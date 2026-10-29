@@ -1,5 +1,7 @@
 # Pakistan Finance Calculators — Live Site
 
+[![CI](https://github.com/wali5737r-creator/pakistan-finance-calculators/actions/workflows/ci.yml/badge.svg)](https://github.com/wali5737r-creator/pakistan-finance-calculators/actions/workflows/ci.yml)
+
 Astro + TypeScript + Tailwind CSS, static output for Cloudflare Pages.
 Eight free calculator tools, all calculations client-side, no accounts,
 no stored inputs. Built from the specs in
@@ -28,6 +30,16 @@ It never feeds the calculator and its price is never read or copied;
 calculation still uses the live API price or a manually entered price.
 The CSP in `public/_headers` allows the TradingView widget origins for
 this purpose only, and the widget's "by TradingView" attribution is kept.
+
+## Continuous integration
+
+Every push to `main` and every pull request runs GitHub Actions CI
+(`.github/workflows/ci.yml`): `npm ci`, `npm test`, `npm run build`.
+Dependabot checks npm dependencies monthly
+(`.github/dependabot.yml`). Deployment itself is Cloudflare Pages
+connected to this repository (see below): pushing to `main` redeploys
+the site automatically once the Pages project exists. No deploy
+workflow or Cloudflare token lives in this repo.
 
 ## Deploy to Cloudflare Pages (free subdomain first)
 
