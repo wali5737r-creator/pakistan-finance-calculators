@@ -37,6 +37,8 @@ export async function onRequest(context: { request: Request; env: Env }) {
     }
     // Older than 7 days: never serve it; fall through to refetch.
   }
+  let caratStatus: number | null = null;
+  let silverStatus: number | null = null;
   try {
     const headers: Record<string, string> = { Accept: 'application/json' };
     if (env.GOLDPRICE_API_KEY) headers.Authorization = `Bearer ${env.GOLDPRICE_API_KEY}`;
@@ -44,6 +46,8 @@ export async function onRequest(context: { request: Request; env: Env }) {
       fetch('https://api.goldprice.dev/v1/carat?currency=PKR', { headers }),
       fetch('https://api.goldprice.dev/v1/convert?from=XAG&to=PKR&amount=1&unit=gram', { headers }),
     ]);
+    caratStatus = caratRes.status;
+    silverStatus = silverRes.status;
     if (!caratRes.ok || !silverRes.ok) throw new Error('Upstream status error');
     const carat = (await caratRes.json()) as Record<string, string>;
     const silver = (await silverRes.json()) as { result?: string };
@@ -73,8 +77,8 @@ export async function onRequest(context: { request: Request; env: Env }) {
     response.headers.set('Cache-Control', 'public, max-age=3600');
     void cache.put(cacheKey, response.clone()).catch(() => undefined);
     return response;
-  } catch {
-    return jsonResponse({ status: 'unavailable', reason: 'The price source could not be reached and no recent snapshot is cached. No price is shown rather than a guessed price.' }, 503);
+  } catch (err) {
+    return jsonResponse({ status: 'unavailable', reason: 'The price source could not be reached and no recent snapshot is cached. No price is shown rather than a guessed price.', upstreamStatuses: { carat: caratStatus, silver: silverStatus }, error: err instanceof Error ? err.message : String(err) }, 503);
   }
 }
 
