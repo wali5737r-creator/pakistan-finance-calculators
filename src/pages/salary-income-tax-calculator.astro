@@ -1,0 +1,565 @@
+---
+import Layout from '../components/Layout.astro';
+import { formatNumber, formatPct, formatPKR } from '../lib/calc.ts';
+import { SOURCE_STATUS, TAX_SLAB_LOWER_BOUNDS, TAX_SLABS, TAX_YEAR } from '../config/tax.ts';
+
+const title = 'Salary Tax Calculator Pakistan 2026-27 | FBR Slabs';
+const description =
+  'Calculate your monthly and annual income tax in Pakistan for 2026-27 using FBR salaried slabs. Free, instant take-home pay estimate — no sign-up.';
+const h1 = 'Salary / Income Tax Calculator Pakistan 2026-27';
+const slug = '/salary-income-tax-calculator/';
+const canonical = `https://[live-domain]${slug}`;
+
+// ONE FAQ array: rendered as the visible FAQ and as the FAQPage JSON-LD,
+// so the wording matches exactly.
+const faqs = [
+  {
+    question: 'What is the tax on my salary in Pakistan for 2026-27?',
+    answer:
+      'Enter your monthly or annual taxable income and the calculator applies the FBR salaried slabs for 2026-27, showing your annual tax, monthly tax, take-home pay, and effective and marginal rates.',
+  },
+  {
+    question: 'What are the FBR salary slabs for 2026-27?',
+    answer:
+      'The full slab table is shown on this page, below the calculator, rendered from the same figures used for the calculation. The row for your income is highlighted as your bracket.',
+  },
+  {
+    question: 'Is the result monthly or annual tax?',
+    answer:
+      'Both. The headline result is your annual tax; the monthly tax is the annual tax divided by 12, and take-home pay is shown for the period you selected.',
+  },
+  {
+    question: 'Does this include surcharge, rebate, or withholding?',
+    answer:
+      'No. This tool applies salaried slabs only, before any surcharge, rebate, or withholding adjustment.',
+  },
+  {
+    question: 'Is this tax advice?',
+    answer:
+      'No. Results are estimates for information only, not tax advice. Confirm your position with a qualified tax professional before acting.',
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      name: h1,
+      url: canonical,
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://[live-domain]/' },
+        { '@type': 'ListItem', position: 2, name: h1, item: canonical },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.question,
+        acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+      })),
+    },
+  ],
+});
+
+const slabCaption = `Income exactly at a band boundary is taxed in the lower band — for example, ${formatPKR(TAX_SLAB_LOWER_BOUNDS[2])} uses the ${Math.round(TAX_SLABS[1].rate * 100)}% rate, not ${Math.round(TAX_SLABS[2].rate * 100)}%. Tax rises smoothly: one rupee above a boundary adds only the new band's rate on that rupee.`;
+---
+
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top:32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb" style="font-size:14px; margin-bottom:12px;">
+      <a href="/">Home</a> / Salary / Income Tax Calculator
+    </nav>
+    <p><span class="badge badge-info">Tax</span></p>
+    <h1 style="font-size:clamp(1.75rem, 4.5vw, 2.25rem); max-width:720px;">{h1}</h1>
+    <p class="prose-narrow" style="font-size:clamp(1.0625rem, 2vw, 1.1875rem); margin-top:12px;">
+      Work out income tax on a monthly or annual salary using the Federal Board of Revenue (FBR)
+      2026-27 slabs for salaried individuals. Enter your taxable income to see your annual tax,
+      monthly tax, take-home pay, and effective and marginal rates. This tool applies salaried
+      slabs only.
+    </p>
+    <p class="notice-warning prose-narrow" style="margin-top:16px;">
+      <strong>FBR slabs {TAX_YEAR}, salaried individuals.</strong> Source: {SOURCE_STATUS}.
+    </p>
+  </div>
+
+  <div class="container" style="padding-top:24px;">
+    <div class="tool-grid">
+      <section class="card" aria-label="Calculator">
+        <form id="tax-form" novalidate>
+          <div id="tax-error-box" role="alert" class="error-box" hidden></div>
+          <fieldset class="field" style="border:0; padding:0; margin:0 0 16px;">
+            <legend>Period</legend>
+            <div style="display:flex; flex-wrap:wrap; gap:8px 20px;">
+              <label style="font-size:16px; font-weight:600;">
+                <input type="radio" name="tax-period" value="monthly" checked /> Monthly
+              </label>
+              <label style="font-size:16px; font-weight:600;">
+                <input type="radio" name="tax-period" value="annual" /> Annual
+              </label>
+            </div>
+          </fieldset>
+          <div class="field">
+            <label for="tax-amount">
+              <span id="tax-amount-label-text">Monthly taxable income (PKR)</span>
+              <span aria-hidden="true">*</span>
+            </label>
+            <input
+              id="tax-amount"
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
+              aria-required="true"
+              aria-describedby="tax-amount-hint"
+            />
+            <p class="hint" id="tax-amount-hint">
+              Enter income after exemptions/deductions, if any. This tool applies salaried slabs
+              only.
+            </p>
+            <p class="hint">
+              Salaried slabs only, before any surcharge, rebate or withholding adjustment.
+            </p>
+            <p id="tax-amount-error" style="color:var(--danger); font-size:14px; font-weight:600;" hidden></p>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
+            <button type="submit" class="btn-primary">Calculate</button>
+            <button type="button" class="btn-secondary" id="tax-clear">Clear</button>
+          </div>
+          <p id="tax-status" role="status" class="hint" style="margin-top:8px;"></p>
+        </form>
+      </section>
+
+      <section class="result-card" aria-labelledby="tax-result-heading">
+        <h2 id="tax-result-heading" tabindex="-1" style="font-size:18px;">Your result</h2>
+        <div id="tax-stale" hidden>
+          <p><span class="badge badge-warning">May be out of date</span></p>
+          <p class="hint">
+            Previous result — based on earlier inputs. Update the highlighted field to
+            recalculate.
+          </p>
+        </div>
+        <div id="tax-empty">
+          <p>Enter your details to see your result.</p>
+          <p class="hint">You'll see your annual tax, monthly tax, and take-home pay.</p>
+        </div>
+        <div id="tax-result" data-result-text hidden>
+          <p style="font-size:14px; font-weight:700; color:var(--ink-muted);">Your annual income tax</p>
+          <p class="result-value" id="tax-headline"></p>
+          <p id="tax-subrupee" class="hint" hidden>Unrounded tax is below Rs 1.</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;">
+            <div>
+              <p class="hint">Annual taxable income</p>
+              <p style="font-size:20px; font-weight:700;" id="tax-annual-income"></p>
+            </div>
+            <div>
+              <p class="hint">Monthly tax</p>
+              <p style="font-size:20px; font-weight:700;" id="tax-monthly-tax"></p>
+            </div>
+            <div>
+              <p class="hint" id="tax-takehome-label">Monthly take-home</p>
+              <p style="font-size:20px; font-weight:700;" id="tax-takehome"></p>
+            </div>
+            <div>
+              <p class="hint">Effective tax rate</p>
+              <p style="font-size:20px; font-weight:700;" id="tax-effective"></p>
+            </div>
+            <div>
+              <p class="hint">Marginal tax rate</p>
+              <p style="font-size:20px; font-weight:700;" id="tax-marginal"></p>
+              <p class="hint" id="tax-bracket"></p>
+            </div>
+          </div>
+          <p class="hint" id="tax-echo" style="margin-top:16px;"></p>
+          <p class="hint" id="tax-worked"></p>
+          <p class="hint">FBR slabs {TAX_YEAR} · Salaried individuals</p>
+          <p><span class="badge badge-warning">Source: {SOURCE_STATUS}</span></p>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" class="hint"></p>
+        <p id="tax-actions-hint" class="hint">Calculate first to copy or print your result.</p>
+        <p class="hint" style="margin-top:8px;">
+          Estimates only — not tax advice. <a href="#disclaimer">Read the full disclaimer.</a>
+        </p>
+      </section>
+    </div>
+  </div>
+
+  <section id="tax-slab-section" class="container" style="padding-top:32px;" hidden>
+    <h2>Salary tax slabs {TAX_YEAR}</h2>
+    <p class="hint">FBR slabs {TAX_YEAR} — salaried individuals. Source: {SOURCE_STATUS}.</p>
+    <div class="table-wrap">
+      <table class="data">
+        <caption>FBR salaried slabs, annual taxable income</caption>
+        <thead>
+          <tr>
+            <th scope="col">Income range (Rs)</th>
+            <th scope="col">Marginal rate</th>
+            <th scope="col">Base tax at lower bound (Rs)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            TAX_SLABS.map((slab, i) => {
+              const lower = TAX_SLAB_LOWER_BOUNDS[i];
+              const range =
+                i === 0
+                  ? `${formatNumber(lower, 0)} – ${formatNumber(slab.upTo ?? 0, 0)}`
+                  : slab.upTo === null
+                    ? `Above ${formatNumber(lower, 0)}`
+                    : `Above ${formatNumber(lower, 0)} – ${formatNumber(slab.upTo, 0)}`;
+              return (
+                <tr data-slab-index={i}>
+                  <td>
+                    {range}{' '}
+                    <span class="badge badge-success" data-bracket-pill hidden>Your bracket</span>
+                  </td>
+                  <td>{Math.round(slab.rate * 100)}%</td>
+                  <td>{formatPKR(slab.baseTax)}</td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">{slabCaption}</p>
+  </section>
+
+  <div class="container prose-narrow" style="padding-top:32px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>
+        Enter your taxable income and choose Monthly or Annual. The period changes the meaning
+        of the amount you enter, so it is shown before the amount field.
+      </li>
+      <li>
+        Your annual taxable income is your monthly taxable income multiplied by 12, or the
+        annual figure you entered. The entered monthly figure is never rounded before it is
+        annualised.
+      </li>
+      <li>
+        Tax is the base tax at the lower bound of your band plus the marginal rate multiplied
+        by the part of your annual taxable income above that lower bound, using the FBR slabs
+        for {TAX_YEAR} for salaried individuals.
+      </li>
+      <li>
+        Monthly tax is annual tax divided by 12. Take-home pay is income minus tax, worked out
+        from the unrounded tax so the monthly and annual figures stay consistent.
+      </li>
+    </ol>
+    <p>
+      Formula: tax = base tax at the lower bound of your band + marginal rate × (annual
+      taxable income − lower bound of the band).
+    </p>
+
+    <h2>Worked example</h2>
+    <p>
+      For example, a monthly taxable income of {formatPKR(200000)} (annual{' '}
+      {formatPKR(2400000)}) gives annual tax of {formatPKR(156000)}, monthly tax of{' '}
+      {formatPKR(13000)}, an effective rate of {formatPct(6.5)}, a marginal rate of{' '}
+      {formatPct(20)}, and monthly take-home pay of {formatPKR(187000)}. This example uses
+      fixed example inputs; enter your own income above to calculate your tax.
+    </p>
+
+    <section class="faq" aria-labelledby="tax-faq-heading">
+      <h2 id="tax-faq-heading">Frequently asked questions</h2>
+      {
+        faqs.map((faq) => (
+          <details>
+            <summary>{faq.question}</summary>
+            <p>{faq.answer}</p>
+          </details>
+        ))
+      }
+    </section>
+
+    <section id="disclaimer" class="notice-warning" style="margin-top:32px;">
+      <h2>Important — please read</h2>
+      <p>
+        Results are estimates for information only and are not tax advice. This calculator
+        applies salaried slabs only, before any surcharge, rebate, or withholding adjustment.
+        Confirm your tax position with a qualified tax professional before acting. Calculations
+        run in your browser; nothing you enter is stored or sent to a server.
+      </p>
+    </section>
+
+    <section style="margin-top:32px;">
+      <h2>Related tools</h2>
+      <div style="display:grid; gap:16px; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));">
+        <article class="card">
+          <h3 style="font-size:18px;"><a href="/emi-loan-calculator/">EMI / Loan Calculator</a></h3>
+          <p>Monthly instalment, total interest, and the full schedule for a reducing-balance loan.</p>
+        </article>
+        <article class="card">
+          <h3 style="font-size:18px;"><a href="/zakat-calculator/">Zakat Calculator</a></h3>
+          <p>Zakat at 2.5% on cash, gold, silver, and trade goods, with gold and silver nisab shown.</p>
+        </article>
+        <article class="card">
+          <h3 style="font-size:18px;"><a href="/percentage-calculator/">Percentage Calculator</a></h3>
+          <p>What X% of a number is, percentage increase and decrease, and what percent one number is of another.</p>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    import { calcTax, formatPct, formatPKR, parseDecimal } from '../lib/calc.ts';
+    import { TAX_SLAB_LOWER_BOUNDS, TAX_SLABS, TAX_YEAR } from '../config/tax.ts';
+
+    type Period = 'monthly' | 'annual';
+    type TaxResult = ReturnType<typeof calcTax>;
+
+    function el<T extends HTMLElement>(id: string): T {
+      const node = document.getElementById(id);
+      if (!node) throw new Error(`Missing element: ${id}`);
+      return node as T;
+    }
+
+    const form = el<HTMLFormElement>('tax-form');
+    const amountInput = el<HTMLInputElement>('tax-amount');
+    const amountLabelText = el<HTMLElement>('tax-amount-label-text');
+    const amountError = el<HTMLParagraphElement>('tax-amount-error');
+    const errorBox = el<HTMLDivElement>('tax-error-box');
+    const statusEl = el<HTMLParagraphElement>('tax-status');
+    const emptyEl = el<HTMLDivElement>('tax-empty');
+    const resultEl = el<HTMLDivElement>('tax-result');
+    const staleEl = el<HTMLDivElement>('tax-stale');
+    const headlineEl = el<HTMLParagraphElement>('tax-headline');
+    const subRupeeEl = el<HTMLParagraphElement>('tax-subrupee');
+    const annualIncomeEl = el<HTMLParagraphElement>('tax-annual-income');
+    const monthlyTaxEl = el<HTMLParagraphElement>('tax-monthly-tax');
+    const takehomeLabelEl = el<HTMLParagraphElement>('tax-takehome-label');
+    const takehomeEl = el<HTMLParagraphElement>('tax-takehome');
+    const effectiveEl = el<HTMLParagraphElement>('tax-effective');
+    const marginalEl = el<HTMLParagraphElement>('tax-marginal');
+    const bracketEl = el<HTMLParagraphElement>('tax-bracket');
+    const echoEl = el<HTMLParagraphElement>('tax-echo');
+    const workedEl = el<HTMLParagraphElement>('tax-worked');
+    const resultHeading = el<HTMLHeadingElement>('tax-result-heading');
+    const slabSection = el<HTMLElement>('tax-slab-section');
+    const actionsHint = el<HTMLParagraphElement>('tax-actions-hint');
+    const copyBtn = document.querySelector('[data-copy-result]') as HTMLButtonElement | null;
+    const printBtn = document.querySelector('[data-print-result]') as HTMLButtonElement | null;
+    const slabRows = Array.from(document.querySelectorAll<HTMLTableRowElement>('[data-slab-index]'));
+
+    const AMOUNT_CAP = 999999999999;
+    let lastValid: { entered: number; period: Period; result: TaxResult } | null = null;
+    let debounceTimer: number | undefined;
+
+    function currentPeriod(): Period {
+      const checked = form.querySelector<HTMLInputElement>('input[name="tax-period"]:checked');
+      return checked?.value === 'annual' ? 'annual' : 'monthly';
+    }
+
+    function updateAmountLabel(period: Period): void {
+      amountLabelText.textContent =
+        period === 'monthly' ? 'Monthly taxable income (PKR)' : 'Annual taxable income (PKR)';
+    }
+
+    function setActionsEnabled(enabled: boolean): void {
+      if (copyBtn) copyBtn.disabled = !enabled;
+      if (printBtn) printBtn.disabled = !enabled;
+      actionsHint.hidden = enabled;
+    }
+
+    function clearFieldError(): void {
+      amountError.textContent = '';
+      amountError.hidden = true;
+      amountInput.setAttribute('aria-invalid', 'false');
+      amountInput.setAttribute('aria-describedby', 'tax-amount-hint');
+    }
+
+    function showFieldError(message: string): void {
+      amountError.textContent = `Error: ${message}`;
+      amountError.hidden = false;
+      amountInput.setAttribute('aria-invalid', 'true');
+      amountInput.setAttribute('aria-describedby', 'tax-amount-hint tax-amount-error');
+    }
+
+    function showErrorBox(message: string): void {
+      errorBox.textContent = message;
+      errorBox.hidden = false;
+    }
+
+    function hideErrorBox(): void {
+      errorBox.textContent = '';
+      errorBox.hidden = true;
+    }
+
+    function highlightSlab(bracketIndex: number): void {
+      for (const row of slabRows) {
+        const active = Number(row.dataset.slabIndex) === bracketIndex;
+        row.classList.toggle('active-row', active);
+        const pill = row.querySelector('[data-bracket-pill]');
+        if (pill) (pill as HTMLElement).hidden = !active;
+      }
+    }
+
+    function echoText(entered: number, period: Period, result: TaxResult, stale: boolean): string {
+      const prefix = stale ? 'Previous inputs: ' : 'Based on: ';
+      if (period === 'monthly') {
+        return `${prefix}Monthly taxable income ${formatPKR(entered)} · Annual taxable income ${formatPKR(result.annualIncome)}`;
+      }
+      return `${prefix}Annual taxable income ${formatPKR(entered)}`;
+    }
+
+    function workedOutText(result: TaxResult): string {
+      const slab = TAX_SLABS[result.bracketIndex];
+      const lower = TAX_SLAB_LOWER_BOUNDS[result.bracketIndex];
+      const rateLabel = `${Math.round(slab.rate * 100)}%`;
+      if (result.bracketIndex === 0) {
+        return `FBR slabs ${TAX_YEAR}: Annual taxable income of ${formatPKR(result.annualIncome)} is within the 0% band, so tax is ${formatPKR(0)}.`;
+      }
+      if (slab.baseTax === 0) {
+        return `FBR slabs ${TAX_YEAR}: ${rateLabel} × (${formatPKR(result.annualIncome)} − ${formatPKR(lower)}) = ${formatPKR(result.annualTax)}`;
+      }
+      return `FBR slabs ${TAX_YEAR}: ${formatPKR(slab.baseTax)} + ${rateLabel} × (${formatPKR(result.annualIncome)} − ${formatPKR(lower)}) = ${formatPKR(result.annualTax)}`;
+    }
+
+    function renderValid(entered: number, period: Period, result: TaxResult): void {
+      lastValid = { entered, period, result };
+      headlineEl.textContent = formatPKR(result.annualTax);
+      subRupeeEl.hidden = !(result.annualTax > 0 && result.annualTax < 0.5);
+      annualIncomeEl.textContent = formatPKR(result.annualIncome);
+      monthlyTaxEl.textContent = formatPKR(result.monthlyTax);
+      if (period === 'monthly') {
+        takehomeLabelEl.textContent = 'Monthly take-home';
+        takehomeEl.textContent = formatPKR(entered - result.monthlyTax);
+      } else {
+        takehomeLabelEl.textContent = 'Annual take-home';
+        takehomeEl.textContent = formatPKR(result.annualTakeHome);
+      }
+      effectiveEl.textContent = formatPct(result.effectiveRate);
+      marginalEl.textContent = formatPct(result.marginalRate);
+      bracketEl.textContent = `Band ${result.bracketIndex + 1} of ${TAX_SLABS.length}`;
+      echoEl.textContent = echoText(entered, period, result, false);
+      workedEl.textContent = workedOutText(result);
+      highlightSlab(result.bracketIndex);
+      slabSection.hidden = false;
+      staleEl.hidden = true;
+      emptyEl.hidden = true;
+      resultEl.hidden = false;
+      hideErrorBox();
+      clearFieldError();
+      setActionsEnabled(true);
+    }
+
+    function showEmpty(): void {
+      lastValid = null;
+      emptyEl.hidden = false;
+      resultEl.hidden = true;
+      staleEl.hidden = true;
+      slabSection.hidden = true;
+      highlightSlab(-1);
+      hideErrorBox();
+      clearFieldError();
+      setActionsEnabled(false);
+    }
+
+    function showInvalid(message: string): void {
+      showErrorBox(message);
+      showFieldError(message);
+      if (lastValid) {
+        // Stale: keep the previous result visible, labelled as previous.
+        staleEl.hidden = false;
+        emptyEl.hidden = true;
+        resultEl.hidden = false;
+        echoEl.textContent = echoText(lastValid.entered, lastValid.period, lastValid.result, true);
+        slabSection.hidden = true;
+        highlightSlab(-1);
+        setActionsEnabled(false);
+      } else {
+        emptyEl.hidden = false;
+        resultEl.hidden = true;
+        staleEl.hidden = true;
+        slabSection.hidden = true;
+        setActionsEnabled(false);
+      }
+    }
+
+    function validateAndRender(submitted = false): boolean {
+      const period = currentPeriod();
+      const raw = amountInput.value;
+      if (raw.trim() === '') {
+        if (submitted || lastValid) {
+          showInvalid('Enter your taxable income.');
+        } else {
+          showEmpty();
+        }
+        return false;
+      }
+      const value = parseDecimal(raw);
+      if (value === null) {
+        showInvalid('Enter a number using digits and one decimal point only.');
+        return false;
+      }
+      if (value <= 0) {
+        showInvalid('Enter an amount greater than 0.');
+        return false;
+      }
+      if (value > AMOUNT_CAP) {
+        showInvalid('Enter an amount of PKR 999,999,999,999 or less.');
+        return false;
+      }
+      const annualIncome = period === 'monthly' ? value * 12 : value;
+      if (annualIncome > AMOUNT_CAP) {
+        showInvalid('That amount is too large to calculate. Enter a smaller amount.');
+        return false;
+      }
+      try {
+        const result = calcTax(annualIncome);
+        renderValid(value, period, result);
+        return true;
+      } catch {
+        showInvalid('That amount is too large to calculate. Enter a smaller amount.');
+        return false;
+      }
+    }
+
+    amountInput.addEventListener('input', () => {
+      window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(() => validateAndRender(), 150);
+    });
+    amountInput.addEventListener('blur', () => validateAndRender());
+    form.addEventListener('change', (event) => {
+      const target = event.target as HTMLElement;
+      if (target instanceof HTMLInputElement && target.name === 'tax-period') {
+        updateAmountLabel(currentPeriod());
+        validateAndRender();
+      }
+    });
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const valid = validateAndRender(true);
+      if (!valid) {
+        amountInput.focus();
+        return;
+      }
+      if (window.matchMedia('(max-width: 899px)').matches) {
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        resultHeading.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+        resultHeading.focus();
+      }
+    });
+    el<HTMLButtonElement>('tax-clear').addEventListener('click', () => {
+      form.reset();
+      updateAmountLabel('monthly');
+      showEmpty();
+      statusEl.textContent = 'Form cleared.';
+      amountInput.focus();
+    });
+
+    updateAmountLabel('monthly');
+    setActionsEnabled(false);
+  </script>
+</Layout>

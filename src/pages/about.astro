@@ -1,0 +1,48 @@
+---
+import Layout from '../components/Layout.astro';
+---
+
+<Layout
+  title="About | Pakistan Finance Calculators"
+  description="About Pakistan Finance Calculators: free, private calculators for salary tax, EMI, Zakat, currency, gold, percentage, age, and marla conversion."
+  slug="/about/"
+>
+  <div class="container prose-narrow" style="padding-top:40px;">
+    <h1>About</h1>
+    <p>
+      Pakistan Finance Calculators is a small set of free calculators built
+      for people in Pakistan: salary and income tax, loan EMI, Zakat,
+      currency conversion, gold prices, percentages, age, and land-area
+      conversion between marla, kanal, and square feet.
+    </p>
+    <h2>How figures are sourced</h2>
+    <p>
+      Tax slabs and conversion factors are stored in config files with an
+      effective date and a source citation. Currency and gold rates come
+      from named providers, fetched once a day by a same-origin service,
+      and are always shown with their last-updated time. A rate that is
+      no longer current is labelled stale; if no rate is available, the
+      tool says so instead of showing a guessed figure.
+    </p>
+    <p>
+      The FBR slab citation is still to be verified against the Finance
+      Act gazette before launch, and the marla factors are labelled
+      provisional until a named source confirms them. Those checks are
+      listed as launch blockers in the project README, and the affected
+      pages carry honest labels until they are closed.
+    </p>
+    <h2>Privacy</h2>
+    <p>
+      All calculations run in your browser. No account is needed, no
+      input is sent to a server for calculation, and no input is stored,
+      logged, or put in a URL. See the
+      <a href="/privacy/">Privacy Policy</a>.
+    </p>
+    <h2>Feedback</h2>
+    <p>
+      If a result looks wrong, please tell us through the
+      <a href="/contact/">Contact page</a> — include the inputs you used
+      and what you expected, and never include personal details.
+    </p>
+  </div>
+</Layout>

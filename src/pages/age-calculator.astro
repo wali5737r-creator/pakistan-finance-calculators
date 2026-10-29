@@ -1,0 +1,402 @@
+---
+import Layout from '../components/Layout.astro';
+
+const title = 'Age Calculator | Years, Months, Days & Next Birthday';
+const description =
+  'Calculate your exact age in years, months and days from your date of birth, plus days until your next birthday. Free and private — nothing is stored.';
+
+const faqs = [
+  {
+    question: 'How old am I?',
+    answer:
+      'Enter your date of birth and, if you want, a different “age at” date. The calculator counts completed years, then completed months, then remaining days, and shows the result in the result card.',
+  },
+  {
+    question: 'How many days until my next birthday?',
+    answer:
+      'The result shows your next birthday — the next occurrence of your birth month and day strictly after the “age at” date — and how many days away it is. On your birthday itself, the next birthday shown is next year’s.',
+  },
+  {
+    question: 'What happens for 29 February birthdays?',
+    answer:
+      'In a leap year, your birthday is 29 February. In a year without 29 February, your completed years count from 1 March, and your next birthday is shown as 1 March.',
+  },
+  {
+    question: 'What date format should I enter?',
+    answer:
+      'Use the date picker to enter dates in day / month / year (DD/MM/YYYY) order — for example, 03/04/2000 means 3 April 2000. Results show dates in full, for example 15 March 1995, so there is no ambiguity.',
+  },
+  {
+    question: 'Is my date of birth stored?',
+    answer:
+      'No. The calculation runs in your browser. Your date of birth is not stored, sent to a server, or included in a web address. Reloading the page clears the form.',
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://[live-domain]/age-calculator/#webapp',
+      name: 'Age Calculator',
+      url: 'https://[live-domain]/age-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://[live-domain]/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Age Calculator',
+          item: 'https://[live-domain]/age-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': 'https://[live-domain]/age-calculator/#faq',
+      mainEntity: faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.question,
+        acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+      })),
+    },
+  ],
+});
+---
+
+<Layout title={title} description={description} slug="/age-calculator/" schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb" style="font-size: 14px; margin-bottom: 12px;">
+      <a href="/">Home</a> / Age Calculator
+    </nav>
+    <h1>Age Calculator</h1>
+    <p class="prose-narrow" style="font-size: 1.0625rem; margin-top: 12px;">
+      Work out your exact age in years, months and days from your date of birth,
+      on today’s date or on any date you choose — plus your total days, total
+      weeks, and days until your next birthday. Your dates stay in your browser:
+      your date of birth is not stored.
+    </p>
+
+    <div class="tool-grid" style="margin-top: 24px;">
+      <section class="card" aria-label="Age calculator form">
+        <div class="field">
+          <label for="dob">Date of birth *</label>
+          <input type="date" id="dob" name="dob" required aria-required="true" aria-describedby="dob-error dob-help" autocomplete="off" />
+          <p class="hint" id="dob-help">
+            Enter as day / month / year, for example 15/03/1995, using the date
+            picker. 03/04/2000 means 3 April 2000.
+          </p>
+          <p class="notice-info">
+            Born on 29 February? In years without a 29 February, your completed
+            years count from 1 March, and your next birthday is shown as
+            1 March.
+          </p>
+        </div>
+        <div class="field">
+          <label for="asof">Age at (optional)</label>
+          <input type="date" id="asof" name="asof" aria-describedby="dob-error asof-help" autocomplete="off" />
+          <p class="hint" id="asof-help">
+            Defaults to today (Asia/Karachi). You can pick a past or future date
+            to see your age on that date.
+          </p>
+          <p><button type="button" class="btn-secondary" id="reset-today">Reset to today</button></p>
+        </div>
+        <div id="dob-error" role="alert" class="error-box" hidden></div>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px;">
+          <button type="button" class="btn-primary" id="calculate">Calculate</button>
+          <button type="button" class="btn-secondary" id="clear">Clear</button>
+        </div>
+      </section>
+
+      <section class="result-card" aria-label="Age result">
+        <div id="empty-state">
+          <p><strong>Enter your date of birth to see your age.</strong></p>
+          <p>
+            You’ll see your age in years, months and days, your total days, and
+            your next birthday.
+          </p>
+        </div>
+        <div id="result-content" hidden>
+          <div data-result-text>
+            <div id="result-heading" tabindex="-1" aria-live="polite" aria-atomic="true">
+              <p id="result-eyebrow" style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Your age</p>
+              <p class="result-value" id="headline"></p>
+            </div>
+            <p id="age-warning" class="notice-warning" role="note" hidden>
+              This age is over 150 years. Please check the date of birth — the result is shown, but it may be a typing mistake.
+            </p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px;">
+              <div>
+                <p style="font-size: 14px; color: var(--ink-muted);">Total days lived</p>
+                <p id="total-days" style="font-weight: 700; font-size: 20px;"></p>
+              </div>
+              <div>
+                <p style="font-size: 14px; color: var(--ink-muted);">Total weeks</p>
+                <p id="total-weeks" style="font-weight: 700; font-size: 20px;"></p>
+              </div>
+              <div>
+                <p style="font-size: 14px; color: var(--ink-muted);">Total complete months</p>
+                <p id="total-months" style="font-weight: 700; font-size: 20px;"></p>
+              </div>
+              <div>
+                <p style="font-size: 14px; color: var(--ink-muted);">Next birthday</p>
+                <p id="next-birthday" style="font-weight: 700; font-size: 20px;"></p>
+              </div>
+              <div>
+                <p style="font-size: 14px; color: var(--ink-muted);">Born</p>
+                <p id="born" style="font-weight: 700; font-size: 20px;"></p>
+              </div>
+            </div>
+            <p id="echo" style="margin-top: 20px; font-size: 14px; color: var(--ink-muted);"></p>
+            <p class="notice-info" style="margin-top: 12px;">
+              Gregorian calendar. “Today” is the date in Asia/Karachi. 29 February
+              birthdays count from 1 March in non-leap years.
+            </p>
+            <p style="margin-top: 12px; font-size: 14px;">
+              Your date of birth is not stored.
+            </p>
+          </div>
+          <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px;">
+            <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+            <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          </div>
+          <p data-copy-status role="status" style="font-size: 14px; margin-top: 8px;"></p>
+        </div>
+      </section>
+    </div>
+
+    <section class="prose-narrow" style="margin-top: 48px;">
+      <h2>How it works</h2>
+      <ol>
+        <li>Enter your date of birth as day / month / year — 03/04/2000 always means 3 April 2000.</li>
+        <li>Leave “Age at” blank for today (the date in Asia/Karachi), or pick any past or future date.</li>
+        <li>Read your age in completed years, months and days, plus your total days, weeks, and next birthday.</li>
+      </ol>
+      <p>
+        The years, months and days are counted by calendar borrowing: first the
+        completed years, then the completed months, then the remaining days —
+        not by dividing total days by 365. Total days are counted by subtracting
+        the two calendar dates, so leap days are included exactly.
+      </p>
+      <p>
+        Born on 29 February? In a year without 29 February, your completed
+        years count from 1 March, and your next birthday is shown as 1 March.
+        In a leap year, your birthday is 29 February itself.
+      </p>
+      <p>
+        “Today” means the calendar date in Pakistan (Asia/Karachi) when you
+        calculate. The time of day does not change the result.
+      </p>
+    </section>
+
+    <section class="prose-narrow" style="margin-top: 40px;">
+      <h2>Worked example</h2>
+      <p>
+        Born <strong>15 March 1995</strong>, age at <strong>28 October 2026</strong>:
+        <strong>31 years, 7 months, 13 days</strong>; 11,550 days; 1,650 weeks,
+        0 days; 379 complete months; born on a Wednesday; next birthday
+        15 March 2027 (Monday), 138 days away.
+      </p>
+    </section>
+
+    <section class="prose-narrow faq" style="margin-top: 40px;">
+      <h2>Frequently asked questions</h2>
+      {faqs.map((faq) => (
+        <details>
+          <summary>{faq.question}</summary>
+          <p>{faq.answer}</p>
+        </details>
+      ))}
+      <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+    </section>
+
+    <section style="margin-top: 40px;">
+      <h2>Related tools</h2>
+      <div style="display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+        <article class="card">
+          <h3 style="font-size: 20px;"><a href="/percentage-calculator/">Percentage Calculator</a></h3>
+          <p style="color: var(--ink-muted);">What X% of a number is, percentage increase and decrease, and what percent one number is of another.</p>
+          <p><a href="/percentage-calculator/">Use the calculator →</a></p>
+        </article>
+        <article class="card">
+          <h3 style="font-size: 20px;"><a href="/unit-marla-converter/">Unit / Marla Converter</a></h3>
+          <p style="color: var(--ink-muted);">Convert marla, kanal, acre, square feet, square yards, square metres, and hectares.</p>
+          <p><a href="/unit-marla-converter/">Use the calculator →</a></p>
+        </article>
+        <article class="card">
+          <h3 style="font-size: 20px;"><a href="/salary-income-tax-calculator/">Salary / Income Tax Calculator</a></h3>
+          <p style="color: var(--ink-muted);">Monthly and annual tax on your salary for 2026-27, using FBR salaried slabs, with take-home pay.</p>
+          <p><a href="/salary-income-tax-calculator/">Use the calculator →</a></p>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    import { calcAge, todayInKarachi, formatNumber } from '../lib/calc.ts';
+
+    const dobInput = document.getElementById('dob') as HTMLInputElement;
+    const asofInput = document.getElementById('asof') as HTMLInputElement;
+    const asofHelp = document.getElementById('asof-help') as HTMLParagraphElement;
+    const errorBox = document.getElementById('dob-error') as HTMLDivElement;
+    const emptyState = document.getElementById('empty-state') as HTMLDivElement;
+    const resultContent = document.getElementById('result-content') as HTMLDivElement;
+    const resultHeading = document.getElementById('result-heading') as HTMLDivElement;
+    const resultCard = resultContent.closest('.result-card') as HTMLElement;
+    const eyebrow = document.getElementById('result-eyebrow') as HTMLParagraphElement;
+    const headline = document.getElementById('headline') as HTMLParagraphElement;
+    const totalDaysEl = document.getElementById('total-days') as HTMLParagraphElement;
+    const totalWeeksEl = document.getElementById('total-weeks') as HTMLParagraphElement;
+    const totalMonthsEl = document.getElementById('total-months') as HTMLParagraphElement;
+    const nextBirthdayEl = document.getElementById('next-birthday') as HTMLParagraphElement;
+    const ageWarningEl = document.getElementById('age-warning') as HTMLParagraphElement;
+    const bornEl = document.getElementById('born') as HTMLParagraphElement;
+    const echoEl = document.getElementById('echo') as HTMLParagraphElement;
+    const copyBtn = document.querySelector('[data-copy-result]') as HTMLButtonElement;
+    const printBtn = document.querySelector('[data-print-result]') as HTMLButtonElement;
+    const calculateBtn = document.getElementById('calculate') as HTMLButtonElement;
+    const clearBtn = document.getElementById('clear') as HTMLButtonElement;
+    const resetTodayBtn = document.getElementById('reset-today') as HTMLButtonElement;
+
+    const MONTHS = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+
+    function formatLong(iso: string): string {
+      const parts = iso.split('-');
+      const year = Number(parts[0]);
+      const month = Number(parts[1]);
+      const day = Number(parts[2]);
+      return `${day} ${MONTHS[month - 1]} ${year}`;
+    }
+
+    function plural(count: number, one: string, many: string): string {
+      return count === 1 ? one : many;
+    }
+
+    function describeAsOf(asOfISO: string, todayISO: string): string {
+      if (asOfISO === todayISO) return ' (today, Asia/Karachi)';
+      if (asOfISO > todayISO) return ' (a future date)';
+      return ' (a past date)';
+    }
+
+    function refreshAsOfHelp(): void {
+      const todayISO = todayInKarachi();
+      const current = asofInput.value || todayISO;
+      asofHelp.textContent = `Using ${formatLong(current)}${describeAsOf(current, todayISO)}. You can pick a past or future date to see your age on that date.`;
+    }
+
+    function showError(message: string, field: HTMLInputElement): void {
+      errorBox.textContent = message;
+      errorBox.hidden = false;
+      dobInput.setAttribute('aria-invalid', 'false');
+      asofInput.setAttribute('aria-invalid', 'false');
+      field.setAttribute('aria-invalid', 'true');
+      resultContent.hidden = true;
+      emptyState.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+
+    function clearError(): void {
+      errorBox.textContent = '';
+      errorBox.hidden = true;
+      dobInput.removeAttribute('aria-invalid');
+      asofInput.removeAttribute('aria-invalid');
+    }
+
+    function calculate(scrollToResult: boolean): boolean {
+      const todayISO = todayInKarachi();
+      if (!asofInput.value) asofInput.value = todayISO;
+      const asOfISO = asofInput.value;
+      refreshAsOfHelp();
+      if (!dobInput.value) {
+        showError('Enter your date of birth.', dobInput);
+        return false;
+      }
+      let result;
+      try {
+        result = calcAge(dobInput.value, asOfISO);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Enter real calendar dates.';
+        const field = /before/.test(message) ? asofInput : dobInput;
+        showError(message, field);
+        return false;
+      }
+      clearError();
+      eyebrow.textContent =
+        asOfISO === todayISO ? 'Your age' : `Your age on ${formatLong(asOfISO)}`;
+      headline.textContent =
+        `${result.years} ${plural(result.years, 'year', 'years')}, ` +
+        `${result.months} ${plural(result.months, 'month', 'months')}, ` +
+        `${result.days} ${plural(result.days, 'day', 'days')}`;
+      totalDaysEl.textContent = formatNumber(result.totalDays, 0);
+      totalWeeksEl.textContent =
+        `${formatNumber(result.totalWeeks, 0)} ${plural(result.totalWeeks, 'week', 'weeks')}, ` +
+        `${result.remainingDays} ${plural(result.remainingDays, 'day', 'days')}`;
+      totalMonthsEl.textContent = formatNumber(result.totalMonths, 0);
+      nextBirthdayEl.textContent =
+        `${formatLong(result.nextBirthday)} — in ${result.daysUntilNextBirthday} ` +
+        `${plural(result.daysUntilNextBirthday, 'day', 'days')}`;
+      bornEl.textContent = `${result.dayOfWeekBorn}, ${formatLong(dobInput.value)}`;
+      ageWarningEl.hidden = !result.implausibleAgeWarning;
+      echoEl.textContent =
+        `Based on: born ${formatLong(dobInput.value)} · age at ${formatLong(asOfISO)}` +
+        describeAsOf(asOfISO, todayISO);
+      emptyState.hidden = true;
+      resultContent.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+      if (scrollToResult) {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        resultCard.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+        resultHeading.focus({ preventScroll: true });
+      }
+      return true;
+    }
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    function scheduleCalculate(): void {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => calculate(false), 150);
+    }
+
+    dobInput.addEventListener('input', scheduleCalculate);
+    dobInput.addEventListener('change', () => calculate(false));
+    asofInput.addEventListener('input', scheduleCalculate);
+    asofInput.addEventListener('change', () => calculate(false));
+    calculateBtn.addEventListener('click', () => {
+      if (!calculate(true)) {
+        const invalid = document.querySelector('[aria-invalid="true"]') as HTMLElement | null;
+        invalid?.focus();
+      }
+    });
+    resetTodayBtn.addEventListener('click', () => {
+      asofInput.value = todayInKarachi();
+      calculate(false);
+    });
+    clearBtn.addEventListener('click', () => {
+      dobInput.value = '';
+      asofInput.value = todayInKarachi();
+      clearError();
+      resultContent.hidden = true;
+      emptyState.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+      refreshAsOfHelp();
+      dobInput.focus();
+    });
+
+    // Default the "age at" date to today in Asia/Karachi, evaluated in the
+    // browser at load time — never baked into the static HTML.
+    asofInput.value = todayInKarachi();
+    refreshAsOfHelp();
+  </script>
+</Layout>

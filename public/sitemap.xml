@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Replace [live-domain] once, in one place, at deploy time (OQ-14).
+     Only the 11 indexed pages are listed (SEO plan §1). -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://[live-domain]/</loc></url>
+  <url><loc>https://[live-domain]/salary-income-tax-calculator/</loc></url>
+  <url><loc>https://[live-domain]/emi-loan-calculator/</loc></url>
+  <url><loc>https://[live-domain]/zakat-calculator/</loc></url>
+  <url><loc>https://[live-domain]/currency-converter/</loc></url>
+  <url><loc>https://[live-domain]/gold-price-calculator/</loc></url>
+  <url><loc>https://[live-domain]/percentage-calculator/</loc></url>
+  <url><loc>https://[live-domain]/age-calculator/</loc></url>
+  <url><loc>https://[live-domain]/unit-marla-converter/</loc></url>
+  <url><loc>https://[live-domain]/about/</loc></url>
+  <url><loc>https://[live-domain]/contact/</loc></url>
+  <url><loc>https://[live-domain]/privacy/</loc></url>
+  <url><loc>https://[live-domain]/terms/</loc></url>
+</urlset>

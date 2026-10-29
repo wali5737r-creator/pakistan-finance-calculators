@@ -1,0 +1,113 @@
+---
+import '../styles/global.css';
+
+export interface Props {
+  title: string;
+  description: string;
+  slug: string;
+  h1?: string;
+  schema?: string;
+  noindex?: boolean;
+}
+
+const { title, description, slug, schema, noindex = false } = Astro.props;
+// Canonical placeholder: replace [live-domain] once, in one place, at
+// deploy time (SEO plan §1). No domain has been invented.
+const canonical = `https://[live-domain]${slug}`;
+const tools = [
+  { href: '/salary-income-tax-calculator/', label: 'Salary Tax' },
+  { href: '/emi-loan-calculator/', label: 'EMI Calculator' },
+  { href: '/zakat-calculator/', label: 'Zakat Calculator' },
+  { href: '/currency-converter/', label: 'Currency Converter' },
+  { href: '/gold-price-calculator/', label: 'Gold Price' },
+  { href: '/percentage-calculator/', label: 'Percentage' },
+  { href: '/age-calculator/', label: 'Age Calculator' },
+  { href: '/unit-marla-converter/', label: 'Marla Converter' },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content="https://[live-domain]/og-image.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#0c5c44" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {schema && <script type="application/ld+json" set:html={schema} />}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="site-header" style="background: var(--brand-950); color: #fff;">
+      <div class="container" style="display:flex; flex-wrap:wrap; gap:8px 24px; align-items:center; justify-content:space-between; padding-top:14px; padding-bottom:14px;">
+        <a href="/" style="color:#fff; font-weight:800; font-size:20px; text-decoration:none;">
+          Pakistan Finance Calculators
+        </a>
+        <nav aria-label="Main" style="display:flex; flex-wrap:wrap; gap:4px 16px;">
+          <a href="/" style="color:#fff;">Home</a>
+          <a href="/about/" style="color:#fff;">About</a>
+          <a href="/contact/" style="color:#fff;">Contact</a>
+        </nav>
+      </div>
+      <nav aria-label="Calculators" style="background: var(--brand-800);">
+        <div class="container" style="display:flex; flex-wrap:wrap; gap:4px 18px; padding-top:8px; padding-bottom:8px;">
+          {tools.map((t) => (
+            <a href={t.href} style="color:#fff; font-size:15px;">{t.label}</a>
+          ))}
+        </div>
+      </nav>
+    </header>
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="site-footer" style="background: var(--brand-950); color:#fff; margin-top:64px;">
+      <div class="container" style="padding-top:32px; padding-bottom:32px;">
+        <p style="font-weight:700; margin-bottom:8px;">Pakistan Finance Calculators</p>
+        <p style="font-size:14px; max-width:720px;">
+          Free calculators for Pakistan. Results are estimates for information
+          only — not tax, financial, or religious advice. Calculations run in
+          your browser; nothing you enter is stored or sent to a server.
+        </p>
+        <nav aria-label="Footer" style="display:flex; flex-wrap:wrap; gap:8px 20px; margin-top:16px; font-size:15px;">
+          <a href="/about/" style="color:#fff;">About</a>
+          <a href="/contact/" style="color:#fff;">Contact</a>
+          <a href="/privacy/" style="color:#fff;">Privacy Policy</a>
+          <a href="/terms/" style="color:#fff;">Terms &amp; Disclaimer</a>
+        </nav>
+      </div>
+    </footer>
+    <script>
+      // Shared copy/print behaviour for every tool page. No user input is
+      // ever placed in a URL, analytics event, or storage (SRS G3).
+      document.addEventListener('click', async (event) => {
+        const target = event.target as HTMLElement;
+        const copyBtn = target.closest('[data-copy-result]') as HTMLButtonElement | null;
+        if (copyBtn) {
+          const source = document.querySelector('[data-result-text]');
+          const text = source?.textContent?.trim() ?? '';
+          const status = document.querySelector('[data-copy-status]');
+          try {
+            await navigator.clipboard.writeText(text);
+            if (status) status.textContent = 'Result copied.';
+            copyBtn.textContent = 'Copied ✓';
+            setTimeout(() => { copyBtn.textContent = 'Copy result'; }, 2000);
+          } catch {
+            if (status) status.textContent = 'Copy did not work in this browser. Select the result text and copy it manually.';
+          }
+          return;
+        }
+        const printBtn = target.closest('[data-print-result]') as HTMLButtonElement | null;
+        if (printBtn) window.print();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,969 @@
+---
+import Layout from '../components/Layout.astro';
+import { formatPct } from '../lib/calc.ts';
+import { KARATS } from '../config/currencies.ts';
+import { TOLA_GRAMS } from '../config/zakat.ts';
+
+const title = 'Gold Price Calculator Pakistan | Per Tola & Gram';
+const description =
+  'Calculate the value of gold in Pakistan per tola and per gram for 24K, 22K, 21K and 18K. Live price or your own price, with source and time shown.';
+const slug = '/gold-price-calculator/';
+
+const faqs = [
+  {
+    q: 'What is the price of 1 tola of gold today?',
+    a: 'The live price is shown at the top of this page, with the source it came from and the date and time it was last updated. If the price is stale, it is labelled stale with its last-updated time. No fixed price is shown here, because the price changes. If no live price is available, you can enter a price of your own instead.',
+  },
+  {
+    q: 'How many grams are in 1 tola?',
+    a: `One tola is ${TOLA_GRAMS} grams. Enter a weight in tola or grams — both units are shown in your result, so the conversion is transparent.`,
+  },
+  {
+    q: 'What is the price of 22K / 21K / 18K gold per gram?',
+    a: 'Divide the price per tola by the number of grams in one tola to get the price per gram for pure (24K) gold, then multiply by the karat fraction — karat divided by 24. So 22K gold uses 22 ÷ 24 of the pure-gold price per gram, 21K uses 21 ÷ 24, and 18K uses 18 ÷ 24. Your result shows the price per gram used.',
+  },
+  {
+    q: 'Are making charges included?',
+    a: 'No. The result is the indicative melt value only. Making charges, wastage, taxes, and dealer buy/sell spreads are not included, and no percentage for them is assumed. A jeweller’s price will differ.',
+  },
+  {
+    q: 'What does "price entered by you" mean?',
+    a: 'It is a price per tola that you type in yourself, for example a price you were quoted. It is labelled as a price entered by you, not a market rate, and it is shown without a source name or market time. The live price is never copied into that field.',
+  },
+  {
+    q: 'What is the live gold chart on this page?',
+    a: 'It is a TradingView widget shown for reference only. It displays the XAUUSD price in US dollars per troy ounce. It does not feed this calculator: your result still uses the live API price or the price you enter yourself, in PKR per tola. The widget is display-only and its price is not copied into any field.',
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://[live-domain]/gold-price-calculator/#webapp',
+      name: 'Gold Price Calculator Pakistan',
+      url: 'https://[live-domain]/gold-price-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://[live-domain]/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Gold Price Calculator Pakistan',
+          item: 'https://[live-domain]/gold-price-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+
+const related = [
+  {
+    href: '/zakat-calculator/',
+    name: 'Zakat Calculator',
+    desc: 'Zakat at 2.5% on cash, gold, silver, and trade goods, with gold and silver nisab shown.',
+  },
+  {
+    href: '/currency-converter/',
+    name: 'Currency Converter',
+    desc: 'Convert PKR to USD, GBP, EUR, SAR, AED, AUD, and CAD with the rate source and last-updated time shown.',
+  },
+  {
+    href: '/emi-loan-calculator/',
+    name: 'EMI / Loan Calculator',
+    desc: 'Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan.',
+  },
+];
+---
+
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Gold Price Calculator</p>
+    </nav>
+    <p class="badge badge-info" style="margin-top: 8px;">Rates &amp; Gold</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Gold Price Calculator Pakistan</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+      Work out what your gold is worth in Pakistan, per tola and per gram, for 24K, 22K, 21K, or 18K.
+      Use the live price, shown with its source and time, or enter a price of your own. The result is
+      the indicative melt value only — making charges, wastage, taxes, and dealer buy/sell spreads are
+      not included, and a jeweller’s price will differ.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div id="goldStrip" class="notice-info">
+      <p>
+        <span id="goldStripText">Fetching the latest price…</span>
+        <span id="goldStripBadge" class="badge badge-info" hidden></span>
+      </p>
+      <p id="goldStripActions" hidden style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+        <button id="goldRetryBtn" class="btn-secondary" type="button">Try again</button>
+        <button id="goldManualBtn" class="btn-secondary" type="button">Enter your own price</button>
+      </p>
+    </div>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="goldForm" novalidate>
+          <div class="field">
+            <label for="goldWeight">Weight of gold <span aria-hidden="true">*</span></label>
+            <input
+              id="goldWeight"
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
+              aria-required="true"
+              aria-describedby="goldWeightHint goldWeightError"
+            />
+            <p class="hint" id="goldWeightHint">
+              Enter the weight in tola or grams — switch units below. Commas are accepted.
+            </p>
+            <p class="field-error" id="goldWeightError" hidden></p>
+          </div>
+
+          <fieldset class="radiogroup">
+            <legend>Weight unit</legend>
+            <div class="seg">
+              <label><input type="radio" name="goldUnit" value="tola" checked /> <span>Tola</span></label>
+              <label><input type="radio" name="goldUnit" value="grams" /> <span>Grams</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="radiogroup">
+            <legend>Karat <span aria-hidden="true">*</span></legend>
+            <div class="seg">
+              {
+                KARATS.map((karat) => (
+                  <label>
+                    <input type="radio" name="goldKarat" value={karat} checked={karat === 24} />
+                    <span>
+                      {karat}K · {formatPct((karat / 24) * 100)}
+                    </span>
+                  </label>
+                ))
+              }
+            </div>
+            <p class="hint" style="margin-top: 6px;">
+              Purity is karat ÷ 24. 24K is pure gold; lower karats contain other metals.
+            </p>
+          </fieldset>
+
+          <fieldset class="radiogroup">
+            <legend>Price</legend>
+            <div class="seg">
+              <label><input type="radio" name="goldMode" value="live" checked /> <span>Live price</span></label>
+              <label><input type="radio" name="goldMode" value="manual" /> <span>Your own price</span></label>
+            </div>
+          </fieldset>
+
+          <div class="field" id="goldManualField" hidden>
+            <label for="goldManualPrice">Your price (PKR per tola) <span aria-hidden="true">*</span></label>
+            <input
+              id="goldManualPrice"
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
+              aria-required="true"
+              aria-describedby="goldManualHint goldManualError"
+            />
+            <p class="hint" id="goldManualHint">
+              Price entered by you, not a market rate. Enter the price per tola you were quoted.
+            </p>
+            <p class="field-error" id="goldManualError" hidden></p>
+          </div>
+
+          <div id="goldErrors" class="error-box" role="alert" hidden></div>
+
+          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+            <button id="goldCalculate" class="btn-primary" type="submit">Calculate</button>
+            <button id="goldClear" class="btn-secondary" type="button">Clear</button>
+          </p>
+          <p id="goldFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        </form>
+      </div>
+
+      <div class="result-card" id="goldResultCard" tabindex="-1">
+        <div id="goldEmpty">
+          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p id="goldEmptyText">Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            You’ll see the purity-adjusted value, the pure-gold (24K) value, and the price per gram
+            and per tola used.
+          </p>
+        </div>
+
+        <div id="goldResult" data-result-text hidden>
+          <p id="goldStaleLine" class="notice-warning" hidden></p>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Purity-adjusted gold value</p>
+          <div aria-live="polite" aria-atomic="true">
+            <p class="result-value" id="goldHeadline"></p>
+          </div>
+          <p id="goldTinyNote" hidden style="font-size: 14px;"></p>
+          <div class="stat-grid">
+            <div>
+              <p class="stat-label">Pure-gold value (as if 24K)</p>
+              <p class="stat-value" id="goldPure"></p>
+            </div>
+            <div>
+              <p class="stat-label">Purity applied</p>
+              <p class="stat-value" id="goldPurity"></p>
+            </div>
+            <div>
+              <p class="stat-label">Weight</p>
+              <p class="stat-value" id="goldWeightStat"></p>
+            </div>
+            <div>
+              <p class="stat-label">Price per gram used</p>
+              <p class="stat-value" id="goldPerGram"></p>
+            </div>
+            <div>
+              <p class="stat-label">Price per tola used</p>
+              <p class="stat-value" id="goldPerTola"></p>
+            </div>
+          </div>
+          <p id="goldEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="goldPriceLine" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="goldWorked" style="font-size: 15px;"></p>
+          <p style="font-size: 14px;">
+            Indicative melt value only. Making charges, wastage, taxes, and dealer buy/sell spreads
+            are not included — a jeweller’s price will differ.
+          </p>
+          <p style="font-size: 13px; color: var(--ink-muted);">
+            Estimates only — not financial advice.
+            <a href="#goldDisclaimer">Read the full disclaimer.</a>
+          </p>
+        </div>
+
+        <div class="actions-row no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size: 14px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <section class="container" id="tvGoldSection" aria-labelledby="tvGoldHeading" style="margin-top: 32px;">
+    <div class="card">
+      <h2 id="tvGoldHeading" style="font-size: 20px;">Live gold price (USD) — for reference only</h2>
+      <p style="font-size: 15px; color: var(--ink-muted);">
+        The widget below is from TradingView and shows the XAUUSD price in US dollars per troy
+        ounce. It is display-only: it does not feed this calculator, and its price is never copied
+        into any field. Your result still uses the live API price in PKR per tola, or the price you
+        enter yourself. The widget loads only when you scroll to it, so it does not slow down the
+        calculator above.
+      </p>
+      <div id="tvGoldWidget" class="tradingview-widget-container">
+        <div class="tradingview-widget-container__widget"></div>
+        <div class="tradingview-widget-copyright">
+          <a
+            href="https://www.tradingview.com/symbols/OANDA-XAUUSD/"
+            rel="noopener nofollow"
+            target="_blank"><span class="blue-text">XAUUSD chart</span></a
+          ><span class="trademark"> by TradingView</span>
+        </div>
+      </div>
+      <p id="tvGoldFallback" hidden style="font-size: 14px; color: var(--ink-muted);">
+        The live chart did not load. You can view the XAUUSD price directly on
+        <a
+          href="https://www.tradingview.com/symbols/OANDA-XAUUSD/"
+          rel="noopener nofollow"
+          target="_blank">TradingView</a
+        >.
+      </p>
+      <noscript>
+        <p style="font-size: 14px;">
+          Enable JavaScript to see the live TradingView chart, or view XAUUSD on
+          <a
+            href="https://www.tradingview.com/symbols/OANDA-XAUUSD/"
+            rel="noopener nofollow"
+            target="_blank">TradingView</a
+          >.
+        </p>
+      </noscript>
+    </div>
+  </section>
+
+  <div class="container prose-narrow" style="margin-top: 40px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Enter the weight of your gold, in tola or grams.</li>
+      <li>
+        Choose the karat — 24K is pure gold; 22K, 21K, and 18K contain other metals, so they are
+        worth a fraction of the pure-gold price.
+      </li>
+      <li>
+        Use the live price, or enter a price per tola you were quoted. The result is the
+        purity-adjusted value, before making charges and taxes.
+      </li>
+    </ol>
+    <p>
+      Weight in grams × price per gram × (karat ÷ 24). Price per gram is the price per tola ÷
+      {TOLA_GRAMS}, because 1 tola = {TOLA_GRAMS} grams.
+    </p>
+
+    <h2>Worked example</h2>
+    <p>
+      <strong>Example, in symbols only — no price is shown here.</strong> One tola of 24K gold is
+      worth the price per tola. Two tola of 22K gold is worth twice the price per tola × 22/24,
+      because 22K gold is 22/24 pure. The result is the melt value only — making charges, wastage,
+      taxes, and dealer spreads are not included.
+    </p>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+
+    <section id="goldDisclaimer" class="notice-info" style="margin-top: 32px;">
+      <h2 style="font-size: 20px;">Important — please read</h2>
+      <p>
+        This calculator gives an indicative melt value only, based on the weight, karat, and price
+        you use. It is not financial advice, and it is not a buying or selling price. Making
+        charges, wastage, taxes, and dealer buy/sell spreads are not included, and a jeweller’s
+        price will differ. Live prices are indicative and can change; check the source and time
+        shown. Confirm any transaction with the dealer and, where relevant, a qualified
+        professional before acting.
+      </p>
+      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+    </section>
+
+    <h2 style="margin-top: 32px;">Related tools</h2>
+    <div class="related-grid">
+      {
+        related.map((tool) => (
+          <article class="card">
+            <h3 style="font-size: 18px;">
+              <a href={tool.href}>{tool.name}</a>
+            </h3>
+            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p>
+              <a href={tool.href}>Use the calculator →</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+    .radiogroup {
+      border: 0;
+      padding: 0;
+      margin: 0 0 var(--space-4);
+      display: grid;
+      gap: 6px;
+    }
+    .radiogroup legend {
+      font-size: 17px;
+      font-weight: 600;
+      padding: 0;
+    }
+    .seg {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .seg label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      padding: 10px 16px;
+      min-height: 44px;
+      cursor: pointer;
+      font-weight: 600;
+      background: var(--surface);
+    }
+    .seg label:has(input:checked) {
+      background: var(--brand-700);
+      color: #fff;
+      border-color: var(--brand-700);
+    }
+    .seg label:focus-within {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+    .field-error {
+      font-size: 14px;
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin: 12px 0;
+    }
+    .stat-grid p {
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .related-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .tradingview-widget-container {
+      width: 100%;
+    }
+    .tradingview-widget-container iframe {
+      width: 100%;
+    }
+    .tradingview-widget-copyright {
+      font-size: 13px;
+    }
+  </style>
+
+  <script>
+    import { calcGold, parseDecimal, formatPKR, formatPct, MAX_AMOUNT } from '../lib/calc.ts';
+    import { KARATS } from '../config/currencies.ts';
+    import { TOLA_GRAMS } from '../config/zakat.ts';
+
+    const FRESH_MS = 24 * 60 * 60 * 1000;
+    const STALE_MAX_MS = 7 * 24 * 60 * 60 * 1000;
+    const SKEW_MS = 5 * 60 * 1000;
+
+    const form = document.getElementById('goldForm');
+    const weightInput = document.getElementById('goldWeight');
+    const weightError = document.getElementById('goldWeightError');
+    const manualField = document.getElementById('goldManualField');
+    const manualInput = document.getElementById('goldManualPrice');
+    const manualError = document.getElementById('goldManualError');
+    const errorsBox = document.getElementById('goldErrors');
+    const strip = document.getElementById('goldStrip');
+    const stripText = document.getElementById('goldStripText');
+    const stripBadge = document.getElementById('goldStripBadge');
+    const stripActions = document.getElementById('goldStripActions');
+    const emptyBox = document.getElementById('goldEmpty');
+    const emptyText = document.getElementById('goldEmptyText');
+    const resultBox = document.getElementById('goldResult');
+    const resultCard = document.getElementById('goldResultCard');
+    const headline = document.getElementById('goldHeadline');
+    const tinyNote = document.getElementById('goldTinyNote');
+    const pureEl = document.getElementById('goldPure');
+    const purityEl = document.getElementById('goldPurity');
+    const weightStat = document.getElementById('goldWeightStat');
+    const perGramEl = document.getElementById('goldPerGram');
+    const perTolaEl = document.getElementById('goldPerTola');
+    const echoEl = document.getElementById('goldEcho');
+    const priceLineEl = document.getElementById('goldPriceLine');
+    const workedEl = document.getElementById('goldWorked');
+    const staleLine = document.getElementById('goldStaleLine');
+    const copyBtn = document.querySelector('[data-copy-result]');
+    const printBtn = document.querySelector('[data-print-result]');
+    const formStatus = document.getElementById('goldFormStatus');
+
+    let interacted = false;
+    let prevUnit = 'tola';
+    let debounceTimer = null;
+    let priceState = {
+      status: 'loading',
+      price: null,
+      sourceName: null,
+      asOf: null,
+      fetchedAt: null,
+      quotationUnit: null,
+    };
+
+    function fmtTime(iso) {
+      try {
+        return new Intl.DateTimeFormat('en-GB', {
+          timeZone: 'Asia/Karachi',
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+          timeZoneName: 'short',
+        }).format(new Date(iso));
+      } catch {
+        return iso;
+      }
+    }
+
+    function fmtWeight(value) {
+      return value.toLocaleString('en-PK', { maximumFractionDigits: 4 });
+    }
+
+    function freshness() {
+      if (priceState.status !== 'ready') return priceState.status;
+      const asOfMs = Date.parse(priceState.asOf);
+      const fetchedMs = Date.parse(priceState.fetchedAt);
+      if (!Number.isFinite(asOfMs) || !Number.isFinite(fetchedMs)) return 'unavailable';
+      const now = Date.now();
+      if (asOfMs - now > SKEW_MS || fetchedMs - now > SKEW_MS) return 'unavailable';
+      if (now - asOfMs < FRESH_MS && now - fetchedMs < FRESH_MS) return 'current';
+      if (now - asOfMs <= STALE_MAX_MS) return 'stale';
+      return 'unavailable';
+    }
+
+    function checkedValue(name) {
+      const el = document.querySelector('input[name="' + name + '"]:checked');
+      return el ? el.value : null;
+    }
+
+    function currentMode() {
+      return checkedValue('goldMode') || 'live';
+    }
+
+    function updateStrip() {
+      const mode = currentMode();
+      stripActions.hidden = true;
+      stripBadge.hidden = true;
+      if (mode === 'manual') {
+        strip.className = 'notice-info';
+        stripText.textContent =
+          'Your price — the price you enter is used, not a market rate. No source or market time applies.';
+        return;
+      }
+      if (priceState.status === 'loading') {
+        strip.className = 'notice-info';
+        stripText.textContent = 'Fetching the latest price…';
+        return;
+      }
+      if (priceState.status === 'unavailable') {
+        strip.className = 'notice-warning';
+        stripText.textContent = 'Price unavailable. Enter a price of your own, or try again later.';
+        stripBadge.hidden = false;
+        stripBadge.textContent = 'Unavailable';
+        stripBadge.className = 'badge badge-warning';
+        stripActions.hidden = false;
+        return;
+      }
+      const fresh = freshness();
+      const priceText = 'Live gold price: ' + formatPKR(priceState.price, 2) + ' per tola';
+      const sourceText = priceState.sourceName ? ' · Source: ' + priceState.sourceName : '';
+      if (fresh === 'stale') {
+        strip.className = 'notice-warning';
+        stripText.textContent =
+          'Stale price — last updated ' + fmtTime(priceState.asOf) + '. ' + priceText + sourceText + '.';
+        stripBadge.hidden = false;
+        stripBadge.textContent = 'Stale';
+        stripBadge.className = 'badge badge-warning';
+      } else if (fresh === 'unavailable') {
+        strip.className = 'notice-warning';
+        stripText.textContent = 'Price unavailable. Enter a price of your own, or try again later.';
+        stripBadge.hidden = false;
+        stripBadge.textContent = 'Unavailable';
+        stripBadge.className = 'badge badge-warning';
+        stripActions.hidden = false;
+      } else {
+        strip.className = 'notice-info';
+        stripText.textContent = priceText + sourceText + ' · as of ' + fmtTime(priceState.asOf) + '.';
+        stripBadge.hidden = false;
+        stripBadge.textContent = 'Current';
+        stripBadge.className = 'badge badge-success';
+      }
+    }
+
+    function parseField(raw) {
+      const trimmed = raw.trim();
+      if (trimmed === '') return { kind: 'blank' };
+      const value = parseDecimal(raw);
+      if (value !== null) return { kind: 'ok', value };
+      const stripped = trimmed.replace(/,/g, '');
+      if (/^-?(?:\d+(?:\.\d+)?|\.\d+)$/.test(stripped) && !/,/.test(trimmed)) {
+        return { kind: 'too-large' };
+      }
+      return { kind: 'not-a-number' };
+    }
+
+    function validateField(parsed, messages) {
+      if (parsed.kind === 'blank') return messages.blank;
+      if (parsed.kind === 'not-a-number') return messages.notANumber;
+      if (parsed.kind === 'too-large') return messages.tooLarge;
+      if (parsed.value <= 0) return messages.notPositive;
+      if (parsed.value > MAX_AMOUNT) return messages.tooLarge;
+      return null;
+    }
+
+    function setFieldError(input, errorEl, message) {
+      if (message) {
+        errorEl.textContent = message;
+        errorEl.hidden = false;
+        input.setAttribute('aria-invalid', 'true');
+      } else {
+        errorEl.textContent = '';
+        errorEl.hidden = true;
+        input.removeAttribute('aria-invalid');
+      }
+    }
+
+    function showEmpty(text) {
+      resultBox.hidden = true;
+      emptyBox.hidden = false;
+      emptyText.textContent = text;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+
+    function showResult() {
+      emptyBox.hidden = true;
+      resultBox.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+    }
+
+    function evaluate() {
+      const mode = currentMode();
+      const weightRaw = weightInput.value;
+      const weightParsed = parseField(weightRaw);
+      const weightMessage = validateField(weightParsed, {
+        blank: 'Enter the weight of gold.',
+        notANumber: 'Enter a number for the weight, using digits and one decimal point.',
+        notPositive: 'Enter a weight greater than 0.',
+        tooLarge: 'That weight is too large to calculate. Enter a smaller weight.',
+      });
+
+      const karat = Number(checkedValue('goldKarat'));
+      const karatValid = KARATS.includes(karat);
+      const unit = checkedValue('goldUnit') || 'tola';
+
+      let price = null;
+      let priceMessage = null;
+      let waitingForPrice = false;
+      let priceUnavailable = false;
+      if (mode === 'manual') {
+        const priceParsed = parseField(manualInput.value);
+        priceMessage = validateField(priceParsed, {
+          blank: 'Enter your price per tola.',
+          notANumber: 'Enter a number for the price, using digits and one decimal point.',
+          notPositive: 'Enter a price greater than 0.',
+          tooLarge: 'That price is too large to calculate. Enter a smaller price.',
+        });
+        if (!priceMessage) price = priceParsed.value;
+      } else if (priceState.status === 'loading') {
+        waitingForPrice = true;
+      } else if (priceState.status === 'unavailable' || freshness() === 'unavailable') {
+        priceUnavailable = true;
+      } else {
+        price = priceState.price;
+      }
+
+      const messages = [];
+      if (weightMessage) messages.push(weightMessage);
+      if (priceMessage) messages.push(priceMessage);
+      if (!karatValid) messages.push('Choose a karat from the list.');
+
+      if (interacted) {
+        setFieldError(weightInput, weightError, weightMessage);
+        if (mode === 'manual') {
+          setFieldError(manualInput, manualError, priceMessage);
+        } else {
+          setFieldError(manualInput, manualError, null);
+        }
+        if (messages.length > 0) {
+          errorsBox.textContent = messages.join(' ');
+          errorsBox.hidden = false;
+        } else {
+          errorsBox.textContent = '';
+          errorsBox.hidden = true;
+        }
+      } else {
+        errorsBox.textContent = '';
+        errorsBox.hidden = true;
+      }
+
+      if (messages.length > 0) {
+        showEmpty(
+          interacted
+            ? 'Fix the highlighted fields to see your result.'
+            : 'Enter your details to see your result.'
+        );
+        return { valid: false, firstInvalid: weightMessage ? weightInput : manualInput };
+      }
+      if (waitingForPrice) {
+        showEmpty('Fetching the latest price… Enter your details, or switch to your own price.');
+        return { valid: false, firstInvalid: null };
+      }
+      if (priceUnavailable) {
+        showEmpty('Price unavailable. Enter a price of your own, or try again later.');
+        return { valid: false, firstInvalid: null };
+      }
+
+      let result;
+      try {
+        result = calcGold(weightParsed.value, unit, karat, price);
+      } catch {
+        errorsBox.textContent = 'Could not calculate that result. Please check your entries.';
+        errorsBox.hidden = false;
+        showEmpty('Fix the highlighted fields to see your result.');
+        return { valid: false, firstInvalid: weightInput };
+      }
+
+      const fresh = mode === 'live' ? freshness() : null;
+      if (fresh === 'stale') {
+        staleLine.textContent = 'Stale price — last updated ' + fmtTime(priceState.asOf) + '.';
+        staleLine.hidden = false;
+      } else {
+        staleLine.textContent = '';
+        staleLine.hidden = true;
+      }
+
+      const tiny = result.adjustedValue > 0 && result.adjustedValue < 0.005;
+      headline.textContent = formatPKR(result.adjustedValue, 2);
+      tinyNote.textContent = tiny
+        ? 'Less than Rs 0.01 — see the per-gram price below, shown unrounded.'
+        : '';
+      tinyNote.hidden = !tiny;
+      pureEl.textContent = formatPKR(result.pureValue, 2);
+      purityEl.textContent = karat + 'K · ' + formatPct(result.purityFraction * 100) + ' (karat ÷ 24)';
+      const otherUnit = unit === 'tola' ? 'g' : 'tola';
+      const otherValue = unit === 'tola' ? result.grams : result.tola;
+      const unitLabel = unit === 'tola' ? 'tola' : 'g';
+      weightStat.textContent = fmtWeight(weightParsed.value) + ' ' + unitLabel + ' · ' + fmtWeight(otherValue) + ' ' + otherUnit;
+      if (tiny) {
+        perGramEl.textContent =
+          'Rs ' + result.pricePerGram.toLocaleString('en-PK', { minimumFractionDigits: 6, maximumFractionDigits: 6 });
+      } else {
+        perGramEl.textContent = formatPKR(result.pricePerGram, 2);
+      }
+      perTolaEl.textContent = formatPKR(result.pricePerTola, 2);
+
+      if (mode === 'live') {
+        echoEl.textContent =
+          'Based on: ' + fmtWeight(weightParsed.value) + ' ' + unitLabel + ' · ' + karat + 'K · Live price ' + formatPKR(price, 2) + ' per tola';
+        let line = 'as of ' + fmtTime(priceState.asOf) + '.';
+        if (priceState.sourceName) line = 'Source: ' + priceState.sourceName + ' · ' + line;
+        if (fresh === 'stale') line = 'Stale price — last updated ' + fmtTime(priceState.asOf) + '. ' + line;
+        if (priceState.quotationUnit === 'per-ounce') {
+          line += ' Source quoted per troy ounce, converted to per tola (1 tola = ' + TOLA_GRAMS + ' g).';
+        }
+        priceLineEl.textContent = 'Price basis: PKR per tola (1 tola = ' + TOLA_GRAMS + ' g). ' + line;
+      } else {
+        echoEl.textContent =
+          'Based on: ' + fmtWeight(weightParsed.value) + ' ' + unitLabel + ' · ' + karat + 'K · Price entered by you: ' + formatPKR(price, 2) + ' per tola (not a market rate)';
+        priceLineEl.textContent =
+          'Price entered by you, not a market rate. Price basis: PKR per tola (1 tola = ' + TOLA_GRAMS + ' g).';
+      }
+
+      const expression =
+        '(' + formatPKR(price, 2) + ' ÷ ' + TOLA_GRAMS + ') × (' + karat + ' ÷ 24)';
+      if (unit === 'tola') {
+        workedEl.textContent =
+          fmtWeight(weightParsed.value) + ' tola (' + fmtWeight(result.grams) + ' g) × ' + expression + ' = ' + formatPKR(result.adjustedValue, 2) +
+          '. Price per gram: ' + formatPKR(result.pricePerGram, 2) + ' (shown rounded; calculated unrounded).';
+      } else {
+        workedEl.textContent =
+          fmtWeight(weightParsed.value) + ' g × ' + expression + ' = ' + formatPKR(result.adjustedValue, 2) +
+          '. Price per gram: ' + formatPKR(result.pricePerGram, 2) + ' (shown rounded; calculated unrounded).';
+      }
+
+      showResult();
+      return { valid: true, firstInvalid: null };
+    }
+
+    function scheduleEvaluate() {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(evaluate, 150);
+    }
+
+    async function loadPrice() {
+      priceState = { status: 'loading', price: null, sourceName: null, asOf: null, fetchedAt: null, quotationUnit: null };
+      updateStrip();
+      try {
+        const response = await fetch('/api/metals');
+        const data = await response.json();
+        if (!response.ok) throw new Error('unavailable');
+        const gold = data && data.gold ? data.gold : data;
+        const price = gold ? (gold.pricePerTolaPkr ?? gold.goldPerTola) : null;
+        const asOf = gold ? (gold.asOf ?? gold.providerTimestamp ?? gold.fetchedAt) : null;
+        const fetchedAt = gold ? gold.fetchedAt ?? null : null;
+        const sourceName = gold ? (gold.sourceName ?? gold.source ?? data.sourceName ?? null) : null;
+        if (typeof price !== 'number' || !Number.isFinite(price) || price <= 0 || !asOf || !fetchedAt) {
+          throw new Error('invalid payload');
+        }
+        priceState = {
+          status: 'ready',
+          price,
+          sourceName,
+          asOf,
+          fetchedAt,
+          quotationUnit: gold.quotationUnit ?? null,
+        };
+        if (freshness() === 'unavailable') {
+          priceState.status = 'unavailable';
+        }
+      } catch {
+        priceState = { status: 'unavailable', price: null, sourceName: null, asOf: null, fetchedAt: null, quotationUnit: null };
+      }
+      updateStrip();
+      evaluate();
+    }
+
+    weightInput.addEventListener('input', () => {
+      interacted = true;
+      scheduleEvaluate();
+    });
+    manualInput.addEventListener('input', () => {
+      interacted = true;
+      scheduleEvaluate();
+    });
+
+    document.querySelectorAll('input[name="goldUnit"]').forEach((radio) => {
+      radio.addEventListener('change', () => {
+        interacted = true;
+        const newUnit = checkedValue('goldUnit');
+        const parsed = parseDecimal(weightInput.value);
+        if (parsed !== null && parsed > 0 && newUnit && newUnit !== prevUnit) {
+          const grams = prevUnit === 'tola' ? parsed * TOLA_GRAMS : parsed;
+          const converted = newUnit === 'tola' ? grams / TOLA_GRAMS : grams;
+          weightInput.value = fmtWeight(converted);
+        }
+        prevUnit = newUnit || prevUnit;
+        evaluate();
+      });
+    });
+
+    document.querySelectorAll('input[name="goldKarat"]').forEach((radio) => {
+      radio.addEventListener('change', () => {
+        interacted = true;
+        evaluate();
+      });
+    });
+
+    document.querySelectorAll('input[name="goldMode"]').forEach((radio) => {
+      radio.addEventListener('change', () => {
+        interacted = true;
+        manualField.hidden = currentMode() !== 'manual';
+        updateStrip();
+        evaluate();
+      });
+    });
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      interacted = true;
+      const outcome = evaluate();
+      if (!outcome.valid) {
+        if (outcome.firstInvalid) outcome.firstInvalid.focus();
+        return;
+      }
+      if (window.matchMedia('(max-width: 899px)').matches) {
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        resultCard.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+        resultCard.focus({ preventScroll: true });
+      }
+    });
+
+    document.getElementById('goldClear').addEventListener('click', () => {
+      form.reset();
+      prevUnit = 'tola';
+      interacted = false;
+      manualField.hidden = true;
+      setFieldError(weightInput, weightError, null);
+      setFieldError(manualInput, manualError, null);
+      errorsBox.textContent = '';
+      errorsBox.hidden = true;
+      formStatus.textContent = 'Form cleared.';
+      updateStrip();
+      showEmpty('Enter your details to see your result.');
+    });
+
+    document.getElementById('goldRetryBtn').addEventListener('click', () => {
+      loadPrice();
+    });
+
+    document.getElementById('goldManualBtn').addEventListener('click', () => {
+      const manualRadio = document.querySelector('input[name="goldMode"][value="manual"]');
+      if (manualRadio) manualRadio.checked = true;
+      manualField.hidden = false;
+      updateStrip();
+      evaluate();
+      manualInput.focus();
+    });
+
+    // TradingView widget: display-only, loaded only when scrolled into view.
+    // It never feeds the calculator and its price is never read or copied.
+    const tvContainer = document.getElementById('tvGoldWidget');
+    const tvFallback = document.getElementById('tvGoldFallback');
+    let tvLoaded = false;
+    function loadTradingViewWidget() {
+      if (tvLoaded || !tvContainer) return;
+      tvLoaded = true;
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.async = true;
+      script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js';
+      script.textContent = JSON.stringify({
+        symbol: 'OANDA:XAUUSD',
+        width: '100%',
+        colorTheme: 'light',
+        isTransparent: false,
+        locale: 'en',
+      });
+      script.onerror = () => {
+        if (tvFallback) tvFallback.hidden = false;
+      };
+      tvContainer.appendChild(script);
+      setTimeout(() => {
+        if (tvContainer && !tvContainer.querySelector('iframe') && tvFallback) {
+          tvFallback.hidden = false;
+        }
+      }, 8000);
+    }
+    if (tvContainer) {
+      if ('IntersectionObserver' in window) {
+        const tvObserver = new IntersectionObserver(
+          (entries) => {
+            if (entries.some((entry) => entry.isIntersecting)) {
+              loadTradingViewWidget();
+              tvObserver.disconnect();
+            }
+          },
+          { rootMargin: '200px' }
+        );
+        tvObserver.observe(tvContainer);
+      } else {
+        loadTradingViewWidget();
+      }
+    }
+
+    updateStrip();
+    loadPrice();
+  </script>
+</Layout>

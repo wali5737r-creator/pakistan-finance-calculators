@@ -1,0 +1,551 @@
+---
+import Layout from '../components/Layout.astro';
+import {
+  AREA_UNITS,
+  DEFAULT_MARLA_STANDARD_ID,
+  MARLA_STANDARDS,
+  UNIT_REGION,
+  UNIT_SOURCE_CITATION,
+  UNIT_SOURCE_STATUS,
+  areaUnitsForStandard,
+  marlaStandardById,
+} from '../config/units.ts';
+import { convertArea, formatNumber } from '../lib/calc.ts';
+
+const title = 'Marla to Square Feet Converter | Kanal, Acre & Sq Yd';
+const description =
+  'Convert marla, kanal, acre, square feet, square yards, square metres and hectares. Choose the Punjab revenue standard (272.25 sq ft per marla) or the housing-society standard (225 sq ft per marla) — free, instant and private, nothing is stored.';
+
+const unitById = (id: string) => AREA_UNITS.find((unit) => unit.id === id)!;
+const marlaUnit = unitById('marla');
+const kanalUnit = unitById('kanal');
+const acreUnit = unitById('acre');
+const sqftUnit = unitById('sqft');
+const sqydUnit = unitById('sqyd');
+
+const canonicalLine =
+  `1 ${marlaUnit.label} = ${formatNumber(marlaUnit.sqft, 2)} ${sqftUnit.label} · ` +
+  `1 ${kanalUnit.label} = ${formatNumber(kanalUnit.sqft, 0)} ${sqftUnit.label} ` +
+  `(20 ${marlaUnit.label}) · ` +
+  `1 ${acreUnit.label} = ${formatNumber(acreUnit.sqft, 0)} ${sqftUnit.label}`;
+
+const exampleSqFt = formatNumber(convertArea(10, 'marla', 'sqft'), 2);
+const exampleSqYd = formatNumber(convertArea(10, 'marla', 'sqyd'), 2);
+const exampleKanal = formatNumber(convertArea(10, 'marla', 'kanal'), 2);
+
+const provisionalLabel = `${UNIT_REGION} definition — source to be confirmed`;
+const sourceNote = UNIT_SOURCE_CITATION
+  ? `Source: ${UNIT_SOURCE_CITATION}.`
+  : 'No source has been cited yet.';
+
+const faqs = [
+  {
+    question: 'How many square feet are in 1 marla?',
+    answer:
+      `1 ${marlaUnit.label} = ${formatNumber(marlaUnit.sqft, 2)} ${sqftUnit.label}, ` +
+      `using the ${UNIT_REGION} definition (${UNIT_SOURCE_STATUS}).`,
+  },
+  {
+    question: 'How many marla are in 1 kanal?',
+    answer:
+      `1 ${kanalUnit.label} = ${formatNumber(kanalUnit.sqft / marlaUnit.sqft, 0)} ${marlaUnit.label}, ` +
+      `using the ${UNIT_REGION} definition (${UNIT_SOURCE_STATUS}).`,
+  },
+  {
+    question: 'Is a marla the same size in every province or housing society?',
+    answer:
+      `No. Use the standard selector above the calculator: the ${UNIT_REGION} revenue ` +
+      `standard is 1 marla = 272.25 sq ft (1 kanal = 5,445 sq ft), while DHA, Bahria Town ` +
+      `and LDA schemes use 1 marla = 225 sq ft (1 kanal = 4,500 sq ft). A 250 sq ft municipal ` +
+      `variant is also reported in some Islamabad/CDA areas and is not offered here. ` +
+      'For important measurements, check the dimensions on your registry or the ' +
+      "society's approved layout plan — the plot dimensions matter more than the unit name.",
+  },
+  {
+    question: 'Which definition does this converter use?',
+    answer:
+      `This converter uses the ${UNIT_REGION} definition of marla and kanal. ${UNIT_SOURCE_STATUS}. ${sourceNote}`,
+  },
+  {
+    question: 'What units can I convert between?',
+    answer: `You can convert between ${AREA_UNITS.map((unit) => unit.label).join(', ')}.`,
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://[live-domain]/unit-marla-converter/#webapp',
+      name: 'Unit / Marla Converter',
+      url: 'https://[live-domain]/unit-marla-converter/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://[live-domain]/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Unit / Marla Converter',
+          item: 'https://[live-domain]/unit-marla-converter/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': 'https://[live-domain]/unit-marla-converter/#faq',
+      mainEntity: faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.question,
+        acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+      })),
+    },
+  ],
+});
+---
+
+<Layout title={title} description={description} slug="/unit-marla-converter/" schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb" style="font-size: 14px; margin-bottom: 12px;">
+      <a href="/">Home</a> / Unit / Marla Converter
+    </nav>
+    <h1>Unit / Marla Converter</h1>
+    <p class="prose-narrow" style="font-size: 1.0625rem; margin-top: 12px;">
+      Convert land area between marla, kanal, acre, square feet, square yards,
+      square metres and hectares. Choose the marla standard that matches your
+      land — Punjab revenue (272.25 sq ft per marla, default) or housing-society
+      (225 sq ft per marla, DHA / Bahria / LDA). Free, instant and private — nothing you enter is stored.
+    </p>
+
+    <div class="tool-grid" style="margin-top: 24px;">
+      <section class="card" aria-label="Unit converter form">
+        <div class="field">
+          <label for="marla-standard">Marla standard *</label>
+          <select id="marla-standard" name="marla-standard" required aria-required="true" aria-describedby="standard-help">
+            {MARLA_STANDARDS.map((standard) => (
+              <option value={standard.id} selected={standard.id === DEFAULT_MARLA_STANDARD_ID}>{standard.label}</option>
+            ))}
+          </select>
+          <p class="hint" id="standard-help">
+            Revenue land records use 272.25 sq ft per marla; DHA, Bahria Town and LDA schemes use 225 sq ft. Pick the one your plot follows — marla and kanal change together (20 marla = 1 kanal under both).
+          </p>
+        </div>
+        <div class="field">
+          <label for="area-value">Area *</label>
+          <input
+            type="text"
+            inputmode="decimal"
+            id="area-value"
+            name="area-value"
+            required
+            aria-required="true"
+            aria-describedby="area-error area-help"
+            autocomplete="off"
+          />
+          <p class="hint" id="area-help">
+            Enter 0 or more. Fractions are allowed — for example, 0.5 marla.
+          </p>
+        </div>
+        <div class="field">
+          <label for="from-unit">From *</label>
+          <select id="from-unit" name="from-unit" required aria-required="true" aria-describedby="area-error">
+            {AREA_UNITS.map((unit) => (
+              <option value={unit.id} selected={unit.id === 'marla'}>{unit.label}</option>
+            ))}
+          </select>
+        </div>
+        <div style="text-align: center; margin: 4px 0 16px;">
+          <button type="button" class="btn-secondary" id="swap" aria-label="Swap units" style="min-height: 48px;">⇅ Swap units</button>
+        </div>
+        <div class="field">
+          <label for="to-unit">To *</label>
+          <select id="to-unit" name="to-unit" required aria-required="true" aria-describedby="area-error">
+            {AREA_UNITS.map((unit) => (
+              <option value={unit.id} selected={unit.id === 'sqft'}>{unit.label}</option>
+            ))}
+          </select>
+        </div>
+        <p id="swap-status" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        <div id="area-error" role="alert" class="error-box" hidden></div>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px;">
+          <button type="button" class="btn-primary" id="calculate">Calculate</button>
+          <button type="button" class="btn-secondary" id="clear">Clear</button>
+        </div>
+      </section>
+
+      <section class="result-card" aria-label="Conversion result">
+        <div id="empty-state">
+          <p><strong>Enter an area to see your conversion.</strong></p>
+          <p>
+            You’ll see the converted value and the same area in every listed unit.
+          </p>
+        </div>
+        <div id="result-content" hidden>
+          <div data-result-text>
+            <div id="result-heading" tabindex="-1" aria-live="polite" aria-atomic="true">
+              <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Converted area</p>
+              <p class="result-value" id="headline"></p>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px;">
+              <div>
+                <p style="font-size: 14px; color: var(--ink-muted);">In square feet</p>
+                <p id="sqft-stat" style="font-weight: 700; font-size: 20px;"></p>
+              </div>
+              <div>
+                <p style="font-size: 14px; color: var(--ink-muted);">Conversion factor</p>
+                <p id="factor-stat" style="font-weight: 700; font-size: 16px;"></p>
+                <p id="factor-inverse" style="font-size: 14px; color: var(--ink-muted);"></p>
+              </div>
+            </div>
+            <p id="echo" style="margin-top: 20px; font-size: 14px; color: var(--ink-muted);"></p>
+            {UNIT_SOURCE_CITATION === '' && (
+              <p style="margin-top: 12px;">
+                <span class="badge badge-warning">{UNIT_SOURCE_STATUS}</span>
+              </p>
+              <p class="notice-warning" style="margin-top: 8px;">{provisionalLabel}.</p>
+            )}
+            {UNIT_SOURCE_CITATION !== '' && (
+              <p style="margin-top: 12px; font-size: 14px;">Source: {UNIT_SOURCE_CITATION}</p>
+            )}
+            <p class="notice-warning" style="margin-top: 12px;">
+              Uses the marla standard you chose above (Punjab revenue by default).
+              Marla sizes can differ by region and housing society; for important
+              measurements, check the dimensions on your registry or the
+              society's layout plan.
+            </p>
+          </div>
+          <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px;">
+            <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+            <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          </div>
+          <p data-copy-status role="status" style="font-size: 14px; margin-top: 8px;"></p>
+        </div>
+      </section>
+    </div>
+
+    <section id="table-section" hidden style="margin-top: 32px;">
+      <h2>The same area in every unit</h2>
+      <p>{canonicalLine}</p>
+      {UNIT_SOURCE_CITATION === '' && (
+        <p><span class="badge badge-warning">{UNIT_SOURCE_STATUS}</span></p>
+      )}
+      {UNIT_SOURCE_CITATION !== '' && (
+        <p style="font-size: 14px;">Source: {UNIT_SOURCE_CITATION}</p>
+      )}
+      <div class="table-wrap">
+        <table class="data">
+          <caption id="table-caption"></caption>
+          <thead>
+            <tr><th scope="col">Unit</th><th scope="col">Value</th></tr>
+          </thead>
+          <tbody id="all-units-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="prose-narrow" style="margin-top: 48px;">
+      <h2>How it works</h2>
+      <ol>
+        <li>Enter the area and choose the unit it is measured in.</li>
+        <li>The area is converted to square feet — the common unit all conversions go through.</li>
+        <li>Square feet are divided by the size of the unit you want, giving your converted area — shown in every listed unit below.</li>
+      </ol>
+      <p>
+        The conversion goes through square feet: value × square feet per From
+        unit ÷ square feet per To unit. {canonicalLine}.
+      </p>
+    </section>
+
+    <section class="prose-narrow" style="margin-top: 40px;">
+      <h2>Worked example</h2>
+      <p>
+        <strong>Example — 10 marla</strong>
+        {UNIT_SOURCE_CITATION === '' && (
+          <span class="badge badge-warning" style="margin-left: 8px;">{UNIT_SOURCE_STATUS}</span>
+        )}
+      </p>
+      <p>
+        10 {marlaUnit.label} = {exampleSqFt} {sqftUnit.label}; {exampleSqYd} {sqydUnit.label};
+        {exampleKanal} {kanalUnit.label}. Provisional factors, labelled as such
+        on this page: {provisionalLabel}.
+      </p>
+    </section>
+
+    <section class="prose-narrow faq" style="margin-top: 40px;">
+      <h2>Frequently asked questions</h2>
+      {faqs.map((faq) => (
+        <details>
+          <summary>{faq.question}</summary>
+          <p>{faq.answer}</p>
+        </details>
+      ))}
+      <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+    </section>
+
+    <section class="prose-narrow" style="margin-top: 40px;">
+      <div class="notice-info">
+        <h2>Important — please read</h2>
+        <p>
+          Results are estimates for information only. This converter uses the
+          marla standard you chose above ({UNIT_REGION} revenue by default),
+          and other regional and housing-society definitions differ. This is not legal, surveying, or financial
+          advice. Confirm important land measurements against official land
+          records and, where needed, a qualified professional before acting.
+          <a href="/terms/">Read the full disclaimer</a>.
+        </p>
+      </div>
+    </section>
+
+    <section style="margin-top: 40px;">
+      <h2>Related tools</h2>
+      <div style="display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+        <article class="card">
+          <h3 style="font-size: 20px;"><a href="/gold-price-calculator/">Gold Price Calculator</a></h3>
+          <p style="color: var(--ink-muted);">Value of gold per tola and per gram for 24K, 22K, 21K, and 18K, with a live or your own price.</p>
+          <p><a href="/gold-price-calculator/">Use the calculator →</a></p>
+        </article>
+        <article class="card">
+          <h3 style="font-size: 20px;"><a href="/percentage-calculator/">Percentage Calculator</a></h3>
+          <p style="color: var(--ink-muted);">What X% of a number is, percentage increase and decrease, and what percent one number is of another.</p>
+          <p><a href="/percentage-calculator/">Use the calculator →</a></p>
+        </article>
+        <article class="card">
+          <h3 style="font-size: 20px;"><a href="/age-calculator/">Age Calculator</a></h3>
+          <p style="color: var(--ink-muted);">Your exact age in years, months, and days, plus total days lived and days until your next birthday.</p>
+          <p><a href="/age-calculator/">Use the calculator →</a></p>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    import {
+      DEFAULT_MARLA_STANDARD_ID,
+      UNIT_SOURCE_CITATION,
+      UNIT_SOURCE_STATUS,
+      areaUnitsForStandard,
+      marlaStandardById,
+    } from '../config/units.ts';
+    import {
+      MAX_AMOUNT,
+      convertAreaWithUnits,
+      convertAreaToAllWithUnits,
+      formatNumber,
+      parseDecimal,
+    } from '../lib/calc.ts';
+
+    const standardSelect = document.getElementById('marla-standard') as HTMLSelectElement;
+    let currentUnits = areaUnitsForStandard(DEFAULT_MARLA_STANDARD_ID);
+    let currentStandard = marlaStandardById(DEFAULT_MARLA_STANDARD_ID);
+
+    const valueInput = document.getElementById('area-value') as HTMLInputElement;
+    const fromSelect = document.getElementById('from-unit') as HTMLSelectElement;
+    const toSelect = document.getElementById('to-unit') as HTMLSelectElement;
+    const swapBtn = document.getElementById('swap') as HTMLButtonElement;
+    const swapStatus = document.getElementById('swap-status') as HTMLParagraphElement;
+    const errorBox = document.getElementById('area-error') as HTMLDivElement;
+    const emptyState = document.getElementById('empty-state') as HTMLDivElement;
+    const resultContent = document.getElementById('result-content') as HTMLDivElement;
+    const resultCard = resultContent.closest('.result-card') as HTMLElement;
+    const resultHeading = document.getElementById('result-heading') as HTMLDivElement;
+    const headline = document.getElementById('headline') as HTMLParagraphElement;
+    const sqftStat = document.getElementById('sqft-stat') as HTMLParagraphElement;
+    const factorStat = document.getElementById('factor-stat') as HTMLParagraphElement;
+    const factorInverse = document.getElementById('factor-inverse') as HTMLParagraphElement;
+    const echoEl = document.getElementById('echo') as HTMLParagraphElement;
+    const tableSection = document.getElementById('table-section') as HTMLElement;
+    const tableCaption = document.getElementById('table-caption') as HTMLTableCaptionElement;
+    const tableBody = document.getElementById('all-units-body') as HTMLTableSectionElement;
+    const copyBtn = document.querySelector('[data-copy-result]') as HTMLButtonElement;
+    const printBtn = document.querySelector('[data-print-result]') as HTMLButtonElement;
+    const calculateBtn = document.getElementById('calculate') as HTMLButtonElement;
+    const clearBtn = document.getElementById('clear') as HTMLButtonElement;
+
+    function unitById(id: string) {
+      return currentUnits.find((unit) => unit.id === id)!;
+    }
+
+    // Display formatting for area values: at least 2 fraction digits, up to
+    // 4 (6 below 0.001, 10 below 5e-7), trimming trailing zeros past 2 dp,
+    // so 2722.5 shows as 2,722.50 and 136.125 as 136.125. Zero shows as 0.
+    function formatArea(value: number): string {
+      if (value === 0) return '0';
+      const abs = Math.abs(value);
+      const maxDp = abs < 0.0000005 ? 10 : abs < 0.001 ? 6 : 4;
+      return value.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: maxDp,
+      });
+    }
+
+    // Echo the entered value: commas stripped, integer part re-grouped,
+    // fraction digits preserved exactly as typed — never re-rounded.
+    function echoValue(raw: string): string {
+      const text = raw.trim().replace(/,/g, '');
+      const [intPart, fracPart] = text.split('.');
+      const grouped = Number(intPart === '' ? '0' : intPart).toLocaleString('en-US');
+      return fracPart === undefined ? grouped : `${grouped}.${fracPart}`;
+    }
+
+    function showError(message: string, field: HTMLElement): void {
+      errorBox.textContent = message;
+      errorBox.hidden = false;
+      valueInput.removeAttribute('aria-invalid');
+      fromSelect.removeAttribute('aria-invalid');
+      toSelect.removeAttribute('aria-invalid');
+      field.setAttribute('aria-invalid', 'true');
+      resultContent.hidden = true;
+      emptyState.hidden = false;
+      tableSection.hidden = true;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+
+    function clearError(): void {
+      errorBox.textContent = '';
+      errorBox.hidden = true;
+      valueInput.removeAttribute('aria-invalid');
+      fromSelect.removeAttribute('aria-invalid');
+      toSelect.removeAttribute('aria-invalid');
+    }
+
+    function calculate(scrollToResult: boolean): boolean {
+      const raw = valueInput.value;
+      if (raw.trim() === '') {
+        showError('Enter an area.', valueInput);
+        return false;
+      }
+      const parsed = parseDecimal(raw);
+      if (parsed === null) {
+        showError('Enter numbers only — digits and one decimal point.', valueInput);
+        return false;
+      }
+      if (raw.trim().startsWith('-') || Object.is(parsed, -0) || parsed < 0) {
+        showError('Enter 0 or more — area cannot be negative.', valueInput);
+        return false;
+      }
+      if (parsed > MAX_AMOUNT) {
+        showError(
+          `That area is too large — enter ${formatNumber(MAX_AMOUNT, 0)} or less.`,
+          valueInput,
+        );
+        return false;
+      }
+      const fromUnit = unitById(fromSelect.value);
+      const toUnit = unitById(toSelect.value);
+      if (!fromUnit || !toUnit) {
+        showError('Choose a listed unit.', fromUnit ? toSelect : fromSelect);
+        return false;
+      }
+      let result: number;
+      let all: Record<string, number>;
+      try {
+        // Same-unit conversion returns the input exactly, with no
+        // multiply/divide round-trip.
+        result = fromSelect.value === toSelect.value ? parsed : convertAreaWithUnits(parsed, fromSelect.value, toSelect.value, currentUnits);
+        all = convertAreaToAllWithUnits(parsed, fromSelect.value, currentUnits);
+        if (fromSelect.value === toSelect.value) all[fromSelect.value] = parsed;
+      } catch {
+        showError('Choose a listed unit.', fromSelect);
+        return false;
+      }
+      clearError();
+      const sqftUnit = unitById('sqft');
+      const valueInSqFt = parsed * fromUnit.sqft;
+      headline.textContent = `${formatArea(result)} ${toUnit.label}`;
+      sqftStat.textContent = `${formatArea(valueInSqFt)} ${sqftUnit.label}`;
+      const factor = fromUnit.sqft / toUnit.sqft;
+      const inverse = toUnit.sqft / fromUnit.sqft;
+      factorStat.textContent = `1 ${fromUnit.label} = ${formatArea(factor)} ${toUnit.label}`;
+      factorInverse.textContent = `1 ${toUnit.label} = ${formatArea(inverse)} ${fromUnit.label}`;
+      echoEl.textContent =
+        `Based on: ${echoValue(raw)} ${fromUnit.label} → ${toUnit.label} (${currentStandard.shortLabel})` +
+        (UNIT_SOURCE_CITATION === '' ? ` — ${UNIT_SOURCE_STATUS}` : ` — Source: ${UNIT_SOURCE_CITATION}`);
+      tableCaption.textContent =
+        `Conversion of ${echoValue(raw)} ${fromUnit.label} into all listed units (${currentStandard.shortLabel})`;
+      tableBody.innerHTML = '';
+      for (const unit of currentUnits) {
+        const row = document.createElement('tr');
+        if (unit.id === toSelect.value) row.className = 'active-row';
+        const unitCell = document.createElement('td');
+        unitCell.textContent = unit.label;
+        if (unit.id === toSelect.value) {
+          const pill = document.createElement('span');
+          pill.className = 'badge badge-info';
+          pill.style.marginLeft = '8px';
+          pill.textContent = 'Selected';
+          unitCell.appendChild(pill);
+        }
+        const valueCell = document.createElement('td');
+        valueCell.textContent = `${formatArea(all[unit.id])} ${unit.label}`;
+        row.appendChild(unitCell);
+        row.appendChild(valueCell);
+        tableBody.appendChild(row);
+      }
+      emptyState.hidden = true;
+      resultContent.hidden = false;
+      tableSection.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+      if (scrollToResult) {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        resultCard.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+        resultHeading.focus({ preventScroll: true });
+      }
+      return true;
+    }
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    function scheduleCalculate(): void {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => calculate(false), 150);
+    }
+
+    valueInput.addEventListener('input', scheduleCalculate);
+    valueInput.addEventListener('change', () => calculate(false));
+    fromSelect.addEventListener('change', () => calculate(false));
+    toSelect.addEventListener('change', () => calculate(false));
+    standardSelect.addEventListener('change', () => {
+      currentStandard = marlaStandardById(standardSelect.value);
+      currentUnits = areaUnitsForStandard(standardSelect.value);
+      swapStatus.textContent = `Standard: ${currentStandard.shortLabel} — 1 marla = ${currentStandard.marlaSqft} sq ft, 1 kanal = ${currentStandard.kanalSqft} sq ft.`;
+      calculate(false);
+    });
+    swapBtn.addEventListener('click', () => {
+      const previousFrom = fromSelect.value;
+      fromSelect.value = toSelect.value;
+      toSelect.value = previousFrom;
+      const fromUnit = unitById(fromSelect.value);
+      const toUnit = unitById(toSelect.value);
+      swapStatus.textContent = `Swapped: converting from ${fromUnit.label} to ${toUnit.label}`;
+      calculate(false);
+    });
+    calculateBtn.addEventListener('click', () => {
+      if (!calculate(true)) {
+        const invalid = document.querySelector('[aria-invalid="true"]') as HTMLElement | null;
+        invalid?.focus();
+      }
+    });
+    clearBtn.addEventListener('click', () => {
+      valueInput.value = '';
+      standardSelect.value = DEFAULT_MARLA_STANDARD_ID;
+      currentStandard = marlaStandardById(DEFAULT_MARLA_STANDARD_ID);
+      currentUnits = areaUnitsForStandard(DEFAULT_MARLA_STANDARD_ID);
+      fromSelect.value = 'marla';
+      toSelect.value = 'sqft';
+      swapStatus.textContent = '';
+      clearError();
+      resultContent.hidden = true;
+      emptyState.hidden = false;
+      tableSection.hidden = true;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+      valueInput.focus();
+    });
+  </script>
+</Layout>

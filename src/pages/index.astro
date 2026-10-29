@@ -1,0 +1,66 @@
+---
+import Layout from '../components/Layout.astro';
+
+const title = 'Pakistan Finance Calculators | Free Tax, EMI, Zakat, Gold & Currency Tools';
+const description = 'Free Pakistan finance calculators: salary tax, EMI, Zakat, currency, gold price, percentage, age and marla converters. Fast, private, no sign-up.';
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    { '@type': 'Organization', '@id': 'https://[live-domain]/#organization', name: 'Pakistan Finance Calculators', url: 'https://[live-domain]/' },
+    { '@type': 'WebSite', '@id': 'https://[live-domain]/#website', name: 'Pakistan Finance Calculators', url: 'https://[live-domain]/', publisher: { '@id': 'https://[live-domain]/#organization' } },
+    { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: 'https://[live-domain]/' }] },
+  ],
+});
+const tools = [
+  { href: '/salary-income-tax-calculator/', name: 'Salary / Income Tax Calculator', desc: 'Monthly and annual tax on your salary for 2026-27, using FBR salaried slabs, with take-home pay.' },
+  { href: '/emi-loan-calculator/', name: 'EMI / Loan Calculator', desc: 'Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan.' },
+  { href: '/zakat-calculator/', name: 'Zakat Calculator', desc: 'Zakat at 2.5% on cash, gold, silver, and trade goods, with gold and silver nisab shown.' },
+  { href: '/currency-converter/', name: 'Currency Converter PKR', desc: 'Convert PKR to USD, GBP, EUR, SAR, AED, AUD, and CAD with the rate source and last-updated time shown.' },
+  { href: '/gold-price-calculator/', name: 'Gold Price Calculator', desc: 'Value of gold per tola and per gram for 24K, 22K, 21K, and 18K, with a live or your own price.' },
+  { href: '/percentage-calculator/', name: 'Percentage Calculator', desc: 'What X% of a number is, percentage increase and decrease, and what percent one number is of another.' },
+  { href: '/age-calculator/', name: 'Age Calculator', desc: 'Your exact age in years, months, and days, plus total days lived and days until your next birthday.' },
+  { href: '/unit-marla-converter/', name: 'Unit / Marla Converter', desc: 'Convert marla, kanal, acre, square feet, square yards, square metres, and hectares.' },
+];
+---
+
+<Layout title={title} description={description} slug="/" schema={schema}>
+  <div class="container" style="padding-top:48px; padding-bottom:16px;">
+    <p class="badge badge-info" style="margin-bottom:12px;">Free · No sign-up · Private</p>
+    <h1 style="font-size: clamp(2rem, 5.5vw, 2.75rem); max-width: 720px;">Pakistan Finance Calculators</h1>
+    <p style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); max-width: 720px; margin-top:12px;">
+      Eight calculators built for Pakistan — salary tax, EMI, Zakat, currency,
+      gold, percentages, age, and land area. Every calculation runs in your
+      browser, every result shows its basis, and nothing you enter is stored.
+    </p>
+  </div>
+  <div class="container" style="padding-bottom:16px;">
+    <div style="display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+      {tools.map((tool) => (
+        <article class="card" style="display:flex; flex-direction:column; gap:8px;">
+          <h2 style="font-size:20px;"><a href={tool.href}>{tool.name}</a></h2>
+          <p style="color: var(--ink-muted); flex:1;">{tool.desc}</p>
+          <p><a href={tool.href}>Use the calculator →</a></p>
+        </article>
+      ))}
+    </div>
+  </div>
+  <div class="container prose-narrow" style="padding-top:24px;">
+    <h2>How this site works</h2>
+    <p>
+      Each tool is a separate page with its own worked example, formula,
+      source, and disclaimer. Tax slabs, nisab weights, and conversion
+      factors live in one config file each, so next year's update is a
+      single edit — not a rewrite. Currency and gold rates come from named
+      sources with a last-updated time; a stale rate is always labelled
+      stale, and no rate is ever guessed.
+    </p>
+    <h2>Results are estimates</h2>
+    <p>
+      Tax results use salaried slabs only, before any surcharge, rebate, or
+      withholding adjustment. Zakat results are arithmetic estimates only,
+      not a fatwa — please confirm with a qualified scholar. Currency and
+      gold figures are indicative, not bank or jeweller rates.
+      <a href="/terms/">Read the full disclaimer</a>.
+    </p>
+  </div>
+</Layout>

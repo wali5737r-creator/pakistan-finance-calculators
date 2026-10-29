@@ -1,0 +1,793 @@
+---
+import Layout from '../components/Layout.astro';
+
+const title = 'Percentage Calculator | X% of Y, Increase & Decrease';
+const description =
+  'Work out what X% of a number is, percentage increase or decrease, and what percent one number is of another. Free, with the formula shown for every answer.';
+const slug = '/percentage-calculator/';
+
+const faqs = [
+  {
+    q: 'What is X% of a number?',
+    a: 'Multiply the number by X and divide by 100. For example, 15% of 2,000 is 300. Choose the “X% of Y” mode, enter X and Y, and the formula with your numbers is shown with the answer.',
+  },
+  {
+    q: 'How do I calculate percentage increase or decrease?',
+    a: 'Subtract the starting number from the new number, divide by the starting number, and multiply by 100. For example, going from 800 to 1,000 is a +25.00% increase, with a difference of +200. The starting number cannot be 0, because percentage change from zero is undefined.',
+  },
+  {
+    q: 'How do I work out what percent one number is of another?',
+    a: 'Divide the first number by the second number and multiply by 100. For example, 450 is 25.00% of 1,800. Choose the “X is what % of Y?” mode. The second number cannot be 0, because you cannot divide by zero.',
+  },
+  {
+    q: 'Can I see the formula with my numbers?',
+    a: 'Yes. The formula preview under the fields updates as you type, and the result shows the same formula with your numbers filled in — for example, 15% of 2,000 = 300. The formula is generated from your inputs; it is never a typed example.',
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://[live-domain]/percentage-calculator/#webapp',
+      name: 'Percentage Calculator',
+      url: 'https://[live-domain]/percentage-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://[live-domain]/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Percentage Calculator',
+          item: 'https://[live-domain]/percentage-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+
+const related = [
+  {
+    href: '/salary-income-tax-calculator/',
+    name: 'Salary / Income Tax Calculator',
+    desc: 'Monthly and annual tax on your salary for 2026-27, using FBR salaried slabs, with take-home pay.',
+  },
+  {
+    href: '/emi-loan-calculator/',
+    name: 'EMI / Loan Calculator',
+    desc: 'Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan.',
+  },
+  {
+    href: '/age-calculator/',
+    name: 'Age Calculator',
+    desc: 'Your exact age in years, months, and days, plus days until your next birthday.',
+  },
+];
+---
+
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Percentage Calculator</p>
+    </nav>
+    <p class="badge badge-info" style="margin-top: 8px;">Everyday Math</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Percentage Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+      Work out what X% of a number is, what percent one number is of another, or a percentage
+      increase or decrease — with the formula shown using your numbers, so you can check every
+      answer. Results are plain arithmetic: plain numbers or percentages, with no currency assumed.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="pctForm" novalidate>
+          <fieldset class="radiogroup">
+            <legend>Choose what to calculate</legend>
+            <div class="seg">
+              <label>
+                <input
+                  type="radio"
+                  name="pctMode"
+                  value="6a"
+                  checked
+                  aria-label="What is X percent of Y?"
+                />
+                <span>X% of Y</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="pctMode"
+                  value="6b"
+                  aria-label="X is what percent of Y?"
+                />
+                <span>X as % of Y</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="pctMode"
+                  value="6c"
+                  aria-label="Percentage increase or decrease"
+                />
+                <span>% change</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="pctField1"><span id="pctLabel1">Percentage (X)</span> <span aria-hidden="true">*</span></label>
+            <div class="suffix-wrap">
+              <input
+                id="pctField1"
+                type="text"
+                inputmode="decimal"
+                autocomplete="off"
+                aria-required="true"
+                aria-describedby="pctHint1 pctError1"
+              />
+              <span id="pctSuffix1" class="suffix" aria-hidden="true">%</span>
+            </div>
+            <p class="hint" id="pctHint1">Enter a percentage. It can be more than 100.</p>
+            <p class="hint">Negative numbers are allowed. Results keep their sign.</p>
+            <p class="field-error" id="pctError1" hidden></p>
+          </div>
+
+          <div class="field">
+            <label for="pctField2"><span id="pctLabel2">Number (Y)</span> <span aria-hidden="true">*</span></label>
+            <input
+              id="pctField2"
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
+              aria-required="true"
+              aria-describedby="pctHint2 pctError2"
+            />
+            <p class="hint" id="pctHint2">Enter the number to take a percentage of.</p>
+            <p class="field-error" id="pctError2" hidden></p>
+          </div>
+
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            Formula: <span id="pctPreviewText">X% of Y = ?</span>
+          </p>
+
+          <div id="pctErrors" class="error-box" role="alert" hidden></div>
+
+          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+            <button id="pctCalculate" class="btn-primary" type="submit">Calculate</button>
+            <button id="pctClear" class="btn-secondary" type="button">Clear</button>
+          </p>
+          <p id="pctFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        </form>
+      </div>
+
+      <div class="result-card" id="pctResultCard" tabindex="-1">
+        <div id="pctEmpty">
+          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p>Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            You’ll see your answer with the formula shown, so you can check it.
+          </p>
+        </div>
+
+        <div id="pctTooLarge" class="error-box" role="alert" hidden>
+          Result is too large to display. Enter smaller numbers.
+        </div>
+
+        <div id="pctResult" data-result-text hidden>
+          <p id="pctEyebrow" style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Result</p>
+          <div aria-live="polite" aria-atomic="true">
+            <p class="result-value" id="pctHeadline"></p>
+          </div>
+          <p id="pctDirectionRow" hidden style="margin-top: 8px;">
+            <span id="pctDirectionBadge" class="badge badge-success"></span>
+          </p>
+          <div class="stat-grid">
+            <div>
+              <p class="stat-label" id="pctStatLabel1">Percentage (X)</p>
+              <p class="stat-value" id="pctStatValue1"></p>
+            </div>
+            <div>
+              <p class="stat-label" id="pctStatLabel2">Number (Y)</p>
+              <p class="stat-value" id="pctStatValue2"></p>
+            </div>
+            <div id="pctStat3" hidden>
+              <p class="stat-label">Difference (To − From)</p>
+              <p class="stat-value" id="pctStatValue3"></p>
+            </div>
+          </div>
+          <p id="pctEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="pctFormula" style="font-size: 16px;"></p>
+          <p style="font-size: 13px; color: var(--ink-muted);">
+            Arithmetic only — check important figures before acting.
+            <a href="#pctDisclaimer">Read the full disclaimer.</a>
+          </p>
+        </div>
+
+        <div class="actions-row no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size: 14px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top: 40px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>
+        Choose what you want to work out: a percentage of a number, what percentage one number is
+        of another, or a percentage increase or decrease.
+      </li>
+      <li>
+        Enter the two numbers. Negative numbers are allowed, and a percentage can be more than 100.
+        The formula preview updates as you switch modes, and your numbers stay in place when you
+        switch.
+      </li>
+      <li>
+        You see the answer with the formula and your numbers filled in, so you can check it. In
+        percentage-change mode you also see the difference and whether it is an increase, a
+        decrease, or no change.
+      </li>
+    </ol>
+    <p>Result = (X ÷ 100) × Y</p>
+    <p>Result % = (X ÷ Y) × 100</p>
+    <p>
+      Change % = ((To − From) ÷ From) × 100. Percentage change from zero is undefined, so the
+      starting number cannot be 0. In the second mode, the second number cannot be 0, because you
+      cannot divide by zero.
+    </p>
+
+    <h2>Worked examples</h2>
+    <p><strong>Example 1:</strong> What is 15% of 2,000? (15 ÷ 100) × 2,000 = 300. The answer is 300.</p>
+    <p>
+      <strong>Example 2:</strong> From 800 to 1,000: ((1,000 − 800) ÷ 800) × 100 = +25.00%, an
+      increase, with a difference of +200.
+    </p>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+
+    <section id="pctDisclaimer" class="notice-info" style="margin-top: 32px;">
+      <h2 style="font-size: 20px;">Important — please read</h2>
+      <p>
+        Results are plain arithmetic only, for information. They are not financial, tax, or other
+        professional advice. Check important figures before acting on them, especially for money
+        decisions. This tool stores nothing, files nothing, and takes no payment. If a result looks
+        wrong, please report it via <a href="/contact/">Contact</a>, with the inputs and the result
+        shown.
+      </p>
+      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+    </section>
+
+    <h2 style="margin-top: 32px;">Related tools</h2>
+    <div class="related-grid">
+      {
+        related.map((tool) => (
+          <article class="card">
+            <h3 style="font-size: 18px;">
+              <a href={tool.href}>{tool.name}</a>
+            </h3>
+            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p>
+              <a href={tool.href}>Use the calculator →</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+    .radiogroup {
+      border: 0;
+      padding: 0;
+      margin: 0 0 var(--space-4);
+      display: grid;
+      gap: 6px;
+    }
+    .radiogroup legend {
+      font-size: 17px;
+      font-weight: 600;
+      padding: 0;
+    }
+    .seg {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .seg label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      padding: 10px 16px;
+      min-height: 44px;
+      cursor: pointer;
+      font-weight: 600;
+      background: var(--surface);
+    }
+    .seg label:has(input:checked) {
+      background: var(--brand-700);
+      color: #fff;
+      border-color: var(--brand-700);
+    }
+    .seg label:focus-within {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+    .field-error {
+      font-size: 14px;
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin: 12px 0;
+    }
+    .stat-grid p {
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .related-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .suffix-wrap {
+      position: relative;
+    }
+    .suffix-wrap input {
+      padding-right: 40px;
+    }
+    .suffix {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--ink-muted);
+      font-weight: 600;
+      pointer-events: none;
+    }
+  </style>
+
+  <script>
+    import { calcPercentage, parseDecimal, formatPct, MAX_AMOUNT } from '../lib/calc.ts';
+
+    // Result cap (spec §4.3): computed headlines beyond this are not displayed.
+    const RESULT_CAP = 999999999999999;
+
+    const MODES = {
+      '6a': {
+        label1: 'Percentage (X)',
+        label2: 'Number (Y)',
+        hint1: 'Enter a percentage. It can be more than 100.',
+        hint2: 'Enter the number to take a percentage of.',
+        blank1: 'Enter a percentage.',
+        blank2: 'Enter a number.',
+        template: 'X% of Y = ?',
+        eyebrow: 'Result',
+      },
+      '6b': {
+        label1: 'Part (X)',
+        label2: 'Whole (Y)',
+        hint1: 'Enter the first number.',
+        hint2: 'Enter the second number. It cannot be 0.',
+        blank1: 'Enter a number.',
+        blank2: 'Enter a number.',
+        template: 'X ÷ Y × 100 = ?%',
+        eyebrow: 'Result',
+      },
+      '6c': {
+        label1: 'From value',
+        label2: 'To value',
+        hint1: 'Enter the starting number. It cannot be 0.',
+        hint2: 'Enter the new number.',
+        blank1: 'Enter the starting number.',
+        blank2: 'Enter the new number.',
+        template: '(To − From) ÷ From × 100 = ?%',
+        eyebrow: 'Percentage change',
+      },
+    };
+
+    const form = document.getElementById('pctForm');
+    const field1 = document.getElementById('pctField1');
+    const field2 = document.getElementById('pctField2');
+    const label1 = document.getElementById('pctLabel1');
+    const label2 = document.getElementById('pctLabel2');
+    const hint1 = document.getElementById('pctHint1');
+    const hint2 = document.getElementById('pctHint2');
+    const error1 = document.getElementById('pctError1');
+    const error2 = document.getElementById('pctError2');
+    const suffix1 = document.getElementById('pctSuffix1');
+    const previewText = document.getElementById('pctPreviewText');
+    const errorsBox = document.getElementById('pctErrors');
+    const emptyBox = document.getElementById('pctEmpty');
+    const tooLargeBox = document.getElementById('pctTooLarge');
+    const resultBox = document.getElementById('pctResult');
+    const resultCard = document.getElementById('pctResultCard');
+    const eyebrow = document.getElementById('pctEyebrow');
+    const headline = document.getElementById('pctHeadline');
+    const directionRow = document.getElementById('pctDirectionRow');
+    const directionBadge = document.getElementById('pctDirectionBadge');
+    const statLabel1 = document.getElementById('pctStatLabel1');
+    const statLabel2 = document.getElementById('pctStatLabel2');
+    const statValue1 = document.getElementById('pctStatValue1');
+    const statValue2 = document.getElementById('pctStatValue2');
+    const stat3 = document.getElementById('pctStat3');
+    const statValue3 = document.getElementById('pctStatValue3');
+    const echoEl = document.getElementById('pctEcho');
+    const formulaEl = document.getElementById('pctFormula');
+    const copyBtn = document.querySelector('[data-copy-result]');
+    const printBtn = document.querySelector('[data-print-result]');
+    const formStatus = document.getElementById('pctFormStatus');
+
+    let interacted = false;
+    let debounceTimer = null;
+
+    const plainFmt = new Intl.NumberFormat('en-PK', { maximumFractionDigits: 2 });
+    const pctFmt = new Intl.NumberFormat('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function roundHalfUp(value) {
+      const rounded = Math.sign(value) * (Math.round((Math.abs(value) + 1e-9) * 100) / 100);
+      return rounded === 0 ? 0 : rounded;
+    }
+
+    function formatPlain(value) {
+      const v = Object.is(value, -0) ? 0 : value;
+      return plainFmt.format(roundHalfUp(v));
+    }
+
+    function formatPct2(value) {
+      const v = Object.is(value, -0) ? 0 : value;
+      return pctFmt.format(roundHalfUp(v)) + '%';
+    }
+
+    function formatSignedPct(value) {
+      return (value > 0 ? '+' : '') + formatPct2(value);
+    }
+
+    function formatSignedPlain(value) {
+      return (value > 0 ? '+' : '') + formatPlain(value);
+    }
+
+    function formatOperand(value, isFirstToken) {
+      const s = formatPlain(value);
+      return value < 0 && !isFirstToken ? '(' + s + ')' : s;
+    }
+
+    function formatFormula(mode, a, b, headlineValue) {
+      if (mode === '6a') {
+        return formatPlain(a) + '% of ' + formatOperand(b, false) + ' = ' + formatPlain(headlineValue);
+      }
+      if (mode === '6b') {
+        return formatPlain(a) + ' ÷ ' + formatOperand(b, false) + ' × 100 = ' + formatPct2(headlineValue);
+      }
+      return (
+        '(' + formatPlain(b) + ' − ' + formatOperand(a, false) + ') ÷ ' + formatOperand(a, false) + ' × 100 = ' + formatSignedPct(headlineValue)
+      );
+    }
+
+    function currentMode() {
+      const el = document.querySelector('input[name="pctMode"]:checked');
+      return el ? el.value : '6a';
+    }
+
+    function isPending(raw) {
+      const s = raw.trim().replace(/,/g, '');
+      return s === '-' || s === '.' || s === '-.';
+    }
+
+    function parseField(raw) {
+      const trimmed = raw.trim();
+      if (trimmed === '') return { kind: 'blank' };
+      const value = parseDecimal(raw);
+      if (value !== null) return { kind: 'ok', value };
+      const stripped = trimmed.replace(/,/g, '');
+      if (/^-?(?:\d+(?:\.\d+)?|\.\d+)$/.test(stripped) && !/,/.test(trimmed)) {
+        return { kind: 'too-large' };
+      }
+      return { kind: 'not-a-number' };
+    }
+
+    function validateField(parsed, blankMessage) {
+      if (parsed.kind === 'blank') return blankMessage;
+      if (parsed.kind === 'not-a-number') {
+        return 'Enter a number using digits, an optional minus sign, and one decimal point only.';
+      }
+      if (parsed.kind === 'too-large') {
+        return 'Enter a smaller number — no larger than ' + MAX_AMOUNT.toLocaleString('en-PK') + '.';
+      }
+      if (Math.abs(parsed.value) > MAX_AMOUNT) {
+        return 'Enter a smaller number — no larger than ' + MAX_AMOUNT.toLocaleString('en-PK') + '.';
+      }
+      return null;
+    }
+
+    function setFieldError(input, errorEl, message) {
+      if (message) {
+        errorEl.textContent = message;
+        errorEl.hidden = false;
+        input.setAttribute('aria-invalid', 'true');
+      } else {
+        errorEl.textContent = '';
+        errorEl.hidden = true;
+        input.removeAttribute('aria-invalid');
+      }
+    }
+
+    function showEmpty() {
+      resultBox.hidden = true;
+      tooLargeBox.hidden = true;
+      emptyBox.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+
+    function showResult() {
+      emptyBox.hidden = true;
+      tooLargeBox.hidden = true;
+      resultBox.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+    }
+
+    function updateModeUI() {
+      const mode = currentMode();
+      const cfg = MODES[mode];
+      label1.textContent = cfg.label1;
+      label2.textContent = cfg.label2;
+      hint1.textContent = cfg.hint1;
+      hint2.textContent = cfg.hint2;
+      statLabel1.textContent = cfg.label1;
+      statLabel2.textContent = cfg.label2;
+      suffix1.hidden = mode !== '6a';
+      previewText.textContent = cfg.template;
+    }
+
+    function evaluate(final) {
+      const mode = currentMode();
+      const cfg = MODES[mode];
+      updateModeUI();
+
+      const raw1 = field1.value;
+      const raw2 = field2.value;
+      const pending1 = isPending(raw1);
+      const pending2 = isPending(raw2);
+
+      if (!final && (pending1 || pending2)) {
+        setFieldError(field1, error1, null);
+        setFieldError(field2, error2, null);
+        errorsBox.textContent = '';
+        errorsBox.hidden = true;
+        showEmpty();
+        return { valid: false, firstInvalid: null };
+      }
+
+      const parsed1 = parseField(raw1);
+      const parsed2 = parseField(raw2);
+      let message1 = validateField(parsed1, cfg.blank1);
+      let message2 = validateField(parsed2, cfg.blank2);
+
+      if (final) {
+        if (pending1) message1 = 'Enter a number using digits, an optional minus sign, and one decimal point only.';
+        if (pending2) message2 = 'Enter a number using digits, an optional minus sign, and one decimal point only.';
+      }
+
+      // Divide-by-zero: the divisor field carries the error, never a result.
+      if (!message1 && !message2) {
+        if (mode === '6b' && parsed2.value === 0) {
+          message2 = 'Enter a number other than 0. You cannot divide by zero.';
+        }
+        if (mode === '6c' && parsed1.value === 0) {
+          message1 = 'Enter a starting number other than 0. Percentage change from zero is undefined.';
+        }
+      }
+
+      const messages = [];
+      if (message1) messages.push(message1);
+      if (message2) messages.push(message2);
+
+      if (interacted) {
+        setFieldError(field1, error1, message1);
+        setFieldError(field2, error2, message2);
+        if (messages.length > 0) {
+          errorsBox.textContent = messages.join(' ');
+          errorsBox.hidden = false;
+        } else {
+          errorsBox.textContent = '';
+          errorsBox.hidden = true;
+        }
+      }
+
+      if (messages.length > 0) {
+        showEmpty();
+        return { valid: false, firstInvalid: message1 ? field1 : field2 };
+      }
+
+      let calc;
+      try {
+        calc = calcPercentage(mode, parsed1.value, parsed2.value);
+      } catch {
+        errorsBox.textContent = 'Could not calculate that result. Please check your entries.';
+        errorsBox.hidden = false;
+        showEmpty();
+        return { valid: false, firstInvalid: field1 };
+      }
+
+      const headlineValue = calc.result;
+      if (!Number.isFinite(headlineValue) || Math.abs(headlineValue) > RESULT_CAP) {
+        emptyBox.hidden = true;
+        resultBox.hidden = true;
+        tooLargeBox.hidden = false;
+        copyBtn.disabled = true;
+        printBtn.disabled = true;
+        return { valid: false, firstInvalid: null };
+      }
+
+      const formula = formatFormula(mode, parsed1.value, parsed2.value, headlineValue);
+      previewText.textContent = formula;
+      eyebrow.textContent = cfg.eyebrow;
+
+      if (mode === '6a') {
+        headline.textContent = formatPlain(headlineValue);
+        directionRow.hidden = true;
+        directionBadge.textContent = '';
+        stat3.hidden = true;
+        statValue3.textContent = '';
+        statValue1.textContent = formatPct(parsed1.value);
+        statValue2.textContent = formatPlain(parsed2.value);
+        echoEl.textContent = 'Based on: ' + formatPlain(parsed1.value) + '% of ' + formatPlain(parsed2.value);
+      } else if (mode === '6b') {
+        headline.textContent = formatPct2(headlineValue);
+        directionRow.hidden = true;
+        directionBadge.textContent = '';
+        stat3.hidden = true;
+        statValue3.textContent = '';
+        statValue1.textContent = formatPlain(parsed1.value);
+        statValue2.textContent = formatPlain(parsed2.value);
+        echoEl.textContent =
+          'Based on: ' + formatPlain(parsed1.value) + ' is what % of ' + formatPlain(parsed2.value);
+      } else {
+        headline.textContent = formatSignedPct(headlineValue);
+        directionRow.hidden = false;
+        const direction = calc.direction;
+        if (direction === 'increase') {
+          directionBadge.textContent = '↑ Increase';
+          directionBadge.className = 'badge badge-success';
+        } else if (direction === 'decrease') {
+          directionBadge.textContent = '↓ Decrease';
+          directionBadge.className = 'badge badge-warning';
+        } else {
+          directionBadge.textContent = '— No change';
+          directionBadge.className = 'badge badge-info';
+        }
+        stat3.hidden = false;
+        statValue1.textContent = formatPlain(parsed1.value);
+        statValue2.textContent = formatPlain(parsed2.value);
+        statValue3.textContent = formatSignedPlain(calc.difference);
+        echoEl.textContent =
+          'Based on: from ' + formatPlain(parsed1.value) + ' to ' + formatPlain(parsed2.value);
+      }
+      formulaEl.textContent = formula;
+
+      showResult();
+      return { valid: true, firstInvalid: null };
+    }
+
+    function scheduleEvaluate() {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => evaluate(false), 150);
+    }
+
+    function groupOnBlur(input) {
+      const value = parseDecimal(input.value);
+      if (value === null) return;
+      const raw = input.value.trim().replace(/,/g, '');
+      const parts = raw.split('.');
+      const grouped = Number(parts[0]).toLocaleString('en-PK');
+      input.value = parts.length > 1 ? grouped + '.' + parts[1] : grouped;
+    }
+
+    field1.addEventListener('input', () => {
+      interacted = true;
+      scheduleEvaluate();
+    });
+    field2.addEventListener('input', () => {
+      interacted = true;
+      scheduleEvaluate();
+    });
+    field1.addEventListener('blur', () => {
+      interacted = true;
+      groupOnBlur(field1);
+      evaluate(true);
+    });
+    field2.addEventListener('blur', () => {
+      interacted = true;
+      groupOnBlur(field2);
+      evaluate(true);
+    });
+
+    document.querySelectorAll('input[name="pctMode"]').forEach((radio) => {
+      radio.addEventListener('change', () => {
+        interacted = true;
+        evaluate(true);
+      });
+    });
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      interacted = true;
+      const outcome = evaluate(true);
+      if (!outcome.valid) {
+        if (outcome.firstInvalid) outcome.firstInvalid.focus();
+        return;
+      }
+      if (window.matchMedia('(max-width: 899px)').matches) {
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        resultCard.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+        resultCard.focus({ preventScroll: true });
+      }
+    });
+
+    document.getElementById('pctClear').addEventListener('click', () => {
+      form.reset();
+      interacted = false;
+      setFieldError(field1, error1, null);
+      setFieldError(field2, error2, null);
+      errorsBox.textContent = '';
+      errorsBox.hidden = true;
+      formStatus.textContent = 'Form cleared.';
+      updateModeUI();
+      showEmpty();
+    });
+
+    updateModeUI();
+  </script>
+</Layout>

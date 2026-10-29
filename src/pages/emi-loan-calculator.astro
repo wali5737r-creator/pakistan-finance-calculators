@@ -1,0 +1,876 @@
+---
+import Layout from '../components/Layout.astro';
+import { formatPKR } from '../lib/calc.ts';
+
+const title = 'EMI Calculator Pakistan | Loan Instalment & Schedule';
+const description =
+  'Calculate your monthly loan EMI, total interest and full amortisation schedule in Pakistan. Reducing-balance, free and instant — try different rates and tenures.';
+const h1 = 'EMI / Loan Calculator';
+const slug = '/emi-loan-calculator/';
+const canonical = `https://[live-domain]${slug}`;
+
+// ONE FAQ array: rendered as the visible FAQ and as the FAQPage JSON-LD,
+// so the wording matches exactly.
+const faqs = [
+  {
+    question: 'How is EMI calculated?',
+    answer:
+      'With the reducing-balance formula: EMI = P × R × (1+R)^N / ((1+R)^N − 1), where P is the loan amount, R is the monthly rate (annual rate divided by 100 and by 12), and N is the number of months. If the rate is 0, EMI is the loan amount divided by the number of months.',
+  },
+  {
+    question: 'What is a reducing-balance loan?',
+    answer:
+      'A loan where interest each month is calculated on the remaining balance, so the interest portion falls and the principal portion rises over the tenure. This calculator uses reducing balance only; there is no flat-rate mode.',
+  },
+  {
+    question: 'What happens if the interest rate is 0?',
+    answer:
+      'The EMI is the loan amount divided by the number of months, total interest is zero, and the schedule still shows each month, with the final instalment adjusted for rounding.',
+  },
+  {
+    question: 'Does the schedule include the final adjusted instalment?',
+    answer:
+      'Yes. The final instalment is adjusted so the schedule adds up to the total payment and the closing balance is zero. When the final instalment differs from the headline EMI, it is marked in the schedule.',
+  },
+  {
+    question: 'Can I change the rate or tenure to compare loans?',
+    answer:
+      'Change the rate or tenure inputs and the results update live. This page does not save loans or compare them side by side.',
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      name: h1,
+      url: canonical,
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://[live-domain]/' },
+        { '@type': 'ListItem', position: 2, name: h1, item: canonical },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.question,
+        acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+      })),
+    },
+  ],
+});
+---
+
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top:32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb" style="font-size:14px; margin-bottom:12px;">
+      <a href="/">Home</a> / EMI / Loan Calculator
+    </nav>
+    <p><span class="badge badge-info">Loans</span></p>
+    <h1 style="font-size:clamp(1.75rem, 4.5vw, 2.25rem); max-width:720px;">{h1}</h1>
+    <p class="prose-narrow" style="font-size:clamp(1.0625rem, 2vw, 1.1875rem); margin-top:12px;">
+      Work out your monthly loan instalment (EMI), total interest, and total payment for a
+      reducing-balance loan in Pakistan. Enter the loan amount, annual interest rate, and
+      tenure to see the full amortisation schedule. Fees, insurance, and processing charges
+      are not included.
+    </p>
+  </div>
+
+  <div class="container" style="padding-top:24px;">
+    <div class="tool-grid">
+      <section class="card" aria-label="Calculator">
+        <form id="emi-form" novalidate>
+          <div id="emi-error-box" role="alert" class="error-box" hidden></div>
+          <p class="hint" style="margin-bottom:16px;">
+            Reducing balance only. No flat-rate mode.
+          </p>
+          <div class="field">
+            <label for="emi-amount">
+              Loan amount (PKR) <span aria-hidden="true">*</span>
+            </label>
+            <input
+              id="emi-amount"
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
+              aria-required="true"
+              aria-describedby="emi-amount-hint"
+            />
+            <p class="hint" id="emi-amount-hint">Enter the principal amount you want to borrow.</p>
+            <p id="emi-amount-error" style="color:var(--danger); font-size:14px; font-weight:600;" hidden></p>
+          </div>
+          <div class="field">
+            <label for="emi-rate">
+              Annual interest rate (% per year) <span aria-hidden="true">*</span>
+            </label>
+            <input
+              id="emi-rate"
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
+              aria-required="true"
+              aria-describedby="emi-rate-hint"
+            />
+            <p class="hint" id="emi-rate-hint">
+              Nominal annual rate. The calculator converts it to a monthly rate. Zero is
+              allowed — see below.
+            </p>
+            <p id="emi-rate-error" style="color:var(--danger); font-size:14px; font-weight:600;" hidden></p>
+            <p id="emi-rate-warning" class="notice-warning" hidden>
+              Unusually high rate — please check it
+            </p>
+          </div>
+          <fieldset class="field" style="border:0; padding:0; margin:0 0 16px;">
+            <legend>
+              Loan tenure <span aria-hidden="true">*</span>
+            </legend>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div>
+                <label for="emi-years" style="font-size:16px;">Years</label>
+                <input
+                  id="emi-years"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  aria-required="true"
+                  aria-describedby="emi-tenure-hint"
+                />
+                <p id="emi-years-error" style="color:var(--danger); font-size:14px; font-weight:600;" hidden></p>
+              </div>
+              <div>
+                <label for="emi-months" style="font-size:16px;">Months (0–11)</label>
+                <input
+                  id="emi-months"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  aria-required="true"
+                  aria-describedby="emi-tenure-hint"
+                />
+                <p id="emi-months-error" style="color:var(--danger); font-size:14px; font-weight:600;" hidden></p>
+              </div>
+            </div>
+            <p class="hint" id="emi-tenure-hint">
+              Enter whole years and months. Total months are shown below.
+            </p>
+            <p id="emi-total-months" aria-live="polite">Total: —</p>
+          </fieldset>
+          <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
+            <button type="submit" class="btn-primary">Calculate</button>
+            <button type="button" class="btn-secondary" id="emi-clear">Clear</button>
+          </div>
+          <p id="emi-status" role="status" class="hint" style="margin-top:8px;"></p>
+        </form>
+      </section>
+
+      <section class="result-card" aria-labelledby="emi-result-heading">
+        <h2 id="emi-result-heading" tabindex="-1" style="font-size:18px;">Your result</h2>
+        <div id="emi-stale" hidden>
+          <p><span class="badge badge-warning">May be out of date</span></p>
+          <p class="hint">
+            Previous result — based on earlier inputs. Update the highlighted field to
+            recalculate.
+          </p>
+        </div>
+        <div id="emi-empty">
+          <p>Enter your details to see your result.</p>
+          <p class="hint">You'll see your monthly EMI, total interest, and total payment.</p>
+        </div>
+        <div id="emi-result" data-result-text hidden>
+          <p style="font-size:14px; font-weight:700; color:var(--ink-muted);">Your monthly EMI</p>
+          <p class="result-value" id="emi-headline"></p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;">
+            <div>
+              <p class="hint">Total payment over the tenure</p>
+              <p style="font-size:20px; font-weight:700;" id="emi-total-payment"></p>
+            </div>
+            <div>
+              <p class="hint">Total interest payable</p>
+              <p style="font-size:20px; font-weight:700;" id="emi-total-interest"></p>
+            </div>
+            <div>
+              <p class="hint">Principal — the amount borrowed</p>
+              <p style="font-size:20px; font-weight:700;" id="emi-principal"></p>
+            </div>
+            <div>
+              <p class="hint">Interest share of total payment</p>
+              <p style="font-size:20px; font-weight:700;" id="emi-interest-share"></p>
+            </div>
+          </div>
+          <p class="hint" id="emi-echo" style="margin-top:16px;"></p>
+          <p class="hint" id="emi-formula"></p>
+          <p id="emi-result-warning" class="notice-warning" hidden>
+            Unusually high rate — please check it
+          </p>
+          <div style="margin-top:16px;">
+            <svg
+              id="emi-donut"
+              role="img"
+              width="200"
+              height="200"
+              viewBox="0 0 200 200"
+              aria-describedby="emi-donut-table"
+              style="display:block; margin-inline:auto;"
+            >
+              <title>Principal and interest split</title>
+              <desc id="emi-donut-desc"></desc>
+              <circle cx="100" cy="100" r="80" fill="none" stroke="var(--surface-tint)" stroke-width="28"></circle>
+              <circle
+                id="emi-donut-principal"
+                cx="100"
+                cy="100"
+                r="80"
+                fill="none"
+                stroke="var(--brand-600)"
+                stroke-width="28"
+                transform="rotate(-90 100 100)"
+              ></circle>
+              <circle
+                id="emi-donut-interest"
+                cx="100"
+                cy="100"
+                r="80"
+                fill="none"
+                stroke="var(--gold-500)"
+                stroke-width="28"
+                transform="rotate(-90 100 100)"
+              ></circle>
+              <text x="100" y="97" text-anchor="middle" fill="var(--ink)" font-size="17" font-weight="700" id="emi-donut-centre-value"></text>
+              <text x="100" y="118" text-anchor="middle" fill="var(--ink-muted)" font-size="13">Total payment</text>
+            </svg>
+            <div class="table-wrap" style="margin-top:12px;">
+              <table class="data" id="emi-donut-table">
+                <caption>Principal and interest split</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Part</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Share</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <span aria-hidden="true" style="display:inline-block; width:12px; height:12px; border-radius:3px; background:var(--brand-600);"></span>
+                      Principal
+                    </td>
+                    <td id="emi-legend-principal-amount"></td>
+                    <td id="emi-legend-principal-share"></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span aria-hidden="true" style="display:inline-block; width:12px; height:12px; border-radius:3px; background:var(--gold-500);"></span>
+                      Interest
+                    </td>
+                    <td id="emi-legend-interest-amount"></td>
+                    <td id="emi-legend-interest-share"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" class="hint"></p>
+        <p id="emi-actions-hint" class="hint">Calculate first to copy or print your result.</p>
+        <p class="hint" style="margin-top:8px;">
+          Fees, insurance, and processing charges are not included. Estimates only — not
+          financial advice. <a href="#disclaimer">Read the full disclaimer.</a>
+        </p>
+      </section>
+    </div>
+  </div>
+
+  <section id="emi-schedule-section" class="container" style="padding-top:32px;" hidden>
+    <h2>Amortisation schedule</h2>
+    <p class="hint">
+      Reducing balance. Interest each month is calculated on the opening balance.
+    </p>
+    <button
+      type="button"
+      class="btn-secondary"
+      id="emi-schedule-toggle"
+      aria-expanded="false"
+      aria-controls="emi-schedule-region"
+    >
+      View month-by-month schedule
+    </button>
+    <div id="emi-schedule-region" hidden>
+      <div class="table-wrap" style="max-height:480px; overflow-y:auto; margin-top:12px;">
+        <table class="data">
+          <caption>Month-by-month schedule</caption>
+          <thead>
+            <tr>
+              <th scope="col" style="position:sticky; top:0;">Month</th>
+              <th scope="col" style="position:sticky; top:0;">EMI</th>
+              <th scope="col" style="position:sticky; top:0;">Interest</th>
+              <th scope="col" style="position:sticky; top:0;">Principal</th>
+              <th scope="col" style="position:sticky; top:0;">Closing balance</th>
+            </tr>
+          </thead>
+          <tbody id="emi-schedule-body"></tbody>
+          <tfoot>
+            <tr>
+              <td>Total</td>
+              <td id="emi-schedule-total-emi"></td>
+              <td id="emi-schedule-total-interest"></td>
+              <td id="emi-schedule-total-principal"></td>
+              <td>{formatPKR(0, 2)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <p id="emi-schedule-footnote" class="hint" hidden>
+        † Final instalment adjusted for rounding so the schedule totals the total payment
+        and the closing balance is {formatPKR(0, 2)}.
+      </p>
+      <p id="emi-rounding-note" class="notice-info" hidden>
+        Totals are the sums of the rounded monthly rows. The final instalment is adjusted so
+        the schedule totals the total payment and the closing balance is {formatPKR(0, 2)}.
+      </p>
+      <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">
+        <button type="button" class="btn-secondary" id="emi-show-all" aria-expanded="false" hidden>
+          Show all months
+        </button>
+        <button type="button" class="btn-secondary" id="emi-show-fewer" hidden>
+          Show fewer months
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="container prose-narrow" style="padding-top:32px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>
+        Enter the loan amount, the nominal annual interest rate, and the tenure in whole
+        years and months. Total months are shown below the tenure fields.
+      </li>
+      <li>
+        The monthly rate is the annual rate divided by 100 and by 12. For example, an annual
+        rate of 18% gives a monthly rate of 1.50% (0.015).
+      </li>
+      <li>
+        The EMI is worked out with the reducing-balance formula, and the schedule charges
+        interest each month on the opening balance. The final instalment is adjusted for
+        rounding so the schedule adds up to the total payment and the closing balance is zero.
+      </li>
+    </ol>
+    <p>
+      Formula: EMI = P × R × (1+R)^N / ((1+R)^N − 1), where P is the loan amount, R is the
+      monthly rate, and N is the number of months. If the rate is 0, EMI = P ÷ N.
+    </p>
+
+    <h2>Worked example</h2>
+    <p>
+      For example, a loan of {formatPKR(1000000, 2)} at 18% per year for 24 months gives a
+      monthly EMI of {formatPKR(49924.1, 2)}. This example uses fixed example inputs; enter
+      your own figures above to calculate your loan.
+    </p>
+
+    <section class="faq" aria-labelledby="emi-faq-heading">
+      <h2 id="emi-faq-heading">Frequently asked questions</h2>
+      {
+        faqs.map((faq) => (
+          <details>
+            <summary>{faq.question}</summary>
+            <p>{faq.answer}</p>
+          </details>
+        ))
+      }
+    </section>
+
+    <section id="disclaimer" class="notice-warning" style="margin-top:32px;">
+      <h2>Important — please read</h2>
+      <p>
+        Results are estimates for information only and are not financial advice. This
+        calculator uses the reducing-balance method only, and fees, insurance, and processing
+        charges are not included. The interest rate is the figure you enter — this site does
+        not quote or verify loan rates. Confirm the terms with a qualified professional or
+        your lender before borrowing. Calculations run in your browser; nothing you enter is
+        stored or sent to a server.
+      </p>
+    </section>
+
+    <section style="margin-top:32px;">
+      <h2>Related tools</h2>
+      <div style="display:grid; gap:16px; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));">
+        <article class="card">
+          <h3 style="font-size:18px;"><a href="/salary-income-tax-calculator/">Salary / Income Tax Calculator</a></h3>
+          <p>Monthly and annual tax on your salary for 2026-27, using FBR salaried slabs, with take-home pay.</p>
+        </article>
+        <article class="card">
+          <h3 style="font-size:18px;"><a href="/zakat-calculator/">Zakat Calculator</a></h3>
+          <p>Zakat at 2.5% on cash, gold, silver, and trade goods, with gold and silver nisab shown.</p>
+        </article>
+        <article class="card">
+          <h3 style="font-size:18px;"><a href="/percentage-calculator/">Percentage Calculator</a></h3>
+          <p>What X% of a number is, percentage increase and decrease, and what percent one number is of another.</p>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    import {
+      calcEMI,
+      EMI_MAX_MONTHS,
+      EMI_MAX_RATE,
+      formatNumber,
+      formatPct,
+      formatPKR,
+      parseDecimal,
+      round2,
+    } from '../lib/calc.ts';
+
+    type EmiResult = ReturnType<typeof calcEMI>;
+
+    function el<T extends HTMLElement>(id: string): T {
+      const node = document.getElementById(id);
+      if (!node) throw new Error(`Missing element: ${id}`);
+      return node as T;
+    }
+
+    const form = el<HTMLFormElement>('emi-form');
+    const amountInput = el<HTMLInputElement>('emi-amount');
+    const rateInput = el<HTMLInputElement>('emi-rate');
+    const yearsInput = el<HTMLInputElement>('emi-years');
+    const monthsInput = el<HTMLInputElement>('emi-months');
+    const amountError = el<HTMLParagraphElement>('emi-amount-error');
+    const rateError = el<HTMLParagraphElement>('emi-rate-error');
+    const yearsError = el<HTMLParagraphElement>('emi-years-error');
+    const monthsError = el<HTMLParagraphElement>('emi-months-error');
+    const rateWarning = el<HTMLParagraphElement>('emi-rate-warning');
+    const resultWarning = el<HTMLParagraphElement>('emi-result-warning');
+    const totalMonthsEl = el<HTMLParagraphElement>('emi-total-months');
+    const errorBox = el<HTMLDivElement>('emi-error-box');
+    const statusEl = el<HTMLParagraphElement>('emi-status');
+    const emptyEl = el<HTMLDivElement>('emi-empty');
+    const resultEl = el<HTMLDivElement>('emi-result');
+    const staleEl = el<HTMLDivElement>('emi-stale');
+    const headlineEl = el<HTMLParagraphElement>('emi-headline');
+    const totalPaymentEl = el<HTMLParagraphElement>('emi-total-payment');
+    const totalInterestEl = el<HTMLParagraphElement>('emi-total-interest');
+    const principalEl = el<HTMLParagraphElement>('emi-principal');
+    const interestShareEl = el<HTMLParagraphElement>('emi-interest-share');
+    const echoEl = el<HTMLParagraphElement>('emi-echo');
+    const formulaEl = el<HTMLParagraphElement>('emi-formula');
+    const resultHeading = el<HTMLHeadingElement>('emi-result-heading');
+    const actionsHint = el<HTMLParagraphElement>('emi-actions-hint');
+    const donutPrincipal = el<SVGCircleElement>('emi-donut-principal');
+    const donutInterest = el<SVGCircleElement>('emi-donut-interest');
+    const donutDesc = el<SVGDescElement>('emi-donut-desc');
+    const donutCentre = el<SVGTextElement>('emi-donut-centre-value');
+    const legendPrincipalAmount = el<HTMLTableCellElement>('emi-legend-principal-amount');
+    const legendPrincipalShare = el<HTMLTableCellElement>('emi-legend-principal-share');
+    const legendInterestAmount = el<HTMLTableCellElement>('emi-legend-interest-amount');
+    const legendInterestShare = el<HTMLTableCellElement>('emi-legend-interest-share');
+    const scheduleSection = el<HTMLElement>('emi-schedule-section');
+    const scheduleToggle = el<HTMLButtonElement>('emi-schedule-toggle');
+    const scheduleRegion = el<HTMLDivElement>('emi-schedule-region');
+    const scheduleBody = el<HTMLTableSectionElement>('emi-schedule-body');
+    const scheduleTotalEmi = el<HTMLTableCellElement>('emi-schedule-total-emi');
+    const scheduleTotalInterest = el<HTMLTableCellElement>('emi-schedule-total-interest');
+    const scheduleTotalPrincipal = el<HTMLTableCellElement>('emi-schedule-total-principal');
+    const scheduleFootnote = el<HTMLParagraphElement>('emi-schedule-footnote');
+    const roundingNote = el<HTMLParagraphElement>('emi-rounding-note');
+    const showAllBtn = el<HTMLButtonElement>('emi-show-all');
+    const showFewerBtn = el<HTMLButtonElement>('emi-show-fewer');
+    const copyBtn = document.querySelector('[data-copy-result]') as HTMLButtonElement | null;
+    const printBtn = document.querySelector('[data-print-result]') as HTMLButtonElement | null;
+
+    const AMOUNT_CAP = 999999999999;
+    const DONUT_RADIUS = 80;
+    const DONUT_GAP_PX = 2;
+    let lastValid: { principal: number; rate: number; months: number; result: EmiResult } | null = null;
+    let showAllRows = false;
+    let debounceTimer: number | undefined;
+
+    interface FieldError {
+      input: HTMLInputElement;
+      errorEl: HTMLParagraphElement;
+      hintId: string;
+      message: string;
+    }
+
+    function setFieldError(field: FieldError | null, input: HTMLInputElement, errorEl: HTMLParagraphElement, hintId: string): void {
+      if (field) {
+        errorEl.textContent = `Error: ${field.message}`;
+        errorEl.hidden = false;
+        input.setAttribute('aria-invalid', 'true');
+        input.setAttribute('aria-describedby', `${hintId} ${errorEl.id}`);
+      } else {
+        errorEl.textContent = '';
+        errorEl.hidden = true;
+        input.setAttribute('aria-invalid', 'false');
+        input.setAttribute('aria-describedby', hintId);
+      }
+    }
+
+    function setActionsEnabled(enabled: boolean): void {
+      if (copyBtn) copyBtn.disabled = !enabled;
+      if (printBtn) printBtn.disabled = !enabled;
+      actionsHint.hidden = enabled;
+    }
+
+    function decompose(totalMonths: number): string {
+      const years = Math.floor(totalMonths / 12);
+      const months = totalMonths % 12;
+      return `${years} ${years === 1 ? 'year' : 'years'} ${months} ${months === 1 ? 'month' : 'months'}`;
+    }
+
+    function updateTotalMonthsDisplay(): void {
+      const years = parseDecimal(yearsInput.value);
+      const months = parseDecimal(monthsInput.value);
+      if (
+        years !== null &&
+        months !== null &&
+        Number.isInteger(years) &&
+        Number.isInteger(months) &&
+        years >= 0 &&
+        months >= 0 &&
+        months <= 11
+      ) {
+        const total = years * 12 + months;
+        totalMonthsEl.textContent = `Total: ${total} months (${decompose(total)})`;
+      } else {
+        totalMonthsEl.textContent = 'Total: —';
+      }
+    }
+
+    function updateRateWarning(): void {
+      const rate = parseDecimal(rateInput.value);
+      const warn = rate !== null && rate > 40 && rate <= EMI_MAX_RATE;
+      rateWarning.hidden = !warn;
+      // The result-card note follows the same rule, but only while a valid
+      // result is shown; renderValid toggles it again for the stored result.
+      if (!lastValid || resultEl.hidden) resultWarning.hidden = true;
+      else resultWarning.hidden = !warn;
+    }
+
+    function renderDonut(result: EmiResult): void {
+      const circumference = 2 * Math.PI * DONUT_RADIUS;
+      const principalFraction = result.totalPayment > 0 ? result.principal / result.totalPayment : 1;
+      const principalLength = Math.max(0, circumference * principalFraction - DONUT_GAP_PX);
+      const interestLength = Math.max(0, circumference * (1 - principalFraction) - DONUT_GAP_PX);
+      donutPrincipal.setAttribute('stroke-dasharray', `${principalLength} ${circumference - principalLength}`);
+      donutPrincipal.setAttribute('stroke-dashoffset', '0');
+      donutInterest.setAttribute('stroke-dasharray', `${interestLength} ${circumference - interestLength}`);
+      donutInterest.setAttribute('stroke-dashoffset', `${-(principalLength + DONUT_GAP_PX)}`);
+      const principalPct = round2((result.principal / result.totalPayment) * 100);
+      const interestPct = round2(100 - principalPct);
+      donutCentre.textContent = formatPKR(result.totalPayment, 2);
+      donutDesc.textContent = `Donut chart: of a total payment of ${formatPKR(result.totalPayment, 2)}, principal is ${formatPKR(result.principal, 2)} (${formatPct(principalPct)}) and interest is ${formatPKR(result.totalInterest, 2)} (${formatPct(interestPct)}).`;
+      legendPrincipalAmount.textContent = formatPKR(result.principal, 2);
+      legendPrincipalShare.textContent = formatPct(principalPct);
+      legendInterestAmount.textContent = formatPKR(result.totalInterest, 2);
+      legendInterestShare.textContent = formatPct(interestPct);
+    }
+
+    function renderSchedule(result: EmiResult): void {
+      const rows = showAllRows ? result.schedule : result.schedule.slice(0, 12);
+      const fragment = document.createDocumentFragment();
+      const lastRow = result.schedule[result.schedule.length - 1];
+      const finalDiffers = lastRow.emi !== result.emi;
+      for (const row of rows) {
+        const tr = document.createElement('tr');
+        const monthCell = document.createElement('td');
+        monthCell.textContent = String(row.month);
+        const emiCell = document.createElement('td');
+        emiCell.textContent =
+          row.month === result.schedule.length && finalDiffers
+            ? `${formatPKR(row.emi, 2)} †`
+            : formatPKR(row.emi, 2);
+        const interestCell = document.createElement('td');
+        interestCell.textContent = formatPKR(row.interest, 2);
+        const principalCell = document.createElement('td');
+        principalCell.textContent = formatPKR(row.principal, 2);
+        const balanceCell = document.createElement('td');
+        balanceCell.textContent = formatPKR(row.balance, 2);
+        tr.append(monthCell, emiCell, interestCell, principalCell, balanceCell);
+        fragment.append(tr);
+      }
+      scheduleBody.replaceChildren(fragment);
+      scheduleTotalEmi.textContent = formatPKR(result.totalPayment, 2);
+      scheduleTotalInterest.textContent = formatPKR(result.totalInterest, 2);
+      scheduleTotalPrincipal.textContent = formatPKR(result.principal, 2);
+      scheduleFootnote.hidden = !finalDiffers;
+      showAllBtn.hidden = result.schedule.length <= 12 || showAllRows;
+      showFewerBtn.hidden = result.schedule.length <= 12 || !showAllRows;
+      showAllBtn.textContent = `Show all ${result.schedule.length} months`;
+      showAllBtn.setAttribute('aria-expanded', String(showAllRows));
+    }
+
+    function updateScheduleToggle(months: number): void {
+      scheduleToggle.textContent = scheduleRegion.hidden
+        ? `View month-by-month schedule (${months} months)`
+        : `Hide month-by-month schedule (${months} months)`;
+    }
+
+    function echoText(principal: number, rate: number, months: number, stale: boolean): string {
+      const prefix = stale ? 'Previous inputs: ' : 'Based on: ';
+      return `${prefix}Loan amount ${formatPKR(principal, 2)} · Annual interest rate ${formatPct(rate)} per year (reducing balance) · Tenure ${months} months (${decompose(months)})`;
+    }
+
+    function formulaText(principal: number, rate: number, months: number, result: EmiResult): string {
+      if (rate === 0) {
+        return `Rate is 0, so EMI = ${formatPKR(principal, 2)} ÷ ${months} = ${formatPKR(result.emi, 2)}.`;
+      }
+      const monthlyRate = rate / 100 / 12;
+      const growth = Math.pow(1 + monthlyRate, months);
+      return `EMI = P × R × (1+R)^N / ((1+R)^N − 1) = ${formatPKR(principal, 2)} × ${formatNumber(monthlyRate, 4)} × ${formatNumber(growth, 6)} / ${formatNumber(growth - 1, 6)} = ${formatPKR(result.emi, 2)}.`;
+    }
+
+    function renderValid(principal: number, rate: number, months: number, result: EmiResult): void {
+      lastValid = { principal, rate, months, result };
+      headlineEl.textContent = formatPKR(result.emi, 2);
+      totalPaymentEl.textContent = formatPKR(result.totalPayment, 2);
+      totalInterestEl.textContent = formatPKR(result.totalInterest, 2);
+      principalEl.textContent = formatPKR(result.principal, 2);
+      const principalPct = round2((result.principal / result.totalPayment) * 100);
+      interestShareEl.textContent = formatPct(round2(100 - principalPct));
+      echoEl.textContent = echoText(principal, rate, months, false);
+      formulaEl.textContent = formulaText(principal, rate, months, result);
+      resultWarning.hidden = !(rate > 40);
+      renderDonut(result);
+      renderSchedule(result);
+      updateScheduleToggle(months);
+      roundingNote.hidden = months < 240;
+      scheduleSection.hidden = false;
+      staleEl.hidden = true;
+      emptyEl.hidden = true;
+      resultEl.hidden = false;
+      errorBox.textContent = '';
+      errorBox.hidden = true;
+      setActionsEnabled(true);
+    }
+
+    function showEmpty(): void {
+      lastValid = null;
+      emptyEl.hidden = false;
+      resultEl.hidden = true;
+      staleEl.hidden = true;
+      scheduleSection.hidden = true;
+      scheduleRegion.hidden = true;
+      scheduleToggle.setAttribute('aria-expanded', 'false');
+      showAllRows = false;
+      rateWarning.hidden = true;
+      setFieldError(null, amountInput, amountError, 'emi-amount-hint');
+      setFieldError(null, rateInput, rateError, 'emi-rate-hint');
+      setFieldError(null, yearsInput, yearsError, 'emi-tenure-hint');
+      setFieldError(null, monthsInput, monthsError, 'emi-tenure-hint');
+      errorBox.textContent = '';
+      errorBox.hidden = true;
+      setActionsEnabled(false);
+    }
+
+    function showInvalid(errors: FieldError[], calcError: string | null, firstInvalid: HTMLInputElement | null): void {
+      if (errors.length > 0) {
+        const noun = errors.length === 1 ? 'field needs attention' : 'fields need attention';
+        errorBox.textContent = `${errors.length} ${noun}: ${errors.map((e) => e.message).join(' ')}`;
+      } else if (calcError) {
+        errorBox.textContent = calcError;
+      }
+      errorBox.hidden = false;
+      if (lastValid) {
+        staleEl.hidden = false;
+        emptyEl.hidden = true;
+        resultEl.hidden = false;
+        echoEl.textContent = echoText(lastValid.principal, lastValid.rate, lastValid.months, true);
+        scheduleSection.hidden = true;
+        setActionsEnabled(false);
+      } else {
+        emptyEl.hidden = false;
+        resultEl.hidden = true;
+        staleEl.hidden = true;
+        scheduleSection.hidden = true;
+        setActionsEnabled(false);
+      }
+      void firstInvalid;
+    }
+
+    function validateAndRender(submitted = false): { valid: boolean; firstInvalid: HTMLInputElement | null } {
+      const errors: FieldError[] = [];
+      let firstInvalid: HTMLInputElement | null = null;
+      const noteError = (field: FieldError) => {
+        errors.push(field);
+        if (!firstInvalid) firstInvalid = field.input;
+      };
+
+      // Loan amount.
+      let principal: number | null = null;
+      const amountValue = parseDecimal(amountInput.value);
+      if (amountInput.value.trim() === '' || amountValue === null) {
+        noteError({ input: amountInput, errorEl: amountError, hintId: 'emi-amount-hint', message: 'Enter a loan amount using numbers only.' });
+      } else if (amountValue <= 0) {
+        noteError({ input: amountInput, errorEl: amountError, hintId: 'emi-amount-hint', message: 'Enter a loan amount greater than 0.' });
+      } else if (amountValue > AMOUNT_CAP) {
+        noteError({ input: amountInput, errorEl: amountError, hintId: 'emi-amount-hint', message: 'Amount is too large — enter 999,999,999,999 PKR or less.' });
+      } else {
+        principal = amountValue;
+      }
+      setFieldError(errors.find((e) => e.input === amountInput) ?? null, amountInput, amountError, 'emi-amount-hint');
+
+      // Annual rate.
+      let rate: number | null = null;
+      const rateValue = parseDecimal(rateInput.value);
+      if (rateInput.value.trim() === '' || rateValue === null) {
+        noteError({ input: rateInput, errorEl: rateError, hintId: 'emi-rate-hint', message: 'Enter an annual interest rate using numbers only.' });
+      } else if (rateValue < 0) {
+        noteError({ input: rateInput, errorEl: rateError, hintId: 'emi-rate-hint', message: 'Interest rate cannot be negative. Enter 0% or more.' });
+      } else if (rateValue > EMI_MAX_RATE) {
+        noteError({ input: rateInput, errorEl: rateError, hintId: 'emi-rate-hint', message: `Enter a rate of ${EMI_MAX_RATE}% or less. Check whether you meant a monthly rate.` });
+      } else {
+        rate = rateValue;
+      }
+      setFieldError(errors.find((e) => e.input === rateInput) ?? null, rateInput, rateError, 'emi-rate-hint');
+      updateRateWarning();
+
+      // Tenure: both fields must be entered; group errors only when both
+      // parse successfully as integers.
+      let years: number | null = null;
+      let monthsPart: number | null = null;
+      let yearsParseOk = false;
+      let monthsParseOk = false;
+      const yearsValue = parseDecimal(yearsInput.value);
+      if (yearsInput.value.trim() === '' || yearsValue === null || !Number.isInteger(yearsValue)) {
+        noteError({ input: yearsInput, errorEl: yearsError, hintId: 'emi-tenure-hint', message: 'Enter whole years using numbers only.' });
+      } else if (yearsValue < 0) {
+        noteError({ input: yearsInput, errorEl: yearsError, hintId: 'emi-tenure-hint', message: 'Years cannot be negative.' });
+      } else {
+        years = yearsValue;
+        yearsParseOk = true;
+      }
+      setFieldError(errors.find((e) => e.input === yearsInput) ?? null, yearsInput, yearsError, 'emi-tenure-hint');
+
+      const monthsValue = parseDecimal(monthsInput.value);
+      if (monthsInput.value.trim() === '' || monthsValue === null || !Number.isInteger(monthsValue)) {
+        noteError({ input: monthsInput, errorEl: monthsError, hintId: 'emi-tenure-hint', message: 'Enter whole months (0–11) using numbers only.' });
+      } else if (monthsValue < 0) {
+        noteError({ input: monthsInput, errorEl: monthsError, hintId: 'emi-tenure-hint', message: 'Months cannot be negative.' });
+      } else if (monthsValue > 11) {
+        noteError({ input: monthsInput, errorEl: monthsError, hintId: 'emi-tenure-hint', message: 'Enter 0 to 11 months — put 12 months or more in years.' });
+      } else {
+        monthsPart = monthsValue;
+        monthsParseOk = true;
+      }
+      setFieldError(errors.find((e) => e.input === monthsInput) ?? null, monthsInput, monthsError, 'emi-tenure-hint');
+
+      let totalMonths: number | null = null;
+      if (yearsParseOk && monthsParseOk && years !== null && monthsPart !== null) {
+        totalMonths = years * 12 + monthsPart;
+        if (totalMonths === 0) {
+          const field: FieldError = { input: monthsInput, errorEl: monthsError, hintId: 'emi-tenure-hint', message: 'Enter a tenure of at least 1 month.' };
+          noteError(field);
+          setFieldError(field, monthsInput, monthsError, 'emi-tenure-hint');
+        } else if (totalMonths > EMI_MAX_MONTHS) {
+          const field: FieldError = { input: yearsInput, errorEl: yearsError, hintId: 'emi-tenure-hint', message: `Tenure is too long — enter ${EMI_MAX_MONTHS} months (50 years) or less.` };
+          noteError(field);
+          setFieldError(field, yearsInput, yearsError, 'emi-tenure-hint');
+        }
+      }
+
+      updateTotalMonthsDisplay();
+
+      // All fields blank on first load: empty state, no errors shown.
+      const allBlank =
+        amountInput.value.trim() === '' &&
+        rateInput.value.trim() === '' &&
+        yearsInput.value.trim() === '' &&
+        monthsInput.value.trim() === '' &&
+        !lastValid &&
+        !submitted;
+      if (allBlank) {
+        showEmpty();
+        return { valid: false, firstInvalid: null };
+      }
+
+      if (errors.length > 0 || principal === null || rate === null || totalMonths === null) {
+        showInvalid(errors, null, firstInvalid);
+        return { valid: false, firstInvalid };
+      }
+
+      try {
+        const result = calcEMI(principal, rate, totalMonths);
+        if (!Number.isFinite(result.emi) || !Number.isFinite(result.totalPayment)) {
+          throw new Error('These figures are too large to calculate. Try a smaller amount, rate, or tenure.');
+        }
+        renderValid(principal, rate, totalMonths, result);
+        return { valid: true, firstInvalid: null };
+      } catch (error) {
+        // Stall-guard / overflow errors from calcEMI: a clear error, no
+        // absurd schedule, and no field is marked invalid for this alone.
+        const message =
+          error instanceof Error && error.message
+            ? error.message
+            : 'These figures are too large to calculate. Try a smaller amount, rate, or tenure.';
+        showInvalid([], message, null);
+        return { valid: false, firstInvalid: null };
+      }
+    }
+
+    function scheduleValidate(): void {
+      window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(() => validateAndRender(), 150);
+    }
+
+    for (const input of [amountInput, rateInput, yearsInput, monthsInput]) {
+      input.addEventListener('input', () => {
+        updateTotalMonthsDisplay();
+        updateRateWarning();
+        scheduleValidate();
+      });
+      input.addEventListener('blur', () => validateAndRender());
+    }
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const { valid, firstInvalid } = validateAndRender(true);
+      if (!valid) {
+        if (firstInvalid) firstInvalid.focus();
+        return;
+      }
+      if (window.matchMedia('(max-width: 899px)').matches) {
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        resultHeading.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+        resultHeading.focus();
+      }
+    });
+    el<HTMLButtonElement>('emi-clear').addEventListener('click', () => {
+      form.reset();
+      showEmpty();
+      rateWarning.hidden = true;
+      resultWarning.hidden = true;
+      totalMonthsEl.textContent = 'Total: —';
+      statusEl.textContent = 'Form cleared.';
+      amountInput.focus();
+    });
+    scheduleToggle.addEventListener('click', () => {
+      const open = scheduleRegion.hidden;
+      scheduleRegion.hidden = !open;
+      scheduleToggle.setAttribute('aria-expanded', String(open));
+      if (lastValid) updateScheduleToggle(lastValid.months);
+    });
+    showAllBtn.addEventListener('click', () => {
+      showAllRows = true;
+      if (lastValid) renderSchedule(lastValid.result);
+    });
+    showFewerBtn.addEventListener('click', () => {
+      showAllRows = false;
+      if (lastValid) renderSchedule(lastValid.result);
+    });
+
+    setActionsEnabled(false);
+    updateTotalMonthsDisplay();
+  </script>
+</Layout>

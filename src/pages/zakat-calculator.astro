@@ -1,0 +1,933 @@
+---
+import Layout from '../components/Layout.astro';
+import { ZAKAT_RATE, NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS, TOLA_GRAMS } from '../config/zakat.ts';
+
+const title = 'Zakat Calculator Pakistan | Gold & Silver Nisab 2.5%';
+const description = 'Calculate Zakat at 2.5% on cash, gold, silver and trade goods. Shows gold and silver nisab with current prices and dates. Estimate only — not a fatwa.';
+const slug = '/zakat-calculator/';
+
+const faqs = [
+  {
+    q: 'How much Zakat is due on my wealth?',
+    a: 'If your net zakatable wealth meets the nisab on the basis stated, Zakat due is 2.5% of that net wealth. If it is below nisab, Zakat due is shown as zero on that basis. The result shows the breakdown, the nisab used, and whether nisab is met.',
+  },
+  {
+    q: 'What is the nisab, and why are gold and silver nisab different?',
+    a: 'The nisab is 87.48 grams of gold or 612.36 grams of silver. The two weights are different thresholds, so their values in rupees differ whenever gold and silver prices differ. This page shows both values in rupees when prices are available, and labels which basis the decision uses.',
+  },
+  {
+    q: 'Is Zakat due on gold for personal use?',
+    a: 'This tool cannot decide whether an item is zakatable. Personal-use items are excluded from the trade-goods field; enter only gold you count as zakatable, and confirm questions about personal-use gold with a qualified scholar.',
+  },
+  {
+    q: 'What assets count, and what debts are deducted?',
+    a: 'Cash and bank balances, gold, silver, goods held for trade or resale, and other zakatable assets or money owed to you count here. Debts that are due are deducted. Personal-use items are excluded. If you are unsure whether an asset or debt counts, confirm with a qualified scholar.',
+  },
+  {
+    q: 'Is this a fatwa?',
+    a: 'No. This is an arithmetic estimate only, not a fatwa. Zakat method, nisab and asset eligibility can differ by school of thought. Confirm with a qualified scholar before paying, especially for edge cases.',
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://[live-domain]/zakat-calculator/#webapp',
+      name: 'Zakat Calculator',
+      url: 'https://[live-domain]/zakat-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://[live-domain]/' },
+        { '@type': 'ListItem', position: 2, name: 'Zakat Calculator', item: 'https://[live-domain]/zakat-calculator/' },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': 'https://[live-domain]/zakat-calculator/#faq',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+---
+
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <style is:global>
+    .field-error { color: var(--danger); font-size: 14px; font-weight: 600; margin: 0; }
+    .segmented { display: flex; gap: 8px; flex-wrap: wrap; }
+    .segmented label {
+      border: 1px solid var(--border-strong); border-radius: 999px;
+      padding: 8px 16px; cursor: pointer; font-weight: 600; font-size: 15px;
+      background: var(--surface);
+    }
+    .segmented input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .segmented label:has(input:checked) { background: var(--brand-700); color: #fff; border-color: var(--brand-700); }
+    .segmented label:has(input:focus-visible) { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+    .group-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-muted); margin: 20px 0 4px; }
+    .group-divider { border: 0; border-top: 1px solid var(--border); margin: 4px 0 12px; }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+    .stat-grid .stat-label { font-size: 14px; color: var(--ink-muted); margin: 0; }
+    .stat-grid .stat-value { font-size: 20px; font-weight: 700; margin: 2px 0 0; }
+    .bar { display: flex; height: 20px; border-radius: 999px; overflow: hidden; background: var(--surface-tint); margin: 12px 0 4px; }
+    .bar span { display: block; height: 100%; }
+    .bar-debts { height: 10px; }
+    #sticky-bar {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+      background: var(--surface-raised); border-top: 1px solid var(--border-strong);
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+      display: flex; gap: 12px; align-items: center; justify-content: space-between;
+      box-shadow: 0 -4px 16px rgba(15, 27, 22, 0.08);
+    }
+  </style>
+
+  <div class="container" style="padding-top:32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb" style="font-size:14px; margin-bottom:12px;">
+      <a href="/">Home</a> / Zakat Calculator
+    </nav>
+    <p class="badge badge-info" style="margin-bottom:12px;">Islamic Finance</p>
+    <h1 style="font-size:clamp(1.75rem,4.5vw,2.25rem);">Zakat Calculator</h1>
+    <p class="prose-narrow" style="font-size:clamp(1.0625rem,2vw,1.1875rem); margin-top:12px;">
+      Add up zakatable wealth, deduct debts due, and work out {ZAKAT_RATE * 100}% Zakat
+      on the stated nisab basis. This is an arithmetic estimate only, not a ruling —
+      how long wealth has been owned (hawl) is not computed here.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top:20px;">
+    <div id="price-strip" class="notice-info" role="status">
+      No live price loaded. Enter gold and silver prices below, or use the latest prices button in the form.
+    </div>
+    <div id="price-notice" class="notice-warning" role="status" hidden style="margin-top:12px;">
+      Latest prices are unavailable. You can still type gold and silver prices yourself below, clearly labelled as prices entered by you, or try again later.
+    </div>
+  </div>
+
+  <div class="container" style="margin-top:20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="zakat-form" novalidate>
+          <div id="error-summary" class="error-box" role="alert" hidden></div>
+
+          <p class="group-label">Cash and other assets</p>
+          <hr class="group-divider" />
+          <p class="hint" style="font-size:14px; color:var(--ink-muted); margin-bottom:12px;">
+            All fields are optional. Leave a field blank if it does not apply — blank means zero.
+          </p>
+
+          <div class="field">
+            <label for="cash">Cash in hand and bank balance (PKR) (optional)</label>
+            <input type="text" inputmode="decimal" autocomplete="off" id="cash" />
+            <p class="hint" id="hint-cash">Money in hand and in bank accounts. Leave blank if none.</p>
+            <p class="field-error" id="err-cash" hidden></p>
+          </div>
+
+          <p class="group-label">Gold owned</p>
+          <hr class="group-divider" />
+          <fieldset class="field" style="border:0; padding:0; margin-bottom:12px;">
+            <legend>Gold — how do you want to enter it?</legend>
+            <div class="segmented" role="radiogroup" aria-label="Gold entry mode">
+              <label><input type="radio" name="gold-mode" value="value" checked /> Value</label>
+              <label><input type="radio" name="gold-mode" value="weight" /> Weight</label>
+            </div>
+            <p class="hint">Choose one way to enter gold. Do not enter both a value and a weight.</p>
+            <p class="field-error" id="err-gold-mode" hidden></p>
+          </fieldset>
+          <div id="gold-value-wrap">
+            <div class="field">
+              <label for="gold-value">Value of gold owned (PKR) (optional)</label>
+              <input type="text" inputmode="decimal" autocomplete="off" id="gold-value" />
+              <p class="hint">The PKR value of gold you own. Enter only zakatable gold — see the note below.</p>
+              <p class="field-error" id="err-gold-value" hidden></p>
+            </div>
+          </div>
+          <div id="gold-weight-wrap" hidden>
+            <div class="field">
+              <label for="gold-weight">Weight of gold owned (optional)</label>
+              <input type="text" inputmode="decimal" autocomplete="off" id="gold-weight" />
+              <p class="hint">Weight of gold you own.</p>
+              <p class="field-error" id="err-gold-weight" hidden></p>
+            </div>
+            <div class="field">
+              <label for="gold-weight-unit">Weight unit</label>
+              <select id="gold-weight-unit">
+                <option value="tola" selected>tola</option>
+                <option value="grams">grams</option>
+              </select>
+              <p class="hint">1 tola = {TOLA_GRAMS} g.</p>
+            </div>
+          </div>
+          <p class="hint" id="gold-retained" style="font-size:14px; color:var(--ink-muted);"></p>
+          <div class="field">
+            <label for="gold-price">Gold price (PKR per tola) (optional)</label>
+            <input type="text" inputmode="decimal" autocomplete="off" id="gold-price" />
+            <p class="hint">Used to value gold by weight and to work out the gold nisab. A live price shows its source and date; a price you type is labelled as yours.</p>
+            <p class="hint" id="gold-price-meta"></p>
+            <p class="field-error" id="err-gold-price" hidden></p>
+          </div>
+
+          <p class="group-label">Silver owned</p>
+          <hr class="group-divider" />
+          <fieldset class="field" style="border:0; padding:0; margin-bottom:12px;">
+            <legend>Silver — how do you want to enter it?</legend>
+            <div class="segmented" role="radiogroup" aria-label="Silver entry mode">
+              <label><input type="radio" name="silver-mode" value="value" checked /> Value</label>
+              <label><input type="radio" name="silver-mode" value="weight" /> Weight</label>
+            </div>
+            <p class="hint">Choose one way to enter silver. Do not enter both a value and a weight.</p>
+            <p class="field-error" id="err-silver-mode" hidden></p>
+          </fieldset>
+          <div id="silver-value-wrap">
+            <div class="field">
+              <label for="silver-value">Value of silver owned (PKR) (optional)</label>
+              <input type="text" inputmode="decimal" autocomplete="off" id="silver-value" />
+              <p class="hint">The PKR value of silver you own.</p>
+              <p class="field-error" id="err-silver-value" hidden></p>
+            </div>
+          </div>
+          <div id="silver-weight-wrap" hidden>
+            <div class="field">
+              <label for="silver-weight">Weight of silver owned (optional)</label>
+              <input type="text" inputmode="decimal" autocomplete="off" id="silver-weight" />
+              <p class="hint">Weight of silver you own.</p>
+              <p class="field-error" id="err-silver-weight" hidden></p>
+            </div>
+            <div class="field">
+              <label for="silver-weight-unit">Weight unit</label>
+              <select id="silver-weight-unit">
+                <option value="tola" selected>tola</option>
+                <option value="grams">grams</option>
+              </select>
+              <p class="hint">1 tola = {TOLA_GRAMS} g.</p>
+            </div>
+          </div>
+          <p class="hint" id="silver-retained" style="font-size:14px; color:var(--ink-muted);"></p>
+          <div class="field">
+            <label for="silver-price">Silver price (PKR per tola) (optional)</label>
+            <input type="text" inputmode="decimal" autocomplete="off" id="silver-price" />
+            <p class="hint">Used to value silver by weight and to work out the silver nisab. A live price shows its source and date; a price you type is labelled as yours.</p>
+            <p class="hint" id="silver-price-meta"></p>
+            <p class="field-error" id="err-silver-price" hidden></p>
+          </div>
+
+          <div style="margin-top:8px;">
+            <button type="button" class="btn-secondary" id="use-prices">Use latest prices</button>
+            <p class="hint" style="font-size:14px; color:var(--ink-muted); margin-top:8px;">
+              Fetches the latest gold and silver prices. If the prices cannot be loaded, type them yourself.
+            </p>
+          </div>
+
+          <p class="group-label">Trade goods, other assets and debts</p>
+          <hr class="group-divider" />
+          <div class="field">
+            <label for="trade-goods">Trade goods / stock for sale (PKR) (optional)</label>
+            <input type="text" inputmode="decimal" autocomplete="off" id="trade-goods" />
+            <p class="hint">Goods held for trade or resale only. Personal-use items are excluded — do not include them here.</p>
+            <p class="field-error" id="err-trade-goods" hidden></p>
+          </div>
+          <div class="field">
+            <label for="other-assets">Other zakatable assets / money owed to you (PKR) (optional)</label>
+            <input type="text" inputmode="decimal" autocomplete="off" id="other-assets" />
+            <p class="hint">Other zakatable wealth and money owed to you. Include only amounts you count as zakatable.</p>
+            <p class="field-error" id="err-other-assets" hidden></p>
+          </div>
+          <div class="field">
+            <label for="debts">Debts you owe that are due (PKR) (optional)</label>
+            <input type="text" inputmode="decimal" autocomplete="off" id="debts" />
+            <p class="hint">Debts due now. Deducted from your total below. If you are unsure whether a debt should be deducted, confirm with a qualified scholar.</p>
+            <p class="field-error" id="err-debts" hidden></p>
+          </div>
+
+          <p style="font-size:14px; color:var(--ink-muted);">
+            Personal-use items (for example, items you use yourself and do not hold for trade) are excluded.
+            This tool cannot decide whether an item is zakatable — if you are unsure, confirm with a
+            qualified scholar before paying.
+          </p>
+
+          <fieldset class="field" style="border:0; padding:0; margin-top:16px;">
+            <legend>Nisab basis</legend>
+            <div class="segmented" role="radiogroup" aria-label="Nisab basis">
+              <label><input type="radio" name="nisab-basis" value="gold" /> Gold</label>
+              <label><input type="radio" name="nisab-basis" value="silver" /> Silver</label>
+              <label><input type="radio" name="nisab-basis" value="both" checked /> Both</label>
+            </div>
+            <p class="hint">
+              Which nisab threshold the result is compared with. Both shows both thresholds;
+              the basis actually used is labelled on the result. Gold only if you own only gold,
+              otherwise silver for mixed assets and cash.
+            </p>
+          </fieldset>
+
+          <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
+            <button type="submit" class="btn-primary" style="flex:1;">Calculate</button>
+            <button type="button" class="btn-secondary" id="clear-btn">Clear</button>
+          </div>
+          <p class="hint" style="font-size:14px; color:var(--ink-muted); margin-top:8px;" role="status" id="form-status"></p>
+        </form>
+      </div>
+
+      <section class="result-card" id="result-card" tabindex="-1" aria-label="Zakat result">
+        <div id="result-content" data-result-text aria-live="polite" aria-atomic="true">
+          <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:0;">Zakat due</p>
+          <p>Enter your details to see your result.</p>
+          <p>Enter at least one asset to see your result. You will see your Zakat due, net wealth, and whether nisab is met on the basis stated.</p>
+          <p style="font-size:13px; color:var(--ink-muted);">Estimates only — not a religious ruling. Confirm with a qualified scholar. Read the full disclaimer below.</p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;" class="no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-share-result disabled>Share</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size:14px; margin-top:8px;"></p>
+      </section>
+    </div>
+  </div>
+
+  <div id="sticky-bar" class="no-print" hidden>
+    <p style="margin:0;"><strong>Zakat due</strong><br /><span id="sticky-text"></span></p>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <button type="button" class="btn-secondary" id="sticky-details">Details</button>
+      <button type="button" class="btn-secondary" id="sticky-dismiss" aria-label="Dismiss summary">×</button>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top:48px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Add up cash, gold, silver, trade goods, and other zakatable assets to get gross wealth.</li>
+      <li>Deduct debts that are due. Net wealth is gross wealth minus debts, and never goes below zero.</li>
+      <li>Compare net wealth with the nisab: {NISAB_GOLD_GRAMS} g of gold or {NISAB_SILVER_GRAMS} g of silver (1 tola = {TOLA_GRAMS} g). If net wealth is at or above the nisab on the basis stated, Zakat due is {ZAKAT_RATE * 100}% of net wealth.</li>
+      <li>Hawl (how long wealth has been owned) is not computed. Include only wealth meeting the conditions you follow, and confirm with a qualified scholar.</li>
+    </ol>
+    <p id="how-numbers">Net wealth × {ZAKAT_RATE * 100}% = Zakat due, when nisab is met.</p>
+
+    <h2>Worked example</h2>
+    <p>
+      Example only — not your result. Cash Rs 2,000,000, no debts, and nisab met
+      (assumed for this example): net wealth is Rs 2,000,000, and {ZAKAT_RATE * 100}% of
+      Rs 2,000,000 is Rs 50,000 Zakat due.
+    </p>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {faqs.map((f) => (
+        <details>
+          <summary><h3 style="display:inline; font-size:18px;">{f.q}</h3></summary>
+          <p>{f.a}</p>
+        </details>
+      ))}
+    </div>
+
+    <h2>Important — please read</h2>
+    <div class="notice-warning">
+      <p>
+        This is an arithmetic estimate only, not a fatwa. Zakat method, nisab and asset
+        eligibility can differ by school of thought. Please confirm with a qualified scholar
+        before paying, especially for edge cases.
+      </p>
+      <ul>
+        <li>Results are estimates for information only.</li>
+        <li>This tool does not compute hawl or decide eligibility — include only wealth meeting the conditions you follow.</li>
+        <li>Personal-use items are excluded.</li>
+        <li>Prices shown are as sourced and dated on the page, or entered by you, and nisab in rupees depends on those prices. Confirm nisab and method questions with a scholar before acting.</li>
+      </ul>
+    </div>
+
+    <h2>Related tools</h2>
+    <div style="display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
+      <article class="card"><h3 style="font-size:18px;"><a href="/gold-price-calculator/">Gold Price Calculator</a></h3><p style="color:var(--ink-muted);">Value of gold per tola and per gram, with a live or your own price.</p></article>
+      <article class="card"><h3 style="font-size:18px;"><a href="/salary-income-tax-calculator/">Salary Tax Calculator</a></h3><p style="color:var(--ink-muted);">Monthly and annual tax on salary, with take-home pay.</p></article>
+      <article class="card"><h3 style="font-size:18px;"><a href="/currency-converter/">Currency Converter</a></h3><p style="color:var(--ink-muted);">Convert between PKR and major currencies at the latest rate.</p></article>
+    </div>
+  </div>
+
+  <script>
+    import { calcZakat, goldValueFromWeight, parseDecimal, formatPKR, formatNumber, round2, MAX_AMOUNT } from '../lib/calc.ts';
+    import { ZAKAT_RATE, NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS, TOLA_GRAMS } from '../config/zakat.ts';
+
+    const $ = (id) => document.getElementById(id);
+    const form = $('zakat-form');
+    const resultContent = $('result-content');
+    const errorSummary = $('error-summary');
+    const priceStrip = $('price-strip');
+    const priceNotice = $('price-notice');
+    const stickyBar = $('sticky-bar');
+
+    const NUMERIC_IDS = ['cash', 'gold-value', 'gold-weight', 'gold-price', 'silver-value', 'silver-weight', 'silver-price', 'trade-goods', 'other-assets', 'debts'];
+    const LABELS = {
+      'cash': 'Cash in hand and bank balance',
+      'gold-value': 'Value of gold owned',
+      'gold-weight': 'Weight of gold owned',
+      'gold-price': 'Gold price per tola',
+      'silver-value': 'Value of silver owned',
+      'silver-weight': 'Weight of silver owned',
+      'silver-price': 'Silver price per tola',
+      'trade-goods': 'Trade goods / stock for sale',
+      'other-assets': 'Other zakatable assets / money owed to you',
+      'debts': 'Debts you owe that are due',
+    };
+
+    let livePrices = { gold: null, silver: null };
+    let priceOrigin = { gold: 'none', silver: 'none' };
+    let userChoseBasis = false;
+    let lastValidHTML = '';
+    let lastValidHeadline = '';
+    let stickyDismissed = false;
+    let debounceTimer = null;
+
+    function formatKarachi(iso) {
+      if (!iso) return null;
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return null;
+      const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Karachi', day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', hour12: false,
+      }).formatToParts(d);
+      const get = (t) => (parts.find((p) => p.type === t) || {}).value || '';
+      return `${get('day')} ${get('month')} ${get('year')}, ${get('hour')}:${get('minute')} PKT`;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function parseField(raw) {
+      const text = raw.trim();
+      if (text === '') return { blank: true, value: 0 };
+      const value = parseDecimal(text);
+      if (value === null) return { blank: false, invalid: true, value: 0 };
+      return { blank: false, value };
+    }
+
+    function checkedValue(name) {
+      const el = form.querySelector(`input[name="${name}"]:checked`);
+      return el ? el.value : null;
+    }
+
+    function setFieldError(id, message) {
+      const input = $(id);
+      const err = $('err-' + id);
+      if (message) {
+        input.setAttribute('aria-invalid', 'true');
+        err.textContent = message;
+        err.hidden = false;
+      } else {
+        input.removeAttribute('aria-invalid');
+        err.textContent = '';
+        err.hidden = true;
+      }
+    }
+
+    function validate() {
+      const errors = {};
+      const parsed = {};
+      for (const id of NUMERIC_IDS) {
+        const p = parseField($(id).value);
+        parsed[id] = p;
+        if (p.invalid) {
+          errors[id] = 'Enter numbers only, using digits and one decimal point.';
+        } else if (!p.blank && p.value < 0) {
+          errors[id] = 'Enter an amount of 0 or more.';
+        } else if (!p.blank && p.value > MAX_AMOUNT) {
+          errors[id] = 'Amount is too large to calculate reliably. Enter a smaller amount.';
+        }
+      }
+      // Price rules: a price of 0 or less is never usable; a weight above 0 needs a price.
+      for (const metal of ['gold', 'silver']) {
+        const priceId = metal + '-price';
+        const weightId = metal + '-weight';
+        const mode = checkedValue(metal + '-mode');
+        const price = parsed[priceId];
+        const weight = parsed[weightId];
+        if (!price.blank && !price.invalid && price.value <= 0) {
+          errors[priceId] = 'Enter a price greater than 0, or leave it blank.';
+        }
+        if (mode === 'weight' && !weight.blank && !weight.invalid && weight.value > 0) {
+          if (price.blank || (price.value <= 0 && !price.invalid)) {
+            errors[priceId] = 'Enter a price per tola greater than 0 to value this weight.';
+          }
+        }
+      }
+      return { errors, parsed };
+    }
+
+    function anyAssetEntered(parsed) {
+      const assetIds = ['cash', 'gold-value', 'gold-weight', 'silver-value', 'silver-weight', 'trade-goods', 'other-assets'];
+      return assetIds.some((id) => !parsed[id].blank);
+    }
+
+    function deriveBasis(values) {
+      const goldEntered = values.goldEntered;
+      const otherEntered = values.otherEntered;
+      return goldEntered && !otherEntered ? 'gold' : 'silver';
+    }
+
+    function priceDisplay(metal, priceValue) {
+      if (priceValue === null) return 'not available';
+      const origin = priceOrigin[metal];
+      const live = livePrices[metal];
+      if (origin === 'live' && live) {
+        const when = formatKarachi(live.asOf);
+        return `${formatPKR(priceValue)} per tola${when ? `, as of ${when}` : ''}${live.stale ? ' (stale price)' : ''}${live.source ? `, source: ${live.source}` : ''}`;
+      }
+      return `${formatPKR(priceValue)} per tola, price entered by you`;
+    }
+
+    function updateStrip() {
+      const parts = [];
+      let anyStale = false;
+      for (const metal of ['gold', 'silver']) {
+        const raw = $(metal + '-price').value.trim();
+        const p = parseField(raw);
+        if (priceOrigin[metal] === 'live' && livePrices[metal] && !p.blank && !p.invalid && p.value > 0) {
+          const live = livePrices[metal];
+          if (live.stale) anyStale = true;
+          const when = formatKarachi(live.asOf);
+          parts.push(`${metal === 'gold' ? 'Gold' : 'Silver'}: ${formatPKR(p.value)} per tola${live.source ? `, source ${live.source}` : ''}${when ? `, as of ${when}` : ''} (${live.stale ? 'Stale' : 'Current'})`);
+        } else if (!p.blank && !p.invalid && p.value > 0) {
+          parts.push(`${metal === 'gold' ? 'Gold' : 'Silver'}: price entered by you`);
+        } else {
+          parts.push(`${metal === 'gold' ? 'Gold' : 'Silver'}: no price available`);
+        }
+      }
+      priceStrip.textContent = parts.join(' · ');
+      priceStrip.className = anyStale ? 'notice-warning' : 'notice-info';
+    }
+
+    function updatePriceMetas() {
+      for (const metal of ['gold', 'silver']) {
+        const meta = $(metal + '-price-meta');
+        const raw = $(metal + '-price').value.trim();
+        const p = parseField(raw);
+        if (priceOrigin[metal] === 'live' && livePrices[metal] && !p.blank && !p.invalid && p.value > 0) {
+          const live = livePrices[metal];
+          const when = formatKarachi(live.asOf);
+          meta.textContent = `Latest price${live.source ? ` from ${live.source}` : ''}${when ? `, as of ${when}` : ''} (${live.stale ? 'stale price' : 'current'}).`;
+        } else if (!p.blank) {
+          meta.textContent = 'Price entered by you, not a market rate.';
+        } else {
+          meta.textContent = '';
+        }
+      }
+    }
+
+    function updateRetainedNotes() {
+      for (const metal of ['gold', 'silver']) {
+        const mode = checkedValue(metal + '-mode');
+        const note = $(metal + '-retained');
+        if (mode === 'weight') {
+          const p = parseField($(metal + '-value').value);
+          note.textContent = (!p.blank && !p.invalid && p.value > 0)
+            ? `You entered ${formatPKR(p.value)} as a value — switching back will restore it.`
+            : '';
+        } else {
+          const p = parseField($(metal + '-weight').value);
+          const unit = $(metal + '-weight-unit').value;
+          note.textContent = (!p.blank && !p.invalid && p.value > 0)
+            ? `You entered ${escapeHtml($(metal + '-weight').value.trim())} ${unit} as a weight — switching back will restore it.`
+            : '';
+        }
+      }
+    }
+
+    function syncModeVisibility() {
+      for (const metal of ['gold', 'silver']) {
+        const mode = checkedValue(metal + '-mode');
+        $(metal + '-value-wrap').hidden = mode !== 'value';
+        $(metal + '-weight-wrap').hidden = mode !== 'weight';
+      }
+      updateRetainedNotes();
+    }
+
+    function bothModesGuard(values) {
+      // Defence in depth: the UI hides the inactive mode, so both modes for
+      // one metal cannot be entered through the form. This guard rejects
+      // any inconsistent state rather than silently adding both together.
+      return values.bothModes;
+    }
+
+    function collectValues(parsed) {
+      const goldMode = checkedValue('gold-mode');
+      const silverMode = checkedValue('silver-mode');
+      const goldPrice = parsed['gold-price'].blank ? null : parsed['gold-price'].value;
+      const silverPrice = parsed['silver-price'].blank ? null : parsed['silver-price'].value;
+      const goldWeight = parsed['gold-weight'];
+      const silverWeight = parsed['silver-weight'];
+      let goldValue = 0;
+      let silverValue = 0;
+      let bothModes = false;
+      if (goldMode === 'value') {
+        goldValue = parsed['gold-value'].value;
+      } else if (!goldWeight.blank && goldWeight.value > 0 && goldPrice !== null && goldPrice > 0) {
+        goldValue = goldValueFromWeight(goldWeight.value, $('gold-weight-unit').value, goldPrice);
+      }
+      if (silverMode === 'value') {
+        silverValue = parsed['silver-value'].value;
+      } else if (!silverWeight.blank && silverWeight.value > 0 && silverPrice !== null && silverPrice > 0) {
+        silverValue = goldValueFromWeight(silverWeight.value, $('silver-weight-unit').value, silverPrice);
+      }
+      const goldEntered = goldMode === 'value' ? parsed['gold-value'].value > 0 : goldWeight.value > 0;
+      const silverEntered = silverMode === 'value' ? parsed['silver-value'].value > 0 : silverWeight.value > 0;
+      const otherEntered = parsed['cash'].value > 0 || silverEntered || parsed['trade-goods'].value > 0 || parsed['other-assets'].value > 0;
+      return {
+        cash: parsed['cash'].value, goldValue, silverValue,
+        tradeGoods: parsed['trade-goods'].value, otherAssets: parsed['other-assets'].value,
+        debts: parsed['debts'].value, goldPrice, silverPrice,
+        goldMode, silverMode, goldWeight, silverWeight,
+        goldEntered, otherEntered, bothModes,
+      };
+    }
+
+    function gramsText(weight, unit) {
+      if (weight.blank || weight.value === 0) return null;
+      const grams = unit === 'tola' ? weight.value * TOLA_GRAMS : weight.value;
+      return `${formatNumber(grams, 2)} g`;
+    }
+
+    function echoText(values, parsed) {
+      const parts = [];
+      if (!parsed['cash'].blank) parts.push(`Cash ${formatPKR(parsed['cash'].value)}`);
+      if (values.goldMode === 'value') {
+        if (!parsed['gold-value'].blank) parts.push(`Gold (value) ${formatPKR(parsed['gold-value'].value)}`);
+      } else if (!parsed['gold-weight'].blank) {
+        const g = gramsText(parsed['gold-weight'], $('gold-weight-unit').value);
+        parts.push(`Gold ${escapeHtml(parsed['gold-weight'].value.trim())} ${$('gold-weight-unit').value}${g ? ` (${g})` : ''}${values.goldPrice !== null && values.goldPrice > 0 ? ` at ${formatPKR(values.goldPrice)} per tola` : ''}`);
+      }
+      if (values.silverMode === 'value') {
+        if (!parsed['silver-value'].blank) parts.push(`Silver (value) ${formatPKR(parsed['silver-value'].value)}`);
+      } else if (!parsed['silver-weight'].blank) {
+        const g = gramsText(parsed['silver-weight'], $('silver-weight-unit').value);
+        parts.push(`Silver ${escapeHtml(parsed['silver-weight'].value.trim())} ${$('silver-weight-unit').value}${g ? ` (${g})` : ''}${values.silverPrice !== null && values.silverPrice > 0 ? ` at ${formatPKR(values.silverPrice)} per tola` : ''}`);
+      }
+      if (!parsed['trade-goods'].blank) parts.push(`Trade goods ${formatPKR(parsed['trade-goods'].value)}`);
+      if (!parsed['other-assets'].blank) parts.push(`Other zakatable assets ${formatPKR(parsed['other-assets'].value)}`);
+      if (!parsed['debts'].blank) parts.push(`Debts ${formatPKR(parsed['debts'].value)}`);
+      return parts.join(' · ');
+    }
+
+    function setActionsEnabled(enabled) {
+      document.querySelectorAll('[data-copy-result],[data-share-result],[data-print-result]').forEach((b) => { b.disabled = !enabled; });
+    }
+
+    function showSticky(headline) {
+      if (stickyDismissed) return;
+      $('sticky-text').textContent = headline;
+      stickyBar.hidden = false;
+      document.body.style.paddingBottom = '76px';
+    }
+
+    function hideSticky() {
+      stickyBar.hidden = true;
+      document.body.style.paddingBottom = '';
+    }
+
+    function renderResult(values, parsed) {
+      const selection = checkedValue('nisab-basis');
+      const effectiveBasis = selection === 'both' ? deriveBasis(values) : selection;
+      const result = calcZakat({
+        cash: values.cash, goldValue: values.goldValue, silverValue: values.silverValue,
+        tradeGoods: values.tradeGoods, otherAssets: values.otherAssets, debts: values.debts,
+        goldPricePerTola: values.goldPrice, silverPricePerTola: values.silverPrice,
+        nisabBasis: effectiveBasis,
+      });
+      const unavailable = result.nisabThreshold === null;
+      const basisLabel = effectiveBasis === 'gold' ? 'gold nisab' : 'silver nisab';
+      const basisReason = selection === 'both'
+        ? (effectiveBasis === 'gold' ? 'you entered gold only' : 'you entered mixed assets/cash')
+        : 'your selection';
+      const unrounded = ZAKAT_RATE * result.net;
+      const subRupee = !unavailable && result.nisabMet && result.net > 0 && result.zakat === 0 && unrounded > 0 && unrounded < 0.5;
+
+      let banner = '';
+      if (unavailable) {
+        banner = `<div class="notice-warning" role="status"><strong>Nisab not available.</strong> No price is available for the ${basisLabel}, so nisab in rupees cannot be worked out. Enter a gold/silver price, or use the latest prices, to check nisab.</div>`;
+      } else if (result.nisabMet) {
+        banner = `<div class="notice-success" role="status"><strong>Nisab met</strong> — on the ${basisLabel} stated. Net wealth ${formatPKR(result.net)} is at or above the ${basisLabel} of ${formatPKR(result.nisabThreshold)}.</div>`;
+      } else {
+        banner = `<div class="notice-info" role="status"><strong>Below nisab</strong> — on the ${basisLabel} stated. Net wealth ${formatPKR(result.net)} is below the ${basisLabel} of ${formatPKR(result.nisabThreshold)}. Zakat due is ${formatPKR(0)} on this basis.</div>`;
+      }
+
+      const headline = unavailable ? 'Nisab not available' : formatPKR(result.zakat);
+      const conditional = unavailable
+        ? `<p>${ZAKAT_RATE * 100}% of net wealth would be ${formatPKR(round2(unrounded))} — this amount is due only if your wealth meets the nisab. Enter a gold/silver price (or use the live price) to check nisab.</p>`
+        : '';
+      const belowLine = (!unavailable && !result.nisabMet)
+        ? `<div><p class="stat-label">${ZAKAT_RATE * 100}% of net wealth — not due, below nisab</p><p class="stat-value">${formatPKR(round2(unrounded))}</p></div>`
+        : '';
+      const subRupeeNote = subRupee ? '<p>The unrounded figure is below one rupee.</p>' : '';
+      const debtsNote = values.debts > result.gross
+        ? '<p>Debts exceeded the total entered, so net wealth is floored at zero.</p>'
+        : '';
+      const staleNote = (priceOrigin.gold === 'live' && livePrices.gold && livePrices.gold.stale) || (priceOrigin.silver === 'live' && livePrices.silver && livePrices.silver.stale)
+        ? `<div class="notice-warning" role="status"><strong>Stale price</strong> — last updated ${formatKarachi((livePrices.gold && livePrices.gold.stale ? livePrices.gold.asOf : livePrices.silver.asOf))}. The result uses the cached price, labelled stale.</div>`
+        : '';
+
+      const goldNisabLine = result.goldNisabPKR !== null
+        ? `Gold nisab: ${formatPKR(result.goldNisabPKR)} (${NISAB_GOLD_GRAMS} g${values.goldPrice !== null ? ` at ${priceDisplay('gold', values.goldPrice)}` : ''})`
+        : 'Gold nisab: price not available';
+      const silverNisabLine = result.silverNisabPKR !== null
+        ? `Silver nisab: ${formatPKR(result.silverNisabPKR)} (${NISAB_SILVER_GRAMS} g${values.silverPrice !== null ? ` at ${priceDisplay('silver', values.silverPrice)}` : ''})`
+        : 'Silver nisab: price not available';
+
+      const categories = [
+        { label: 'Cash and bank', amount: values.cash, entered: !parsed['cash'].blank },
+        { label: 'Gold', amount: values.goldValue, entered: values.goldMode === 'value' ? !parsed['gold-value'].blank : !parsed['gold-weight'].blank },
+        { label: 'Silver', amount: values.silverValue, entered: values.silverMode === 'value' ? !parsed['silver-value'].blank : !parsed['silver-weight'].blank },
+        { label: 'Trade goods / stock for sale', amount: values.tradeGoods, entered: !parsed['trade-goods'].blank },
+        { label: 'Other zakatable assets / money owed to you', amount: values.otherAssets, entered: !parsed['other-assets'].blank },
+      ];
+      const rows = categories.filter((c) => c.entered || c.amount > 0).map((c) => {
+        const share = result.gross > 0 ? (c.amount / result.gross) * 100 : 0;
+        return `<tr><td>${c.label}</td><td>${formatPKR(round2(c.amount))}</td><td>${formatNumber(share, 2)}%</td></tr>`;
+      }).join('');
+      const barSegments = categories.map((c, i) => {
+        const share = result.gross > 0 ? (c.amount / result.gross) * 100 : 0;
+        const colors = ['var(--brand-600)', 'var(--gold-500)', 'var(--info)', 'var(--brand-400)', 'var(--gold-600)'];
+        return share > 0 ? `<span style="width:${share}%;background:${colors[i]};"></span>` : '';
+      }).join('');
+      const barLabel = result.gross > 0
+        ? categories.filter((c) => c.amount > 0).map((c) => `${c.label} ${formatNumber(result.gross > 0 ? (c.amount / result.gross) * 100 : 0, 2)}%`).join(', ') + ` of gross wealth ${formatPKR(result.gross)}`
+        : 'No zakatable wealth entered';
+      const debtsBar = result.gross > 0 && values.debts > 0
+        ? `<div class="bar bar-debts" aria-hidden="true"><span style="width:${Math.min(100, (values.debts / result.gross) * 100)}%;background:repeating-linear-gradient(45deg, var(--gold-600) 0 6px, transparent 6px 12px);"></span></div><p style="font-size:14px;">Less: debts due ${formatPKR(values.debts)}${values.debts > result.gross ? ' — debts exceed the total entered' : ''}.</p>`
+        : '';
+
+      const html = `
+        ${banner}
+        ${staleNote}
+        <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:16px 0 0;">Zakat due</p>
+        <p class="result-value" style="margin:0;">${escapeHtml(headline)}</p>
+        ${conditional}
+        ${subRupeeNote}
+        ${debtsNote}
+        <div class="stat-grid">
+          <div><p class="stat-label">Net zakatable wealth (PKR)</p><p class="stat-value">${formatPKR(result.net)}</p></div>
+          <div><p class="stat-label">Gross zakatable wealth (PKR)</p><p class="stat-value">${formatPKR(result.gross)}</p></div>
+          <div><p class="stat-label">Debts deducted (PKR)</p><p class="stat-value">${formatPKR(result.debts)}</p></div>
+          <div><p class="stat-label">Nisab threshold used (${basisLabel})</p><p class="stat-value">${result.nisabThreshold !== null ? formatPKR(result.nisabThreshold) : 'Not available'}</p></div>
+          ${belowLine}
+        </div>
+        <p><strong>Based on:</strong> ${escapeHtml(echoText(values, parsed)) || 'No assets entered.'}</p>
+        <p style="font-size:14px;">Zakat rate ${ZAKAT_RATE * 100}% · Nisab: ${NISAB_GOLD_GRAMS} g gold / ${NISAB_SILVER_GRAMS} g silver · Basis used: ${basisLabel} (${basisReason}) · Gold price: ${escapeHtml(values.goldPrice !== null ? priceDisplay('gold', values.goldPrice) : 'not available')} · Silver price: ${escapeHtml(values.silverPrice !== null ? priceDisplay('silver', values.silverPrice) : 'not available')}</p>
+        <h3 style="font-size:18px; margin-top:20px;">Breakdown</h3>
+        ${result.gross > 0 ? `<div class="bar" role="img" aria-label="${escapeHtml(barLabel)}">${barSegments}</div>` : '<p>No zakatable wealth entered.</p>'}
+        ${debtsBar}
+        <div class="table-wrap">
+          <table class="data">
+            <caption style="text-align:left; font-weight:700; padding:10px 12px;">Breakdown by category</caption>
+            <thead><tr><th scope="col">Category</th><th scope="col">Amount (PKR)</th><th scope="col">Share of gross</th></tr></thead>
+            <tbody>${rows}</tbody>
+            <tfoot>
+              <tr><td>Gross zakatable wealth</td><td>${formatPKR(result.gross)}</td><td></td></tr>
+              <tr><td>Less: debts due</td><td>− ${formatPKR(result.debts)}</td><td></td></tr>
+              <tr><td><strong>Net zakatable wealth</strong></td><td><strong>${formatPKR(result.net)}</strong></td><td></td></tr>
+            </tfoot>
+          </table>
+        </div>
+        <h3 style="font-size:18px; margin-top:20px;">Nisab thresholds</h3>
+        <p>${escapeHtml(goldNisabLine)} <span class="badge ${effectiveBasis === 'gold' ? 'badge-info' : 'badge-success'}" style="margin-left:6px;">${effectiveBasis === 'gold' ? 'Basis used' : 'For reference'}</span></p>
+        <p>${escapeHtml(silverNisabLine)} <span class="badge ${effectiveBasis === 'silver' ? 'badge-info' : 'badge-success'}" style="margin-left:6px;">${effectiveBasis === 'silver' ? 'Basis used' : 'For reference'}</span></p>
+        <p style="font-size:13px; color:var(--ink-muted);">Estimates only — not a religious ruling. Confirm with a qualified scholar. Read the full disclaimer below.</p>
+      `;
+      resultContent.innerHTML = html;
+      lastValidHTML = html;
+      lastValidHeadline = headline;
+      setActionsEnabled(true);
+      showSticky(headline);
+
+      const how = $('how-numbers');
+      if (unavailable) {
+        how.textContent = `With your entries: net wealth ${formatPKR(result.net)} × ${ZAKAT_RATE * 100}% = ${formatPKR(round2(unrounded))}. This amount is due only if your wealth meets the nisab.`;
+      } else {
+        how.textContent = `With your entries: net wealth ${formatPKR(result.net)} × ${ZAKAT_RATE * 100}% = ${formatPKR(result.zakat)}${result.nisabMet ? '' : ' (not due — below nisab)'} on the ${basisLabel}.`;
+      }
+    }
+
+    function renderEmpty() {
+      resultContent.innerHTML = `
+        <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:0;">Zakat due</p>
+        <p>Enter your details to see your result.</p>
+        <p>Enter at least one asset to see your result. You will see your Zakat due, net wealth, and whether nisab is met on the basis stated.</p>
+        <p style="font-size:13px; color:var(--ink-muted);">Estimates only — not a religious ruling. Confirm with a qualified scholar. Read the full disclaimer below.</p>`;
+      setActionsEnabled(false);
+      hideSticky();
+    }
+
+    function recalculate(fromCalculate) {
+      const { errors, parsed } = validate();
+      for (const id of NUMERIC_IDS) setFieldError(id, errors[id] || '');
+      const bothGuard = bothModesGuard(collectValues(parsed));
+      if (bothGuard) {
+        errors['gold-mode'] = 'Enter gold in one mode only — value or weight, not both.';
+        const gm = $('err-gold-mode');
+        gm.textContent = errors['gold-mode'];
+        gm.hidden = false;
+      }
+      const errorIds = Object.keys(errors);
+      if (errorIds.length > 0) {
+        errorSummary.innerHTML = `<strong>${errorIds.length} field${errorIds.length > 1 ? 's' : ''} need${errorIds.length > 1 ? '' : 's'} attention.</strong> ` +
+          errorIds.map((id) => `<a href="#${id}">${escapeHtml(LABELS[id] || id)}</a>`).join(' · ');
+        errorSummary.hidden = false;
+        if (lastValidHTML) {
+          resultContent.innerHTML = `<div class="notice-warning" role="status"><strong>Previous result</strong> — based on earlier inputs. Update the highlighted field to recalculate.</div>` + lastValidHTML;
+          setActionsEnabled(false);
+        } else {
+          renderEmpty();
+        }
+        if (fromCalculate) {
+          const first = $(errorIds[0]);
+          if (first) first.focus();
+        }
+        return;
+      }
+      errorSummary.hidden = true;
+      errorSummary.textContent = '';
+      updateStrip();
+      updatePriceMetas();
+      if (!anyAssetEntered(parsed)) {
+        renderEmpty();
+        $('how-numbers').textContent = `Net wealth × ${ZAKAT_RATE * 100}% = Zakat due, when nisab is met.`;
+        return;
+      }
+      const values = collectValues(parsed);
+      renderResult(values, parsed);
+      if (fromCalculate) {
+        const card = $('result-card');
+        card.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+        card.focus({ preventScroll: true });
+      }
+    }
+
+    function scheduleRecalculate() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => recalculate(false), 150);
+    }
+
+    async function useLatestPrices() {
+      priceNotice.hidden = true;
+      priceStrip.textContent = 'Fetching the latest prices…';
+      priceStrip.className = 'notice-info';
+      try {
+        const res = await fetch('/api/metals');
+        if (!res.ok) throw new Error('unavailable');
+        const data = await res.json();
+        if (!data || data.status === 'unavailable' || typeof data.goldPerTola !== 'number' || typeof data.silverPerTola !== 'number' || !(data.goldPerTola > 0) || !(data.silverPerTola > 0)) {
+          throw new Error('unavailable');
+        }
+        const fetchedAt = data.fetchedAt || null;
+        const ageMs = fetchedAt ? Date.now() - new Date(fetchedAt).getTime() : NaN;
+        if (Number.isFinite(ageMs) && ageMs > 7 * 24 * 60 * 60 * 1000) throw new Error('too-old');
+        const stale = data.stale === true || (Number.isFinite(ageMs) && ageMs >= 24 * 60 * 60 * 1000);
+        const asOf = data.providerTimestamp || fetchedAt;
+        livePrices = {
+          gold: { price: data.goldPerTola, source: data.source || null, asOf, fetchedAt, stale },
+          silver: { price: data.silverPerTola, source: data.source || null, asOf, fetchedAt, stale },
+        };
+        $('gold-price').value = formatNumber(data.goldPerTola, 2);
+        $('silver-price').value = formatNumber(data.silverPerTola, 2);
+        priceOrigin = { gold: 'live', silver: 'live' };
+        updateStrip();
+        updatePriceMetas();
+        recalculate(false);
+      } catch {
+        priceStrip.textContent = 'Latest prices are unavailable. Enter gold and silver prices yourself below, or try again later.';
+        priceStrip.className = 'notice-warning';
+        priceNotice.hidden = false;
+      }
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      stickyDismissed = false;
+      recalculate(true);
+    });
+
+    form.addEventListener('input', (e) => {
+      const target = e.target;
+      if (target.id === 'gold-price') { priceOrigin.gold = 'manual'; }
+      if (target.id === 'silver-price') { priceOrigin.silver = 'manual'; }
+      updatePriceMetas();
+      updateStrip();
+      scheduleRecalculate();
+    });
+
+    form.addEventListener('change', (e) => {
+      const target = e.target;
+      if (target.name === 'gold-mode' || target.name === 'silver-mode') {
+        syncModeVisibility();
+      }
+      if (target.name === 'nisab-basis') {
+        userChoseBasis = true;
+      }
+      scheduleRecalculate();
+    });
+
+    $('use-prices').addEventListener('click', useLatestPrices);
+
+    $('clear-btn').addEventListener('click', () => {
+      form.reset();
+      livePrices = { gold: null, silver: null };
+      priceOrigin = { gold: 'none', silver: 'none' };
+      userChoseBasis = false;
+      lastValidHTML = '';
+      lastValidHeadline = '';
+      stickyDismissed = false;
+      priceNotice.hidden = true;
+      for (const id of NUMERIC_IDS) setFieldError(id, '');
+      $('err-gold-mode').hidden = true;
+      errorSummary.hidden = true;
+      errorSummary.textContent = '';
+      $('form-status').textContent = 'Form cleared.';
+      syncModeVisibility();
+      updateStrip();
+      updatePriceMetas();
+      renderEmpty();
+      $('how-numbers').textContent = `Net wealth × ${ZAKAT_RATE * 100}% = Zakat due, when nisab is met.`;
+    });
+
+    $('sticky-details').addEventListener('click', () => {
+      const card = $('result-card');
+      card.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      card.focus({ preventScroll: true });
+    });
+    $('sticky-dismiss').addEventListener('click', () => {
+      stickyDismissed = true;
+      hideSticky();
+    });
+    form.addEventListener('focusin', hideSticky);
+    form.addEventListener('focusout', () => {
+      if (lastValidHTML && !stickyDismissed) showSticky(lastValidHeadline);
+    });
+
+    document.querySelector('[data-share-result]').addEventListener('click', async () => {
+      const text = resultContent.textContent.trim();
+      const status = document.querySelector('[data-copy-status]');
+      if (navigator.share) {
+        try {
+          await navigator.share({ text });
+          if (status) status.textContent = 'Result shared.';
+          return;
+        } catch { /* fall through to copy */ }
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        if (status) status.textContent = 'Result copied.';
+      } catch {
+        if (status) status.textContent = 'Sharing did not work in this browser. Select the result text and copy it manually.';
+      }
+    });
+
+    syncModeVisibility();
+    updateStrip();
+    renderEmpty();
+  </script>
+</Layout>

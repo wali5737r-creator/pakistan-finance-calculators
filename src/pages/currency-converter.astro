@@ -1,0 +1,767 @@
+---
+import Layout from '../components/Layout.astro';
+import { CURRENCIES } from '../config/currencies.ts';
+
+const title = 'Currency Converter PKR | USD to PKR & Live Rates';
+const description = 'Convert PKR to USD, GBP, EUR, SAR, AED, AUD and CAD with the latest rate and last-updated time. Free converter — stale rates are clearly labelled.';
+const slug = '/currency-converter/';
+
+const faqs = [
+  {
+    q: 'How do I convert PKR to USD (or any listed pair)?',
+    a: 'Enter the amount, choose the From and To currencies, and the converter shows the converted amount with the rate used. Use Swap to reverse the direction without retyping the amount.',
+  },
+  {
+    q: 'Is this the bank rate or the market rate?',
+    a: 'Neither. The rate shown is indicative only — it is not a buy or sell rate. Banks, exchangers, and payment services may offer different rates, and fees or charges are not included.',
+  },
+  {
+    q: 'When was this rate last updated, and what does "stale rate" mean?',
+    a: 'Every result shows the rate source and the last-updated time in Asia/Karachi, with a Current or Stale label. A stale rate is the last cached rate shown after its provider update time has passed; it is labelled stale with its timestamp and may no longer reflect the market.',
+  },
+  {
+    q: 'What happens if no rate is available?',
+    a: 'No conversion is shown and no rate is guessed. The page shows a clear unavailable message with a Retry button, and your amount and currency choices stay in the form. Converting a currency into itself still works, because no rate is needed.',
+  },
+  {
+    q: 'Which currencies are supported?',
+    a: 'PKR, USD, GBP, EUR, SAR, AED, AUD and CAD. Only currencies the rate source can price are listed; if a rate is missing for a listed currency, that pair is shown as unavailable rather than converted at another pair’s rate.',
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://[live-domain]/currency-converter/#webapp',
+      name: 'Currency Converter PKR',
+      url: 'https://[live-domain]/currency-converter/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://[live-domain]/' },
+        { '@type': 'ListItem', position: 2, name: 'Currency Converter PKR', item: 'https://[live-domain]/currency-converter/' },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': 'https://[live-domain]/currency-converter/#faq',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+---
+
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <style is:global>
+    .field-error { color: var(--danger); font-size: 14px; font-weight: 600; margin: 0; }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+    .stat-grid .stat-label { font-size: 14px; color: var(--ink-muted); margin: 0; }
+    .stat-grid .stat-value { font-size: 20px; font-weight: 700; margin: 2px 0 0; overflow-wrap: anywhere; }
+    .amount-wrap { display: flex; gap: 8px; align-items: center; }
+    .amount-wrap input { flex: 1; min-width: 0; }
+    .amount-suffix { font-weight: 700; white-space: nowrap; }
+    .swap-row { display: flex; justify-content: center; margin: 4px 0 12px; }
+    #swap-btn { min-width: 48px; min-height: 48px; padding: 10px 18px; font-size: 16px; }
+    #sticky-bar {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+      background: var(--surface-raised); border-top: 1px solid var(--border-strong);
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+      display: flex; gap: 12px; align-items: center; justify-content: space-between;
+      box-shadow: 0 -4px 16px rgba(15, 27, 22, 0.08);
+    }
+  </style>
+
+  <div class="container" style="padding-top:32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb" style="font-size:14px; margin-bottom:12px;">
+      <a href="/">Home</a> / Currency Converter
+    </nav>
+    <p class="badge badge-info" style="margin-bottom:12px;">Rates &amp; Gold</p>
+    <h1 style="font-size:clamp(1.75rem,4.5vw,2.25rem);">Currency Converter PKR</h1>
+    <p class="prose-narrow" style="font-size:clamp(1.0625rem,2vw,1.1875rem); margin-top:12px;">
+      Convert between PKR and major currencies at the latest indicative rate, with the
+      source and last-updated time shown on every result. This is not a buy or sell
+      rate, and fees are not included.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top:20px;">
+    <div id="rate-strip" class="notice-info" role="status">Fetching the latest rate…</div>
+  </div>
+
+  <div class="container" style="margin-top:20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="currency-form" novalidate>
+          <div id="error-summary" class="error-box" role="alert" hidden></div>
+
+          <div class="field">
+            <label for="amount">Amount *</label>
+            <div class="amount-wrap">
+              <input type="text" inputmode="decimal" autocomplete="off" id="amount" aria-required="true" aria-describedby="hint-amount" />
+              <span class="amount-suffix" id="amount-suffix" aria-hidden="true">PKR</span>
+            </div>
+            <p class="hint" id="hint-amount">Enter the amount in the From currency. Decimals are allowed.</p>
+            <p class="field-error" id="err-amount" hidden></p>
+          </div>
+
+          <div class="field">
+            <label for="from-currency">From *</label>
+            <select id="from-currency" aria-required="true" aria-describedby="hint-from">
+              {CURRENCIES.map((c) => (
+                <option value={c.code} selected={c.code === 'PKR'}>{c.code} — {c.name}</option>
+              ))}
+            </select>
+            <p class="hint" id="hint-from">The currency you are converting from.</p>
+            <p class="field-error" id="err-from-currency" hidden></p>
+          </div>
+
+          <div class="swap-row no-print">
+            <button type="button" class="btn-secondary" id="swap-btn" aria-label="Swap currencies">
+              <span aria-hidden="true">⇄</span> Swap
+            </button>
+          </div>
+
+          <div class="field">
+            <label for="to-currency">To *</label>
+            <select id="to-currency" aria-required="true" aria-describedby="hint-to">
+              {CURRENCIES.map((c) => (
+                <option value={c.code} selected={c.code === 'USD'}>{c.code} — {c.name}</option>
+              ))}
+            </select>
+            <p class="hint" id="hint-to">The currency you are converting to.</p>
+            <p class="field-error" id="err-to-currency" hidden></p>
+          </div>
+
+          <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
+            <button type="submit" class="btn-primary" style="flex:1;">Calculate</button>
+            <button type="button" class="btn-secondary" id="clear-btn">Clear</button>
+          </div>
+          <p class="hint" style="font-size:14px; color:var(--ink-muted); margin-top:8px;" role="status" id="form-status"></p>
+          <p role="status" aria-live="polite" id="announcer" style="font-size:14px; color:var(--ink-muted);"></p>
+        </form>
+      </div>
+
+      <section class="result-card" id="result-card" tabindex="-1" aria-label="Conversion result">
+        <div id="result-content" data-result-text aria-live="polite" aria-atomic="true">
+          <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:0;">Converted amount</p>
+          <p>Enter your details to see your result.</p>
+          <p>You will see the converted amount, the rate used, and the inverse rate, with the rate’s source and date.</p>
+          <p style="font-size:13px; color:var(--ink-muted);">Estimates only — indicative rates. Read the full disclaimer below.</p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;" class="no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-share-result disabled>Share</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          <button type="button" class="btn-secondary" id="refresh-btn">Refresh rate</button>
+        </div>
+        <p data-copy-status role="status" style="font-size:14px; margin-top:8px;"></p>
+        <p role="status" style="font-size:14px; margin-top:4px;" id="refresh-status"></p>
+      </section>
+    </div>
+  </div>
+
+  <div id="sticky-bar" class="no-print" hidden>
+    <p style="margin:0;"><strong>Converted amount</strong><br /><span id="sticky-text"></span></p>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <button type="button" class="btn-secondary" id="sticky-details">Details</button>
+      <button type="button" class="btn-secondary" id="sticky-dismiss" aria-label="Dismiss summary">×</button>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top:48px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Converted amount = amount × rate, where the rate is the number of units of the To currency equal to one unit of the From currency.</li>
+      <li>Cross rates are derived through PKR: the rate from one currency to another is the PKR value of the first currency divided by the PKR value of the second. One route is used for every pair — direct and cross rates are never mixed for the same pair.</li>
+      <li>The inverse rate is 1 divided by the rate used. Converting back at the inverse rate returns the original amount within display rounding.</li>
+      <li>Only the latest rate is used. There is no historical lookup, and no rate can be typed in by hand.</li>
+    </ol>
+
+    <h2>Worked example</h2>
+    <p>
+      Example in words only — not your result, and no rate figure is stated here.
+      Converting an amount in US dollars to Pakistani rupees multiplies the amount by the
+      current rate for one US dollar in rupees. Converting the resulting rupees back to
+      US dollars uses the inverse rate, and returns the starting amount within display rounding.
+    </p>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {faqs.map((f) => (
+        <details>
+          <summary><h3 style="display:inline; font-size:18px;">{f.q}</h3></summary>
+          <p>{f.a}</p>
+        </details>
+      ))}
+    </div>
+
+    <h2>Important — please read</h2>
+    <div class="notice-warning">
+      <p>
+        The rate shown is indicative only. It is not a buy/sell rate. Banks, exchangers,
+        and payment services may offer different rates, and fees or charges are not
+        included in the converted amount. Rates change frequently — always check the
+        rate and total cost with your bank or exchanger before acting. Results are
+        estimates for information only, not financial advice.
+      </p>
+      <ul>
+        <li>The rate’s source and “as of” time are shown on the result and must be checked before relying on it.</li>
+        <li>A stale rate is labelled as stale and may no longer reflect the market.</li>
+        <li>This tool does not buy or sell currency and does not include any charge.</li>
+      </ul>
+    </div>
+
+    <h2>Related tools</h2>
+    <div style="display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
+      <article class="card"><h3 style="font-size:18px;"><a href="/gold-price-calculator/">Gold Price Calculator</a></h3><p style="color:var(--ink-muted);">Value of gold per tola and per gram, with a live or your own price.</p></article>
+      <article class="card"><h3 style="font-size:18px;"><a href="/zakat-calculator/">Zakat Calculator</a></h3><p style="color:var(--ink-muted);">Zakat at 2.5% on cash, gold, silver, and trade goods, with gold and silver nisab shown.</p></article>
+      <article class="card"><h3 style="font-size:18px;"><a href="/salary-income-tax-calculator/">Salary Tax Calculator</a></h3><p style="color:var(--ink-muted);">Monthly and annual tax on salary, with take-home pay.</p></article>
+    </div>
+  </div>
+
+  <script>
+    import { convertCurrency, parseDecimal, formatNumber, MAX_AMOUNT } from '../lib/calc.ts';
+    import { CURRENCIES } from '../config/currencies.ts';
+
+    const $ = (id) => document.getElementById(id);
+    const form = $('currency-form');
+    const resultContent = $('result-content');
+    const errorSummary = $('error-summary');
+    const rateStrip = $('rate-strip');
+    const stickyBar = $('sticky-bar');
+    const STALE_LIMIT_MS = 7 * 24 * 60 * 60 * 1000;
+    const DAY_MS = 24 * 60 * 60 * 1000;
+
+    let table = null; // active table used for new calculations
+    let tableState = 'loading'; // 'loading' | 'ready' | 'unavailable'
+    let pending = null; // { table } — a newer table frozen out of the displayed result
+    let newRateNotice = false;
+    let displayed = null; // frozen displayed result { converted, rate, inverseRate, amountRaw, from, to, table, freshness, sameCurrency, convertedFull }
+    let lastValidHTML = '';
+    let lastValidHeadline = '';
+    let stickyDismissed = false;
+    let debounceTimer = null;
+    let refreshing = false;
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function formatKarachi(iso) {
+      if (!iso) return null;
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return null;
+      const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Karachi', day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', hour12: false,
+      }).formatToParts(d);
+      const get = (t) => (parts.find((p) => p.type === t) || {}).value || '';
+      return `${get('day')} ${get('month')} ${get('year')}, ${get('hour')}:${get('minute')} PKT`;
+    }
+
+    function currencyName(code) {
+      const c = CURRENCIES.find((x) => x.code === code);
+      return c ? c.name : code;
+    }
+
+    // Freshness is derived from the provider's next-update time when present,
+    // and from the endpoint's stale flag / 24-hour age otherwise. A snapshot is
+    // never shown as Current when any signal says it is stale. Past 7 days,
+    // or an untrustworthy timestamp, it is Unavailable.
+    function freshnessOf(t, nowMs) {
+      if (!t) return 'unavailable';
+      const asOf = t.asOf;
+      if (!asOf || !/(?:[zZ]|[+-]\d{2}:?\d{2})$/.test(String(asOf).trim())) return 'unavailable';
+      const asOfMs = Date.parse(asOf);
+      if (!Number.isFinite(asOfMs)) return 'unavailable';
+      const ageMs = nowMs - asOfMs;
+      if (ageMs < 0) return 'unavailable';
+      if (ageMs > STALE_LIMIT_MS) return 'unavailable';
+      if (t.stale === true) return 'stale';
+      if (t.nextUpdateAt) {
+        const nextMs = Date.parse(t.nextUpdateAt);
+        if (Number.isFinite(nextMs) && /(?:[zZ]|[+-]\d{2}:?\d{2})$/.test(String(t.nextUpdateAt).trim())) {
+          if (nowMs >= nextMs) return 'stale';
+        }
+      }
+      if (ageMs > DAY_MS) return 'stale';
+      return 'current';
+    }
+
+    function formatRate(v) {
+      if (!Number.isFinite(v) || v <= 0) return '—';
+      if (v === 1) return '1.0000';
+      let text = new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 4, maximumFractionDigits: 6, roundingMode: 'halfExpand',
+      }).format(v);
+      // Zero guard: a real non-zero rate must never display as 0.0000.
+      if (Number(text.replace(/,/g, '')) === 0) {
+        text = new Intl.NumberFormat('en-US', {
+          minimumFractionDigits: 10, maximumFractionDigits: 10, roundingMode: 'halfExpand',
+        }).format(v);
+        text = text.replace(/0+$/, '').replace(/\.$/, '');
+      }
+      return text;
+    }
+
+    function formatAmount(value, code) {
+      return `${code} ${formatNumber(value, 2)}`;
+    }
+
+    function rateLineText(t, freshness) {
+      if (!t) return 'Rate table unavailable — no rate was needed for this conversion.';
+      const when = formatKarachi(t.asOf);
+      const label = freshness === 'current' ? 'Current' : freshness === 'stale' ? `Stale rate — last updated ${when || 'unknown time'}` : 'Rate unavailable';
+      return `${t.sourceName ? `Rate source: ${t.sourceName} · ` : ''}as of ${when || 'unknown time'} · ${label}`;
+    }
+
+    function renderStrip() {
+      if (tableState === 'loading') {
+        rateStrip.textContent = 'Fetching the latest rate…';
+        rateStrip.className = 'notice-info';
+        return;
+      }
+      if (!table) {
+        rateStrip.innerHTML = 'Rate unavailable. The latest rate could not be loaded. Your amount and currencies are saved in this form — <button type="button" class="btn-secondary" data-action="retry" style="min-height:36px; padding:6px 14px;">Retry</button>';
+        rateStrip.className = 'notice-warning';
+        return;
+      }
+      const freshness = freshnessOf(table, Date.now());
+      const when = formatKarachi(table.asOf);
+      const badge = freshness === 'current'
+        ? '<span class="badge badge-success">Current</span>'
+        : freshness === 'stale'
+          ? '<span class="badge badge-warning">Stale</span>'
+          : '<span class="badge badge-warning">Unavailable</span>';
+      rateStrip.innerHTML = `${table.sourceName ? `Rate source: ${escapeHtml(table.sourceName)} · ` : ''}as of ${escapeHtml(when || 'unknown time')} ${badge}`;
+      rateStrip.className = freshness === 'stale' ? 'notice-warning' : 'notice-info';
+    }
+
+    function renderOptions() {
+      for (const selectId of ['from-currency', 'to-currency']) {
+        const select = $(selectId);
+        const current = select.value;
+        select.innerHTML = '';
+        for (const c of CURRENCIES) {
+          const option = document.createElement('option');
+          option.value = c.code;
+          const missing = table && c.code !== 'PKR' && !(c.code in (table.pkrPerUnit || {}));
+          option.disabled = Boolean(missing) && c.code !== current;
+          option.textContent = `${c.code} — ${c.name}${missing && c.code !== current ? ' (rate unavailable)' : ''}`;
+          if (c.code === current) option.selected = true;
+          select.appendChild(option);
+        }
+      }
+      $('amount-suffix').textContent = $('from-currency').value;
+    }
+
+    function setActionsEnabled(enabled) {
+      document.querySelectorAll('[data-copy-result],[data-share-result],[data-print-result]').forEach((b) => { b.disabled = !enabled; });
+    }
+
+    function showSticky(headline) {
+      if (stickyDismissed) return;
+      $('sticky-text').textContent = headline;
+      stickyBar.hidden = false;
+      document.body.style.paddingBottom = '76px';
+    }
+
+    function hideSticky() {
+      stickyBar.hidden = true;
+      document.body.style.paddingBottom = '';
+    }
+
+    function emptyHTML() {
+      return `
+        <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:0;">Converted amount</p>
+        <p>Enter your details to see your result.</p>
+        <p>You will see the converted amount, the rate used, and the inverse rate, with the rate’s source and date.</p>
+        <p style="font-size:13px; color:var(--ink-muted);">Estimates only — indicative rates. Read the full disclaimer below.</p>`;
+    }
+
+    function renderEmpty() {
+      resultContent.innerHTML = emptyHTML();
+      setActionsEnabled(false);
+      hideSticky();
+    }
+
+    function precisionLine(convertedFull, code) {
+      let text = new Intl.NumberFormat('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6, roundingMode: 'halfExpand' }).format(convertedFull);
+      if (Number(text.replace(/,/g, '')) === 0) {
+        text = new Intl.NumberFormat('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10, roundingMode: 'halfExpand' }).format(convertedFull);
+        text = text.replace(/0+$/, '').replace(/\.$/, '');
+      }
+      return `<p>More precisely: ${text} ${code} (rounded to 2 decimals above).</p>`;
+    }
+
+    function renderDisplayed() {
+      const d = displayed;
+      if (!d) { renderEmpty(); return; }
+      const freshness = freshnessOf(d.table, Date.now());
+      const headline = formatAmount(d.converted, d.to);
+      const staleBanner = (!d.sameCurrency && freshness === 'stale')
+        ? `<div class="notice-warning" role="status"><strong>Stale rate</strong> — last updated ${escapeHtml(formatKarachi(d.table ? d.table.asOf : null) || 'unknown time')}. This result was calculated from the cached rate, labelled stale.</div>`
+        : '';
+      const newNotice = newRateNotice
+        ? '<div class="notice-info" role="status"><strong>New rate available</strong> — recalculate to use the latest rate. The result below still uses the earlier rate.</div>'
+        : '';
+      const staleWord = (!d.sameCurrency && freshness === 'stale') ? ' (Stale)' : '';
+      const rateStat = d.sameCurrency
+        ? `1 ${d.from} = 1.0000 ${d.to} (same currency — no exchange rate needed)`
+        : `1 ${d.from} = ${formatRate(d.rate)} ${d.to}`;
+      const inverseStat = d.sameCurrency
+        ? `1 ${d.to} = 1.0000 ${d.from}`
+        : `1 ${d.to} = ${formatRate(d.inverseRate)} ${d.from}`;
+      const needsPrecision = d.convertedFull > 0 && Number(formatNumber(d.convertedFull, 2).replace(/,/g, '')) === 0;
+      const longHeadline = headline.length > 16;
+      const html = `
+        ${staleBanner}
+        ${newNotice}
+        <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:16px 0 0;">Converted amount</p>
+        <p class="result-value" style="margin:0;${longHeadline ? ' font-size:clamp(1.5rem,5vw,1.875rem);' : ''}">${escapeHtml(headline)}${staleWord ? ` <span style="font-size:16px;">${escapeHtml(staleWord)}</span>` : ''}</p>
+        ${needsPrecision ? precisionLine(d.convertedFull, d.to) : ''}
+        <div class="stat-grid">
+          <div><p class="stat-label">Exchange rate used</p><p class="stat-value">${escapeHtml(rateStat)}</p></div>
+          <div><p class="stat-label">Inverse rate</p><p class="stat-value">${escapeHtml(inverseStat)}</p></div>
+          <div><p class="stat-label">Amount entered</p><p class="stat-value">${escapeHtml(d.amountRaw)} ${d.from}</p></div>
+        </div>
+        <p><strong>Based on:</strong> ${escapeHtml(d.amountRaw)} ${d.from} (${escapeHtml(currencyName(d.from))}) → ${d.to} (${escapeHtml(currencyName(d.to))})</p>
+        <p style="font-size:14px;">${escapeHtml(rateLineText(d.table, freshness))}</p>
+        <p style="font-size:14px;">Indicative rate — not a buy/sell rate. Banks and exchangers may differ, and fees/charges are not included.</p>
+        <p style="font-size:13px; color:var(--ink-muted);">Estimates only — indicative rates. Read the full disclaimer below.</p>
+      `;
+      resultContent.innerHTML = html;
+      lastValidHTML = html;
+      lastValidHeadline = headline + staleWord;
+      setActionsEnabled(true);
+      showSticky(lastValidHeadline);
+    }
+
+    function renderUnavailable(message, showRetry) {
+      resultContent.innerHTML = `
+        <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:0;">Converted amount</p>
+        <div class="error-box" role="alert" style="margin-top:12px;">${escapeHtml(message)}</div>
+        ${showRetry ? '<p style="margin-top:12px;"><button type="button" class="btn-secondary" data-action="retry">Retry</button></p>' : ''}
+        <p style="font-size:13px; color:var(--ink-muted);">Estimates only — indicative rates. Read the full disclaimer below.</p>`;
+      setActionsEnabled(false);
+      hideSticky();
+    }
+
+    function adoptPending() {
+      if (pending) {
+        table = pending.table;
+        tableState = table ? 'ready' : 'unavailable';
+        pending = null;
+        newRateNotice = false;
+        renderStrip();
+        renderOptions();
+      }
+    }
+
+    function rateWouldChange(oldTable, newTable, from, to) {
+      if (!oldTable && newTable) return true;
+      if (oldTable && !newTable) return true;
+      if (!oldTable && !newTable) return false;
+      const oldHas = from === to || (from in (oldTable.pkrPerUnit || {}) && to in (oldTable.pkrPerUnit || {}));
+      const newHas = from === to || (from in (newTable.pkrPerUnit || {}) && to in (newTable.pkrPerUnit || {}));
+      if (oldHas !== newHas) return true;
+      if (from === to) return false;
+      const oldRate = oldTable.pkrPerUnit[from] / oldTable.pkrPerUnit[to];
+      const newRate = newTable.pkrPerUnit[from] / newTable.pkrPerUnit[to];
+      return oldRate !== newRate;
+    }
+
+    function recalculate(fromCalculate) {
+      const amountInput = $('amount');
+      const from = $('from-currency').value;
+      const to = $('to-currency').value;
+      const raw = amountInput.value.trim();
+      let error = '';
+      if (raw === '') error = 'Enter an amount.';
+      let amount = null;
+      if (!error) {
+        amount = parseDecimal(raw);
+        if (amount === null) error = 'Enter numbers only, using digits and one decimal point.';
+        else if (amount <= 0) error = 'Enter an amount greater than 0.';
+        else if (amount > MAX_AMOUNT) error = 'Amount is too large to calculate reliably. Enter a smaller amount.';
+      }
+      const amountErr = $('err-amount');
+      if (error) {
+        amountInput.setAttribute('aria-invalid', 'true');
+        amountErr.textContent = error;
+        amountErr.hidden = false;
+        errorSummary.innerHTML = `<strong>1 field needs attention.</strong> <a href="#amount">Amount</a>`;
+        errorSummary.hidden = false;
+        if (lastValidHTML) {
+          resultContent.innerHTML = `<div class="notice-warning" role="status"><strong>Previous result</strong> — based on earlier inputs. Update the highlighted field to recalculate.</div>` + lastValidHTML;
+          setActionsEnabled(false);
+        } else {
+          renderEmpty();
+        }
+        if (fromCalculate) amountInput.focus();
+        return;
+      }
+      amountInput.removeAttribute('aria-invalid');
+      amountErr.textContent = '';
+      amountErr.hidden = true;
+      errorSummary.hidden = true;
+      errorSummary.textContent = '';
+
+      adoptPending();
+
+      const amountRaw = raw.replace(/,/g, '');
+      if (from === to) {
+        // Same-currency conversion is exact: the amount is returned as entered.
+        displayed = {
+          converted: amount,
+          rate: 1, inverseRate: 1, amountRaw, from, to,
+          table, sameCurrency: true, convertedFull: amount,
+        };
+        renderDisplayed();
+      } else if (tableState === 'loading') {
+        resultContent.innerHTML = emptyHTML().replace('Enter your details to see your result.', 'Fetching the latest rate…');
+        setActionsEnabled(false);
+        return;
+      } else if (!table || freshnessOf(table, Date.now()) === 'unavailable') {
+        displayed = null;
+        renderUnavailable('Rate unavailable. The latest rate could not be loaded. Your amount and currencies are saved in this form — try again.', true);
+        return;
+      } else {
+        let result;
+        try {
+          result = convertCurrency(amount, from, to, table.pkrPerUnit);
+        } catch {
+          result = null;
+        }
+        if (!result) {
+          displayed = null;
+          const missing = [from, to].find((code) => code !== 'PKR' && !(code in (table.pkrPerUnit || {})));
+          renderUnavailable(
+            missing
+              ? `Conversion unavailable — no rate for ${missing} in the latest rate table (as of ${formatKarachi(table.asOf) || 'unknown time'}).`
+              : 'Conversion unavailable — no rate is available for this currency pair.',
+            true,
+          );
+          return;
+        }
+        displayed = {
+          converted: result.converted, rate: result.rate, inverseRate: result.inverseRate,
+          amountRaw, from, to, table, sameCurrency: false, convertedFull: amount * result.rate,
+        };
+        renderDisplayed();
+      }
+
+      if (fromCalculate) {
+        const card = $('result-card');
+        card.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+        card.focus({ preventScroll: true });
+      }
+    }
+
+    function scheduleRecalculate() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => recalculate(false), 150);
+    }
+
+    async function fetchRates() {
+      try {
+        const res = await fetch('/api/rates');
+        if (!res.ok) throw new Error('unavailable');
+        const data = await res.json();
+        if (!data || data.status === 'unavailable' || typeof data.pkrPerUnit !== 'object' || data.pkrPerUnit === null) {
+          throw new Error('unavailable');
+        }
+        const pkrPerUnit = {};
+        for (const [code, value] of Object.entries(data.pkrPerUnit)) {
+          if (typeof value === 'number' && Number.isFinite(value) && value > 0) pkrPerUnit[code] = value;
+        }
+        if (!('PKR' in pkrPerUnit)) pkrPerUnit.PKR = 1;
+        return {
+          pkrPerUnit,
+          sourceName: typeof data.source === 'string' ? data.source : null,
+          asOf: data.providerUpdatedAt || data.fetchedAt || null,
+          fetchedAt: data.fetchedAt || null,
+          nextUpdateAt: data.providerNextUpdateAt || null,
+          stale: data.stale === true,
+        };
+      } catch {
+        return null;
+      }
+    }
+
+    async function refreshRates(manual) {
+      if (refreshing) return;
+      refreshing = true;
+      $('refresh-status').textContent = 'Checking for the latest rate…';
+      const previous = table;
+      const next = await fetchRates();
+      refreshing = false;
+      const from = $('from-currency').value;
+      const to = $('to-currency').value;
+      if (!next) {
+        if (!displayed) {
+          table = null;
+          tableState = 'unavailable';
+          renderStrip();
+          renderOptions();
+          recalculate(false);
+          $('refresh-status').textContent = 'Still trying — the rate could not be loaded.';
+        } else {
+          $('refresh-status').textContent = 'Still trying — the rate could not be loaded. Your displayed result is unchanged.';
+        }
+        return;
+      }
+      const sameTable = previous && next.asOf === previous.asOf && next.fetchedAt === previous.fetchedAt;
+      if (!displayed) {
+        table = next;
+        tableState = 'ready';
+        renderStrip();
+        renderOptions();
+        recalculate(false);
+        $('refresh-status').textContent = freshnessOf(next, Date.now()) === 'stale'
+          ? 'The cached rate is stale — last updated ' + (formatKarachi(next.asOf) || 'unknown time') + '.'
+          : 'Rate already up to date.';
+        return;
+      }
+      if (displayed.sameCurrency || sameTable || !rateWouldChange(previous, next, from, to)) {
+        table = next;
+        renderStrip();
+        renderOptions();
+        if (errorSummary.hidden) renderDisplayed();
+        $('refresh-status').textContent = freshnessOf(next, Date.now()) === 'stale'
+          ? 'The cached rate is stale — last updated ' + (formatKarachi(next.asOf) || 'unknown time') + '.'
+          : 'Rate already up to date.';
+        return;
+      }
+      pending = { table: next };
+      newRateNotice = true;
+      renderDisplayed();
+      $('refresh-status').textContent = 'A new rate is available. Recalculate to use it.';
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      stickyDismissed = false;
+      recalculate(true);
+    });
+
+    $('amount').addEventListener('input', scheduleRecalculate);
+    $('from-currency').addEventListener('change', () => {
+      $('amount-suffix').textContent = $('from-currency').value;
+      scheduleRecalculate();
+    });
+    $('to-currency').addEventListener('change', scheduleRecalculate);
+
+    $('swap-btn').addEventListener('click', () => {
+      const fromEl = $('from-currency');
+      const toEl = $('to-currency');
+      const oldFrom = fromEl.value;
+      const oldTo = toEl.value;
+      fromEl.value = oldTo;
+      toEl.value = oldFrom;
+      $('amount-suffix').textContent = fromEl.value;
+      $('announcer').textContent = `Currencies swapped. Now converting ${fromEl.value} to ${toEl.value}.`;
+      recalculate(false);
+    });
+
+    $('clear-btn').addEventListener('click', () => {
+      form.reset();
+      $('from-currency').value = 'PKR';
+      $('to-currency').value = 'USD';
+      $('amount-suffix').textContent = 'PKR';
+      pending = null;
+      newRateNotice = false;
+      displayed = null;
+      lastValidHTML = '';
+      lastValidHeadline = '';
+      stickyDismissed = false;
+      const amountInput = $('amount');
+      amountInput.removeAttribute('aria-invalid');
+      $('err-amount').textContent = '';
+      $('err-amount').hidden = true;
+      errorSummary.hidden = true;
+      errorSummary.textContent = '';
+      $('form-status').textContent = 'Form cleared.';
+      $('refresh-status').textContent = '';
+      $('announcer').textContent = '';
+      renderOptions();
+      renderEmpty();
+    });
+
+    $('refresh-btn').addEventListener('click', () => refreshRates(true));
+
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-action="retry"]');
+      if (btn) refreshRates(true);
+    });
+
+    $('sticky-details').addEventListener('click', () => {
+      const card = $('result-card');
+      card.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      card.focus({ preventScroll: true });
+    });
+    $('sticky-dismiss').addEventListener('click', () => {
+      stickyDismissed = true;
+      hideSticky();
+    });
+    form.addEventListener('focusin', hideSticky);
+    form.addEventListener('focusout', () => {
+      if (lastValidHTML && !stickyDismissed) showSticky(lastValidHeadline);
+    });
+
+    document.querySelector('[data-share-result]').addEventListener('click', async () => {
+      const text = resultContent.textContent.trim();
+      const status = document.querySelector('[data-copy-status]');
+      if (navigator.share) {
+        try {
+          await navigator.share({ text });
+          if (status) status.textContent = 'Result shared.';
+          return;
+        } catch { /* fall through to copy */ }
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        if (status) status.textContent = 'Result copied.';
+      } catch {
+        if (status) status.textContent = 'Sharing did not work in this browser. Select the result text and copy it manually.';
+      }
+    });
+
+    // Re-derive freshness badges as time passes, without changing figures.
+    // Never re-render over an invalid-input state: the previous result
+    // stays labelled as previous until the input is fixed.
+    setInterval(() => {
+      if (displayed && errorSummary.hidden) renderDisplayed();
+      renderStrip();
+    }, 30000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        if (displayed && errorSummary.hidden) renderDisplayed();
+        renderStrip();
+      }
+    });
+
+    // Initial load: fetch the rate table, then calculate (same-currency
+    // works with no table; other pairs show the unavailable state).
+    renderOptions();
+    renderStrip();
+    renderEmpty();
+    fetchRates().then((next) => {
+      table = next;
+      tableState = next ? 'ready' : 'unavailable';
+      renderStrip();
+      renderOptions();
+      if ($('amount').value.trim() !== '') recalculate(false);
+    });
+  </script>
+</Layout>
