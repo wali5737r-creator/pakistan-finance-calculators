@@ -61,7 +61,7 @@ workflow or Cloudflare token lives in this repo.
 | Variable | Purpose |
 |---|---|
 | `EXCHANGE_RATE_API_KEY` | ExchangeRate-API v6 Free key (currency rates). Server-side only. |
-| `METALPRICE_API_KEY` | MetalpriceAPI Free key (gold/silver prices). Server-side only. |
+| `GOLDPRICE_API_KEY` | Optional goldprice.dev key (gold/silver prices). The goldprice.dev Free endpoints used by `/api/metals` need no key; if set, calls are attributed to the account. Server-side only. |
 
 Set both in Pages → Settings → Environment variables (Production).
 No key is ever written into code, docs, chat, or the client bundle;

@@ -240,6 +240,9 @@ const related = [
           </div>
           <p id="goldEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p id="goldPriceLine" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="goldCredit" hidden style="font-size: 14px; color: var(--ink-muted);">
+            Live gold prices by <a href="https://goldprice.dev" rel="noopener nofollow" target="_blank">goldprice.dev</a>.
+          </p>
           <p id="goldWorked" style="font-size: 15px;"></p>
           <p style="font-size: 14px;">
             Indicative melt value only. Making charges, wastage, taxes, and dealer buy/sell spreads
@@ -477,6 +480,7 @@ const related = [
     const stripText = document.getElementById('goldStripText');
     const stripBadge = document.getElementById('goldStripBadge');
     const stripActions = document.getElementById('goldStripActions');
+    const creditEl = document.getElementById('goldCredit');
     const emptyBox = document.getElementById('goldEmpty');
     const emptyText = document.getElementById('goldEmptyText');
     const resultBox = document.getElementById('goldResult');
@@ -554,6 +558,7 @@ const related = [
       const mode = currentMode();
       stripActions.hidden = true;
       stripBadge.hidden = true;
+      if (creditEl) creditEl.hidden = true;
       if (mode === 'manual') {
         strip.className = 'notice-info';
         stripText.textContent =
@@ -584,6 +589,7 @@ const related = [
         stripBadge.hidden = false;
         stripBadge.textContent = 'Stale';
         stripBadge.className = 'badge badge-warning';
+        if (creditEl) creditEl.hidden = false;
       } else if (fresh === 'unavailable') {
         strip.className = 'notice-warning';
         stripText.textContent = 'Price unavailable. Enter a price of your own, or try again later.';
@@ -597,6 +603,7 @@ const related = [
         stripBadge.hidden = false;
         stripBadge.textContent = 'Current';
         stripBadge.className = 'badge badge-success';
+        if (creditEl) creditEl.hidden = false;
       }
     }
 
