@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Replace [live-domain] once, in one place, at deploy time (OQ-14).
+<!-- Replace pakistan-finance-calculators.pages.dev once, in one place, at deploy time (OQ-14).
      Only the 11 indexed pages are listed (SEO plan §1). -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://[live-domain]/</loc></url>
-  <url><loc>https://[live-domain]/salary-income-tax-calculator/</loc></url>
-  <url><loc>https://[live-domain]/emi-loan-calculator/</loc></url>
-  <url><loc>https://[live-domain]/zakat-calculator/</loc></url>
-  <url><loc>https://[live-domain]/currency-converter/</loc></url>
-  <url><loc>https://[live-domain]/gold-price-calculator/</loc></url>
-  <url><loc>https://[live-domain]/percentage-calculator/</loc></url>
-  <url><loc>https://[live-domain]/age-calculator/</loc></url>
-  <url><loc>https://[live-domain]/unit-marla-converter/</loc></url>
-  <url><loc>https://[live-domain]/about/</loc></url>
-  <url><loc>https://[live-domain]/contact/</loc></url>
-  <url><loc>https://[live-domain]/privacy/</loc></url>
-  <url><loc>https://[live-domain]/terms/</loc></url>
+  <url><loc>https://pakistan-finance-calculators.pages.dev/</loc></url>
+  <url><loc>https://pakistan-finance-calculators.pages.dev/salary-income-tax-calculator/</loc></url>
+  <url><loc>https://pakistan-finance-calculators.pages.dev/emi-loan-calculator/</loc></url>
+  <url><loc>https://pakistan-finance-calculators.pages.dev/zakat-calculator/</loc></url>
+  <url><loc>https://pakistan-finance-calculators.pages.dev/currency-converter/</loc></url>
+  <url><loc>https://pakistan-finance-calculators.pages.dev/gold-price-calculator/</loc></url>
+  <url><loc>https://pakistan-finance-calculators.pages.dev/percentage-calculator/</loc></url>
+  <url><loc>https://pakistan-finance-calculators.pages.dev/age-calculator/</loc></url>
+  <url><loc>https://pakistan-finance-calculators.pages.dev/unit-marla-converter/</loc></url>
+  <url><loc>https://pakistan-finance-calculators.pages.dev/about/</loc></url>
+  <url><loc>https://pakistan-finance-calculators.pages.dev/contact/</loc></url>
+  <url><loc>https://pakistan-finance-calculators.pages.dev/privacy/</loc></url>
+  <url><loc>https://pakistan-finance-calculators.pages.dev/terms/</loc></url>
 </urlset>

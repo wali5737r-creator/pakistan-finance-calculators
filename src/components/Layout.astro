@@ -11,9 +11,9 @@ export interface Props {
 }
 
 const { title, description, slug, schema, noindex = false } = Astro.props;
-// Canonical placeholder: replace [live-domain] once, in one place, at
+// Canonical placeholder: replace pakistan-finance-calculators.pages.dev once, in one place, at
 // deploy time (SEO plan §1). No domain has been invented.
-const canonical = `https://[live-domain]${slug}`;
+const canonical = `https://pakistan-finance-calculators.pages.dev${slug}`;
 const tools = [
   { href: '/salary-income-tax-calculator/', label: 'Salary Tax' },
   { href: '/emi-loan-calculator/', label: 'EMI Calculator' },
@@ -39,7 +39,7 @@ const tools = [
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content="https://[live-domain]/og-image.svg" />
+    <meta property="og:image" content="https://pakistan-finance-calculators.pages.dev/og-image.svg" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#0c5c44" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
