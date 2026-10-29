@@ -2,7 +2,8 @@
 // Citation verified 2026-10-29 from the Gazette PDF itself and approved
 // by Muhammad. Slabs were checked row-by-row against the Gazette table.
 export const TAX_YEAR = '2026-27';
-export const SOURCE_CITATION = 'Finance Act, 2026 (Act No. XLIII of 2026), Gazette of Pakistan, Extraordinary, Part I, 26 June 2026, No. F.22(46)/2026-Legis., s.5(44)(a)(i) substituting the Table in clause (2), Division I, Part I, First Schedule to the Income Tax Ordinance, 2001 — Tax Year 2027 (1 July 2026 to 30 June 2027). Gazette PDF: http://na.gov.pk/uploads/documents/6a422720f05a0_626.pdf';
+export const SOURCE_CITATION = 'Finance Act, 2026 (Act No. XLIII of 2026), Gazette of Pakistan, Extraordinary, Part I, 26 June 2026, No. F.22(46)/2026-Legis., s.5(44)(a)(i) substituting the Table in clause (2), Division I, Part I, First Schedule to the Income Tax Ordinance, 2001 — Tax Year 2027 (1 July 2026 to 30 June 2027)';
+export const GAZETTE_URL = 'http://na.gov.pk/uploads/documents/6a422720f05a0_626.pdf';
 export const SOURCE_STATUS = 'Verified against the Finance Act 2026 gazette';
 
 export interface TaxSlab {

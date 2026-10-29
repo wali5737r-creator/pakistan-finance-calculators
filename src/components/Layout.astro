@@ -11,8 +11,7 @@ export interface Props {
 }
 
 const { title, description, slug, schema, noindex = false } = Astro.props;
-// Canonical placeholder: replace pakistan-finance-calculators.pages.dev once, in one place, at
-// deploy time (SEO plan §1). No domain has been invented.
+// Canonical URL for this page, using the live domain.
 const canonical = `https://pakistan-finance-calculators.pages.dev${slug}`;
 const tools = [
   { href: '/salary-income-tax-calculator/', label: 'Salary Tax' },

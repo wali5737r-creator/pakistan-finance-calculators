@@ -1,7 +1,7 @@
 ---
 import Layout from '../components/Layout.astro';
 import { formatNumber, formatPct, formatPKR } from '../lib/calc.ts';
-import { SOURCE_CITATION, SOURCE_STATUS, TAX_SLAB_LOWER_BOUNDS, TAX_SLABS, TAX_YEAR } from '../config/tax.ts';
+import { GAZETTE_URL, SOURCE_CITATION, SOURCE_STATUS, TAX_SLAB_LOWER_BOUNDS, TAX_SLABS, TAX_YEAR } from '../config/tax.ts';
 
 const title = 'Salary Tax Calculator Pakistan 2026-27 | FBR Slabs';
 const description =
@@ -86,7 +86,8 @@ const slabCaption = `Income exactly at a band boundary is taxed in the lower ban
       slabs only.
     </p>
     <p class="notice-warning prose-narrow" style="margin-top:16px;">
-      <strong>FBR slabs {TAX_YEAR}, salaried individuals.</strong> Source: {SOURCE_STATUS}. {SOURCE_CITATION}
+      <strong>FBR slabs {TAX_YEAR}, salaried individuals.</strong> Source: {SOURCE_STATUS}. {SOURCE_CITATION}.
+      <a href={GAZETTE_URL} rel="noopener" target="_blank">Read the Gazette PDF</a>.
     </p>
   </div>
 
@@ -268,7 +269,9 @@ const slabCaption = `Income exactly at a band boundary is taxed in the lower ban
       {formatPKR(2400000)}) gives annual tax of {formatPKR(156000)}, monthly tax of{' '}
       {formatPKR(13000)}, an effective rate of {formatPct(6.5)}, a marginal rate of{' '}
       {formatPct(20)}, and monthly take-home pay of {formatPKR(187000)}. This example uses
-      fixed example inputs; enter your own income above to calculate your tax.
+      fixed example inputs; enter your own income above to calculate your tax. To see what
+      loan instalment that take-home pay could support, try the{' '}
+      <a href="/emi-loan-calculator/">EMI / Loan Calculator</a>.
     </p>
 
     <section class="faq" aria-labelledby="tax-faq-heading">
@@ -303,10 +306,6 @@ const slabCaption = `Income exactly at a band boundary is taxed in the lower ban
         <article class="card">
           <h3 style="font-size:18px;"><a href="/zakat-calculator/">Zakat Calculator</a></h3>
           <p>Zakat at 2.5% on cash, gold, silver, and trade goods, with gold and silver nisab shown.</p>
-        </article>
-        <article class="card">
-          <h3 style="font-size:18px;"><a href="/percentage-calculator/">Percentage Calculator</a></h3>
-          <p>What X% of a number is, percentage increase and decrease, and what percent one number is of another.</p>
         </article>
       </div>
     </section>

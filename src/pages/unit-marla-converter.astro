@@ -14,7 +14,7 @@ import { convertArea, formatNumber } from '../lib/calc.ts';
 
 const title = 'Marla to Square Feet Converter | Kanal, Acre & Sq Yd';
 const description =
-  'Convert marla, kanal, acre, square feet, square yards, square metres and hectares. Choose the Punjab revenue standard (272.25 sq ft per marla) or the housing-society standard (225 sq ft per marla) — free, instant and private, nothing is stored.';
+  'Convert marla, kanal, acre, square feet, square yards, square metres and hectares. Punjab definition shown with its source — free, instant and accurate.';
 
 const unitById = (id: string) => AREA_UNITS.find((unit) => unit.id === id)!;
 const marlaUnit = unitById('marla');
@@ -302,24 +302,7 @@ const schema = JSON.stringify({
     </section>
 
     <section style="margin-top: 40px;">
-      <h2>Related tools</h2>
-      <div style="display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
-        <article class="card">
-          <h3 style="font-size: 20px;"><a href="/gold-price-calculator/">Gold Price Calculator</a></h3>
-          <p style="color: var(--ink-muted);">Value of gold per tola and per gram for 24K, 22K, 21K, and 18K, with a live or your own price.</p>
-          <p><a href="/gold-price-calculator/">Use the calculator →</a></p>
-        </article>
-        <article class="card">
-          <h3 style="font-size: 20px;"><a href="/percentage-calculator/">Percentage Calculator</a></h3>
-          <p style="color: var(--ink-muted);">What X% of a number is, percentage increase and decrease, and what percent one number is of another.</p>
-          <p><a href="/percentage-calculator/">Use the calculator →</a></p>
-        </article>
-        <article class="card">
-          <h3 style="font-size: 20px;"><a href="/age-calculator/">Age Calculator</a></h3>
-          <p style="color: var(--ink-muted);">Your exact age in years, months, and days, plus total days lived and days until your next birthday.</p>
-          <p><a href="/age-calculator/">Use the calculator →</a></p>
-        </article>
-      </div>
+      <p><a href="/">See all calculators →</a></p>
     </section>
   </div>
 

@@ -62,19 +62,14 @@ const schema = JSON.stringify({
 
 const related = [
   {
-    href: '/salary-income-tax-calculator/',
-    name: 'Salary / Income Tax Calculator',
-    desc: 'Monthly and annual tax on your salary for 2026-27, using FBR salaried slabs, with take-home pay.',
-  },
-  {
     href: '/emi-loan-calculator/',
     name: 'EMI / Loan Calculator',
     desc: 'Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan.',
   },
   {
-    href: '/age-calculator/',
-    name: 'Age Calculator',
-    desc: 'Your exact age in years, months, and days, plus days until your next birthday.',
+    href: '/salary-income-tax-calculator/',
+    name: 'Salary / Income Tax Calculator',
+    desc: 'Monthly and annual tax on your salary for 2026-27, using FBR salaried slabs, with take-home pay.',
   },
 ];
 ---
@@ -252,7 +247,8 @@ const related = [
     <p>
       Change % = ((To − From) ÷ From) × 100. Percentage change from zero is undefined, so the
       starting number cannot be 0. In the second mode, the second number cannot be 0, because you
-      cannot divide by zero.
+      cannot divide by zero. Interest on a loan is a percentage of the amount borrowed — the{' '}
+      <a href="/emi-loan-calculator/">EMI / Loan Calculator</a> shows the full repayment schedule.
     </p>
 
     <h2>Worked examples</h2>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Replace pakistan-finance-calculators.pages.dev once, in one place, at deploy time (OQ-14).
-     Only the 11 indexed pages are listed (SEO plan §1). -->
+<!-- All indexed pages are listed (SEO plan §1): home, 8 tool pages, About, Contact, Privacy, Terms. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://pakistan-finance-calculators.pages.dev/</loc></url>
   <url><loc>https://pakistan-finance-calculators.pages.dev/salary-income-tax-calculator/</loc></url>

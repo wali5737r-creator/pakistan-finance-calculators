@@ -309,7 +309,8 @@ const schema = JSON.stringify({
     <ol>
       <li>Add up cash, gold, silver, trade goods, and other zakatable assets to get gross wealth.</li>
       <li>Deduct debts that are due. Net wealth is gross wealth minus debts, and never goes below zero.</li>
-      <li>Compare net wealth with the nisab: {NISAB_GOLD_GRAMS} g of gold or {NISAB_SILVER_GRAMS} g of silver (1 tola = {TOLA_GRAMS} g). If net wealth is at or above the nisab on the basis stated, Zakat due is {ZAKAT_RATE * 100}% of net wealth.</li>
+      <li>Compare net wealth with the nisab: {NISAB_GOLD_GRAMS} g of gold or {NISAB_SILVER_GRAMS} g of silver (1 tola = {TOLA_GRAMS} g). If net wealth is at or above the nisab on the basis stated, Zakat due is {ZAKAT_RATE * 100}% of net wealth. The{' '}
+        <a href="/gold-price-calculator/">Gold Price Calculator</a> shows how the price per tola and per gram is worked out.</li>
       <li>Hawl (how long wealth has been owned) is not computed. Include only wealth meeting the conditions you follow, and confirm with a qualified scholar.</li>
     </ol>
     <p id="how-numbers">Net wealth × {ZAKAT_RATE * 100}% = Zakat due, when nisab is met.</p>
@@ -349,7 +350,6 @@ const schema = JSON.stringify({
     <h2>Related tools</h2>
     <div style="display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
       <article class="card"><h3 style="font-size:18px;"><a href="/gold-price-calculator/">Gold Price Calculator</a></h3><p style="color:var(--ink-muted);">Value of gold per tola and per gram, with a live or your own price.</p></article>
-      <article class="card"><h3 style="font-size:18px;"><a href="/salary-income-tax-calculator/">Salary Tax Calculator</a></h3><p style="color:var(--ink-muted);">Monthly and annual tax on salary, with take-home pay.</p></article>
       <article class="card"><h3 style="font-size:18px;"><a href="/currency-converter/">Currency Converter</a></h3><p style="color:var(--ink-muted);">Convert between PKR and major currencies at the latest rate.</p></article>
     </div>
   </div>

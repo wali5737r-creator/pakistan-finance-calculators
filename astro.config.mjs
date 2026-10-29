@@ -3,9 +3,8 @@ import tailwindcss from '@tailwindcss/vite';
 
 // Static site for Cloudflare Pages. Pages Functions in /functions are
 // deployed by Cloudflare Pages alongside the static output in /dist.
-// No site URL is asserted here: the domain is not yet chosen (OQ-14).
-// Canonical URLs in pages use the pakistan-finance-calculators.pages.dev placeholder pattern from
-// the SEO plan and must be replaced once, in one place, at deploy time.
+// No site URL is asserted here: canonical URLs in pages use the live
+// domain (https://pakistan-finance-calculators.pages.dev).
 export default defineConfig({
   output: 'static',
   trailingSlash: 'always',
