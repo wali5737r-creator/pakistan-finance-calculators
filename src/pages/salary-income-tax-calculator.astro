@@ -1,7 +1,7 @@
 ---
 import Layout from '../components/Layout.astro';
 import { formatNumber, formatPct, formatPKR } from '../lib/calc.ts';
-import { SOURCE_STATUS, TAX_SLAB_LOWER_BOUNDS, TAX_SLABS, TAX_YEAR } from '../config/tax.ts';
+import { SOURCE_CITATION, SOURCE_STATUS, TAX_SLAB_LOWER_BOUNDS, TAX_SLABS, TAX_YEAR } from '../config/tax.ts';
 
 const title = 'Salary Tax Calculator Pakistan 2026-27 | FBR Slabs';
 const description =
@@ -86,7 +86,7 @@ const slabCaption = `Income exactly at a band boundary is taxed in the lower ban
       slabs only.
     </p>
     <p class="notice-warning prose-narrow" style="margin-top:16px;">
-      <strong>FBR slabs {TAX_YEAR}, salaried individuals.</strong> Source: {SOURCE_STATUS}.
+      <strong>FBR slabs {TAX_YEAR}, salaried individuals.</strong> Source: {SOURCE_STATUS}. {SOURCE_CITATION}
     </p>
   </div>
 
