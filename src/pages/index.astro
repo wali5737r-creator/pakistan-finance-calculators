@@ -11,56 +11,81 @@ const schema = JSON.stringify({
     { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: 'https://pakistan-finance-calculators.pages.dev/' }] },
   ],
 });
+const iconAttrs = 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"';
 const tools = [
-  { href: '/salary-income-tax-calculator/', name: 'Salary / Income Tax Calculator', desc: 'Monthly and annual tax on your salary for 2026-27, using FBR salaried slabs, with take-home pay.' },
-  { href: '/emi-loan-calculator/', name: 'EMI / Loan Calculator', desc: 'Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan.' },
-  { href: '/zakat-calculator/', name: 'Zakat Calculator', desc: 'Zakat at 2.5% on cash, gold, silver, and trade goods, with gold and silver nisab shown.' },
-  { href: '/currency-converter/', name: 'Currency Converter PKR', desc: 'Convert PKR to USD, GBP, EUR, SAR, AED, AUD, and CAD with the rate source and last-updated time shown.' },
-  { href: '/gold-price-calculator/', name: 'Gold Price Calculator', desc: 'Value of gold per tola and per gram for 24K, 22K, 21K, and 18K, with a live or your own price.' },
-  { href: '/percentage-calculator/', name: 'Percentage Calculator', desc: 'What X% of a number is, percentage increase and decrease, and what percent one number is of another.' },
-  { href: '/age-calculator/', name: 'Age Calculator', desc: 'Your exact age in years, months, and days, plus total days lived and days until your next birthday.' },
-  { href: '/unit-marla-converter/', name: 'Unit / Marla Converter', desc: 'Convert marla, kanal, acre, square feet, square yards, square metres, and hectares.' },
+  { href: '/salary-income-tax-calculator/', name: 'Salary / Income Tax Calculator', desc: 'Monthly and annual tax on your salary for 2026-27, using FBR salaried slabs, with take-home pay.', icon: `<svg ${iconAttrs}><path d="M6 3h9l3 3v15H6z"/><path d="M9 12h6M9 16h6M14 3v4h4"/></svg>` },
+  { href: '/emi-loan-calculator/', name: 'EMI / Loan Calculator', desc: 'Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan.', icon: `<svg ${iconAttrs}><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/></svg>` },
+  { href: '/zakat-calculator/', name: 'Zakat Calculator', desc: 'Zakat at 2.5% on cash, gold, silver, and trade goods, with gold and silver nisab shown.', icon: `<svg ${iconAttrs}><path d="M20 13A8 8 0 1 1 11 4a6.5 6.5 0 0 0 9 9z"/><path d="M17 3l.6 1.6L19 5l-1.4.5L17 7l-.6-1.5L15 5l1.4-.4z"/></svg>` },
+  { href: '/currency-converter/', name: 'Currency Converter PKR', desc: 'Convert PKR to USD, GBP, EUR, SAR, AED, AUD, and CAD with the rate source and last-updated time shown.', icon: `<svg ${iconAttrs}><path d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5"/></svg>` },
+  { href: '/gold-price-calculator/', name: 'Gold Price Calculator', desc: 'Value of gold per tola and per gram for 24K, 22K, 21K, and 18K, with a live or your own price.', icon: `<svg ${iconAttrs}><path d="M4 18h16M6.5 18l1.5-6.5h8L17.5 18M9.5 11.5V7.5h5v4"/></svg>` },
+  { href: '/percentage-calculator/', name: 'Percentage Calculator', desc: 'What X% of a number is, percentage increase and decrease, and what percent one number is of another.', icon: `<svg ${iconAttrs}><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/><path d="M18 5L6 19"/></svg>` },
+  { href: '/age-calculator/', name: 'Age Calculator', desc: 'Your exact age in years, months, and days, plus total days lived and days until your next birthday.', icon: `<svg ${iconAttrs}><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4M8.5 15h3"/></svg>` },
+  { href: '/unit-marla-converter/', name: 'Unit / Marla Converter', desc: 'Convert marla, kanal, acre, square feet, square yards, square metres, and hectares.', icon: `<svg ${iconAttrs}><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M12 4v16M4 12h16" stroke-dasharray="3 2"/></svg>` },
 ];
 ---
 
 <Layout title={title} description={description} slug="/" schema={schema}>
-  <div class="container" style="padding-top:48px; padding-bottom:16px;">
-    <p class="badge badge-info" style="margin-bottom:12px;">Free · No sign-up · Private</p>
-    <h1 style="font-size: clamp(2rem, 5.5vw, 2.75rem); max-width: 720px;">Pakistan Finance Calculators</h1>
-    <p style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); max-width: 720px; margin-top:12px;">
-      Eight calculators built for Pakistan — salary tax, EMI, Zakat, currency,
-      gold, percentages, age, and land area. Every calculation runs in your
-      browser, every result shows its basis, and nothing you enter is stored.
-    </p>
+  <section class="hero">
+    <div class="container hero-inner">
+      <p><span class="badge badge-dark">Free · No sign-up · Private</span></p>
+      <h1>Pakistan Finance Calculators — <span class="hero-accent">every rupee, worked out.</span></h1>
+      <p class="hero-lede">
+        Eight calculators built for Pakistan — salary tax, EMI, Zakat, currency,
+        gold, percentages, age, and land area. Every calculation runs in your
+        browser, every result shows its basis, and nothing you enter is stored.
+      </p>
+      <p class="hero-cta">
+        <a class="btn-hero-primary" href="/salary-income-tax-calculator/">Calculate salary tax →</a>
+        <a class="btn-hero-secondary" href="#tools">Browse all 8 tools</a>
+      </p>
+      <ul class="trust-strip">
+        <li><span class="trust-tick" aria-hidden="true">✓</span> Free forever — no fees, no sign-up</li>
+        <li><span class="trust-tick" aria-hidden="true">✓</span> Private — calculations never leave your browser</li>
+        <li><span class="trust-tick" aria-hidden="true">✓</span> Sources shown — slabs, rates, and dates on every result</li>
+        <li><span class="trust-tick" aria-hidden="true">✓</span> Built for Pakistan — FBR slabs, tola, marla, and PKR</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="container section-head" id="tools">
+    <p class="section-eyebrow">All calculators</p>
+    <h2 class="section-title">Eight tools, one for every money question</h2>
+    <p class="section-sub">Pick a tool and get your answer in seconds — with the formula, a worked example, and the source behind every figure.</p>
   </div>
-  <div class="container" style="padding-bottom:16px;">
-    <div style="display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+  <div class="container">
+    <div class="tool-card-grid">
       {tools.map((tool) => (
-        <article class="card" style="display:flex; flex-direction:column; gap:8px;">
-          <h2 style="font-size:20px;"><a href={tool.href}>{tool.name}</a></h2>
-          <p style="color: var(--ink-muted); flex:1;">{tool.desc}</p>
-          <p><a href={tool.href}>Use the calculator →</a></p>
+        <article class="tool-card">
+          <span class="tool-icon" set:html={tool.icon} />
+          <h2><a href={tool.href}>{tool.name}</a></h2>
+          <p>{tool.desc}</p>
+          <p><a class="tool-link" href={tool.href}>Use the calculator <span class="arrow" aria-hidden="true">→</span></a></p>
         </article>
       ))}
     </div>
   </div>
-  <div class="container prose-narrow" style="padding-top:24px;">
-    <h2>How this site works</h2>
-    <p>
-      Each tool is a separate page with its own worked example, formula,
-      source, and disclaimer. Tax slabs, nisab weights, and conversion
-      factors live in one config file each, so next year's update is a
-      single edit — not a rewrite. Currency and gold rates come from named
-      sources with a last-updated time; a stale rate is always labelled
-      stale, and no rate is ever guessed.
-    </p>
-    <h2>Results are estimates</h2>
-    <p>
-      Tax results use salaried slabs only, before any surcharge, rebate, or
-      withholding adjustment. Zakat results are arithmetic estimates only,
-      not a fatwa — please confirm with a qualified scholar. Currency and
-      gold figures are indicative, not bank or jeweller rates.
-      <a href="/terms/">Read the full disclaimer</a>.
-    </p>
+
+  <div class="container info-grid" style="padding-bottom:48px;">
+    <section class="card info-card">
+      <h2>How this site works</h2>
+      <p>
+        Each tool is a separate page with its own worked example, formula,
+        source, and disclaimer. Tax slabs, nisab weights, and conversion
+        factors live in one config file each, so next year's update is a
+        single edit — not a rewrite. Currency and gold rates come from named
+        sources with a last-updated time; a stale rate is always labelled
+        stale, and no rate is ever guessed.
+      </p>
+    </section>
+    <section class="card info-card">
+      <h2>Results are estimates</h2>
+      <p>
+        Tax results use salaried slabs only, before any surcharge, rebate, or
+        withholding adjustment. Zakat results are arithmetic estimates only,
+        not a fatwa — please confirm with a qualified scholar. Currency and
+        gold figures are indicative, not bank or jeweller rates.
+        <a href="/terms/">Read the full disclaimer</a>.
+      </p>
+    </section>
   </div>
 </Layout>

@@ -47,21 +47,22 @@ const tools = [
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to main content</a>
-    <header class="site-header" style="background: var(--brand-950); color: #fff;">
-      <div class="container" style="display:flex; flex-wrap:wrap; gap:8px 24px; align-items:center; justify-content:space-between; padding-top:14px; padding-bottom:14px;">
-        <a href="/" style="color:#fff; font-weight:800; font-size:20px; text-decoration:none;">
-          Pakistan Finance Calculators
+    <header class="site-header">
+      <div class="container site-header-bar">
+        <a class="brand-mark" href="/">
+          <span class="brand-badge" aria-hidden="true">Rs</span>
+          <span>Pakistan Finance Calculators</span>
         </a>
-        <nav aria-label="Main" style="display:flex; flex-wrap:wrap; gap:4px 16px;">
-          <a href="/" style="color:#fff;">Home</a>
-          <a href="/about/" style="color:#fff;">About</a>
-          <a href="/contact/" style="color:#fff;">Contact</a>
+        <nav class="main-nav" aria-label="Main">
+          <a href="/">Home</a>
+          <a href="/about/">About</a>
+          <a href="/contact/">Contact</a>
         </nav>
       </div>
-      <nav aria-label="Calculators" style="background: var(--brand-800);">
-        <div class="container" style="display:flex; flex-wrap:wrap; gap:4px 18px; padding-top:8px; padding-bottom:8px;">
+      <nav class="tool-nav" aria-label="Calculators">
+        <div class="container tool-nav-scroll">
           {tools.map((t) => (
-            <a href={t.href} style="color:#fff; font-size:15px;">{t.label}</a>
+            <a href={t.href}>{t.label}</a>
           ))}
         </div>
       </nav>
@@ -69,20 +70,37 @@ const tools = [
     <main id="main">
       <slot />
     </main>
-    <footer class="site-footer" style="background: var(--brand-950); color:#fff; margin-top:64px;">
-      <div class="container" style="padding-top:32px; padding-bottom:32px;">
-        <p style="font-weight:700; margin-bottom:8px;">Pakistan Finance Calculators</p>
-        <p style="font-size:14px; max-width:720px;">
-          Free calculators for Pakistan. Results are estimates for information
-          only — not tax, financial, or religious advice. Calculations run in
-          your browser; nothing you enter is stored or sent to a server.
-        </p>
-        <nav aria-label="Footer" style="display:flex; flex-wrap:wrap; gap:8px 20px; margin-top:16px; font-size:15px;">
-          <a href="/about/" style="color:#fff;">About</a>
-          <a href="/contact/" style="color:#fff;">Contact</a>
-          <a href="/privacy/" style="color:#fff;">Privacy Policy</a>
-          <a href="/terms/" style="color:#fff;">Terms &amp; Disclaimer</a>
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <p class="footer-brand">Pakistan Finance Calculators</p>
+          <p style="font-size:14px; max-width:480px; margin:0;">
+            Free calculators for Pakistan. Results are estimates for information
+            only — not tax, financial, or religious advice. Calculations run in
+            your browser; nothing you enter is stored or sent to a server.
+          </p>
+        </div>
+        <nav aria-label="Calculators">
+          <p class="footer-heading">Calculators</p>
+          <ul class="footer-links">
+            {tools.map((t) => (
+              <li><a href={t.href}>{t.label}</a></li>
+            ))}
+          </ul>
         </nav>
+        <nav aria-label="Footer">
+          <p class="footer-heading">Site</p>
+          <ul class="footer-links">
+            <li><a href="/about/">About</a></li>
+            <li><a href="/contact/">Contact</a></li>
+            <li><a href="/privacy/">Privacy Policy</a></li>
+            <li><a href="/terms/">Terms &amp; Disclaimer</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="container footer-bottom">
+        <span>© 2026 Pakistan Finance Calculators</span>
+        <span>Free · No sign-up · Private</span>
       </div>
     </footer>
     <script>
