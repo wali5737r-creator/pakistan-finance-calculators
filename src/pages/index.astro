@@ -21,6 +21,15 @@ const tools = [
   { href: '/percentage-calculator/', name: 'Percentage Calculator', desc: 'What X% of a number is, percentage increase and decrease, and what percent one number is of another.', icon: `<svg ${iconAttrs}><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/><path d="M18 5L6 19"/></svg>` },
   { href: '/age-calculator/', name: 'Age Calculator', desc: 'Your exact age in years, months, and days, plus total days lived and days until your next birthday.', icon: `<svg ${iconAttrs}><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4M8.5 15h3"/></svg>` },
   { href: '/unit-marla-converter/', name: 'Unit / Marla Converter', desc: 'Convert marla, kanal, acre, square feet, square yards, square metres, and hectares.', icon: `<svg ${iconAttrs}><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M12 4v16M4 12h16" stroke-dasharray="3 2"/></svg>` },
+  { href: '/fuel-cost-calculator/', name: 'Fuel Cost Calculator', desc: 'Litres used, total cost, and cost per kilometre for any trip, from the distance, mileage, and fuel price you enter.', icon: `<svg ${iconAttrs}><path d="M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h14"/><path d="M15 9h2.5A1.5 1.5 0 0 1 19 10.5V16a2 2 0 0 0 4 0V8l-3-3"/><path d="M8 7h4v3H8z"/></svg>` },
+  { href: '/compound-interest-calculator/', name: 'Compound Interest Calculator', desc: 'How savings grow with compound interest: final amount, interest earned, and a year-by-year table.', icon: `<svg ${iconAttrs}><path d="M4 20V10M10 20V4M16 20v-8M21 20H3"/></svg>` },
+  { href: '/loan-eligibility-calculator/', name: 'Loan Eligibility Calculator', desc: 'The largest loan your income can support, from the affordable EMI after your existing obligations.', icon: `<svg ${iconAttrs}><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>` },
+  { href: '/inflation-calculator/', name: 'Inflation Calculator', desc: 'The future cost of an amount and its purchasing power, at the inflation rate and years you assume.', icon: `<svg ${iconAttrs}><path d="M4 19l6-6 4 4 6-8"/><path d="M20 9h-4V5"/></svg>` },
+  { href: '/budget-planner-calculator/', name: 'Budget Planner Calculator', desc: 'Split monthly take-home pay into needs, wants, and savings with the 50/30/20 rule and your own percentages.', icon: `<svg ${iconAttrs}><path d="M4 19h16M6 19V9M11 19V5M16 19v-7M21 19H3"/></svg>` },
+  { href: '/debt-payoff-calculator/', name: 'Debt Payoff Calculator', desc: 'How fast a balance clears with and without an extra monthly payment, and the interest the extra payment saves.', icon: `<svg ${iconAttrs}><path d="M5 21V4M5 4h11l-2.5 4L16 12H5"/><path d="M15 17h5M17.5 15v4"/></svg>` },
+  { href: '/fixed-deposit-calculator/', name: 'Fixed Deposit Calculator', desc: 'Maturity amount and profit on a fixed deposit, with the profit rate and tax you enter.', icon: `<svg ${iconAttrs}><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12h8M8 8h8M8 16h5"/></svg>` },
+  { href: '/loan-comparison-calculator/', name: 'Loan Comparison Calculator', desc: 'Compare two loans side by side: EMI, total interest, and total payment for each, and which costs less.', icon: `<svg ${iconAttrs}><path d="M12 4v16M6 20h12M6 7l6-3 6 3M6 7h12"/></svg>` },
+  { href: '/goal-savings-calculator/', name: 'Goal Savings Calculator', desc: 'How much to save each month for a target, or how long a monthly saving will take to reach it.', icon: `<svg ${iconAttrs}><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3"/></svg>` },
 ];
 ---
 
@@ -30,13 +39,14 @@ const tools = [
       <p><span class="badge badge-dark">Free · No sign-up · Private</span></p>
       <h1>Pakistan Finance Calculators — <span class="hero-accent">every rupee, worked out.</span></h1>
       <p class="hero-lede">
-        Eight calculators built for Pakistan — salary tax, EMI, Zakat, currency,
-        gold, percentages, age, and land area. Every calculation runs in your
+        Seventeen calculators built for Pakistan — salary tax, EMI, Zakat, currency,
+        gold, percentages, age, and land area, plus fuel costs, savings growth, loans,
+        inflation, budgets, debt payoff, fixed deposits, and goal saving. Every calculation runs in your
         browser, every result shows its basis, and nothing you enter is stored.
       </p>
       <p class="hero-cta">
         <a class="btn-hero-primary" href="/salary-income-tax-calculator/">Calculate salary tax →</a>
-        <a class="btn-hero-secondary" href="#tools">Browse all 8 tools</a>
+        <a class="btn-hero-secondary" href="#tools">Browse all 17 tools</a>
       </p>
       <ul class="trust-strip">
         <li><span class="trust-tick" aria-hidden="true">✓</span> Free forever — no fees, no sign-up</li>
@@ -49,7 +59,7 @@ const tools = [
 
   <div class="container section-head" id="tools">
     <p class="section-eyebrow">All calculators</p>
-    <h2 class="section-title">Eight tools, one for every money question</h2>
+    <h2 class="section-title">Seventeen tools, one for every money question</h2>
     <p class="section-sub">Pick a tool and get your answer in seconds — with the formula, a worked example, and the source behind every figure.</p>
   </div>
   <div class="container">

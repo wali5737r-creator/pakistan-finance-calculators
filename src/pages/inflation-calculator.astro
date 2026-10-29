@@ -1,0 +1,334 @@
+---
+import Layout from '../components/Layout.astro';
+
+const title = "Inflation Calculator | Future Cost & Buying Power";
+const description = "See what today's money will buy in the future: the future cost of an amount and its purchasing power, at the inflation rate and years you assume.";
+const slug = "/inflation-calculator/";
+
+const faqs = [
+  {
+    q: "What does the future cost figure mean?",
+    a: "It is what the same thing would cost after the years you entered, if prices rose at the inflation rate you assumed every year. For example, Rs 100,000 today at 8% for 10 years becomes Rs 215,892.50.",
+  },
+  {
+    q: "What does purchasing power mean?",
+    a: "It is what today's amount would be worth in the future, measured in today's prices. Rs 100,000 held for 10 years at 8% inflation would buy what Rs 46,319.35 buys today.",
+  },
+  {
+    q: "Is the inflation rate I enter a forecast?",
+    a: "No. It is an assumption you choose, to see the effect of a steady rate. Real inflation changes every year, so try a lower and a higher rate to see the range of outcomes.",
+  },
+  {
+    q: "Does the calculator use Pakistan's actual inflation rate?",
+    a: "No. No official or live inflation figure is used. You enter the rate, and the result is labelled as your assumption throughout.",
+  },
+  {
+    q: "Why does the increase look so large over many years?",
+    a: "Because inflation compounds, like interest: each year's rise applies to the already-risen price. That is why the effect grows faster the longer the period.",
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://pakistan-finance-calculators.pages.dev/inflation-calculator/#webapp',
+      name: "Inflation Calculator",
+      url: 'https://pakistan-finance-calculators.pages.dev/inflation-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://pakistan-finance-calculators.pages.dev/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: "Inflation Calculator",
+          item: 'https://pakistan-finance-calculators.pages.dev/inflation-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+
+const related = [
+  {
+    href: "/compound-interest-calculator/",
+    name: "Compound Interest Calculator",
+    desc: "How savings grow with compound interest, with a year-by-year table, from the figures you enter.",
+  },
+  {
+    href: "/fixed-deposit-calculator/",
+    name: "Fixed Deposit Calculator",
+    desc: "Maturity amount and profit on a fixed deposit, with the profit rate and tax you enter.",
+  },
+];
+---
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Inflation Calculator</p>
+    </nav>
+    <p class="badge badge-info" style="margin-top: 8px;">Money Over Time</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Inflation Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+      Prices rise, so the same amount of money buys less over time. Enter an amount, the yearly inflation rate you assume, and how many years ahead to look, and see what that amount will cost in the future — and what today's money will be worth then, in today's terms.
+    </p>
+    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+      <strong>No live data.</strong> Every rate, price, and percentage on this page is entered by
+      you. Nothing is fetched from a bank, a market, or a government source, and no figure here
+      is presented as a live or official rate.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="inflForm" novalidate>
+          <div class="field">
+            <label for="inflAmount">Amount today (Rs) <span aria-hidden="true">*</span></label>
+            <input id="inflAmount" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">The cost of something today, or an amount of money you hold today.</p>
+          </div>
+
+          <div class="field">
+            <label for="inflRate">Annual inflation rate (%) <span aria-hidden="true">*</span></label>
+            <input id="inflRate" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">The yearly inflation rate you assume. This is your assumption, not a forecast and not an official figure.</p>
+          </div>
+
+          <div class="field">
+            <label for="inflYears">Years <span aria-hidden="true">*</span></label>
+            <input id="inflYears" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">How many years ahead to look, from 0 to 100. Whole or part years are allowed.</p>
+          </div>
+
+          <div id="inflErrors" class="error-box" role="alert" hidden></div>
+
+          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+            <button id="inflCalculate" class="btn-primary" type="submit">Calculate</button>
+            <button id="inflClear" class="btn-secondary" type="button">Clear</button>
+          </p>
+          <p id="inflFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        </form>
+      </div>
+
+      <div class="result-card" id="inflResultCard" tabindex="-1">
+        <div id="inflEmpty">
+          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p>Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            You will see your answer with the figures shown, so you can check it.
+          </p>
+        </div>
+
+        <div id="inflResult" data-result-text hidden>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Result</p>
+          <div aria-live="polite" aria-atomic="true">
+            <p class="result-value" id="inflHeadline"></p>
+          </div>
+          <div class="stat-grid">
+            <div>
+              <p class="stat-label">Purchasing power in today's terms</p>
+              <p class="stat-value" id="inflStat1"></p>
+            </div>
+            <div>
+              <p class="stat-label">Increase in cost</p>
+              <p class="stat-value" id="inflStat2"></p>
+            </div>
+          </div>
+          <p id="inflEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="inflFormula" style="font-size: 16px;"></p>
+          <p style="font-size: 13px; color: var(--ink-muted);">
+            Estimate only — check important figures before acting.
+            <a href="#inflDisclaimer">Read the full disclaimer.</a>
+          </p>
+        </div>
+
+        <div class="actions-row no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size: 14px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top: 40px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Enter an amount — the price of something today, or an amount of money you hold.</li>
+      <li>Enter the annual inflation rate you assume, and the number of years. The rate is your assumption: inflation is never steady in real life.</li>
+      <li>You see the future cost of the same thing, and the purchasing power of today's amount after that many years — what it would be worth, measured in today's prices.</li>
+    </ol>
+    <p>The two figures are two sides of the same calculation. If something costing Rs 100,000 today will cost Rs 215,892.50 in 10 years at 8% inflation, then Rs 100,000 held for 10 years will only buy what Rs 46,319.35 buys today.</p>
+
+    <h2>Formula</h2>
+    <p>Future cost = Amount × (1 + inflation rate)<sup>years</sup></p>
+    <p>Purchasing power = Amount ÷ (1 + inflation rate)<sup>years</sup></p>
+    <p>The same assumed rate is used for every year. Real inflation varies year to year, so the result is an illustration, not a prediction. To see savings growing against rising prices, try the <a href="/compound-interest-calculator/">Compound Interest Calculator</a>.</p>
+
+    <h2>Worked example</h2>
+    <p><strong>Example:</strong> Rs 100,000 today, at 8% inflation a year for 10 years, would cost Rs 215,892.50 in the future (100,000 × 1.08<sup>10</sup>). The same Rs 100,000 kept for 10 years would have the purchasing power of Rs 46,319.35 in today's terms (100,000 ÷ 1.08<sup>10</sup>).</p>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+
+    <section id="inflDisclaimer" class="notice-info" style="margin-top: 32px;">
+      <h2 style="font-size: 20px;">Important — please read</h2>
+      <p>
+        Results are illustrations based on the inflation rate you assume. The rate is your assumption, not a forecast, not an official statistic, and not a promise about future prices. Real inflation varies every year and differs between goods and services. This is not financial advice.
+      </p>
+      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+    </section>
+
+    <h2 style="margin-top: 32px;">Related tools</h2>
+    <div class="related-grid">
+      {
+        related.map((tool) => (
+          <article class="card">
+            <h3 style="font-size: 18px;">
+              <a href={tool.href}>{tool.name}</a>
+            </h3>
+            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p>
+              <a href={tool.href}>Use the calculator →</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+    .field-error {
+      font-size: 14px;
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin: 12px 0;
+    }
+    .stat-grid p {
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .related-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+  </style>
+
+  <script>
+    import { calcInflation, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';
+
+    const form = document.getElementById('inflForm');
+    const errorsBox = document.getElementById('inflErrors');
+    const emptyBox = document.getElementById('inflEmpty');
+    const resultBox = document.getElementById('inflResult');
+    const resultCard = document.getElementById('inflResultCard');
+    const headline = document.getElementById('inflHeadline');
+    const stat1 = document.getElementById('inflStat1');
+    const stat2 = document.getElementById('inflStat2');
+    const echoEl = document.getElementById('inflEcho');
+    const formulaEl = document.getElementById('inflFormula');
+    const copyBtn = document.querySelector('[data-copy-result]');
+    const printBtn = document.querySelector('[data-print-result]');
+    const formStatus = document.getElementById('inflFormStatus');
+
+    function readNumber(id, label) {
+      const raw = document.getElementById(id).value;
+      if (raw.trim() === '') throw new Error(label + ' is required.');
+      const value = parseDecimal(raw);
+      if (value === null) throw new Error(label + ' must be a number using digits and one decimal point only.');
+      return value;
+    }
+    function showEmpty() {
+      resultBox.hidden = true;
+      emptyBox.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+    function showResult() {
+      emptyBox.hidden = true;
+      resultBox.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        const amount = readNumber('inflAmount', 'Amount');
+        const rate = readNumber('inflRate', 'Inflation rate');
+        const years = readNumber('inflYears', 'Years');
+        const r = calcInflation(amount, rate, years);
+        errorsBox.textContent = '';
+        errorsBox.hidden = true;
+        headline.textContent = formatPKR(r.futureCost, 2);
+        stat1.textContent = formatPKR(r.purchasingPower, 2);
+        stat2.textContent = formatPKR(r.futureCost - amount, 2);
+        echoEl.textContent = 'Based on: ' + formatPKR(amount, 2) + ' today, inflation ' + formatNumber(rate, 2) + '% per year, for ' + formatNumber(years, 2) + ' years.';
+        formulaEl.textContent = 'Future cost = ' + formatPKR(amount, 2) + ' x (1 + ' + formatNumber(rate, 2) + '%)^' + formatNumber(years, 2) + ' = ' + formatPKR(r.futureCost, 2) + '. Purchasing power = ' + formatPKR(amount, 2) + ' / (1 + ' + formatNumber(rate, 2) + '%)^' + formatNumber(years, 2) + ' = ' + formatPKR(r.purchasingPower, 2) + '.';
+        showResult();
+        if (window.matchMedia('(max-width: 899px)').matches) resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorsBox.textContent = err.message;
+        errorsBox.hidden = false;
+        showEmpty();
+      }
+    });
+
+    document.getElementById('inflClear').addEventListener('click', () => {
+      form.reset();
+      errorsBox.textContent = '';
+      errorsBox.hidden = true;
+      formStatus.textContent = 'Form cleared.';
+      showEmpty();
+    });
+    showEmpty();
+
+  </script>
+</Layout>

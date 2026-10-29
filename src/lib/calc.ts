@@ -450,3 +450,408 @@ export function convertAreaToAllWithUnits(
   }
   return result;
 }
+
+// ------------------------------------------------------------ Fuel -----
+export interface FuelResult {
+  distance: number;
+  totalDistance: number;
+  litres: number;
+  totalCost: number;
+  costPerKm: number;
+}
+
+export function calcFuel(distanceKm: number, mileageKmPerLitre: number, pricePerLitre: number, returnTrip: boolean): FuelResult {
+  if (!isFiniteNumber(distanceKm) || distanceKm <= 0 || distanceKm > MAX_AMOUNT) {
+    throw new Error('Distance must be a positive number.');
+  }
+  if (!isFiniteNumber(mileageKmPerLitre) || mileageKmPerLitre <= 0) {
+    throw new Error('Mileage must be a positive number of kilometres per litre.');
+  }
+  if (!isFiniteNumber(pricePerLitre) || pricePerLitre <= 0 || pricePerLitre > MAX_AMOUNT) {
+    throw new Error('Fuel price per litre must be a positive number.');
+  }
+  const totalDistance = returnTrip ? distanceKm * 2 : distanceKm;
+  const litres = totalDistance / mileageKmPerLitre;
+  const totalCost = litres * pricePerLitre;
+  return {
+    distance: distanceKm,
+    totalDistance,
+    litres: round2(litres),
+    totalCost: round2(totalCost),
+    costPerKm: round2(totalCost / totalDistance),
+  };
+}
+
+// ------------------------------------------------- Compound interest --
+export interface CompoundYearRow {
+  year: number;
+  balance: number;
+  totalContributions: number;
+  interestEarned: number;
+}
+
+export interface CompoundResult {
+  finalAmount: number;
+  totalContributions: number;
+  interestEarned: number;
+  rows: CompoundYearRow[];
+}
+
+export const COMPOUND_FREQUENCIES = [1, 2, 4, 12] as const;
+
+export function calcCompound(
+  principal: number,
+  monthlyContribution: number,
+  annualRatePct: number,
+  years: number,
+  periodsPerYear: number,
+): CompoundResult {
+  if (!isFiniteNumber(principal) || principal < 0 || principal > MAX_AMOUNT) {
+    throw new Error('Starting amount must be zero or more.');
+  }
+  if (!isFiniteNumber(monthlyContribution) || monthlyContribution < 0 || monthlyContribution > MAX_AMOUNT) {
+    throw new Error('Monthly contribution must be zero or more.');
+  }
+  if (!isFiniteNumber(annualRatePct) || annualRatePct < 0 || annualRatePct > 100) {
+    throw new Error('Annual return must be between 0 and 100%.');
+  }
+  if (!Number.isInteger(years) || years < 1 || years > 50) {
+    throw new Error('Years must be a whole number between 1 and 50.');
+  }
+  if (!COMPOUND_FREQUENCIES.includes(periodsPerYear as (typeof COMPOUND_FREQUENCIES)[number])) {
+    throw new Error('Compounding frequency must be annual, half-yearly, quarterly, or monthly.');
+  }
+  const ratePerPeriod = annualRatePct / 100 / periodsPerYear;
+  const contributionPerPeriod = (monthlyContribution * 12) / periodsPerYear;
+  const totalPeriods = years * periodsPerYear;
+  let balance = principal;
+  const rows: CompoundYearRow[] = [];
+  for (let period = 1; period <= totalPeriods; period++) {
+    // Contributions are added at the end of each period, then interest
+    // applies from the next period — the same end-of-period convention
+    // as the EMI schedule (interest on the balance outstanding).
+    balance = round2(balance * (1 + ratePerPeriod) + contributionPerPeriod);
+    if (period % periodsPerYear === 0) {
+      const year = period / periodsPerYear;
+      const totalContributions = round2(principal + monthlyContribution * 12 * year);
+      rows.push({
+        year,
+        balance,
+        totalContributions,
+        interestEarned: round2(balance - totalContributions),
+      });
+    }
+  }
+  const totalContributions = round2(principal + monthlyContribution * 12 * years);
+  return {
+    finalAmount: balance,
+    totalContributions,
+    interestEarned: round2(balance - totalContributions),
+    rows,
+  };
+}
+
+// ------------------------------------------------- Loan eligibility ---
+export interface LoanEligibilityResult {
+  maxEmi: number;
+  maxLoan: number;
+  /** EMI the borrower can afford after existing obligations. */
+  affordableEmi: number;
+}
+
+export function calcLoanEligibility(
+  monthlyIncome: number,
+  monthlyObligations: number,
+  maxEmiSharePct: number,
+  annualRatePct: number,
+  months: number,
+): LoanEligibilityResult {
+  if (!isFiniteNumber(monthlyIncome) || monthlyIncome <= 0 || monthlyIncome > MAX_AMOUNT) {
+    throw new Error('Monthly income must be a positive number.');
+  }
+  if (!isFiniteNumber(monthlyObligations) || monthlyObligations < 0 || monthlyObligations > MAX_AMOUNT) {
+    throw new Error('Existing monthly obligations must be zero or more.');
+  }
+  if (!isFiniteNumber(maxEmiSharePct) || maxEmiSharePct <= 0 || maxEmiSharePct > 100) {
+    throw new Error('Maximum EMI share must be between 0 and 100%.');
+  }
+  if (!isFiniteNumber(annualRatePct) || annualRatePct < 0 || annualRatePct > EMI_MAX_RATE) {
+    throw new Error(`Annual interest rate must be between 0 and ${EMI_MAX_RATE}%.`);
+  }
+  if (!Number.isInteger(months) || months < 1 || months > EMI_MAX_MONTHS) {
+    throw new Error(`Tenure must be a whole number of months between 1 and ${EMI_MAX_MONTHS}.`);
+  }
+  const maxEmi = monthlyIncome * (maxEmiSharePct / 100);
+  const affordableEmi = maxEmi - monthlyObligations;
+  if (affordableEmi <= 0) {
+    throw new Error('Existing obligations leave no room for an EMI at this share of income. Lower the obligations or raise the EMI share.');
+  }
+  const monthlyRate = annualRatePct / 100 / 12;
+  // Inverse of the EMI formula: P = EMI x ((1+r)^n - 1) / (r x (1+r)^n).
+  const maxLoan = monthlyRate > 0
+    ? affordableEmi * ((Math.pow(1 + monthlyRate, months) - 1) / (monthlyRate * Math.pow(1 + monthlyRate, months)))
+    : affordableEmi * months;
+  return { maxEmi: round2(maxEmi), maxLoan: round2(maxLoan), affordableEmi: round2(affordableEmi) };
+}
+
+// -------------------------------------------------------- Inflation ---
+export interface InflationResult {
+  futureCost: number;
+  purchasingPower: number;
+}
+
+export function calcInflation(amount: number, annualRatePct: number, years: number): InflationResult {
+  if (!isFiniteNumber(amount) || amount <= 0 || amount > MAX_AMOUNT) {
+    throw new Error('Amount must be a positive number.');
+  }
+  if (!isFiniteNumber(annualRatePct) || annualRatePct < 0 || annualRatePct > 100) {
+    throw new Error('Inflation rate must be between 0 and 100%.');
+  }
+  if (!isFiniteNumber(years) || years < 0 || years > 100) {
+    throw new Error('Years must be between 0 and 100.');
+  }
+  const factor = Math.pow(1 + annualRatePct / 100, years);
+  return {
+    futureCost: round2(amount * factor),
+    purchasingPower: round2(amount / factor),
+  };
+}
+
+// ----------------------------------------------------------- Budget ----
+export interface BudgetResult {
+  needs: number;
+  wants: number;
+  savings: number;
+  total: number;
+}
+
+export function calcBudget(income: number, needsPct: number, wantsPct: number, savingsPct: number): BudgetResult {
+  if (!isFiniteNumber(income) || income <= 0 || income > MAX_AMOUNT) {
+    throw new Error('Monthly take-home pay must be a positive number.');
+  }
+  for (const pct of [needsPct, wantsPct, savingsPct]) {
+    if (!isFiniteNumber(pct) || pct < 0 || pct > 100) {
+      throw new Error('Each percentage must be between 0 and 100.');
+    }
+  }
+  const sum = needsPct + wantsPct + savingsPct;
+  if (Math.abs(sum - 100) > 0.01) {
+    throw new Error('The three percentages must add up to 100%.');
+  }
+  return {
+    needs: round2((income * needsPct) / 100),
+    wants: round2((income * wantsPct) / 100),
+    savings: round2((income * savingsPct) / 100),
+    total: income,
+  };
+}
+
+// ------------------------------------------------------- Debt payoff --
+export interface DebtPayoffResult {
+  monthsWithExtra: number;
+  totalInterestWithExtra: number;
+  monthsWithoutExtra: number | null;
+  totalInterestWithoutExtra: number | null;
+  interestSaved: number | null;
+  monthlyPayment: number;
+}
+
+const DEBT_MAX_MONTHS = 1200;
+
+function simulatePayoff(balance: number, monthlyRate: number, payment: number): { months: number; totalInterest: number } | null {
+  let remaining = balance;
+  let totalInterest = 0;
+  for (let month = 1; month <= DEBT_MAX_MONTHS; month++) {
+    const interest = round2(remaining * monthlyRate);
+    if (monthlyRate > 0 && payment <= interest) return null; // never amortises
+    const principalPart = Math.min(remaining, round2(payment - interest));
+    totalInterest = round2(totalInterest + interest);
+    remaining = round2(remaining - principalPart);
+    if (remaining <= 0) return { months: month, totalInterest };
+  }
+  return null; // exceeds the 100-year cap: effectively never pays off
+}
+
+export function calcDebtPayoff(
+  balance: number,
+  annualRatePct: number,
+  monthlyPayment: number,
+  extraPayment: number,
+): DebtPayoffResult {
+  if (!isFiniteNumber(balance) || balance <= 0 || balance > MAX_AMOUNT) {
+    throw new Error('Loan balance must be a positive number.');
+  }
+  if (!isFiniteNumber(annualRatePct) || annualRatePct < 0 || annualRatePct > EMI_MAX_RATE) {
+    throw new Error(`Annual interest rate must be between 0 and ${EMI_MAX_RATE}%.`);
+  }
+  if (!isFiniteNumber(monthlyPayment) || monthlyPayment <= 0 || monthlyPayment > MAX_AMOUNT) {
+    throw new Error('Monthly payment must be a positive number.');
+  }
+  if (!isFiniteNumber(extraPayment) || extraPayment < 0 || extraPayment > MAX_AMOUNT) {
+    throw new Error('Extra monthly payment must be zero or more.');
+  }
+  const monthlyRate = annualRatePct / 100 / 12;
+  const combined = monthlyPayment + extraPayment;
+  const withExtra = simulatePayoff(balance, monthlyRate, combined);
+  if (withExtra === null) {
+    throw new Error('The monthly payment does not cover the monthly interest, so the balance would never fall. Increase the payment or the extra payment.');
+  }
+  const withoutExtra = simulatePayoff(balance, monthlyRate, monthlyPayment);
+  const interestSaved = withoutExtra !== null ? round2(withoutExtra.totalInterest - withExtra.totalInterest) : null;
+  return {
+    monthsWithExtra: withExtra.months,
+    totalInterestWithExtra: withExtra.totalInterest,
+    monthsWithoutExtra: withoutExtra?.months ?? null,
+    totalInterestWithoutExtra: withoutExtra?.totalInterest ?? null,
+    interestSaved,
+    monthlyPayment: combined,
+  };
+}
+
+// ---------------------------------------------------- Fixed deposit ---
+export type DepositCompounding = 'monthly' | 'quarterly' | 'annual' | 'maturity';
+
+export interface FixedDepositResult {
+  maturityAmount: number;
+  profitBeforeTax: number;
+  taxAmount: number;
+  profitAfterTax: number;
+}
+
+export function calcFixedDeposit(
+  principal: number,
+  annualRatePct: number,
+  years: number,
+  compounding: DepositCompounding,
+  withholdingTaxPct: number,
+): FixedDepositResult {
+  if (!isFiniteNumber(principal) || principal <= 0 || principal > MAX_AMOUNT) {
+    throw new Error('Deposit amount must be a positive number.');
+  }
+  if (!isFiniteNumber(annualRatePct) || annualRatePct < 0 || annualRatePct > 100) {
+    throw new Error('Annual profit rate must be between 0 and 100%.');
+  }
+  if (!isFiniteNumber(years) || years <= 0 || years > 30) {
+    throw new Error('Tenure must be between 0 and 30 years.');
+  }
+  if (!['monthly', 'quarterly', 'annual', 'maturity'].includes(compounding)) {
+    throw new Error('Choose a compounding option.');
+  }
+  if (!isFiniteNumber(withholdingTaxPct) || withholdingTaxPct < 0 || withholdingTaxPct > 100) {
+    throw new Error('Withholding tax must be between 0 and 100%.');
+  }
+  const rate = annualRatePct / 100;
+  let maturity: number;
+  if (compounding === 'maturity') {
+    maturity = principal * (1 + rate * years);
+  } else {
+    const n = compounding === 'monthly' ? 12 : compounding === 'quarterly' ? 4 : 1;
+    maturity = principal * Math.pow(1 + rate / n, n * years);
+  }
+  const maturityAmount = round2(maturity);
+  const profitBeforeTax = round2(maturityAmount - principal);
+  const taxAmount = round2((profitBeforeTax * withholdingTaxPct) / 100);
+  return {
+    maturityAmount,
+    profitBeforeTax,
+    taxAmount,
+    profitAfterTax: round2(profitBeforeTax - taxAmount),
+  };
+}
+
+// --------------------------------------------------- Loan comparison --
+export interface LoanComparisonResult {
+  loanA: EmiResult;
+  loanB: EmiResult;
+  cheaper: 'A' | 'B' | 'equal';
+  saving: number;
+}
+
+export function calcLoanComparison(
+  principalA: number, rateA: number, monthsA: number,
+  principalB: number, rateB: number, monthsB: number,
+): LoanComparisonResult {
+  const loanA = calcEMI(principalA, rateA, monthsA);
+  const loanB = calcEMI(principalB, rateB, monthsB);
+  const diff = round2(loanA.totalPayment - loanB.totalPayment);
+  return {
+    loanA,
+    loanB,
+    cheaper: diff < 0 ? 'A' : diff > 0 ? 'B' : 'equal',
+    saving: Math.abs(diff),
+  };
+}
+
+// ------------------------------------------------------ Goal savings --
+export interface GoalSavingsResult {
+  /** Required monthly contribution (mode: monthly) — 0 when already funded. */
+  monthlyContribution: number | null;
+  /** Months needed (mode: duration). */
+  months: number | null;
+  futureValueOfCurrent: number;
+  shortfall: number;
+}
+
+export function calcGoalMonthly(
+  target: number,
+  currentSavings: number,
+  annualReturnPct: number,
+  months: number,
+): GoalSavingsResult {
+  if (!isFiniteNumber(target) || target <= 0 || target > MAX_AMOUNT) {
+    throw new Error('Target amount must be a positive number.');
+  }
+  if (!isFiniteNumber(currentSavings) || currentSavings < 0 || currentSavings > MAX_AMOUNT) {
+    throw new Error('Current savings must be zero or more.');
+  }
+  if (!isFiniteNumber(annualReturnPct) || annualReturnPct < 0 || annualReturnPct > 100) {
+    throw new Error('Expected annual return must be between 0 and 100%.');
+  }
+  if (!Number.isInteger(months) || months < 1 || months > 1200) {
+    throw new Error('Time must be a whole number of months between 1 and 1200.');
+  }
+  const monthlyRate = annualReturnPct / 100 / 12;
+  const growth = Math.pow(1 + monthlyRate, months);
+  const futureValueOfCurrent = round2(currentSavings * growth);
+  const shortfall = round2(Math.max(0, target - futureValueOfCurrent));
+  if (shortfall <= 0) return { monthlyContribution: 0, months: null, futureValueOfCurrent, shortfall: 0 };
+  const monthlyContribution = monthlyRate > 0
+    ? (shortfall * monthlyRate) / (growth - 1)
+    : shortfall / months;
+  return { monthlyContribution: round2(monthlyContribution), months: null, futureValueOfCurrent, shortfall };
+}
+
+export function calcGoalDuration(
+  target: number,
+  currentSavings: number,
+  annualReturnPct: number,
+  monthlyContribution: number,
+): GoalSavingsResult {
+  if (!isFiniteNumber(target) || target <= 0 || target > MAX_AMOUNT) {
+    throw new Error('Target amount must be a positive number.');
+  }
+  if (!isFiniteNumber(currentSavings) || currentSavings < 0 || currentSavings > MAX_AMOUNT) {
+    throw new Error('Current savings must be zero or more.');
+  }
+  if (!isFiniteNumber(annualReturnPct) || annualReturnPct < 0 || annualReturnPct > 100) {
+    throw new Error('Expected annual return must be between 0 and 100%.');
+  }
+  if (!isFiniteNumber(monthlyContribution) || monthlyContribution <= 0 || monthlyContribution > MAX_AMOUNT) {
+    throw new Error('Monthly contribution must be a positive number.');
+  }
+  if (currentSavings >= target) {
+    return { monthlyContribution: null, months: 0, futureValueOfCurrent: currentSavings, shortfall: 0 };
+  }
+  const monthlyRate = annualReturnPct / 100 / 12;
+  let months: number;
+  if (monthlyRate > 0) {
+    const ratio = (target + monthlyContribution / monthlyRate) / (currentSavings + monthlyContribution / monthlyRate);
+    months = Math.ceil(Math.log(ratio) / Math.log(1 + monthlyRate));
+  } else {
+    months = Math.ceil((target - currentSavings) / monthlyContribution);
+  }
+  if (!Number.isFinite(months) || months < 1 || months > 1200) {
+    throw new Error('This goal cannot be reached within 100 years at this contribution and return. Increase the monthly contribution or the time horizon.');
+  }
+  return { monthlyContribution: null, months, futureValueOfCurrent: round2(currentSavings), shortfall: round2(target - currentSavings) };
+}

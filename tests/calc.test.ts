@@ -266,4 +266,159 @@ check('area society standard', () => {
   assert.equal(AREA_UNITS.find((u) => u.id === 'marla')!.sqft, 272.25);
 });
 
+// --- New tools (2026): fuel, compound, eligibility, inflation, budget,
+// --- debt payoff, fixed deposit, loan comparison, goal savings ---
+import {
+  calcBudget, calcCompound, calcDebtPayoff, calcFixedDeposit, calcFuel,
+  calcGoalDuration, calcGoalMonthly, calcInflation, calcLoanComparison,
+  calcLoanEligibility,
+} from '../src/lib/calc';
+
+check('fuel one-way and return trip', () => {
+  const one = calcFuel(300, 12, 270, false);
+  assert.equal(one.litres, 25);
+  assert.equal(one.totalCost, 6750);
+  assert.equal(one.costPerKm, 22.5);
+  assert.equal(one.totalDistance, 300);
+  const ret = calcFuel(300, 12, 270, true);
+  assert.equal(ret.totalDistance, 600);
+  assert.equal(ret.litres, 50);
+  assert.equal(ret.totalCost, 13500);
+  assert.equal(ret.costPerKm, 22.5);
+  assert.throws(() => calcFuel(0, 12, 270, false), /Distance/);
+  assert.throws(() => calcFuel(100, 0, 270, false), /Mileage/);
+  assert.throws(() => calcFuel(100, 12, -5, false), /Fuel price/);
+  assert.throws(() => calcFuel(100, 12, 270, false) && calcFuel(-1, 12, 270, false), /Distance/);
+});
+
+check('compound interest with monthly contributions', () => {
+  const r = calcCompound(100000, 5000, 10, 10, 12);
+  assert.equal(r.finalAmount, 1294929.07);
+  assert.equal(r.totalContributions, 700000);
+  assert.equal(r.interestEarned, 594929.07);
+  assert.equal(r.rows.length, 10);
+  assert.equal(r.rows[0].balance, 173299.13);
+  assert.equal(r.rows[4].balance, 551716.24);
+  // Zero rate: no interest, balance is exactly contributions.
+  const zero = calcCompound(50000, 1000, 0, 5, 12);
+  assert.equal(zero.finalAmount, 110000);
+  assert.equal(zero.interestEarned, 0);
+  // No contributions: pure growth, annual compounding.
+  const pure = calcCompound(100000, 0, 10, 10, 1);
+  approx(pure.finalAmount, 259374.25, 0.01);
+  assert.throws(() => calcCompound(-1, 0, 10, 10, 12), /Starting amount/);
+  assert.throws(() => calcCompound(1000, 0, 101, 10, 12), /between 0 and 100/);
+  assert.throws(() => calcCompound(1000, 0, 10, 0, 12), /Years/);
+  assert.throws(() => calcCompound(1000, 0, 10, 10, 3), /frequency/);
+});
+
+check('loan eligibility inverse EMI', () => {
+  const r = calcLoanEligibility(200000, 20000, 40, 18, 240);
+  assert.equal(r.maxEmi, 80000);
+  assert.equal(r.affordableEmi, 60000);
+  assert.equal(r.maxLoan, 3887743.93);
+  // Zero rate: loan is simply affordable EMI x months.
+  const zero = calcLoanEligibility(100000, 0, 50, 0, 120);
+  assert.equal(zero.maxLoan, 6000000);
+  assert.throws(() => calcLoanEligibility(100000, 60000, 40, 18, 240), /no room/);
+  assert.throws(() => calcLoanEligibility(100000, 0, 0, 18, 240), /share/);
+  assert.throws(() => calcLoanEligibility(100000, 0, 40, 18, 0), /Tenure/);
+});
+
+check('inflation future cost and purchasing power', () => {
+  const r = calcInflation(100000, 8, 10);
+  assert.equal(r.futureCost, 215892.5);
+  assert.equal(r.purchasingPower, 46319.35);
+  const zero = calcInflation(50000, 0, 10);
+  assert.equal(zero.futureCost, 50000);
+  assert.equal(zero.purchasingPower, 50000);
+  const now = calcInflation(50000, 8, 0);
+  assert.equal(now.futureCost, 50000);
+  assert.throws(() => calcInflation(-1, 8, 10), /Amount/);
+  assert.throws(() => calcInflation(1000, -1, 10), /Inflation rate/);
+});
+
+check('budget 50/30/20 and sum validation', () => {
+  const r = calcBudget(200000, 50, 30, 20);
+  assert.deepEqual([r.needs, r.wants, r.savings], [100000, 60000, 40000]);
+  const custom = calcBudget(150000, 60, 25, 15);
+  assert.deepEqual([custom.needs, custom.wants, custom.savings], [90000, 37500, 22500]);
+  assert.throws(() => calcBudget(100000, 50, 30, 10), /add up to 100/);
+  assert.throws(() => calcBudget(100000, 50, 30, 25), /add up to 100/);
+  assert.throws(() => calcBudget(0, 50, 30, 20), /take-home pay/);
+  assert.throws(() => calcBudget(100000, -5, 30, 75), /between 0 and 100/);
+});
+
+check('debt payoff extra payment saves interest, stall guard throws', () => {
+  const r = calcDebtPayoff(500000, 20, 15000, 5000);
+  assert.equal(r.monthsWithExtra, 33);
+  assert.equal(r.monthsWithoutExtra, 50);
+  assert.equal(r.totalInterestWithExtra, 152210.26);
+  assert.equal(r.totalInterestWithoutExtra, 235909.43);
+  assert.equal(r.interestSaved, 83699.17);
+  // No extra payment: both figures are the same.
+  const plain = calcDebtPayoff(500000, 20, 15000, 0);
+  assert.equal(plain.monthsWithExtra, plain.monthsWithoutExtra);
+  assert.equal(plain.interestSaved, 0);
+  // Payment below monthly interest must throw, never loop forever.
+  assert.throws(() => calcDebtPayoff(500000, 20, 5000, 0), /does not cover/);
+  assert.throws(() => calcDebtPayoff(500000, 20, 5000, 3000), /does not cover/);
+  // Zero rate pays off exactly.
+  const zero = calcDebtPayoff(120000, 0, 10000, 0);
+  assert.equal(zero.monthsWithExtra, 12);
+  assert.equal(zero.totalInterestWithExtra, 0);
+  assert.throws(() => calcDebtPayoff(0, 20, 10000, 0), /balance/);
+});
+
+check('fixed deposit compounding and withholding tax', () => {
+  const r = calcFixedDeposit(500000, 12, 3, 'quarterly', 15);
+  assert.equal(r.maturityAmount, 712880.44);
+  assert.equal(r.profitBeforeTax, 212880.44);
+  assert.equal(r.taxAmount, 31932.07);
+  assert.equal(r.profitAfterTax, 180948.37);
+  const simple = calcFixedDeposit(500000, 12, 3, 'maturity', 0);
+  assert.equal(simple.maturityAmount, 680000);
+  assert.equal(simple.profitBeforeTax, 180000);
+  assert.equal(simple.taxAmount, 0);
+  // Monthly compounding beats quarterly at the same nominal rate.
+  const monthly = calcFixedDeposit(500000, 12, 3, 'monthly', 0);
+  assert.ok(monthly.maturityAmount > r.maturityAmount + r.taxAmount - r.taxAmount);
+  assert.ok(monthly.profitBeforeTax > r.profitBeforeTax);
+  assert.throws(() => calcFixedDeposit(500000, 12, 3, 'quarterly', 101), /Withholding tax/);
+  assert.throws(() => calcFixedDeposit(-1, 12, 3, 'monthly', 0), /Deposit amount/);
+});
+
+check('loan comparison cheaper loan by total payment', () => {
+  const r = calcLoanComparison(1000000, 18, 60, 1000000, 15, 60);
+  assert.equal(r.loanA.emi, 25393.43);
+  assert.equal(r.loanB.emi, 23789.93);
+  assert.equal(r.loanA.totalPayment, 1523605.61);
+  assert.equal(r.loanB.totalPayment, 1427395.77);
+  assert.equal(r.cheaper, 'B');
+  assert.equal(r.saving, 96209.84);
+  const equal = calcLoanComparison(500000, 12, 12, 500000, 12, 12);
+  assert.equal(equal.cheaper, 'equal');
+  assert.equal(equal.saving, 0);
+  assert.throws(() => calcLoanComparison(0, 12, 12, 500000, 12, 12), /positive/);
+});
+
+check('goal savings monthly mode and duration mode', () => {
+  const m = calcGoalMonthly(1000000, 100000, 10, 60);
+  assert.equal(m.monthlyContribution, 10789.01);
+  assert.equal(m.futureValueOfCurrent, 164530.89);
+  assert.equal(m.shortfall, 835469.11);
+  // Already funded: no monthly saving needed.
+  const funded = calcGoalMonthly(100000, 200000, 10, 60);
+  assert.equal(funded.monthlyContribution, 0);
+  const d = calcGoalDuration(1000000, 100000, 10, 10000);
+  assert.equal(d.months, 64);
+  const noReturn = calcGoalDuration(100000, 0, 0, 5000);
+  assert.equal(noReturn.months, 20);
+  const already = calcGoalDuration(100000, 100000, 10, 5000);
+  assert.equal(already.months, 0);
+  assert.throws(() => calcGoalMonthly(100000, 0, 10, 0), /months/);
+  assert.throws(() => calcGoalDuration(100000, 0, 10, 0), /positive/);
+  assert.throws(() => calcGoalDuration(100000, 0, 101, 5000), /between 0 and 100/);
+});
+
 console.log(`\n${passed} checks passed.`);

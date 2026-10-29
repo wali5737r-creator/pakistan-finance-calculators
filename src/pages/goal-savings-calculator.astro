@@ -1,0 +1,391 @@
+---
+import Layout from '../components/Layout.astro';
+
+const title = "Goal Savings Calculator | Monthly Saving for a Goal";
+const description = "Work out how much to save each month to reach a target, or how long a monthly saving will take, from the target, your savings and the return you enter.";
+const slug = "/goal-savings-calculator/";
+
+const faqs = [
+  {
+    q: "How much should I save each month for my goal?",
+    a: "It depends on the target, what you have already, the return you assume, and the time you have. Enter those figures in the 'How much per month?' mode \u2014 for example, a Rs 1,000,000 target with Rs 100,000 saved, at 10% over 60 months, needs Rs 10,789.01 a month.",
+  },
+  {
+    q: "How long will it take to reach my goal?",
+    a: "Use the 'How long will it take?' mode with the amount you can save each month. The same example at Rs 10,000 a month takes 64 months, or 5 years and 4 months.",
+  },
+  {
+    q: "What if my current savings already cover the target?",
+    a: "Then no monthly saving is needed. The calculator says the goal is already reached, or that Rs 0 per month is required, depending on the mode.",
+  },
+  {
+    q: "What return should I assume?",
+    a: "Enter a return you are comfortable assuming, and try a lower one too. The return is never guaranteed, and a lower return means you must save more or take longer.",
+  },
+  {
+    q: "Are contributions added at the start or end of the month?",
+    a: "At the end of each month, so they earn a return from the following month. This matches the compounding convention used on the Compound Interest Calculator.",
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://pakistan-finance-calculators.pages.dev/goal-savings-calculator/#webapp',
+      name: "Goal Savings Calculator",
+      url: 'https://pakistan-finance-calculators.pages.dev/goal-savings-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://pakistan-finance-calculators.pages.dev/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: "Goal Savings Calculator",
+          item: 'https://pakistan-finance-calculators.pages.dev/goal-savings-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+
+const related = [
+  {
+    href: "/budget-planner-calculator/",
+    name: "Budget Planner Calculator",
+    desc: "Split monthly take-home pay into needs, wants, and savings with the 50/30/20 rule and your own percentages.",
+  },
+  {
+    href: "/compound-interest-calculator/",
+    name: "Compound Interest Calculator",
+    desc: "How savings grow with compound interest, with a year-by-year table, from the figures you enter.",
+  },
+];
+---
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Goal Savings Calculator</p>
+    </nav>
+    <p class="badge badge-info" style="margin-top: 8px;">Savings & Growth</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Goal Savings Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+      Set a savings target and work out the plan to reach it. Either find how much you need to save each month in the time you have, or find how long your monthly saving will take — with the return you assume counted along the way.
+    </p>
+    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+      <strong>No live data.</strong> Every rate, price, and percentage on this page is entered by
+      you. Nothing is fetched from a bank, a market, or a government source, and no figure here
+      is presented as a live or official rate.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="goalForm" novalidate>
+          <fieldset class="radiogroup" style="border: 0; padding: 0; margin: 0 0 16px;">
+            <legend style="font-size: 17px; font-weight: 600;">Choose what to work out</legend>
+            <div class="seg">
+              <label>
+                <input type="radio" name="goalMode" value="monthly" checked aria-label="How much per month?" />
+                <span>How much per month?</span>
+              </label>
+              <label>
+                <input type="radio" name="goalMode" value="duration" aria-label="How long will it take?" />
+                <span>How long will it take?</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="goalTarget">Target amount (Rs) <span aria-hidden="true">*</span></label>
+            <input id="goalTarget" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">The amount you want to reach.</p>
+          </div>
+
+          <div class="field">
+            <label for="goalCurrent">Current savings (Rs)</label>
+            <input id="goalCurrent" type="text" inputmode="decimal" autocomplete="off" />
+            <p class="hint">What you have saved already towards this goal. Enter 0, or leave blank, if you are starting from nothing.</p>
+          </div>
+
+          <div class="field">
+            <label for="goalReturn">Expected annual return (%) <span aria-hidden="true">*</span></label>
+            <input id="goalReturn" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">The yearly return you assume. This is your assumption, not a promised return.</p>
+          </div>
+
+          <div class="field">
+            <label for="goalVariable"><span id="goalVariableLabel">Time available (months)</span> <span aria-hidden="true">*</span></label>
+            <input id="goalVariable" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint" id="goalVariableHint">How many months you have to reach the goal, for example 60 for 5 years.</p>
+          </div>
+
+          <div id="goalErrors" class="error-box" role="alert" hidden></div>
+
+          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+            <button id="goalCalculate" class="btn-primary" type="submit">Calculate</button>
+            <button id="goalClear" class="btn-secondary" type="button">Clear</button>
+          </p>
+          <p id="goalFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        </form>
+      </div>
+
+      <div class="result-card" id="goalResultCard" tabindex="-1">
+        <div id="goalEmpty">
+          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p>Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            You will see your answer with the figures shown, so you can check it.
+          </p>
+        </div>
+
+        <div id="goalResult" data-result-text hidden>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Result</p>
+          <div aria-live="polite" aria-atomic="true">
+            <p class="result-value" id="goalHeadline"></p>
+          </div>
+          <div class="stat-grid">
+            <div>
+              <p class="stat-label">Value of current savings at the goal date / today</p>
+              <p class="stat-value" id="goalStat1"></p>
+            </div>
+            <div>
+              <p class="stat-label">Shortfall to cover by saving</p>
+              <p class="stat-value" id="goalStat2"></p>
+            </div>
+          </div>
+          <p id="goalEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="goalFormula" style="font-size: 16px;"></p>
+          <p style="font-size: 13px; color: var(--ink-muted);">
+            Estimate only — check important figures before acting.
+            <a href="#goalDisclaimer">Read the full disclaimer.</a>
+          </p>
+        </div>
+
+        <div class="actions-row no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size: 14px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top: 40px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Choose what to work out: how much per month, or how long it will take.</li>
+      <li>Enter the target amount, what you have saved already, and the annual return you assume.</li>
+      <li>Enter the time you have (for the monthly figure) or the amount you can save each month (for the time figure). You see the answer, plus what your current savings grow to and the shortfall your saving must cover.</li>
+    </ol>
+    <p>Contributions are treated as added at the end of each month and earn the assumed return from then on, monthly compounding. If your current savings already cover the target, the answer is zero — no monthly saving is needed. The <a href="/budget-planner-calculator/">Budget Planner</a> can help you find room for the monthly saving.</p>
+
+    <h2>Formula</h2>
+    <p>Monthly saving = Shortfall × monthly rate ÷ ((1 + monthly rate)<sup>months</sup> − 1), where the shortfall is the target minus the grown value of current savings, and the monthly rate is the annual return ÷ 12.</p>
+    <p>Months to reach the goal = log((target + monthly saving ÷ monthly rate) ÷ (current savings + monthly saving ÷ monthly rate)) ÷ log(1 + monthly rate), rounded up to whole months.</p>
+    <p>With a 0% return, the monthly saving is simply the shortfall divided by the months, and the months are the shortfall divided by the monthly saving.</p>
+
+    <h2>Worked example</h2>
+    <p><strong>Example 1:</strong> Target Rs 1,000,000, current savings Rs 100,000, return 10% a year, 60 months available. Current savings grow to Rs 164,530.89, leaving a shortfall of Rs 835,469.11, so you need to save Rs 10,789.01 a month.</p>
+    <p><strong>Example 2:</strong> The same target and savings, saving Rs 10,000 a month at 10% a year, take 64 months (5 years and 4 months) to reach.</p>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+
+    <section id="goalDisclaimer" class="notice-info" style="margin-top: 32px;">
+      <h2 style="font-size: 20px;">Important — please read</h2>
+      <p>
+        Results are illustrations based on the return you assume. The return is your assumption, not a forecast and not a promised rate, and charges and tax are not included. If the return is lower than assumed, you will need to save more or take longer. This is not investment advice.
+      </p>
+      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+    </section>
+
+    <h2 style="margin-top: 32px;">Related tools</h2>
+    <div class="related-grid">
+      {
+        related.map((tool) => (
+          <article class="card">
+            <h3 style="font-size: 18px;">
+              <a href={tool.href}>{tool.name}</a>
+            </h3>
+            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p>
+              <a href={tool.href}>Use the calculator →</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+    .field-error {
+      font-size: 14px;
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin: 12px 0;
+    }
+    .stat-grid p {
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .related-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+  </style>
+
+  <script>
+    import { calcGoalMonthly, calcGoalDuration, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';
+
+    const form = document.getElementById('goalForm');
+    const errorsBox = document.getElementById('goalErrors');
+    const emptyBox = document.getElementById('goalEmpty');
+    const resultBox = document.getElementById('goalResult');
+    const resultCard = document.getElementById('goalResultCard');
+    const headline = document.getElementById('goalHeadline');
+    const stat1 = document.getElementById('goalStat1');
+    const stat2 = document.getElementById('goalStat2');
+    const echoEl = document.getElementById('goalEcho');
+    const formulaEl = document.getElementById('goalFormula');
+    const varLabel = document.getElementById('goalVariableLabel');
+    const varHint = document.getElementById('goalVariableHint');
+    const copyBtn = document.querySelector('[data-copy-result]');
+    const printBtn = document.querySelector('[data-print-result]');
+    const formStatus = document.getElementById('goalFormStatus');
+
+    function currentMode() {
+      const el = document.querySelector('input[name="goalMode"]:checked');
+      return el ? el.value : 'monthly';
+    }
+    function updateModeUI() {
+      if (currentMode() === 'monthly') {
+        varLabel.textContent = 'Time available (months)';
+        varHint.textContent = 'How many months you have to reach the goal, for example 60 for 5 years.';
+      } else {
+        varLabel.textContent = 'Monthly contribution (Rs)';
+        varHint.textContent = 'What you can save each month towards this goal.';
+      }
+    }
+    function readNumber(id, label, allowBlankZero) {
+      const raw = document.getElementById(id).value;
+      if (raw.trim() === '') {
+        if (allowBlankZero) return 0;
+        throw new Error(label + ' is required.');
+      }
+      const value = parseDecimal(raw);
+      if (value === null) throw new Error(label + ' must be a number using digits and one decimal point only.');
+      return value;
+    }
+    function showEmpty() {
+      resultBox.hidden = true;
+      emptyBox.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+    function showResult() {
+      emptyBox.hidden = true;
+      resultBox.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        const target = readNumber('goalTarget', 'Target amount', false);
+        const current = readNumber('goalCurrent', 'Current savings', true);
+        const ret = readNumber('goalReturn', 'Expected annual return', false);
+        const variable = readNumber('goalVariable', currentMode() === 'monthly' ? 'Time available' : 'Monthly contribution', false);
+        let r;
+        if (currentMode() === 'monthly') {
+          if (!Number.isInteger(variable)) throw new Error('Time available must be a whole number of months.');
+          r = calcGoalMonthly(target, current, ret, variable);
+          headline.textContent = r.monthlyContribution === 0 ? 'Already funded — Rs 0 per month' : formatPKR(r.monthlyContribution, 2) + ' per month';
+          stat1.textContent = formatPKR(r.futureValueOfCurrent, 2);
+          stat2.textContent = formatPKR(r.shortfall, 2);
+          echoEl.textContent = 'Based on: target ' + formatPKR(target, 2) + ', current savings ' + formatPKR(current, 2) + ', return ' + formatNumber(ret, 2) + '% per year, ' + variable + ' months available.';
+          formulaEl.textContent = 'Your current savings grow to ' + formatPKR(r.futureValueOfCurrent, 2) + ' in ' + variable + ' months. The monthly saving fills the remaining shortfall of ' + formatPKR(r.shortfall, 2) + ', with each contribution earning the assumed return.';
+        } else {
+          r = calcGoalDuration(target, current, ret, variable);
+          headline.textContent = r.months === 0 ? 'Goal already reached' : r.months + ' months (' + Math.floor(r.months / 12) + ' years ' + (r.months % 12) + ' months)';
+          stat1.textContent = formatPKR(r.futureValueOfCurrent, 2);
+          stat2.textContent = formatPKR(r.shortfall, 2);
+          echoEl.textContent = 'Based on: target ' + formatPKR(target, 2) + ', current savings ' + formatPKR(current, 2) + ', return ' + formatNumber(ret, 2) + '% per year, saving ' + formatPKR(variable, 2) + ' per month.';
+          formulaEl.textContent = 'Each monthly contribution is added at the end of the month and earns the assumed return from then on. The goal is reached when the grown balance first reaches the target.';
+        }
+        errorsBox.textContent = '';
+        errorsBox.hidden = true;
+        showResult();
+        if (window.matchMedia('(max-width: 899px)').matches) resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorsBox.textContent = err.message;
+        errorsBox.hidden = false;
+        showEmpty();
+      }
+    });
+
+    document.querySelectorAll('input[name="goalMode"]').forEach((radio) => {
+      radio.addEventListener('change', () => { updateModeUI(); showEmpty(); });
+    });
+
+    document.getElementById('goalClear').addEventListener('click', () => {
+      form.reset();
+      errorsBox.textContent = '';
+      errorsBox.hidden = true;
+      formStatus.textContent = 'Form cleared.';
+      updateModeUI();
+      showEmpty();
+    });
+    updateModeUI();
+    showEmpty();
+
+  </script>
+</Layout>

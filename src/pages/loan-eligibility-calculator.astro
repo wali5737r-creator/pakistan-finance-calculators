@@ -1,0 +1,352 @@
+---
+import Layout from '../components/Layout.astro';
+
+const title = "Loan Eligibility Calculator | Max Loan You Can Afford";
+const description = "Estimate the largest loan your income can support: the affordable EMI after existing obligations, and the maximum loan at the rate and tenure you enter.";
+const slug = "/loan-eligibility-calculator/";
+
+const faqs = [
+  {
+    q: "How much loan can I get on my salary?",
+    a: "It depends on your income, existing obligations, the rate, and the tenure. This calculator works out the largest loan whose EMI fits inside the share of income you allow, after subtracting what you already pay each month.",
+  },
+  {
+    q: "What is the 40% EMI share?",
+    a: "It is a common planning rule: all EMIs together should not exceed about 40% of take-home income, so 60% remains for living costs and savings. It is editable \u2014 use a lower share if you want a safer margin.",
+  },
+  {
+    q: "Why do existing obligations reduce the loan amount?",
+    a: "Because the EMI limit covers all instalments together. If Rs 20,000 a month already goes to another loan, only the remaining room can support a new EMI, so the maximum loan is smaller.",
+  },
+  {
+    q: "Does a longer tenure always mean a bigger loan?",
+    a: "A longer tenure raises the maximum loan, because the same EMI is spread over more months. It also raises the total interest you pay, so compare the full cost with the EMI / Loan Calculator before choosing a longer tenure.",
+  },
+  {
+    q: "Is this result a loan approval?",
+    a: "No. It is an estimate from the figures you enter. Lenders check credit history, employment, age, documents, and security, and apply their own rules, so the amount they offer can differ.",
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://pakistan-finance-calculators.pages.dev/loan-eligibility-calculator/#webapp',
+      name: "Loan Eligibility Calculator",
+      url: 'https://pakistan-finance-calculators.pages.dev/loan-eligibility-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://pakistan-finance-calculators.pages.dev/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: "Loan Eligibility Calculator",
+          item: 'https://pakistan-finance-calculators.pages.dev/loan-eligibility-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+
+const related = [
+  {
+    href: "/emi-loan-calculator/",
+    name: "EMI / Loan Calculator",
+    desc: "Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan.",
+  },
+  {
+    href: "/loan-comparison-calculator/",
+    name: "Loan Comparison Calculator",
+    desc: "Compare two loans side by side: EMI, total interest, and total payment for each, and which costs less.",
+  },
+];
+---
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Loan Eligibility Calculator</p>
+    </nav>
+    <p class="badge badge-info" style="margin-top: 8px;">Loans</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Loan Eligibility Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+      Before you apply for a loan, check what your income can comfortably support. Enter your monthly income, what you already pay each month, the share of income you will allow for EMIs, and the rate and tenure you assume — and see the largest loan that fits, as an estimate.
+    </p>
+    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+      <strong>No live data.</strong> Every rate, price, and percentage on this page is entered by
+      you. Nothing is fetched from a bank, a market, or a government source, and no figure here
+      is presented as a live or official rate.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="eligForm" novalidate>
+          <div class="field">
+            <label for="eligIncome">Monthly income (Rs) <span aria-hidden="true">*</span></label>
+            <input id="eligIncome" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">Your monthly take-home income, after tax and deductions.</p>
+          </div>
+
+          <div class="field">
+            <label for="eligObligations">Existing monthly obligations (Rs)</label>
+            <input id="eligObligations" type="text" inputmode="decimal" autocomplete="off" />
+            <p class="hint">Other loan instalments and fixed monthly commitments. Enter 0, or leave blank, if you have none.</p>
+          </div>
+
+          <div class="field">
+            <label for="eligShare">Maximum share of income for EMIs (%) <span aria-hidden="true">*</span></label>
+            <input id="eligShare" type="text" inputmode="decimal" autocomplete="off" aria-required="true" value="40" />
+            <p class="hint">The share of income that may go to all EMIs together. 40% is a common planning figure — change it if you want a stricter or looser limit.</p>
+          </div>
+
+          <div class="field">
+            <label for="eligRate">Annual interest rate (%) <span aria-hidden="true">*</span></label>
+            <input id="eligRate" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">The yearly rate you assume for the loan. Enter the rate a lender quotes you — no bank rate is used.</p>
+          </div>
+
+          <div class="field">
+            <label for="eligMonths">Tenure (months) <span aria-hidden="true">*</span></label>
+            <input id="eligMonths" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">How many monthly instalments, for example 240 for 20 years, or 60 for 5 years.</p>
+          </div>
+
+          <div id="eligErrors" class="error-box" role="alert" hidden></div>
+
+          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+            <button id="eligCalculate" class="btn-primary" type="submit">Calculate</button>
+            <button id="eligClear" class="btn-secondary" type="button">Clear</button>
+          </p>
+          <p id="eligFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        </form>
+      </div>
+
+      <div class="result-card" id="eligResultCard" tabindex="-1">
+        <div id="eligEmpty">
+          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p>Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            You will see your answer with the figures shown, so you can check it.
+          </p>
+        </div>
+
+        <div id="eligResult" data-result-text hidden>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Result</p>
+          <div aria-live="polite" aria-atomic="true">
+            <p class="result-value" id="eligHeadline"></p>
+          </div>
+          <div class="stat-grid">
+            <div>
+              <p class="stat-label">Affordable EMI per month</p>
+              <p class="stat-value" id="eligStat1"></p>
+            </div>
+            <div>
+              <p class="stat-label">EMI limit (share of income)</p>
+              <p class="stat-value" id="eligStat2"></p>
+            </div>
+          </div>
+          <p id="eligEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="eligFormula" style="font-size: 16px;"></p>
+          <p style="font-size: 13px; color: var(--ink-muted);">
+            Estimate only — check important figures before acting.
+            <a href="#eligDisclaimer">Read the full disclaimer.</a>
+          </p>
+        </div>
+
+        <div class="actions-row no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size: 14px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top: 40px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Enter your monthly take-home income and any existing monthly obligations, such as other loan instalments.</li>
+      <li>Set the maximum share of income for all EMIs together. The default is 40%; a lower share leaves more room for living costs.</li>
+      <li>Enter the annual rate and the tenure you assume. You see the affordable EMI and the largest loan whose EMI fits inside it.</li>
+    </ol>
+    <p>Banks apply their own criteria — credit history, employment type, age, property value, and documents — so a lender may offer more or less than this estimate, or decline. Treat the result as a planning figure, not an approval.</p>
+
+    <h2>Formula</h2>
+    <p>EMI limit = Monthly income × Maximum EMI share %</p>
+    <p>Affordable EMI = EMI limit − Existing monthly obligations</p>
+    <p>Maximum loan = the principal whose EMI (at the entered rate and tenure) equals the affordable EMI. It is the inverse of the EMI formula shown on the <a href="/emi-loan-calculator/">EMI / Loan Calculator</a> page.</p>
+
+    <h2>Worked example</h2>
+    <p><strong>Example:</strong> Monthly income Rs 200,000, existing obligations Rs 20,000, EMI share 40%, rate 18% a year, tenure 240 months. The EMI limit is 40% of Rs 200,000 = Rs 80,000, so the affordable EMI is Rs 80,000 − Rs 20,000 = Rs 60,000 a month. At 18% over 240 months, that supports a maximum loan of Rs 3,887,743.93.</p>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+
+    <section id="eligDisclaimer" class="notice-info" style="margin-top: 32px;">
+      <h2 style="font-size: 20px;">Important — please read</h2>
+      <p>
+        This is an estimate only, for planning. Banks and lenders apply their own eligibility criteria, including credit history, employment, age, and the value of any security, and may offer a different amount or decline an application. No lender's actual criteria or rate is used here. Confirm the terms with the lender before borrowing.
+      </p>
+      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+    </section>
+
+    <h2 style="margin-top: 32px;">Related tools</h2>
+    <div class="related-grid">
+      {
+        related.map((tool) => (
+          <article class="card">
+            <h3 style="font-size: 18px;">
+              <a href={tool.href}>{tool.name}</a>
+            </h3>
+            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p>
+              <a href={tool.href}>Use the calculator →</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+    .field-error {
+      font-size: 14px;
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin: 12px 0;
+    }
+    .stat-grid p {
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .related-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+  </style>
+
+  <script>
+    import { calcLoanEligibility, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';
+
+    const form = document.getElementById('eligForm');
+    const errorsBox = document.getElementById('eligErrors');
+    const emptyBox = document.getElementById('eligEmpty');
+    const resultBox = document.getElementById('eligResult');
+    const resultCard = document.getElementById('eligResultCard');
+    const headline = document.getElementById('eligHeadline');
+    const stat1 = document.getElementById('eligStat1');
+    const stat2 = document.getElementById('eligStat2');
+    const echoEl = document.getElementById('eligEcho');
+    const formulaEl = document.getElementById('eligFormula');
+    const copyBtn = document.querySelector('[data-copy-result]');
+    const printBtn = document.querySelector('[data-print-result]');
+    const formStatus = document.getElementById('eligFormStatus');
+
+    function readNumber(id, label, allowBlankZero) {
+      const raw = document.getElementById(id).value;
+      if (raw.trim() === '') {
+        if (allowBlankZero) return 0;
+        throw new Error(label + ' is required.');
+      }
+      const value = parseDecimal(raw);
+      if (value === null) throw new Error(label + ' must be a number using digits and one decimal point only.');
+      return value;
+    }
+    function showEmpty() {
+      resultBox.hidden = true;
+      emptyBox.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+    function showResult() {
+      emptyBox.hidden = true;
+      resultBox.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        const income = readNumber('eligIncome', 'Monthly income', false);
+        const obligations = readNumber('eligObligations', 'Existing obligations', true);
+        const share = readNumber('eligShare', 'Maximum EMI share', false);
+        const rate = readNumber('eligRate', 'Annual interest rate', false);
+        const months = readNumber('eligMonths', 'Tenure', false);
+        if (!Number.isInteger(months)) throw new Error('Tenure must be a whole number of months.');
+        const r = calcLoanEligibility(income, obligations, share, rate, months);
+        errorsBox.textContent = '';
+        errorsBox.hidden = true;
+        headline.textContent = formatPKR(r.maxLoan, 2);
+        stat1.textContent = formatPKR(r.affordableEmi, 2);
+        stat2.textContent = formatPKR(r.maxEmi, 2);
+        echoEl.textContent = 'Based on: income ' + formatPKR(income, 2) + ' per month, obligations ' + formatPKR(obligations, 2) + ', EMI share ' + formatNumber(share, 2) + '%, rate ' + formatNumber(rate, 2) + '% per year, ' + months + ' months.';
+        formulaEl.textContent = 'Affordable EMI = (' + formatNumber(share, 2) + '% of income) - obligations = ' + formatPKR(r.affordableEmi, 2) + ' per month. The maximum loan is the amount whose EMI equals that affordable EMI at the rate and tenure you entered.';
+        showResult();
+        if (window.matchMedia('(max-width: 899px)').matches) resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorsBox.textContent = err.message;
+        errorsBox.hidden = false;
+        showEmpty();
+      }
+    });
+
+    document.getElementById('eligClear').addEventListener('click', () => {
+      form.reset();
+      errorsBox.textContent = '';
+      errorsBox.hidden = true;
+      formStatus.textContent = 'Form cleared.';
+      showEmpty();
+    });
+    showEmpty();
+
+  </script>
+</Layout>

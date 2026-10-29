@@ -1,0 +1,349 @@
+---
+import Layout from '../components/Layout.astro';
+
+const title = "Fuel Cost Calculator | Trip Cost & Petrol Cost";
+const description = "Work out the fuel cost of any trip in Pakistan: litres used, total cost and cost per kilometre from the distance, mileage and fuel price you enter.";
+const slug = "/fuel-cost-calculator/";
+
+const faqs = [
+  {
+    q: "How do I work out the fuel cost of a trip?",
+    a: "Divide the total distance by your mileage to get the litres used, then multiply by the fuel price per litre. For example, 300 km at 12 km per litre uses 25 litres, and at Rs 270 per litre the trip costs Rs 6,750.",
+  },
+  {
+    q: "What mileage should I enter?",
+    a: "Enter your vehicle's real average in kilometres per litre \u2014 the figure you get from your own fill-ups, not only the brochure figure. City driving usually gives fewer kilometres per litre than highway driving.",
+  },
+  {
+    q: "Does the calculator use a live petrol price?",
+    a: "No. Fuel prices change often, so you enter the price you pay at the pump. No live, stored, or official petrol or diesel price is used, and no price is shown as current.",
+  },
+  {
+    q: "How does the return trip option work?",
+    a: "It doubles the one-way distance. A 300 km one-way journey becomes 600 km in total, uses twice the fuel, and costs twice as much, while the cost per kilometre stays the same.",
+  },
+  {
+    q: "Why does my real fuel cost differ from the result?",
+    a: "Traffic, load, air conditioning, tyre pressure, and driving style all change fuel use. The result assumes the mileage you entered stays the same for the whole journey, so treat it as an estimate for planning.",
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://pakistan-finance-calculators.pages.dev/fuel-cost-calculator/#webapp',
+      name: "Fuel Cost Calculator",
+      url: 'https://pakistan-finance-calculators.pages.dev/fuel-cost-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://pakistan-finance-calculators.pages.dev/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: "Fuel Cost Calculator",
+          item: 'https://pakistan-finance-calculators.pages.dev/fuel-cost-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+
+const related = [
+  {
+    href: "/emi-loan-calculator/",
+    name: "EMI / Loan Calculator",
+    desc: "Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan.",
+  },
+  {
+    href: "/percentage-calculator/",
+    name: "Percentage Calculator",
+    desc: "What X% of a number is, percentage increase and decrease, and what percent one number is of another.",
+  },
+];
+---
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Fuel Cost Calculator</p>
+    </nav>
+    <p class="badge badge-info" style="margin-top: 8px;">Travel Costs</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Fuel Cost Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+      Work out what a journey will cost in fuel before you set off. Enter the distance, your vehicle's mileage, and the fuel price you pay, and you will see the litres used, the total cost, and the cost per kilometre — for a one-way trip or a return trip.
+    </p>
+    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+      <strong>No live data.</strong> Every rate, price, and percentage on this page is entered by
+      you. Nothing is fetched from a bank, a market, or a government source, and no figure here
+      is presented as a live or official rate.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="fuelForm" novalidate>
+          <div class="field">
+            <label for="fuelDistance">One-way distance (km) <span aria-hidden="true">*</span></label>
+            <input id="fuelDistance" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">The distance for one leg of the journey, in kilometres.</p>
+          </div>
+
+          <div class="field">
+            <label for="fuelMileage">Mileage (km per litre) <span aria-hidden="true">*</span></label>
+            <input id="fuelMileage" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">How many kilometres your vehicle travels on one litre of fuel.</p>
+          </div>
+
+          <div class="field">
+            <label for="fuelPrice">Fuel price per litre (Rs) <span aria-hidden="true">*</span></label>
+            <input id="fuelPrice" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">Enter the price you pay at the pump. No live petrol or diesel price is used.</p>
+          </div>
+
+          <div class="field">
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: 600;">
+              <input id="fuelReturn" type="checkbox" /> Return trip (double the distance)
+            </label>
+            <p class="hint">Tick this if you are travelling there and back on the same route.</p>
+          </div>
+
+          <div id="fuelErrors" class="error-box" role="alert" hidden></div>
+
+          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+            <button id="fuelCalculate" class="btn-primary" type="submit">Calculate</button>
+            <button id="fuelClear" class="btn-secondary" type="button">Clear</button>
+          </p>
+          <p id="fuelFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        </form>
+      </div>
+
+      <div class="result-card" id="fuelResultCard" tabindex="-1">
+        <div id="fuelEmpty">
+          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p>Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            You will see your answer with the figures shown, so you can check it.
+          </p>
+        </div>
+
+        <div id="fuelResult" data-result-text hidden>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Result</p>
+          <div aria-live="polite" aria-atomic="true">
+            <p class="result-value" id="fuelHeadline"></p>
+          </div>
+          <div class="stat-grid">
+            <div>
+              <p class="stat-label">Fuel used</p>
+              <p class="stat-value" id="fuelStat1"></p>
+            </div>
+            <div>
+              <p class="stat-label">Total distance</p>
+              <p class="stat-value" id="fuelStat2"></p>
+            </div>
+            <div>
+              <p class="stat-label">Cost per km</p>
+              <p class="stat-value" id="fuelStat3"></p>
+            </div>
+          </div>
+          <p id="fuelEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="fuelFormula" style="font-size: 16px;"></p>
+          <p style="font-size: 13px; color: var(--ink-muted);">
+            Estimate only — check important figures before acting.
+            <a href="#fuelDisclaimer">Read the full disclaimer.</a>
+          </p>
+        </div>
+
+        <div class="actions-row no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size: 14px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top: 40px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Enter the one-way distance in kilometres, your vehicle's mileage in kilometres per litre, and the fuel price per litre you pay.</li>
+      <li>Tick "Return trip" if you are travelling there and back — the distance is doubled, and the cost per kilometre stays the same.</li>
+      <li>You see the litres used, the total cost, and the cost per kilometre, with the working shown so you can check it.</li>
+    </ol>
+    <p>Fuel prices change often, so always enter the price at the pump on the day you travel. The calculator never uses a stored or live petrol price.</p>
+
+    <h2>Formula</h2>
+    <p>Litres used = Total distance (km) ÷ Mileage (km per litre)</p>
+    <p>Total cost = Litres used × Fuel price per litre (Rs)</p>
+    <p>Cost per km = Total cost ÷ Total distance (km)</p>
+    <p>For a return trip, total distance is twice the one-way distance. A <a href="/percentage-calculator/">Percentage Calculator</a> can help if you want to work out how much of a budget the trip uses.</p>
+
+    <h2>Worked example</h2>
+    <p><strong>Example:</strong> A 300 km journey at 12 km per litre uses 300 ÷ 12 = 25 litres. At Rs 270 per litre, the trip costs 25 × Rs 270 = Rs 6,750, which is Rs 22.50 per kilometre. The same journey as a return trip covers 600 km, uses 50 litres, and costs Rs 13,500.</p>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+
+    <section id="fuelDisclaimer" class="notice-info" style="margin-top: 32px;">
+      <h2 style="font-size: 20px;">Important — please read</h2>
+      <p>
+        Results are estimates based on the distance, mileage, and fuel price you enter. Real fuel use varies with traffic, load, air conditioning, and driving style. This tool is for planning only and is not a quote for fuel. Check the pump price on the day you travel.
+      </p>
+      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+    </section>
+
+    <h2 style="margin-top: 32px;">Related tools</h2>
+    <div class="related-grid">
+      {
+        related.map((tool) => (
+          <article class="card">
+            <h3 style="font-size: 18px;">
+              <a href={tool.href}>{tool.name}</a>
+            </h3>
+            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p>
+              <a href={tool.href}>Use the calculator →</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+    .field-error {
+      font-size: 14px;
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin: 12px 0;
+    }
+    .stat-grid p {
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .related-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+  </style>
+
+  <script>
+    import { calcFuel, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';
+
+    const form = document.getElementById('fuelForm');
+    const errorsBox = document.getElementById('fuelErrors');
+    const emptyBox = document.getElementById('fuelEmpty');
+    const resultBox = document.getElementById('fuelResult');
+    const resultCard = document.getElementById('fuelResultCard');
+    const headline = document.getElementById('fuelHeadline');
+    const stat1 = document.getElementById('fuelStat1');
+    const stat2 = document.getElementById('fuelStat2');
+    const stat3 = document.getElementById('fuelStat3');
+    const echoEl = document.getElementById('fuelEcho');
+    const formulaEl = document.getElementById('fuelFormula');
+    const copyBtn = document.querySelector('[data-copy-result]');
+    const printBtn = document.querySelector('[data-print-result]');
+    const formStatus = document.getElementById('fuelFormStatus');
+
+    function readNumber(id, label) {
+      const raw = document.getElementById(id).value;
+      if (raw.trim() === '') throw new Error(label + ' is required.');
+      const value = parseDecimal(raw);
+      if (value === null) throw new Error(label + ' must be a number using digits and one decimal point only.');
+      return value;
+    }
+    function showEmpty() {
+      resultBox.hidden = true;
+      emptyBox.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+    function showResult() {
+      emptyBox.hidden = true;
+      resultBox.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        const distance = readNumber('fuelDistance', 'Distance');
+        const mileage = readNumber('fuelMileage', 'Mileage');
+        const price = readNumber('fuelPrice', 'Fuel price');
+        const returnTrip = document.getElementById('fuelReturn').checked;
+        const r = calcFuel(distance, mileage, price, returnTrip);
+        errorsBox.textContent = '';
+        errorsBox.hidden = true;
+        headline.textContent = formatPKR(r.totalCost, 2);
+        stat1.textContent = formatNumber(r.litres, 2) + ' litres';
+        stat2.textContent = formatNumber(r.totalDistance, 2) + ' km';
+        stat3.textContent = formatPKR(r.costPerKm, 2) + ' per km';
+        echoEl.textContent = 'Based on: ' + formatNumber(distance, 2) + ' km one way' + (returnTrip ? ' (return trip, ' + formatNumber(r.totalDistance, 2) + ' km total)' : '') + ', ' + formatNumber(mileage, 2) + ' km per litre, at ' + formatPKR(price, 2) + ' per litre.';
+        formulaEl.textContent = 'Litres = ' + formatNumber(r.totalDistance, 2) + ' km / ' + formatNumber(mileage, 2) + ' km per litre = ' + formatNumber(r.litres, 2) + ' litres. Cost = ' + formatNumber(r.litres, 2) + ' x ' + formatPKR(price, 2) + ' = ' + formatPKR(r.totalCost, 2) + '.';
+        showResult();
+        if (window.matchMedia('(max-width: 899px)').matches) resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorsBox.textContent = err.message;
+        errorsBox.hidden = false;
+        showEmpty();
+      }
+    });
+
+    document.getElementById('fuelClear').addEventListener('click', () => {
+      form.reset();
+      errorsBox.textContent = '';
+      errorsBox.hidden = true;
+      formStatus.textContent = 'Form cleared.';
+      showEmpty();
+    });
+    showEmpty();
+
+  </script>
+</Layout>

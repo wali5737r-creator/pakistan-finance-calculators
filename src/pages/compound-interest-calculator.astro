@@ -1,0 +1,385 @@
+---
+import Layout from '../components/Layout.astro';
+
+const title = "Compound Interest Calculator | Growth & Returns";
+const description = "See how savings grow with compound interest: final amount, total contributions and interest earned, with a year-by-year table, from the figures you enter.";
+const slug = "/compound-interest-calculator/";
+
+const faqs = [
+  {
+    q: "What is compound interest?",
+    a: "Compound interest is a return earned on both the original amount and the returns already added. That is why growth speeds up over time: each year the return is worked out on a larger balance.",
+  },
+  {
+    q: "Does the starting amount or the monthly contribution matter more?",
+    a: "Both matter. The starting amount has the longest time to grow, while regular monthly contributions add up steadily. In the worked example, Rs 5,000 a month for 10 years adds Rs 600,000 of the Rs 700,000 total put in.",
+  },
+  {
+    q: "What return should I enter?",
+    a: "Enter a return you are comfortable assuming, and try a lower one too, so you can see the range. The calculator does not know or suggest any real rate, and no return is guaranteed.",
+  },
+  {
+    q: "How does compounding frequency change the result?",
+    a: "More frequent compounding adds the return to the balance more often, so the balance grows slightly faster at the same annual rate. Monthly compounding gives a little more than annual compounding over the same years.",
+  },
+  {
+    q: "Are tax and charges included?",
+    a: "No. The result is before any tax, fees, or charges. A real account or fund may deduct these, so the amount you receive could be lower.",
+  },
+  {
+    q: "Can I use this for a loan as well?",
+    a: "The maths is similar, but loans reduce the balance with each payment. For a loan, use the EMI / Loan Calculator, which shows the instalment and the full repayment schedule.",
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://pakistan-finance-calculators.pages.dev/compound-interest-calculator/#webapp',
+      name: "Compound Interest Calculator",
+      url: 'https://pakistan-finance-calculators.pages.dev/compound-interest-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://pakistan-finance-calculators.pages.dev/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: "Compound Interest Calculator",
+          item: 'https://pakistan-finance-calculators.pages.dev/compound-interest-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+
+const related = [
+  {
+    href: "/fixed-deposit-calculator/",
+    name: "Fixed Deposit Calculator",
+    desc: "Maturity amount and profit on a fixed deposit, with the profit rate and tax you enter.",
+  },
+  {
+    href: "/goal-savings-calculator/",
+    name: "Goal Savings Calculator",
+    desc: "How much to save each month for a target, or how long a monthly saving will take to reach it.",
+  },
+];
+---
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Compound Interest Calculator</p>
+    </nav>
+    <p class="badge badge-info" style="margin-top: 8px;">Savings & Growth</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Compound Interest Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+      See how money grows when the return itself earns a return. Enter a starting amount, what you add each month, and the annual return you assume, and this calculator shows the final amount, how much you put in, how much is growth, and the balance at the end of every year.
+    </p>
+    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+      <strong>No live data.</strong> Every rate, price, and percentage on this page is entered by
+      you. Nothing is fetched from a bank, a market, or a government source, and no figure here
+      is presented as a live or official rate.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="compoundForm" novalidate>
+          <div class="field">
+            <label for="compoundPrincipal">Starting amount (Rs) <span aria-hidden="true">*</span></label>
+            <input id="compoundPrincipal" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">The lump sum you start with. Enter 0 if you are starting from nothing.</p>
+          </div>
+
+          <div class="field">
+            <label for="compoundMonthly">Monthly contribution (Rs)</label>
+            <input id="compoundMonthly" type="text" inputmode="decimal" autocomplete="off" />
+            <p class="hint">What you add every month. Enter 0 if you add nothing. It can be left blank for 0.</p>
+          </div>
+
+          <div class="field">
+            <label for="compoundRate">Annual return (%) <span aria-hidden="true">*</span></label>
+            <input id="compoundRate" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">The yearly return you assume, as a percentage. This is your assumption, not a promised return.</p>
+          </div>
+
+          <div class="field">
+            <label for="compoundYears">Years <span aria-hidden="true">*</span></label>
+            <input id="compoundYears" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">A whole number of years, from 1 to 50.</p>
+          </div>
+
+          <div class="field">
+            <label for="compoundFrequency">Compounding frequency</label>
+            <select id="compoundFrequency">
+              <option value="12" selected>Monthly</option>
+              <option value="4">Quarterly (every 3 months)</option>
+              <option value="2">Half-yearly (every 6 months)</option>
+              <option value="1">Annually</option>
+            </select>
+            <p class="hint">How often the return is added to the balance. More frequent compounding grows the balance slightly faster.</p>
+          </div>
+
+          <div id="compoundErrors" class="error-box" role="alert" hidden></div>
+
+          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+            <button id="compoundCalculate" class="btn-primary" type="submit">Calculate</button>
+            <button id="compoundClear" class="btn-secondary" type="button">Clear</button>
+          </p>
+          <p id="compoundFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        </form>
+      </div>
+
+      <div class="result-card" id="compoundResultCard" tabindex="-1">
+        <div id="compoundEmpty">
+          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p>Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            You will see your answer with the figures shown, so you can check it.
+          </p>
+        </div>
+
+        <div id="compoundResult" data-result-text hidden>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Result</p>
+          <div aria-live="polite" aria-atomic="true">
+            <p class="result-value" id="compoundHeadline"></p>
+          </div>
+          <div class="stat-grid">
+            <div>
+              <p class="stat-label">Total you put in</p>
+              <p class="stat-value" id="compoundStat1"></p>
+            </div>
+            <div>
+              <p class="stat-label">Interest earned</p>
+              <p class="stat-value" id="compoundStat2"></p>
+            </div>
+          </div>
+          <div class="table-wrap" id="compoundTableWrap" hidden style="margin-top: 12px; max-height: 360px; overflow-y: auto;">
+            <table class="data">
+              <caption>Year-by-year balance</caption>
+              <thead><tr><th scope="col">Year</th><th scope="col">Balance</th><th scope="col">Total put in</th><th scope="col">Interest earned</th></tr></thead>
+              <tbody id="compoundTableBody"></tbody>
+            </table>
+          </div>
+          <p id="compoundEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="compoundFormula" style="font-size: 16px;"></p>
+          <p style="font-size: 13px; color: var(--ink-muted);">
+            Estimate only — check important figures before acting.
+            <a href="#compoundDisclaimer">Read the full disclaimer.</a>
+          </p>
+        </div>
+
+        <div class="actions-row no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size: 14px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top: 40px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Enter the amount you start with (0 is fine), the amount you add each month, and the annual return you assume.</li>
+      <li>Choose how often the return is compounded. Monthly compounding is the default; quarterly, half-yearly, and annual are also available.</li>
+      <li>You see the final amount, the total you put in, and the interest earned, plus a table showing the balance at the end of each year.</li>
+    </ol>
+    <p>Contributions are treated as added at the end of each compounding period, so they start earning a return from the next period. The return you enter is an assumption — real returns vary and are never guaranteed.</p>
+
+    <h2>Formula</h2>
+    <p>Balance after each period = Previous balance × (1 + annual rate ÷ periods per year) + contribution for the period</p>
+    <p>With no contributions, this is the familiar form: Final amount = Principal × (1 + r ÷ n)<sup>n × t</sup>, where r is the annual rate, n is the number of compounding periods per year, and t is the number of years.</p>
+    <p>Interest earned = Final amount − Total put in (starting amount + all monthly contributions).</p>
+
+    <h2>Worked example</h2>
+    <p><strong>Example:</strong> Rs 100,000 to start, Rs 5,000 a month, at 10% a year compounded monthly for 10 years, grows to Rs 1,294,929.07. You put in Rs 700,000 in total (Rs 100,000 + Rs 5,000 × 120 months), so Rs 594,929.07 is interest. After year 1 the balance is Rs 173,299.13, and after year 5 it is Rs 551,716.24.</p>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+
+    <section id="compoundDisclaimer" class="notice-info" style="margin-top: 32px;">
+      <h2 style="font-size: 20px;">Important — please read</h2>
+      <p>
+        Results are illustrations based on the return and contributions you enter. The return is your assumption, not a forecast and not a promise from any bank or fund. Real returns vary, charges and tax are not included, and past growth does not guarantee future growth. This is not investment advice.
+      </p>
+      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+    </section>
+
+    <h2 style="margin-top: 32px;">Related tools</h2>
+    <div class="related-grid">
+      {
+        related.map((tool) => (
+          <article class="card">
+            <h3 style="font-size: 18px;">
+              <a href={tool.href}>{tool.name}</a>
+            </h3>
+            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p>
+              <a href={tool.href}>Use the calculator →</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+    .field-error {
+      font-size: 14px;
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin: 12px 0;
+    }
+    .stat-grid p {
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .related-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+  </style>
+
+  <script>
+    import { calcCompound, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';
+
+    const form = document.getElementById('compoundForm');
+    const errorsBox = document.getElementById('compoundErrors');
+    const emptyBox = document.getElementById('compoundEmpty');
+    const resultBox = document.getElementById('compoundResult');
+    const resultCard = document.getElementById('compoundResultCard');
+    const headline = document.getElementById('compoundHeadline');
+    const stat1 = document.getElementById('compoundStat1');
+    const stat2 = document.getElementById('compoundStat2');
+    const echoEl = document.getElementById('compoundEcho');
+    const formulaEl = document.getElementById('compoundFormula');
+    const tableWrap = document.getElementById('compoundTableWrap');
+    const tableBody = document.getElementById('compoundTableBody');
+    const copyBtn = document.querySelector('[data-copy-result]');
+    const printBtn = document.querySelector('[data-print-result]');
+    const formStatus = document.getElementById('compoundFormStatus');
+
+    function readNumber(id, label, allowBlankZero) {
+      const raw = document.getElementById(id).value;
+      if (raw.trim() === '') {
+        if (allowBlankZero) return 0;
+        throw new Error(label + ' is required.');
+      }
+      const value = parseDecimal(raw);
+      if (value === null) throw new Error(label + ' must be a number using digits and one decimal point only.');
+      return value;
+    }
+    function showEmpty() {
+      resultBox.hidden = true;
+      tableWrap.hidden = true;
+      emptyBox.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+    function showResult() {
+      emptyBox.hidden = true;
+      resultBox.hidden = false;
+      tableWrap.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        const principal = readNumber('compoundPrincipal', 'Starting amount', false);
+        const monthly = readNumber('compoundMonthly', 'Monthly contribution', true);
+        const rate = readNumber('compoundRate', 'Annual return', false);
+        const years = readNumber('compoundYears', 'Years', false);
+        const freq = Number(document.getElementById('compoundFrequency').value);
+        const r = calcCompound(principal, monthly, rate, years, freq);
+        errorsBox.textContent = '';
+        errorsBox.hidden = true;
+        headline.textContent = formatPKR(r.finalAmount, 2);
+        stat1.textContent = formatPKR(r.totalContributions, 2);
+        stat2.textContent = formatPKR(r.interestEarned, 2);
+        echoEl.textContent = 'Based on: starting ' + formatPKR(principal, 2) + ', ' + formatPKR(monthly, 2) + ' per month, ' + formatNumber(rate, 2) + '% per year for ' + years + ' years.';
+        formulaEl.textContent = 'Final amount = starting amount grown with compounding, plus each monthly contribution grown for the time remaining. The year-by-year table below shows the balance at the end of each year.';
+        tableBody.innerHTML = '';
+        r.rows.forEach((row) => {
+          const tr = document.createElement('tr');
+          const tdYear = document.createElement('td');
+          tdYear.textContent = 'Year ' + row.year;
+          const tdBal = document.createElement('td');
+          tdBal.textContent = formatPKR(row.balance, 2);
+          const tdContrib = document.createElement('td');
+          tdContrib.textContent = formatPKR(row.totalContributions, 2);
+          const tdInt = document.createElement('td');
+          tdInt.textContent = formatPKR(row.interestEarned, 2);
+          tr.append(tdYear, tdBal, tdContrib, tdInt);
+          tableBody.appendChild(tr);
+        });
+        showResult();
+        if (window.matchMedia('(max-width: 899px)').matches) resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorsBox.textContent = err.message;
+        errorsBox.hidden = false;
+        showEmpty();
+      }
+    });
+
+    document.getElementById('compoundClear').addEventListener('click', () => {
+      form.reset();
+      errorsBox.textContent = '';
+      errorsBox.hidden = true;
+      formStatus.textContent = 'Form cleared.';
+      showEmpty();
+    });
+    showEmpty();
+
+  </script>
+</Layout>

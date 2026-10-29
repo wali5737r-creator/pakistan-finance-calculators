@@ -1,0 +1,376 @@
+---
+import Layout from '../components/Layout.astro';
+
+const title = "Loan Comparison Calculator | Compare Two Loans";
+const description = "Compare two loans side by side: the EMI, total interest and total payment of each, and which loan costs less overall, with the EMI formula shown.";
+const slug = "/loan-comparison-calculator/";
+
+const faqs = [
+  {
+    q: "Which loan is cheaper: the lower EMI or the lower total payment?",
+    a: "The lower total payment. A longer tenure can give a lower EMI while costing more interest overall, so always compare total payment \u2014 and total interest \u2014 not the EMI alone.",
+  },
+  {
+    q: "Can I compare loans for different amounts or tenures?",
+    a: "Yes. Each loan is worked out from its own amount, rate, and tenure, so you can compare a larger short loan against a smaller long loan, and the result still shows which costs less in total.",
+  },
+  {
+    q: "Why do the figures match the EMI calculator?",
+    a: "Both use the same reducing-balance EMI calculation, with per-row rounding and a final-instalment adjustment. Enter the same amount, rate, and tenure on either page and you get the same EMI and totals.",
+  },
+  {
+    q: "Are fees and insurance included?",
+    a: "No. Processing fees, insurance, and other charges are not in the figures. Add them to the total payment yourself when comparing real offers, because they can change which offer is cheaper.",
+  },
+  {
+    q: "What if the rate is variable?",
+    a: "The calculator assumes the rate you enter stays fixed for the whole tenure. If the rate changes, the EMI and totals will change too, so treat the result as a comparison at today's quoted rates.",
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://pakistan-finance-calculators.pages.dev/loan-comparison-calculator/#webapp',
+      name: "Loan Comparison Calculator",
+      url: 'https://pakistan-finance-calculators.pages.dev/loan-comparison-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://pakistan-finance-calculators.pages.dev/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: "Loan Comparison Calculator",
+          item: 'https://pakistan-finance-calculators.pages.dev/loan-comparison-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+
+const related = [
+  {
+    href: "/emi-loan-calculator/",
+    name: "EMI / Loan Calculator",
+    desc: "Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan.",
+  },
+  {
+    href: "/loan-eligibility-calculator/",
+    name: "Loan Eligibility Calculator",
+    desc: "The largest loan your income can support, from the affordable EMI after existing obligations.",
+  },
+];
+---
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Loan Comparison Calculator</p>
+    </nav>
+    <p class="badge badge-info" style="margin-top: 8px;">Loans</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Loan Comparison Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+      Two loan offers can look similar and cost very different amounts. Enter both loans — amount, rate, and tenure for each — and compare the monthly instalment, the total interest, and the total payment side by side, to see which one truly costs less.
+    </p>
+    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+      <strong>No live data.</strong> Every rate, price, and percentage on this page is entered by
+      you. Nothing is fetched from a bank, a market, or a government source, and no figure here
+      is presented as a live or official rate.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="compForm" novalidate>
+          <p class="group-label" style="font-size: 17px; font-weight: 700; margin-bottom: 8px;">Loan A</p>
+          <div class="field">
+            <label for="compAmountA">Loan A amount (Rs) <span aria-hidden="true">*</span></label>
+            <input id="compAmountA" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+          </div>
+          <div class="field">
+            <label for="compRateA">Loan A annual rate (%) <span aria-hidden="true">*</span></label>
+            <input id="compRateA" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+          </div>
+          <div class="field">
+            <label for="compMonthsA">Loan A tenure (months) <span aria-hidden="true">*</span></label>
+            <input id="compMonthsA" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">For example, 60 for 5 years.</p>
+          </div>
+
+          <p class="group-label" style="font-size: 17px; font-weight: 700; margin-bottom: 8px; margin-top: 20px;">Loan B</p>
+          <div class="field">
+            <label for="compAmountB">Loan B amount (Rs) <span aria-hidden="true">*</span></label>
+            <input id="compAmountB" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+          </div>
+          <div class="field">
+            <label for="compRateB">Loan B annual rate (%) <span aria-hidden="true">*</span></label>
+            <input id="compRateB" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+          </div>
+          <div class="field">
+            <label for="compMonthsB">Loan B tenure (months) <span aria-hidden="true">*</span></label>
+            <input id="compMonthsB" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">For example, 60 for 5 years.</p>
+          </div>
+
+          <div id="compErrors" class="error-box" role="alert" hidden></div>
+
+          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+            <button id="compCalculate" class="btn-primary" type="submit">Calculate</button>
+            <button id="compClear" class="btn-secondary" type="button">Clear</button>
+          </p>
+          <p id="compFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        </form>
+      </div>
+
+      <div class="result-card" id="compResultCard" tabindex="-1">
+        <div id="compEmpty">
+          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p>Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            You will see your answer with the figures shown, so you can check it.
+          </p>
+        </div>
+
+        <div id="compResult" data-result-text hidden>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Result</p>
+          <div aria-live="polite" aria-atomic="true">
+            <p class="result-value" id="compHeadline"></p>
+          </div>
+          <div class="stat-grid">
+            <div>
+              <p class="stat-label">Loan A — EMI per month</p>
+              <p class="stat-value" id="compStatAEmi"></p>
+            </div>
+            <div>
+              <p class="stat-label">Loan A — total payment</p>
+              <p class="stat-value" id="compStatATotal"></p>
+            </div>
+            <div>
+              <p class="stat-label">Loan A — total interest</p>
+              <p class="stat-value" id="compStatAInt"></p>
+            </div>
+            <div>
+              <p class="stat-label">Loan B — EMI per month</p>
+              <p class="stat-value" id="compStatBEmi"></p>
+            </div>
+            <div>
+              <p class="stat-label">Loan B — total payment</p>
+              <p class="stat-value" id="compStatBTotal"></p>
+            </div>
+            <div>
+              <p class="stat-label">Loan B — total interest</p>
+              <p class="stat-value" id="compStatBInt"></p>
+            </div>
+          </div>
+          <p id="compEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="compFormula" style="font-size: 16px;"></p>
+          <p style="font-size: 13px; color: var(--ink-muted);">
+            Estimate only — check important figures before acting.
+            <a href="#compDisclaimer">Read the full disclaimer.</a>
+          </p>
+        </div>
+
+        <div class="actions-row no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size: 14px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top: 40px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Enter the amount, annual rate, and tenure in months for Loan A, then the same three figures for Loan B. The two loans may be for different amounts or different tenures.</li>
+      <li>You see the EMI, total interest, and total payment for each loan, and which loan costs less in total — and by how much.</li>
+      <li>Compare more than the EMI: a lower EMI over a longer tenure can still cost more overall. The total payment is the fair comparison.</li>
+    </ol>
+    <p>Each loan is worked out with the same reducing-balance EMI calculation as the <a href="/emi-loan-calculator/">EMI / Loan Calculator</a>, including the final-instalment adjustment, so the figures here match that page exactly for the same inputs.</p>
+
+    <h2>Formula</h2>
+    <p>EMI = [P × R × (1 + R)<sup>N</sup>] ÷ [(1 + R)<sup>N</sup> − 1]</p>
+    <p>P is the loan amount, R is the monthly rate (annual rate ÷ 12), and N is the number of monthly instalments.</p>
+    <p>Total payment = sum of all instalments. Total interest = Total payment − Loan amount. The cheaper loan is the one with the lower total payment, not necessarily the lower EMI.</p>
+
+    <h2>Worked example</h2>
+    <p><strong>Example:</strong> Two loans of Rs 1,000,000 over 60 months. Loan A at 18% has an EMI of Rs 25,393.43, total interest of Rs 523,605.61, and a total payment of Rs 1,523,605.61. Loan B at 15% has an EMI of Rs 23,789.93, total interest of Rs 427,395.77, and a total payment of Rs 1,427,395.77. Loan B is cheaper by Rs 96,209.84.</p>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+
+    <section id="compDisclaimer" class="notice-info" style="margin-top: 32px;">
+      <h2 style="font-size: 20px;">Important — please read</h2>
+      <p>
+        Results are estimates from the figures you enter, assuming a fixed rate, fixed monthly instalments, and no fees, charges, or penalties. Real loan offers may include processing fees, insurance, and variable rates that change the total cost. Compare the full offer documents, not only the EMI.
+      </p>
+      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+    </section>
+
+    <h2 style="margin-top: 32px;">Related tools</h2>
+    <div class="related-grid">
+      {
+        related.map((tool) => (
+          <article class="card">
+            <h3 style="font-size: 18px;">
+              <a href={tool.href}>{tool.name}</a>
+            </h3>
+            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p>
+              <a href={tool.href}>Use the calculator →</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+    .field-error {
+      font-size: 14px;
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin: 12px 0;
+    }
+    .stat-grid p {
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .related-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+  </style>
+
+  <script>
+    import { calcLoanComparison, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';
+
+    const form = document.getElementById('compForm');
+    const errorsBox = document.getElementById('compErrors');
+    const emptyBox = document.getElementById('compEmpty');
+    const resultBox = document.getElementById('compResult');
+    const resultCard = document.getElementById('compResultCard');
+    const headline = document.getElementById('compHeadline');
+    const statAEmi = document.getElementById('compStatAEmi');
+    const statATotal = document.getElementById('compStatATotal');
+    const statAInt = document.getElementById('compStatAInt');
+    const statBEmi = document.getElementById('compStatBEmi');
+    const statBTotal = document.getElementById('compStatBTotal');
+    const statBInt = document.getElementById('compStatBInt');
+    const echoEl = document.getElementById('compEcho');
+    const formulaEl = document.getElementById('compFormula');
+    const copyBtn = document.querySelector('[data-copy-result]');
+    const printBtn = document.querySelector('[data-print-result]');
+    const formStatus = document.getElementById('compFormStatus');
+
+    function readNumber(id, label) {
+      const raw = document.getElementById(id).value;
+      if (raw.trim() === '') throw new Error(label + ' is required.');
+      const value = parseDecimal(raw);
+      if (value === null) throw new Error(label + ' must be a number using digits and one decimal point only.');
+      return value;
+    }
+    function showEmpty() {
+      resultBox.hidden = true;
+      emptyBox.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+    function showResult() {
+      emptyBox.hidden = true;
+      resultBox.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        const amountA = readNumber('compAmountA', 'Loan A amount');
+        const rateA = readNumber('compRateA', 'Loan A rate');
+        const monthsA = readNumber('compMonthsA', 'Loan A tenure');
+        const amountB = readNumber('compAmountB', 'Loan B amount');
+        const rateB = readNumber('compRateB', 'Loan B rate');
+        const monthsB = readNumber('compMonthsB', 'Loan B tenure');
+        if (!Number.isInteger(monthsA) || !Number.isInteger(monthsB)) throw new Error('Tenures must be whole numbers of months.');
+        const r = calcLoanComparison(amountA, rateA, monthsA, amountB, rateB, monthsB);
+        errorsBox.textContent = '';
+        errorsBox.hidden = true;
+        headline.textContent = r.cheaper === 'equal'
+          ? 'Both loans cost the same'
+          : 'Loan ' + r.cheaper + ' is cheaper by ' + formatPKR(r.saving, 2);
+        statAEmi.textContent = formatPKR(r.loanA.emi, 2);
+        statATotal.textContent = formatPKR(r.loanA.totalPayment, 2);
+        statAInt.textContent = formatPKR(r.loanA.totalInterest, 2);
+        statBEmi.textContent = formatPKR(r.loanB.emi, 2);
+        statBTotal.textContent = formatPKR(r.loanB.totalPayment, 2);
+        statBInt.textContent = formatPKR(r.loanB.totalInterest, 2);
+        echoEl.textContent = 'Loan A: ' + formatPKR(amountA, 2) + ' at ' + formatNumber(rateA, 2) + '% for ' + monthsA + ' months. Loan B: ' + formatPKR(amountB, 2) + ' at ' + formatNumber(rateB, 2) + '% for ' + monthsB + ' months.';
+        formulaEl.textContent = 'EMI = [P x R x (1+R)^N] / [(1+R)^N - 1], where P is the loan amount, R is the monthly rate, and N is the number of months. Total payment = EMI x N (with the final instalment adjusted, as on the EMI page). The cheaper loan is the one with the lower total payment.';
+        showResult();
+        if (window.matchMedia('(max-width: 899px)').matches) resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorsBox.textContent = err.message;
+        errorsBox.hidden = false;
+        showEmpty();
+      }
+    });
+
+    document.getElementById('compClear').addEventListener('click', () => {
+      form.reset();
+      errorsBox.textContent = '';
+      errorsBox.hidden = true;
+      formStatus.textContent = 'Form cleared.';
+      showEmpty();
+    });
+    showEmpty();
+
+  </script>
+</Layout>

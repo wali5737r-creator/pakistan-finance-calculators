@@ -1,0 +1,362 @@
+---
+import Layout from '../components/Layout.astro';
+
+const title = "Debt Payoff Calculator | Months & Interest Saved";
+const description = "See how fast a loan or card balance clears with and without an extra monthly payment, how much interest the extra payment saves, and when it never clears.";
+const slug = "/debt-payoff-calculator/";
+
+const faqs = [
+  {
+    q: "How does paying extra each month help?",
+    a: "Each month's interest is charged first, and the rest of your payment reduces the balance. An extra payment goes straight to the balance, so later months charge interest on a smaller balance, and the debt ends sooner and costs less.",
+  },
+  {
+    q: "What happens if my payment does not cover the interest?",
+    a: "The balance would grow instead of falling, and the debt would never clear. The calculator shows a clear error in that case, so you can raise the payment or the extra payment.",
+  },
+  {
+    q: "Why is the interest saving so large?",
+    a: "Because interest compounds on the balance. Cutting the balance early removes interest from every remaining month, so a small extra payment each month can save many times its own size in interest over the life of the loan.",
+  },
+  {
+    q: "Should I pay extra on the highest-rate debt first?",
+    a: "Usually, yes: extra payments save the most on the highest-rate balance. This calculator works out one balance at a time, so run it separately for each debt and compare.",
+  },
+  {
+    q: "Does this include fees or penalties?",
+    a: "No. Fees, late charges, and any early-settlement penalty are not included. Check your loan agreement, because a penalty could reduce or remove the saving.",
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://pakistan-finance-calculators.pages.dev/debt-payoff-calculator/#webapp',
+      name: "Debt Payoff Calculator",
+      url: 'https://pakistan-finance-calculators.pages.dev/debt-payoff-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://pakistan-finance-calculators.pages.dev/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: "Debt Payoff Calculator",
+          item: 'https://pakistan-finance-calculators.pages.dev/debt-payoff-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+
+const related = [
+  {
+    href: "/emi-loan-calculator/",
+    name: "EMI / Loan Calculator",
+    desc: "Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan.",
+  },
+  {
+    href: "/loan-comparison-calculator/",
+    name: "Loan Comparison Calculator",
+    desc: "Compare two loans side by side: EMI, total interest, and total payment for each, and which costs less.",
+  },
+];
+---
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Debt Payoff Calculator</p>
+    </nav>
+    <p class="badge badge-info" style="margin-top: 8px;">Loans</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Debt Payoff Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+      See what an extra monthly payment really does. Enter the balance, the rate, what you pay now, and any extra amount — and compare how long the debt takes to clear, and how much interest you pay, with and without the extra payment.
+    </p>
+    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+      <strong>No live data.</strong> Every rate, price, and percentage on this page is entered by
+      you. Nothing is fetched from a bank, a market, or a government source, and no figure here
+      is presented as a live or official rate.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="debtForm" novalidate>
+          <div class="field">
+            <label for="debtBalance">Loan balance (Rs) <span aria-hidden="true">*</span></label>
+            <input id="debtBalance" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">What you still owe on the loan or card balance.</p>
+          </div>
+
+          <div class="field">
+            <label for="debtRate">Annual interest rate (%) <span aria-hidden="true">*</span></label>
+            <input id="debtRate" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">The yearly rate on the balance. Enter the rate your lender charges — no bank rate is used.</p>
+          </div>
+
+          <div class="field">
+            <label for="debtPayment">Current monthly payment (Rs) <span aria-hidden="true">*</span></label>
+            <input id="debtPayment" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">What you pay each month now, without any extra payment.</p>
+          </div>
+
+          <div class="field">
+            <label for="debtExtra">Extra monthly payment (Rs)</label>
+            <input id="debtExtra" type="text" inputmode="decimal" autocomplete="off" />
+            <p class="hint">Any extra amount you would add each month. Enter 0, or leave blank, for no extra payment.</p>
+          </div>
+
+          <div id="debtErrors" class="error-box" role="alert" hidden></div>
+
+          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+            <button id="debtCalculate" class="btn-primary" type="submit">Calculate</button>
+            <button id="debtClear" class="btn-secondary" type="button">Clear</button>
+          </p>
+          <p id="debtFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        </form>
+      </div>
+
+      <div class="result-card" id="debtResultCard" tabindex="-1">
+        <div id="debtEmpty">
+          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p>Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            You will see your answer with the figures shown, so you can check it.
+          </p>
+        </div>
+
+        <div id="debtResult" data-result-text hidden>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Result</p>
+          <div aria-live="polite" aria-atomic="true">
+            <p class="result-value" id="debtHeadline"></p>
+          </div>
+          <div class="stat-grid">
+            <div>
+              <p class="stat-label">Total interest with extra payment</p>
+              <p class="stat-value" id="debtStat1"></p>
+            </div>
+            <div>
+              <p class="stat-label">Months without extra payment</p>
+              <p class="stat-value" id="debtStat2"></p>
+            </div>
+            <div>
+              <p class="stat-label">Total interest without extra payment</p>
+              <p class="stat-value" id="debtStat3"></p>
+            </div>
+            <div>
+              <p class="stat-label">Interest saved by the extra payment</p>
+              <p class="stat-value" id="debtStat4"></p>
+            </div>
+          </div>
+          <p id="debtEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="debtFormula" style="font-size: 16px;"></p>
+          <p style="font-size: 13px; color: var(--ink-muted);">
+            Estimate only — check important figures before acting.
+            <a href="#debtDisclaimer">Read the full disclaimer.</a>
+          </p>
+        </div>
+
+        <div class="actions-row no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size: 14px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top: 40px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Enter the balance you owe, the annual interest rate, and the monthly payment you make now.</li>
+      <li>Add an extra monthly payment to see the difference. The extra amount goes straight to reducing the balance, because the month's interest is charged first.</li>
+      <li>You see the payoff time and total interest with the extra payment, and the same figures without it, so the saving is plain to see.</li>
+    </ol>
+    <p>The balance is reduced month by month, using the same reducing-balance approach as the <a href="/emi-loan-calculator/">EMI / Loan Calculator</a>. If the payment does not even cover the month's interest, the balance would never fall, and a clear error is shown instead of a result.</p>
+
+    <h2>Formula</h2>
+    <p>Monthly interest = Balance × (Annual rate ÷ 12)</p>
+    <p>Balance reduction each month = Monthly payment − Monthly interest</p>
+    <p>The balance is worked out month by month until it reaches zero. Interest saved = Total interest without the extra payment − Total interest with the extra payment.</p>
+
+    <h2>Worked example</h2>
+    <p><strong>Example:</strong> A balance of Rs 500,000 at 20% a year, paying Rs 15,000 a month, takes 50 months and costs Rs 235,909.43 in interest. Adding Rs 5,000 a month extra (Rs 20,000 in total) clears it in 33 months, with Rs 152,210.26 in interest — saving Rs 83,699.17 and 17 months.</p>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+
+    <section id="debtDisclaimer" class="notice-info" style="margin-top: 32px;">
+      <h2 style="font-size: 20px;">Important — please read</h2>
+      <p>
+        Results are estimates based on a fixed rate and fixed payments, with no new borrowing, fees, or penalties. Real loans may have variable rates, charges, and early-settlement terms that change the figures. Check your loan agreement before changing your payments.
+      </p>
+      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+    </section>
+
+    <h2 style="margin-top: 32px;">Related tools</h2>
+    <div class="related-grid">
+      {
+        related.map((tool) => (
+          <article class="card">
+            <h3 style="font-size: 18px;">
+              <a href={tool.href}>{tool.name}</a>
+            </h3>
+            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p>
+              <a href={tool.href}>Use the calculator →</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+    .field-error {
+      font-size: 14px;
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin: 12px 0;
+    }
+    .stat-grid p {
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .related-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+  </style>
+
+  <script>
+    import { calcDebtPayoff, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';
+
+    const form = document.getElementById('debtForm');
+    const errorsBox = document.getElementById('debtErrors');
+    const emptyBox = document.getElementById('debtEmpty');
+    const resultBox = document.getElementById('debtResult');
+    const resultCard = document.getElementById('debtResultCard');
+    const headline = document.getElementById('debtHeadline');
+    const stat1 = document.getElementById('debtStat1');
+    const stat2 = document.getElementById('debtStat2');
+    const stat3 = document.getElementById('debtStat3');
+    const stat4 = document.getElementById('debtStat4');
+    const echoEl = document.getElementById('debtEcho');
+    const formulaEl = document.getElementById('debtFormula');
+    const copyBtn = document.querySelector('[data-copy-result]');
+    const printBtn = document.querySelector('[data-print-result]');
+    const formStatus = document.getElementById('debtFormStatus');
+
+    function readNumber(id, label, allowBlankZero) {
+      const raw = document.getElementById(id).value;
+      if (raw.trim() === '') {
+        if (allowBlankZero) return 0;
+        throw new Error(label + ' is required.');
+      }
+      const value = parseDecimal(raw);
+      if (value === null) throw new Error(label + ' must be a number using digits and one decimal point only.');
+      return value;
+    }
+    function showEmpty() {
+      resultBox.hidden = true;
+      emptyBox.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+    function showResult() {
+      emptyBox.hidden = true;
+      resultBox.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+    }
+    function monthsText(months) {
+      if (months === null) return 'Never pays off';
+      const years = Math.floor(months / 12);
+      const rest = months % 12;
+      return months + ' months' + (years > 0 ? ' (' + years + 'y ' + rest + 'm)' : '');
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        const balance = readNumber('debtBalance', 'Loan balance', false);
+        const rate = readNumber('debtRate', 'Annual interest rate', false);
+        const payment = readNumber('debtPayment', 'Monthly payment', false);
+        const extra = readNumber('debtExtra', 'Extra monthly payment', true);
+        const r = calcDebtPayoff(balance, rate, payment, extra);
+        errorsBox.textContent = '';
+        errorsBox.hidden = true;
+        headline.textContent = monthsText(r.monthsWithExtra);
+        stat1.textContent = formatPKR(r.totalInterestWithExtra, 2);
+        stat2.textContent = monthsText(r.monthsWithoutExtra);
+        stat3.textContent = r.totalInterestWithoutExtra === null ? 'Never pays off' : formatPKR(r.totalInterestWithoutExtra, 2);
+        stat4.textContent = r.interestSaved === null ? 'Not applicable' : formatPKR(r.interestSaved, 2);
+        echoEl.textContent = 'Based on: balance ' + formatPKR(balance, 2) + ', rate ' + formatNumber(rate, 2) + '% per year, payment ' + formatPKR(payment, 2) + ' per month plus ' + formatPKR(extra, 2) + ' extra per month.';
+        formulaEl.textContent = 'Each month, interest = balance x monthly rate. The rest of the payment reduces the balance. The extra payment goes straight to the balance, so the loan ends sooner and costs less interest.';
+        showResult();
+        if (window.matchMedia('(max-width: 899px)').matches) resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorsBox.textContent = err.message;
+        errorsBox.hidden = false;
+        showEmpty();
+      }
+    });
+
+    document.getElementById('debtClear').addEventListener('click', () => {
+      form.reset();
+      errorsBox.textContent = '';
+      errorsBox.hidden = true;
+      formStatus.textContent = 'Form cleared.';
+      showEmpty();
+    });
+    showEmpty();
+
+  </script>
+</Layout>
