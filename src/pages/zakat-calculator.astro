@@ -216,6 +216,10 @@ const schema = JSON.stringify({
             <input type="text" inputmode="decimal" autocomplete="off" id="silver-price" />
             <p class="hint">Used to value silver by weight and to work out the silver nisab. A live price shows its source and date; a price you type is labelled as yours.</p>
             <p class="hint" id="silver-price-meta"></p>
+            <p class="hint" id="zakat-credit" hidden>
+              Live gold and silver prices by
+              <a href="https://goldprice.dev" rel="noopener nofollow" target="_blank">goldprice.dev</a>.
+            </p>
             <p class="field-error" id="err-silver-price" hidden></p>
           </div>
 
@@ -835,10 +839,12 @@ const schema = JSON.stringify({
         $('gold-price').value = formatNumber(data.goldPerTola, 2);
         $('silver-price').value = formatNumber(data.silverPerTola, 2);
         priceOrigin = { gold: 'live', silver: 'live' };
+        $('zakat-credit').hidden = false;
         updateStrip();
         updatePriceMetas();
         recalculate(false);
       } catch {
+        $('zakat-credit').hidden = true;
         priceStrip.textContent = 'Latest prices are unavailable. Enter gold and silver prices yourself below, or try again later.';
         priceStrip.className = 'notice-warning';
         priceNotice.hidden = false;
