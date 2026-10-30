@@ -24,8 +24,32 @@ interface Env {
 const TOLA_GRAMS = 11.664;
 const STALE_LIMIT_MS = 7 * 24 * 60 * 60 * 1000;
 
-export async function onRequest(context: { request: Request; env: Env }) {
+interface PagesContext {
+  request: Request;
+  env: Env;
+  waitUntil?: (promise: Promise<unknown>) => void;
+}
+
+const SECURITY_HEADERS: Record<string, string> = {
+  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'; sandbox",
+};
+
+export async function onRequest(context: PagesContext) {
   const { request, env } = context;
+  // Only GET is served; OPTIONS (preflight) is answered without
+  // touching the upstream, anything else is rejected outright so the
+  // free upstream quota cannot be spent by non-read requests.
+  if (request.method === 'OPTIONS') {
+    return jsonResponse(null, 204);
+  }
+  if (request.method !== 'GET') {
+    const response = jsonResponse({ status: 'error', reason: 'Method not allowed.' }, 405);
+    response.headers.set('Allow', 'GET, OPTIONS');
+    return response;
+  }
   const cache = caches.default;
   const cacheKey = new Request(new URL('/api/metals', request.url).toString(), request);
   const cached = await cache.match(cacheKey);
@@ -75,7 +99,7 @@ export async function onRequest(context: { request: Request; env: Env }) {
     };
     const response = jsonResponse(snapshot);
     response.headers.set('Cache-Control', 'public, max-age=3600');
-    void cache.put(cacheKey, response.clone()).catch(() => undefined);
+    persistWithWaitUntil(context, cache.put(cacheKey, response.clone()));
     return response;
   } catch (err) {
     return jsonResponse({ status: 'unavailable', reason: 'The price source could not be reached and no recent snapshot is cached. No price is shown rather than a guessed price.', upstreamStatuses: { carat: caratStatus, silver: silverStatus }, error: err instanceof Error ? err.message : String(err) }, 503);
@@ -83,10 +107,29 @@ export async function onRequest(context: { request: Request; env: Env }) {
 }
 
 function jsonResponse(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
+  return new Response(body === null ? null : JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      ...SECURITY_HEADERS,
+    },
   });
+}
+
+function persistWithWaitUntil(
+  context: PagesContext,
+  promise: Promise<unknown>,
+): void {
+  // Use the real context.waitUntil in production so the cache.put
+  // actually persists after the response is returned; fall back to a
+  // fire-and-forget put (with errors swallowed) in local/dev contexts
+  // where waitUntil is unavailable.
+  if (context.waitUntil) {
+    context.waitUntil(promise.catch(() => undefined));
+  } else {
+    void promise.catch(() => undefined);
+  }
 }
 
 export function __staleLimitMs(): number {
