@@ -7,6 +7,13 @@
 import { TAX_SLABS, TAX_SLAB_LOWER_BOUNDS } from '../config/tax';
 import { NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS, TOLA_GRAMS, ZAKAT_RATE } from '../config/zakat';
 import { AREA_UNITS, type AreaUnit } from '../config/units';
+import {
+  ELECTRICITY_GST_RATE,
+  LIFELINE_MINIMUM_CHARGE,
+  LIFELINE_SLABS,
+  PROTECTED_SLABS,
+  UNPROTECTED_SLABS,
+} from '../config/electricity';
 
 export const MAX_AMOUNT = 999999999999;
 
@@ -854,4 +861,153 @@ export function calcGoalDuration(
     throw new Error('This goal cannot be reached within 100 years at this contribution and return. Increase the monthly contribution or the time horizon.');
   }
   return { monthlyContribution: null, months, futureValueOfCurrent: round2(currentSavings), shortfall: round2(target - currentSavings) };
+}
+
+// ------------------------------------------- Electricity bill (NEPRA) --
+export type ElectricityCategory = 'lifeline' | 'protected' | 'unprotected';
+
+export interface ElectricitySlabRow {
+  label: string;
+  units: number;
+  ratePerUnit: number;
+  amount: number;
+}
+
+export interface ElectricityBillResult {
+  units: number;
+  category: ElectricityCategory;
+  slabRows: ElectricitySlabRow[];
+  energyCharge: number;
+  fixedRatePerKw: number;
+  fixedCharge: number;
+  fpaPerUnit: number;
+  fpaAmount: number;
+  subtotal: number;
+  gst: number;
+  total: number;
+  /** True when the lifeline minimum monthly charge (Rs 75) was applied
+   *  because the energy charge came to less than that. */
+  minimumChargeApplied: boolean;
+}
+
+export const ELECTRICITY_MAX_UNITS = 100000;
+export const ELECTRICITY_MAX_LOAD_KW = 5;
+export const ELECTRICITY_MAX_FPA = 10;
+
+/**
+ * Monthly domestic electricity bill estimate on NEPRA's uniform tariff
+ * A-1 (S.R.O. 279(I)/2026), from src/config/electricity.ts.
+ *
+ * Slab rules, exactly as notified (see the config comments):
+ * - Lifeline (up to 100 units): NO slab benefit — the rate of the band
+ *   reached (Rs 3.95 up to 50 units, Rs 7.74 for 51-100) applies to
+ *   every unit. No fixed charge; the Rs 75 single-phase minimum
+ *   monthly charge applies when the energy charge is lower.
+ * - Protected (up to 200 units): one-previous-slab benefit — the first
+ *   100 units at Rs 10.54, only the excess at Rs 13.01. Fixed charge
+ *   per kW follows the band reached (Rs 200 up to 100 units, Rs 300
+ *   for 101-200).
+ * - Unprotected: NO slab benefit — the rate of the band reached
+ *   applies to every unit. Fixed charge per kW follows the band.
+ * Sanctioned load above 5 kW is billed on Time of Use rates, which
+ * this calculator does not cover, so it is rejected with an error.
+ * GST is 18% of energy + fixed + FPA. Quarterly tariff adjustment,
+ * electricity duty, TV fee and other surcharges are NOT included and
+ * the page says so — the result is an estimate, not the final bill.
+ */
+export function calcElectricityBill(
+  units: number,
+  category: ElectricityCategory,
+  sanctionedLoadKw: number,
+  fpaPerUnit = 0,
+): ElectricityBillResult {
+  if (!isFiniteNumber(units) || units <= 0 || units > ELECTRICITY_MAX_UNITS) {
+    throw new Error(`Monthly units must be between 1 and ${ELECTRICITY_MAX_UNITS}.`);
+  }
+  if (category !== 'lifeline' && category !== 'protected' && category !== 'unprotected') {
+    throw new Error('Choose a consumer category: lifeline, protected, or unprotected.');
+  }
+  if (!isFiniteNumber(sanctionedLoadKw) || sanctionedLoadKw <= 0 || sanctionedLoadKw > ELECTRICITY_MAX_LOAD_KW) {
+    if (isFiniteNumber(sanctionedLoadKw) && sanctionedLoadKw > ELECTRICITY_MAX_LOAD_KW) {
+      throw new Error('Sanctioned load of 5 kW or more is billed on Time of Use rates (peak Rs 46.85, off-peak Rs 34.53 per unit), which this calculator does not cover. This calculator is for sanctioned loads up to 5 kW.');
+    }
+    throw new Error('Sanctioned load must be a positive number of kilowatts, up to 5 kW.');
+  }
+  if (!isFiniteNumber(fpaPerUnit) || fpaPerUnit < -ELECTRICITY_MAX_FPA || fpaPerUnit > ELECTRICITY_MAX_FPA) {
+    throw new Error(`Fuel price adjustment must be between -Rs ${ELECTRICITY_MAX_FPA} and Rs ${ELECTRICITY_MAX_FPA} per unit.`);
+  }
+
+  let slabRows: ElectricitySlabRow[] = [];
+  let energyCharge: number;
+  let fixedRatePerKw: number;
+  let minimumChargeApplied = false;
+
+  if (category === 'lifeline') {
+    if (units > 100) {
+      throw new Error('Lifeline tariff is only for up to 100 units a month. For more than 100 units, choose protected (up to 200 units) or unprotected.');
+    }
+    const slab = LIFELINE_SLABS.find((s) => s.upTo !== null && units <= s.upTo) ?? LIFELINE_SLABS[LIFELINE_SLABS.length - 1];
+    const rawEnergy = round2(units * slab.ratePerUnit);
+    energyCharge = rawEnergy;
+    if (rawEnergy < LIFELINE_MINIMUM_CHARGE) {
+      energyCharge = LIFELINE_MINIMUM_CHARGE;
+      minimumChargeApplied = true;
+    }
+    slabRows = [{
+      label: units <= 50 ? 'Up to 50 units (lifeline)' : '51–100 units (lifeline)',
+      units,
+      ratePerUnit: slab.ratePerUnit,
+      amount: rawEnergy,
+    }];
+    fixedRatePerKw = 0;
+  } else if (category === 'protected') {
+    if (units > 200) {
+      throw new Error('Protected tariff is only for up to 200 units a month. For more than 200 units, choose unprotected — crossing 200 units loses protected status.');
+    }
+    const firstUnits = Math.min(units, 100);
+    const restUnits = units - firstUnits;
+    slabRows = [{
+      label: 'First 100 units',
+      units: firstUnits,
+      ratePerUnit: PROTECTED_SLABS[0].ratePerUnit,
+      amount: round2(firstUnits * PROTECTED_SLABS[0].ratePerUnit),
+    }];
+    if (restUnits > 0) {
+      slabRows.push({
+        label: 'Units 101–200',
+        units: restUnits,
+        ratePerUnit: PROTECTED_SLABS[1].ratePerUnit,
+        amount: round2(restUnits * PROTECTED_SLABS[1].ratePerUnit),
+      });
+    }
+    energyCharge = round2(slabRows.reduce((sum, row) => sum + row.amount, 0));
+    fixedRatePerKw = units <= 100 ? PROTECTED_SLABS[0].fixedPerKw : PROTECTED_SLABS[1].fixedPerKw;
+  } else {
+    const slabIndex = UNPROTECTED_SLABS.findIndex((s) => s.upTo === null || units <= s.upTo);
+    const slab = UNPROTECTED_SLABS[slabIndex];
+    const lower = slabIndex === 0 ? 1 : (UNPROTECTED_SLABS[slabIndex - 1].upTo ?? 0) + 1;
+    const label = slab.upTo === null ? 'Above 700 units' : `${lower}–${slab.upTo} units`;
+    energyCharge = round2(units * slab.ratePerUnit);
+    slabRows = [{ label, units, ratePerUnit: slab.ratePerUnit, amount: energyCharge }];
+    fixedRatePerKw = slab.fixedPerKw;
+  }
+
+  const fixedCharge = round2(fixedRatePerKw * sanctionedLoadKw);
+  const fpaAmount = round2(fpaPerUnit * units);
+  const subtotal = round2(energyCharge + fixedCharge + fpaAmount);
+  const gst = round2(subtotal * ELECTRICITY_GST_RATE);
+  return {
+    units,
+    category,
+    slabRows,
+    energyCharge,
+    fixedRatePerKw,
+    fixedCharge,
+    fpaPerUnit,
+    fpaAmount,
+    subtotal,
+    gst,
+    total: round2(subtotal + gst),
+    minimumChargeApplied,
+  };
 }

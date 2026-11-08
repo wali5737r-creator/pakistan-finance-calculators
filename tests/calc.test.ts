@@ -269,7 +269,7 @@ check('area society standard', () => {
 // --- New tools (2026): fuel, compound, eligibility, inflation, budget,
 // --- debt payoff, fixed deposit, loan comparison, goal savings ---
 import {
-  calcBudget, calcCompound, calcDebtPayoff, calcFixedDeposit, calcFuel,
+  calcBudget, calcCompound, calcDebtPayoff, calcElectricityBill, calcFixedDeposit, calcFuel,
   calcGoalDuration, calcGoalMonthly, calcInflation, calcLoanComparison,
   calcLoanEligibility,
 } from '../src/lib/calc';
@@ -419,6 +419,107 @@ check('goal savings monthly mode and duration mode', () => {
   assert.throws(() => calcGoalMonthly(100000, 0, 10, 0), /months/);
   assert.throws(() => calcGoalDuration(100000, 0, 10, 0), /positive/);
   assert.throws(() => calcGoalDuration(100000, 0, 101, 5000), /between 0 and 100/);
+});
+
+// --- Electricity bill (NEPRA domestic tariff A-1, S.R.O. 279(I)/2026) ---
+// Worked example: 250 units, unprotected, 3 kW load, no FPA:
+// energy 250 x 33.10 = 8,275; fixed 350 x 3 = 1,050; subtotal 9,325;
+// GST 18% = 1,678.50; total 11,003.50.
+check('electricity worked example 250 units unprotected', () => {
+  const r = calcElectricityBill(250, 'unprotected', 3, 0);
+  assert.equal(r.slabRows.length, 1);
+  assert.equal(r.slabRows[0].ratePerUnit, 33.1);
+  assert.equal(r.energyCharge, 8275);
+  assert.equal(r.fixedRatePerKw, 350);
+  assert.equal(r.fixedCharge, 1050);
+  assert.equal(r.fpaAmount, 0);
+  assert.equal(r.subtotal, 9325);
+  assert.equal(r.gst, 1678.5);
+  assert.equal(r.total, 11003.5);
+  assert.equal(r.minimumChargeApplied, false);
+});
+
+check('electricity lifeline boundaries and minimum charge', () => {
+  // 50 units: 50 x 3.95 = 197.50; GST 35.55; total 233.05.
+  const fifty = calcElectricityBill(50, 'lifeline', 1, 0);
+  assert.equal(fifty.energyCharge, 197.5);
+  assert.equal(fifty.fixedCharge, 0);
+  assert.equal(fifty.gst, 35.55);
+  assert.equal(fifty.total, 233.05);
+  assert.equal(fifty.minimumChargeApplied, false);
+  // 51 units: NO slab benefit — all 51 units at 7.74 = 394.74.
+  const fiftyOne = calcElectricityBill(51, 'lifeline', 1, 0);
+  assert.equal(fiftyOne.slabRows[0].ratePerUnit, 7.74);
+  assert.equal(fiftyOne.energyCharge, 394.74);
+  assert.equal(fiftyOne.total, 465.79);
+  // 10 units: 10 x 3.95 = 39.50, below the Rs 75 minimum charge.
+  const ten = calcElectricityBill(10, 'lifeline', 1, 0);
+  assert.equal(ten.energyCharge, 75);
+  assert.equal(ten.minimumChargeApplied, true);
+  assert.equal(ten.total, 88.5);
+  assert.throws(() => calcElectricityBill(101, 'lifeline', 1, 0), /Lifeline/);
+});
+
+check('electricity protected one-previous-slab benefit', () => {
+  // 100 units: 100 x 10.54 = 1,054; fixed 200 x 2 = 400; total 1,715.72.
+  const hundred = calcElectricityBill(100, 'protected', 2, 0);
+  assert.equal(hundred.energyCharge, 1054);
+  assert.equal(hundred.fixedRatePerKw, 200);
+  assert.equal(hundred.total, 1715.72);
+  // 150 units: first 100 at 10.54, next 50 at 13.01 = 1,704.50.
+  const oneFifty = calcElectricityBill(150, 'protected', 2, 0);
+  assert.equal(oneFifty.slabRows.length, 2);
+  assert.equal(oneFifty.energyCharge, 1704.5);
+  assert.equal(oneFifty.fixedRatePerKw, 300);
+  assert.equal(oneFifty.fixedCharge, 600);
+  assert.equal(oneFifty.total, 2719.31);
+  // 200 units: 1,054 + 100 x 13.01 = 2,355; total 3,486.90.
+  const twoHundred = calcElectricityBill(200, 'protected', 2, 0);
+  assert.equal(twoHundred.energyCharge, 2355);
+  assert.equal(twoHundred.total, 3486.9);
+  assert.throws(() => calcElectricityBill(201, 'protected', 2, 0), /Protected/);
+});
+
+check('electricity unprotected slab boundaries (flat rate)', () => {
+  // 100 units: 100 x 22.44 = 2,244; fixed 275; total 2,972.42.
+  const hundred = calcElectricityBill(100, 'unprotected', 1, 0);
+  assert.equal(hundred.energyCharge, 2244);
+  assert.equal(hundred.total, 2972.42);
+  // 200 units: 200 x 28.91 = 5,782; total 7,176.76.
+  const twoHundred = calcElectricityBill(200, 'unprotected', 1, 0);
+  assert.equal(twoHundred.energyCharge, 5782);
+  assert.equal(twoHundred.total, 7176.76);
+  // 201 units: the cliff — all 201 units at 33.10 = 6,653.10.
+  const twoOhOne = calcElectricityBill(201, 'unprotected', 1, 0);
+  assert.equal(twoOhOne.slabRows[0].ratePerUnit, 33.1);
+  assert.equal(twoOhOne.energyCharge, 6653.1);
+  assert.equal(twoOhOne.total, 8263.66);
+  // 300 units: 300 x 33.10 = 9,930; total 12,130.40.
+  assert.equal(calcElectricityBill(300, 'unprotected', 1, 0).total, 12130.4);
+  // 700 units: 700 x 41.85 = 29,295; total 35,364.60.
+  const sevenHundred = calcElectricityBill(700, 'unprotected', 1, 0);
+  assert.equal(sevenHundred.slabRows[0].ratePerUnit, 41.85);
+  assert.equal(sevenHundred.total, 35364.6);
+  // 701 units: 701 x 47.20 = 33,087.20; total 39,839.40.
+  const sevenOhOne = calcElectricityBill(701, 'unprotected', 1, 0);
+  assert.equal(sevenOhOne.slabRows[0].ratePerUnit, 47.2);
+  assert.equal(sevenOhOne.total, 39839.4);
+});
+
+check('electricity FPA and validation', () => {
+  // FPA Rs 2.50/unit on the worked example: 625 more, total 11,741.
+  const withFpa = calcElectricityBill(250, 'unprotected', 3, 2.5);
+  assert.equal(withFpa.fpaAmount, 625);
+  assert.equal(withFpa.subtotal, 9950);
+  assert.equal(withFpa.total, 11741);
+  // Negative FPA lowers the bill.
+  const negFpa = calcElectricityBill(100, 'unprotected', 1, -1.5);
+  assert.equal(negFpa.fpaAmount, -150);
+  assert.equal(negFpa.total, 2795.42);
+  assert.throws(() => calcElectricityBill(100, 'unprotected', 5.5, 0), /Time of Use/);
+  assert.throws(() => calcElectricityBill(100, 'unprotected', 0, 0), /Sanctioned load/);
+  assert.throws(() => calcElectricityBill(0, 'unprotected', 1, 0), /units/);
+  assert.throws(() => calcElectricityBill(100, 'unprotected', 1, 11), /Fuel price adjustment/);
 });
 
 console.log(`\n${passed} checks passed.`);

@@ -1,0 +1,436 @@
+---
+import Layout from '../components/Layout.astro';
+
+const title = "Electricity Bill Calculator Pakistan | NEPRA Slabs 2026 | Pakistan Finance Calculators";
+const description = "Estimate your monthly electricity bill in Pakistan from NEPRA's 2026 domestic tariff: lifeline, protected and unprotected slabs, fixed charge per kW, fuel price adjustment and 18% GST.";
+const slug = "/electricity-bill-calculator/";
+
+const faqs = [
+  {
+    q: "How is my electricity bill worked out?",
+    a: "Three parts, then tax. First the energy charge: your units multiplied by the NEPRA slab rate for your category. Then the fixed charge: a rate per kW multiplied by your sanctioned load. Then the fuel price adjustment, if you enter one. GST at 18% is charged on the subtotal of those three. For example, 250 units as an unprotected consumer: 250 x Rs 33.10 = Rs 8,275 energy, plus Rs 350 x 3 kW = Rs 1,050 fixed, is Rs 9,325; GST of Rs 1,678.50 brings the estimated total to Rs 11,003.50.",
+  },
+  {
+    q: "What is the difference between protected and unprotected?",
+    a: "A protected consumer uses 200 units or fewer every month for six months and has a sanctioned load below 5 kW. Protected consumers get the one-previous-slab benefit: the first 100 units are charged at Rs 10.54 and only the units above 100 at Rs 13.01. An unprotected consumer pays the rate of the slab reached on every unit — so 201 units are all charged at Rs 33.10. Crossing 200 units loses protected status, which is why a bill can jump sharply from 200 to 201 units.",
+  },
+  {
+    q: "What is a lifeline consumer?",
+    a: "A lifeline consumer uses up to 100 units a month. Up to 50 units are charged at Rs 3.95 per unit, and 51 to 100 units at Rs 7.74 per unit — on every unit, because lifeline consumers get no slab benefit. There is no fixed charge, and if the energy charge comes to less than Rs 75, the Rs 75 single-phase minimum monthly charge applies instead.",
+  },
+  {
+    q: "What is the fixed charge, and where do I find my sanctioned load?",
+    a: "The fixed charge is a monthly amount per kilowatt of your sanctioned load — the load your connection was approved for, printed on your bill in kW. It ranges from Rs 200 per kW for protected consumers up to Rs 675 per kW above 500 units. For example, a 3 kW load at Rs 350 per kW is Rs 1,050 a month, whatever the units used. Lifeline consumers pay no fixed charge.",
+  },
+  {
+    q: "What is the fuel price adjustment (FPA), and why is it not filled in for me?",
+    a: "The fuel price adjustment is a per-unit amount that changes every month with fuel costs, so no fixed figure can be shown as current. It is printed on your bill — copy it from your last bill into the optional FPA box for a closer estimate. It can be negative in some months. The quarterly tariff adjustment (QTA) also changes every few months and is not included.",
+  },
+  {
+    q: "Why is my real bill different from this estimate?",
+    a: "This is an estimate from the notified base tariff only. Your real bill also carries the monthly fuel price adjustment, the quarterly tariff adjustment, electricity duty, TV fee, and other surcharges, which vary by month and by province and are not in this calculation. Connections with a sanctioned load of 5 kW or more are billed on Time of Use rates (peak Rs 46.85, off-peak Rs 34.53), which this calculator does not cover. Always check the final amount on your official bill.",
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://pakistan-finance-calculators.pages.dev/electricity-bill-calculator/#webapp',
+      name: "Electricity Bill Calculator",
+      url: 'https://pakistan-finance-calculators.pages.dev/electricity-bill-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://pakistan-finance-calculators.pages.dev/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: "Electricity Bill Calculator",
+          item: 'https://pakistan-finance-calculators.pages.dev/electricity-bill-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+
+const related = [
+  {
+    href: "/budget-planner-calculator/",
+    name: "Budget Planner Calculator",
+    desc: "Split monthly take-home pay into needs, wants, and savings — including what the electricity bill leaves for everything else.",
+  },
+  {
+    href: "/percentage-calculator/",
+    name: "Percentage Calculator",
+    desc: "What X% of a number is, percentage increase and decrease, and what percent one number is of another.",
+  },
+];
+---
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Electricity Bill Calculator</p>
+    </nav>
+    <p class="badge badge-info" style="margin-top: 8px;">Utility Bills</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Electricity Bill Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+      Estimate your monthly electricity bill from NEPRA's 2026 domestic tariff. Enter your units, your consumer category, and your sanctioned load, and you will see the energy charge by slab, the fixed charge, GST, and the estimated total.
+    </p>
+    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+      <strong>Estimate only.</strong> This uses the uniform domestic tariff A-1 notified by
+      S.R.O. 279(I)/2026 (12 February 2026), checked 8 November 2026. The fuel price
+      adjustment and quarterly tariff adjustment change monthly and are not in the tariff,
+      and electricity duty, TV fee, and other surcharges are not included — so your real
+      bill will differ. Nothing here is a live or official bill amount.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="elecForm" novalidate>
+          <div class="field">
+            <label for="elecUnits">Monthly units (kWh) <span aria-hidden="true">*</span></label>
+            <input id="elecUnits" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">The units consumed in the month, as shown on your bill.</p>
+          </div>
+
+          <div class="field">
+            <label for="elecCategory">Consumer category <span aria-hidden="true">*</span></label>
+            <select id="elecCategory" aria-required="true">
+              <option value="unprotected">Unprotected — above 200 units, or not protected</option>
+              <option value="protected">Protected — 200 units or fewer every month for 6 months</option>
+              <option value="lifeline">Lifeline — up to 100 units a month</option>
+            </select>
+            <p class="hint">Protected means 200 units or fewer in each of the last six months with a load below 5 kW. If you are not sure, choose unprotected — it gives the higher, safer estimate.</p>
+          </div>
+
+          <div class="field">
+            <label for="elecLoad">Sanctioned load (kW) <span aria-hidden="true">*</span></label>
+            <input id="elecLoad" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">The load your connection was approved for, printed on your bill in kW. Must be 5 kW or less — loads of 5 kW or more are billed on Time of Use rates, which this calculator does not cover.</p>
+          </div>
+
+          <div class="field">
+            <label for="elecFpa">Fuel price adjustment (Rs per unit) — optional</label>
+            <input id="elecFpa" type="text" inputmode="decimal" autocomplete="off" />
+            <p class="hint">Copy the FPA per unit from your last bill, if you want it included. Leave blank for 0. It can be negative in some months.</p>
+          </div>
+
+          <div id="elecErrors" class="error-box" role="alert" hidden></div>
+
+          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+            <button id="elecCalculate" class="btn-primary" type="submit">Calculate</button>
+            <button id="elecClear" class="btn-secondary" type="button">Clear</button>
+          </p>
+          <p id="elecFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        </form>
+      </div>
+
+      <div class="result-card" id="elecResultCard" tabindex="-1">
+        <div id="elecEmpty">
+          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p>Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            You will see your answer with the figures shown, so you can check it.
+          </p>
+        </div>
+
+        <div id="elecResult" data-result-text hidden>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Estimated bill</p>
+          <div aria-live="polite" aria-atomic="true">
+            <p class="result-value" id="elecHeadline"></p>
+          </div>
+          <div class="stat-grid">
+            <div>
+              <p class="stat-label">Energy charge</p>
+              <p class="stat-value" id="elecStat1"></p>
+            </div>
+            <div>
+              <p class="stat-label">Fixed charge</p>
+              <p class="stat-value" id="elecStat2"></p>
+            </div>
+            <div>
+              <p class="stat-label">GST (18%)</p>
+              <p class="stat-value" id="elecStat3"></p>
+            </div>
+          </div>
+          <table class="breakdown-table" id="elecBreakdown" aria-label="Bill breakdown"></table>
+          <p id="elecMinimumNote" style="font-size: 14px; color: var(--ink-muted);" hidden></p>
+          <p id="elecEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="elecFormula" style="font-size: 16px;"></p>
+          <p style="font-size: 13px; color: var(--ink-muted);">
+            Estimate only — check important figures before acting.
+            <a href="#elecDisclaimer">Read the full disclaimer.</a>
+          </p>
+        </div>
+
+        <div class="actions-row no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size: 14px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top: 40px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Enter the units consumed in the month and choose your category: lifeline (up to 100 units), protected (up to 200 units every month for six months), or unprotected.</li>
+      <li>Enter your sanctioned load in kW from your bill — the fixed charge is a rate per kW that depends on the slab you reach.</li>
+      <li>Optionally add the fuel price adjustment per unit from your last bill. You see the energy charge by slab, the fixed charge, GST at 18%, and the estimated total.</li>
+    </ol>
+    <p>Only protected consumers get the one-previous-slab benefit: their first 100 units are charged at Rs 10.54 and only the excess at Rs 13.01. Lifeline and unprotected consumers pay the rate of the slab reached on every unit. That is why a bill jumps sharply when you cross 200 units — at 201 units the whole bill is charged at Rs 33.10 per unit.</p>
+
+    <h2>Formula</h2>
+    <p>Energy charge = Units × slab rate (Rs per unit, NEPRA tariff A-1)</p>
+    <p>Fixed charge = Fixed rate per kW × sanctioned load (kW)</p>
+    <p>GST = 18% × (Energy charge + Fixed charge + Fuel price adjustment)</p>
+    <p>Estimated total = Energy charge + Fixed charge + Fuel price adjustment + GST</p>
+    <p>Quarterly tariff adjustment, electricity duty, TV fee, and other surcharges are not in this calculation. A <a href="/percentage-calculator/">Percentage Calculator</a> can help if you want to work out what share of your budget the bill takes.</p>
+
+    <h2>Worked example</h2>
+    <p><strong>Example:</strong> 250 units as an unprotected consumer with a 3 kW sanctioned load and no FPA. The 201–300 slab rate is Rs 33.10, so the energy charge is 250 × Rs 33.10 = Rs 8,275. The fixed rate for that slab is Rs 350 per kW, so the fixed charge is Rs 350 × 3 = Rs 1,050. The subtotal is Rs 9,325, GST at 18% is Rs 1,678.50, and the estimated total is Rs 11,003.50.</p>
+    <p><strong>Protected example:</strong> 150 units as a protected consumer with a 2 kW load. The first 100 units cost 100 × Rs 10.54 = Rs 1,054 and the next 50 cost 50 × Rs 13.01 = Rs 650.50, so the energy charge is Rs 1,704.50. The fixed charge is Rs 300 × 2 = Rs 600, the subtotal is Rs 2,304.50, GST is Rs 414.81, and the estimated total is Rs 2,719.31.</p>
+
+    <h2>2026 domestic tariff (NEPRA A-1)</h2>
+    <table class="breakdown-table" aria-label="NEPRA domestic tariff 2026">
+      <thead>
+        <tr><th scope="col">Units per month</th><th scope="col">Rate per unit</th><th scope="col">Fixed charge</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Up to 50 (lifeline)</td><td>Rs 3.95</td><td>None</td></tr>
+        <tr><td>51–100 (lifeline)</td><td>Rs 7.74</td><td>None</td></tr>
+        <tr><td>1–100 (protected)</td><td>Rs 10.54</td><td>Rs 200 / kW</td></tr>
+        <tr><td>101–200 (protected)</td><td>Rs 13.01</td><td>Rs 300 / kW</td></tr>
+        <tr><td>1–100 (unprotected)</td><td>Rs 22.44</td><td>Rs 275 / kW</td></tr>
+        <tr><td>101–200 (unprotected)</td><td>Rs 28.91</td><td>Rs 300 / kW</td></tr>
+        <tr><td>201–300</td><td>Rs 33.10</td><td>Rs 350 / kW</td></tr>
+        <tr><td>301–400</td><td>Rs 36.46</td><td>Rs 400 / kW</td></tr>
+        <tr><td>401–500</td><td>Rs 38.95</td><td>Rs 500 / kW</td></tr>
+        <tr><td>501–600</td><td>Rs 40.22</td><td>Rs 675 / kW</td></tr>
+        <tr><td>601–700</td><td>Rs 41.85</td><td>Rs 675 / kW</td></tr>
+        <tr><td>Above 700</td><td>Rs 47.20</td><td>Rs 675 / kW</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size: 14px; color: var(--ink-muted);">Uniform tariff for all DISCOs and K-Electric. Source: NEPRA Decision No. NEPRA/R/DG(Trf)/TRF-100/2935-57 dated 11 February 2026, notified vide S.R.O. 279(I)/2026 dated 12 February 2026. Checked 8 November 2026.</p>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+
+    <section id="elecDisclaimer" class="notice-info" style="margin-top: 32px;">
+      <h2 style="font-size: 20px;">Important — please read</h2>
+      <p>
+        Results are estimates from the notified base tariff only. Your real bill also carries
+        the monthly fuel price adjustment, the quarterly tariff adjustment, electricity duty,
+        TV fee, and other surcharges, which vary by month and by province. Connections with
+        a sanctioned load of 5 kW or more are billed on Time of Use rates and are not covered
+        by this calculator. NEPRA revises the tariff annually — always check the final amount
+        on your official bill.
+      </p>
+      <p>
+        Sources:
+        <a href="https://www.nepra.org.pk/tariff/Tariff/Ex-WAPDA%20DISCOS/2026/TRF-100%20XWDISCOS%20AND%20KE%20RATIONALIZATION%20OF%20TARIFF%2011-02-2026%202935-57.pdf">NEPRA decision of 11 February 2026 (PDF)</a>
+        and the
+        <a href="https://iesco.com.pk/tariff-guide">IESCO tariff guide</a>.
+      </p>
+      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+    </section>
+
+    <h2 style="margin-top: 32px;">Related tools</h2>
+    <div class="related-grid">
+      {
+        related.map((tool) => (
+          <article class="card">
+            <h3 style="font-size: 18px;">
+              <a href={tool.href}>{tool.name}</a>
+            </h3>
+            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p>
+              <a href={tool.href}>Use the calculator →</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+    .field-error {
+      font-size: 14px;
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin: 12px 0;
+    }
+    .stat-grid p {
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .related-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 15px;
+    }
+    .breakdown-table th,
+    .breakdown-table td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border, #e5e7eb);
+    }
+    .breakdown-table td:last-child,
+    .breakdown-table th:last-child {
+      text-align: right;
+    }
+    .breakdown-table tr.total-row td {
+      font-weight: 700;
+    }
+  </style>
+
+  <script>
+    import { calcElectricityBill, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';
+
+    const form = document.getElementById('elecForm');
+    const errorsBox = document.getElementById('elecErrors');
+    const emptyBox = document.getElementById('elecEmpty');
+    const resultBox = document.getElementById('elecResult');
+    const resultCard = document.getElementById('elecResultCard');
+    const headline = document.getElementById('elecHeadline');
+    const stat1 = document.getElementById('elecStat1');
+    const stat2 = document.getElementById('elecStat2');
+    const stat3 = document.getElementById('elecStat3');
+    const breakdownEl = document.getElementById('elecBreakdown');
+    const minimumNote = document.getElementById('elecMinimumNote');
+    const echoEl = document.getElementById('elecEcho');
+    const formulaEl = document.getElementById('elecFormula');
+    const copyBtn = document.querySelector('[data-copy-result]');
+    const printBtn = document.querySelector('[data-print-result]');
+    const formStatus = document.getElementById('elecFormStatus');
+
+    function readNumber(id, label) {
+      const raw = document.getElementById(id).value;
+      if (raw.trim() === '') throw new Error(label + ' is required.');
+      const value = parseDecimal(raw);
+      if (value === null) throw new Error(label + ' must be a number using digits and one decimal point only.');
+      return value;
+    }
+    function showEmpty() {
+      resultBox.hidden = true;
+      emptyBox.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+    function showResult() {
+      emptyBox.hidden = true;
+      resultBox.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        const units = readNumber('elecUnits', 'Monthly units');
+        const category = document.getElementById('elecCategory').value;
+        const load = readNumber('elecLoad', 'Sanctioned load');
+        const fpaRaw = document.getElementById('elecFpa').value;
+        const fpa = fpaRaw.trim() === '' ? 0 : parseDecimal(fpaRaw);
+        if (fpa === null) throw new Error('Fuel price adjustment must be a number using digits and one decimal point only.');
+        const r = calcElectricityBill(units, category, load, fpa);
+        errorsBox.textContent = '';
+        errorsBox.hidden = true;
+        headline.textContent = formatPKR(r.total, 2);
+        stat1.textContent = formatPKR(r.energyCharge, 2);
+        stat2.textContent = formatPKR(r.fixedCharge, 2);
+        stat3.textContent = formatPKR(r.gst, 2);
+        let rows = r.slabRows.map((row) => {
+          return '<tr><td>' + row.label + ' — ' + formatNumber(row.units, 2) + ' units × ' + formatPKR(row.ratePerUnit, 2) + '</td><td>' + formatPKR(row.amount, 2) + '</td></tr>';
+        }).join('');
+        rows += '<tr><td>Fixed charge — ' + formatPKR(r.fixedRatePerKw, 2) + ' per kW × ' + formatNumber(load, 2) + ' kW</td><td>' + formatPKR(r.fixedCharge, 2) + '</td></tr>';
+        if (r.fpaPerUnit !== 0) {
+          rows += '<tr><td>Fuel price adjustment — ' + formatNumber(r.units, 2) + ' units × ' + formatPKR(r.fpaPerUnit, 2) + '</td><td>' + formatPKR(r.fpaAmount, 2) + '</td></tr>';
+        }
+        rows += '<tr><td>Subtotal</td><td>' + formatPKR(r.subtotal, 2) + '</td></tr>';
+        rows += '<tr><td>GST (18%)</td><td>' + formatPKR(r.gst, 2) + '</td></tr>';
+        rows += '<tr class="total-row"><td>Estimated total</td><td>' + formatPKR(r.total, 2) + '</td></tr>';
+        breakdownEl.innerHTML = '<tbody>' + rows + '</tbody>';
+        if (r.minimumChargeApplied) {
+          minimumNote.textContent = 'Rs 75 minimum monthly charge applied — the energy charge was lower than that.';
+          minimumNote.hidden = false;
+        } else {
+          minimumNote.hidden = true;
+        }
+        const categoryLabel = category === 'lifeline' ? 'lifeline' : category === 'protected' ? 'protected' : 'unprotected';
+        echoEl.textContent = 'Based on: ' + formatNumber(units, 2) + ' units, ' + categoryLabel + ', sanctioned load ' + formatNumber(load, 2) + ' kW, FPA ' + formatPKR(fpa, 2) + ' per unit.';
+        formulaEl.textContent = 'Energy ' + formatPKR(r.energyCharge, 2) + ' + fixed ' + formatPKR(r.fixedCharge, 2) + (r.fpaPerUnit !== 0 ? ' + FPA ' + formatPKR(r.fpaAmount, 2) : '') + ' = subtotal ' + formatPKR(r.subtotal, 2) + '. GST 18% = ' + formatPKR(r.gst, 2) + '. Total = ' + formatPKR(r.total, 2) + '.';
+        showResult();
+        if (window.matchMedia('(max-width: 899px)').matches) resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorsBox.textContent = err.message;
+        errorsBox.hidden = false;
+        showEmpty();
+      }
+    });
+
+    document.getElementById('elecClear').addEventListener('click', () => {
+      form.reset();
+      errorsBox.textContent = '';
+      errorsBox.hidden = true;
+      formStatus.textContent = 'Form cleared.';
+      showEmpty();
+    });
+    showEmpty();
+
+  </script>
+</Layout>
