@@ -50,9 +50,18 @@ const tools = [
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content="https://pakistan-finance-calculators.pages.dev/og-image.svg" />
+    <meta property="og:site_name" content="Pakistan Finance Calculators" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#0c5c44" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Pakistan Finance Calculators",
+        "url": "https://pakistan-finance-calculators.pages.dev/"
+      }
+    </script>
     {schema && <script type="application/ld+json" set:html={schema} />}
   </head>
   <body>
