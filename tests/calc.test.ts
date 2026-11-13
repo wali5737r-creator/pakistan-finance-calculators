@@ -3,10 +3,10 @@
 // they are never a live rate and never appear in site copy (SRS §6.5/§7.5).
 import assert from 'node:assert/strict';
 import {
-  calcAge, calcEMI, calcEobiContributions, calcEobiPension, calcExportTax, calcFreelancerTax, calcGold, calcInvalidityPension, calcNonSalariedTax, calcOldAgeGrant, calcPercentage, calcReducedPension, calcSurvivorPension, calcTax, calcZakat,
-  convertArea, convertAreaToAll, convertAreaWithUnits, convertAreaToAllWithUnits,
+  calcAge, calcDscEncashment, calcEMI, calcEobiContributions, calcEobiPension, calcExportTax, calcFreelancerTax, calcGold, calcInvalidityPension, calcNationalSavings, calcNonSalariedTax, calcOldAgeGrant, calcPercentage, calcReducedPension, calcSaProfit, calcSscProfit, calcSurvivorPension, calcTax, calcZakat,
+  applyNssWht, calcNssMonthlyProfit, convertArea, convertAreaToAll, convertAreaWithUnits, convertAreaToAllWithUnits,
   convertCurrency, formatNumber,
-  goldValueFromWeight, parseDecimal, pensionCreditedYears, pensionWageForPreset, round2, todayInKarachi,
+  goldValueFromWeight, nssSchemeById, parseDecimal, pensionCreditedYears, pensionWageForPreset, round2, todayInKarachi,
 } from '../src/lib/calc';
 import { NON_SALARIED_SLABS } from '../src/config/freelancer-tax';
 import { AREA_UNITS, areaUnitsForStandard } from '../src/config/units';
@@ -1024,6 +1024,156 @@ check('pension: validation throws', () => {
   assert.throws(() => calcSurvivorPension(40700, 25, true), /pensioner/);
   assert.throws(() => calcSurvivorPension(40700, 25, true, 0), /pensioner/);
   assert.throws(() => calcInvalidityPension(40700, 10, 6), /between 0 and 5/);
+});
+
+// --- National Savings (CDNS rates w.e.f. 21 Oct 2026; SA 10.00% since 26 May 2026) ---
+check('nss monthly profit: RIC 12.12% = Rs 1,010/month per Rs 100,000', () => {
+  assert.equal(calcNssMonthlyProfit(100000, 12.12), 1010);
+  assert.equal(calcNssMonthlyProfit(50000, 12.12), 505);
+  assert.equal(calcNssMonthlyProfit(1000000, 12.12), 10100);
+});
+check('nss monthly profit: BSC/PBA/SFWA 12.96% = Rs 1,080/month per Rs 100,000', () => {
+  assert.equal(calcNssMonthlyProfit(100000, 12.96), 1080);
+  assert.equal(calcNssMonthlyProfit(500000, 12.96), 5400);
+  assert.equal(calcNssMonthlyProfit(7500000, 12.96), 81000);
+});
+check('nss DSC encashment table on Rs 100,000 (CDNS schedule, not flat compounding)', () => {
+  assert.equal(calcDscEncashment(100000, 10).profit, 215000);
+  assert.equal(calcDscEncashment(100000, 10).value, 315000);
+  assert.equal(calcDscEncashment(100000, 10).profitPct, 215);
+  assert.equal(calcDscEncashment(100000, 1).profit, 10000);
+  assert.equal(calcDscEncashment(100000, 1).value, 110000);
+  assert.equal(calcDscEncashment(100000, 5).profit, 67000);
+  assert.equal(calcDscEncashment(100000, 5).value, 167000);
+  assert.equal(calcDscEncashment(100000, 2).profit, 21000);
+  assert.equal(calcDscEncashment(100000, 9).profit, 176000);
+  // Whole years only: 5.9 years pays the year-5 figure.
+  assert.equal(calcDscEncashment(100000, 5.9).wholeYears, 5);
+  assert.equal(calcDscEncashment(100000, 5.9).profit, 67000);
+});
+check('nss DSC: no profit before 1 full year', () => {
+  const r = calcDscEncashment(100000, 0);
+  assert.equal(r.noProfit, true);
+  assert.equal(r.profit, 0);
+  assert.equal(r.value, 100000);
+  assert.equal(calcDscEncashment(100000, 0.9).noProfit, true);
+  assert.equal(calcDscEncashment(100000, 0.9).profit, 0);
+});
+check('nss SSC half-yearly profit on Rs 100,000: Rs 6,000 x5 + Rs 6,400 = Rs 36,400', () => {
+  assert.deepEqual(calcSscProfit(100000, 6).perPeriodProfit, [6000, 6000, 6000, 6000, 6000, 6400]);
+  assert.equal(calcSscProfit(100000, 6).profit, 36400);
+  assert.equal(calcSscProfit(100000, 6).value, 136400);
+  assert.equal(calcSscProfit(100000, 1).profit, 6000);
+  assert.equal(calcSscProfit(100000, 1).value, 106000);
+  assert.equal(calcSscProfit(100000, 3).profit, 18000);
+  assert.equal(calcSscProfit(200000, 6).profit, 72800);
+});
+check('nss SSC: no profit before 6 months', () => {
+  const r = calcSscProfit(100000, 0);
+  assert.equal(r.noProfit, true);
+  assert.equal(r.profit, 0);
+  assert.equal(r.value, 100000);
+});
+check('nss SA annual profit: 10.00% = Rs 10,000/year per Rs 100,000', () => {
+  assert.equal(calcSaProfit(100000, 1).annualProfit, 10000);
+  assert.equal(calcSaProfit(100000, 1).totalProfit, 10000);
+  assert.equal(calcSaProfit(100000, 3).totalProfit, 30000);
+  assert.equal(calcSaProfit(100000, 3).value, 130000);
+  assert.equal(calcSaProfit(250000, 2).annualProfit, 25000);
+});
+check('nss WHT: 15% filer / 30% non-filer where it applies; 0% at source for BSC/PBA/SFWA', () => {
+  const filer = applyNssWht(1010, true, 'filer');
+  assert.equal(filer.whtRate, 0.15);
+  assert.equal(filer.whtAmount, 151.5);
+  assert.equal(filer.netProfit, 858.5);
+  const nonFiler = applyNssWht(1010, true, 'non-filer');
+  assert.equal(nonFiler.whtRate, 0.3);
+  assert.equal(nonFiler.whtAmount, 303);
+  assert.equal(nonFiler.netProfit, 707);
+  const exempt = applyNssWht(1080, false, 'filer');
+  assert.equal(exempt.whtRate, 0);
+  assert.equal(exempt.whtAmount, 0);
+  assert.equal(exempt.netProfit, 1080);
+  assert.equal(exempt.noWhtAtSource, true);
+});
+check('nss dispatcher: RIC Rs 100,000 filer — Rs 1,010 gross, Rs 858.50 net/month', () => {
+  const r = calcNationalSavings('ric', 100000, { filerStatus: 'filer' });
+  assert.equal(r.monthlyProfit, 858.5);
+  assert.equal(r.annualProfit, 10302);
+  assert.equal(r.grossProfit, 1010);
+  assert.equal(r.whtRate, 0.15);
+  // 5-year tenure: total profit to maturity after tax.
+  assert.equal(r.totalReceived, 100000 + 10302 * 5);
+});
+check('nss dispatcher: BSC Rs 100,000 — Rs 1,080/month, no WHT at source', () => {
+  const r = calcNationalSavings('bsc', 100000);
+  assert.equal(r.monthlyProfit, 1080);
+  assert.equal(r.annualProfit, 12960);
+  assert.equal(r.whtRate, 0);
+  assert.equal(r.totalReceived, 100000 + 12960 * 10);
+});
+check('nss dispatcher: PBA Rs 100,000 non-filer still pays no WHT at source', () => {
+  const r = calcNationalSavings('pba', 100000, { filerStatus: 'non-filer' });
+  assert.equal(r.monthlyProfit, 1080);
+  assert.equal(r.whtRate, 0);
+});
+check('nss dispatcher: SFWA Rs 100,000 — Rs 1,080/month, no fixed tenure', () => {
+  const r = calcNationalSavings('sfwa', 100000);
+  assert.equal(r.monthlyProfit, 1080);
+  assert.equal(r.totalReceived, null);
+});
+check('nss dispatcher: DSC Rs 100,000 at maturity, filer — Rs 315,000 gross, Rs 282,750 after tax', () => {
+  const r = calcNationalSavings('dsc', 100000, { filerStatus: 'filer' });
+  assert.equal(r.grossProfit, 215000);
+  assert.equal(r.whtAmount, 32250);
+  assert.equal(r.netProfit, 182750);
+  assert.equal(r.headlineValue, 282750);
+  const nf = calcNationalSavings('dsc', 100000, { filerStatus: 'non-filer' });
+  assert.equal(nf.whtAmount, 64500);
+  assert.equal(nf.headlineValue, 250500);
+});
+check('nss dispatcher: DSC encashed at 5 years — Rs 167,000 gross value', () => {
+  const r = calcNationalSavings('dsc', 100000, { yearsHeld: 5, filerStatus: 'filer' });
+  assert.equal(r.grossProfit, 67000);
+  assert.equal(r.headlineValue, 100000 + 67000 - 10050);
+});
+check('nss dispatcher: SSC Rs 100,000 full term, filer — Rs 36,400 gross, Rs 30,940 net', () => {
+  const r = calcNationalSavings('ssc', 100000, { filerStatus: 'filer' });
+  assert.equal(r.grossProfit, 36400);
+  assert.equal(r.whtAmount, 5460);
+  assert.equal(r.headlineValue, 130940);
+});
+check('nss dispatcher: SA Rs 100,000 — Rs 10,000 gross/year, Rs 8,500 net (filer)', () => {
+  const r = calcNationalSavings('sa', 100000, { filerStatus: 'filer' });
+  assert.equal(r.annualProfit, 8500);
+  assert.equal(r.headlineValue, 8500);
+  const r3 = calcNationalSavings('sa', 100000, { years: 3, filerStatus: 'filer' });
+  assert.equal(r3.netProfit, 8500);
+  assert.equal(r3.totalReceived, 125500);
+});
+check('nss: scheme minimums enforced; SFWA has no enforced maximum', () => {
+  assert.throws(() => calcNationalSavings('ric', 49999), /minimum investment is Rs 50,000/);
+  assert.throws(() => calcNationalSavings('bsc', 4999), /minimum investment is Rs 5,000/);
+  assert.throws(() => calcNationalSavings('pba', 9999), /minimum investment is Rs 10,000/);
+  assert.throws(() => calcNationalSavings('pba', 7500001), /maximum investment is Rs 7,500,000/);
+  assert.throws(() => calcNationalSavings('dsc', 499), /minimum investment is Rs 500/);
+  assert.throws(() => calcNationalSavings('sa', 99), /minimum investment is Rs 100/);
+  // SFWA: no minimum or maximum is enforced (official page conflicts on the max).
+  assert.equal(calcNationalSavings('sfwa', 5000000).monthlyProfit, 54000);
+  assert.equal(calcNationalSavings('sfwa', 7500000).monthlyProfit, 81000);
+});
+check('nss: validation throws', () => {
+  assert.throws(() => calcNationalSavings('xxx', 100000), /Choose a National Savings scheme/);
+  assert.throws(() => nssSchemeById('xxx'), /Choose a National Savings scheme/);
+  assert.throws(() => calcNationalSavings('dsc', 0), /positive number/);
+  assert.throws(() => calcNationalSavings('dsc', -100), /positive number/);
+  assert.throws(() => calcDscEncashment(100000, 11), /between 0 and 10/);
+  assert.throws(() => calcDscEncashment(100000, -1), /between 0 and 10/);
+  assert.throws(() => calcSscProfit(100000, 7), /between 0 and 6/);
+  assert.throws(() => calcSaProfit(100000, 0), /between 1 and 30/);
+  assert.throws(() => calcSaProfit(100000, 31), /between 1 and 30/);
+  assert.throws(() => calcNssMonthlyProfit(100000, 0), /between 0% and 100%/);
+  assert.throws(() => applyNssWht(-5, true, 'filer'), /between Rs 0/);
 });
 
 console.log(`\n${passed} checks passed.`);

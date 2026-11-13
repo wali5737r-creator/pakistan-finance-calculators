@@ -62,6 +62,17 @@ import {
   EOBI_SURVIVOR_MIN_YEARS_OUT_OF_SERVICE,
   PENSION_WAGE_PRESETS,
 } from '../config/pension';
+import {
+  DSC_ENCASHMENT_TABLE_PCT,
+  DSC_TENURE_YEARS,
+  NATIONAL_SAVINGS_SCHEMES,
+  NSS_WHT_FILER_RATE,
+  NSS_WHT_NON_FILER_RATE,
+  SSC_HALF_YEAR_RATES_PCT,
+  SSC_TENURE_HALF_YEARS,
+  type NationalSavingsScheme,
+  type NationalSavingsSchemeId,
+} from '../config/national-savings';
 
 export const MAX_AMOUNT = 999999999999;
 
@@ -1942,5 +1953,381 @@ export function calcInvalidityPension(wage: number, serviceYears: number, yearsI
     monthlyPension,
     floorApplied: entitled && base.formulaPension < EOBI_MINIMUM_PENSION,
     annualPension: round2(monthlyPension * 12),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// National Savings (CDNS profit rates w.e.f. 21 October 2026;
+// Savings Account 10.00% since 26 May 2026)
+// ---------------------------------------------------------------------------
+
+export const NSS_MAX_AMOUNT = MAX_AMOUNT;
+export const NSS_MAX_YEARS = 30;
+
+/** Look a scheme up by id; throws on an unknown id. */
+export function nssSchemeById(schemeId: string): NationalSavingsScheme {
+  const found = NATIONAL_SAVINGS_SCHEMES.find((s) => s.id === schemeId);
+  if (!found) throw new Error('Choose a National Savings scheme.');
+  return found;
+}
+
+function validateNssAmount(amount: number, scheme: NationalSavingsScheme): void {
+  if (!isFiniteNumber(amount) || amount <= 0 || amount > NSS_MAX_AMOUNT) {
+    throw new Error('Investment amount must be a positive number.');
+  }
+  if (scheme.minInvestment > 0 && amount < scheme.minInvestment) {
+    throw new Error(
+      `${scheme.name}: minimum investment is Rs ${scheme.minInvestment.toLocaleString('en-PK')}.`,
+    );
+  }
+  if (scheme.maxInvestment !== null && amount > scheme.maxInvestment) {
+    throw new Error(
+      `${scheme.name}: maximum investment is Rs ${scheme.maxInvestment.toLocaleString('en-PK')}.`,
+    );
+  }
+}
+
+/**
+ * Monthly profit on a monthly-paying scheme: amount x rate / 12.
+ * RIC 12.12% on Rs 100,000 = Rs 1,010/month; BSC/PBA/SFWA 12.96%
+ * on Rs 100,000 = Rs 1,080/month (the CDNS-stated amounts).
+ */
+export function calcNssMonthlyProfit(amount: number, ratePct: number): number {
+  if (!isFiniteNumber(amount) || amount <= 0 || amount > NSS_MAX_AMOUNT) {
+    throw new Error('Investment amount must be a positive number.');
+  }
+  if (!isFiniteNumber(ratePct) || ratePct <= 0 || ratePct > 100) {
+    throw new Error('Profit rate must be between 0% and 100% a year.');
+  }
+  return round2((amount * ratePct) / 100 / 12);
+}
+
+export interface DscEncashmentResult {
+  amount: number;
+  yearsHeld: number;
+  /** Completed years (whole years only — the table is per-year). */
+  wholeYears: number;
+  /** Cumulative profit as % of the amount, from the CDNS table (0
+   *  when encashed before 1 full year). */
+  profitPct: number;
+  /** Profit payable, Rs (0 before 1 full year). */
+  profit: number;
+  /** Amount + profit on encashment, Rs. */
+  value: number;
+  /** True when encashed before 1 full year — no profit at all. */
+  noProfit: boolean;
+}
+
+/**
+ * Defence Savings Certificates encashment, from the CDNS per-year
+ * cumulative table — NOT a flat compounding rate. On Rs 100,000:
+ * year 1 Rs 110,000; year 5 Rs 167,000; year 10 Rs 315,000
+ * (215% profit). No profit if encashed before 1 full year.
+ * yearsHeld is floored to whole years; beyond the 10-year tenure
+ * is rejected (the certificate has matured).
+ */
+export function calcDscEncashment(amount: number, yearsHeld: number): DscEncashmentResult {
+  const scheme = nssSchemeById('dsc');
+  validateNssAmount(amount, scheme);
+  if (!isFiniteNumber(yearsHeld) || yearsHeld < 0 || yearsHeld > DSC_TENURE_YEARS) {
+    throw new Error(`Years held must be between 0 and ${DSC_TENURE_YEARS} (the DSC matures at 10 years).`);
+  }
+  const wholeYears = Math.floor(yearsHeld);
+  const profitPct = wholeYears === 0 ? 0 : DSC_ENCASHMENT_TABLE_PCT[wholeYears - 1];
+  const profit = round2((amount * profitPct) / 100);
+  return {
+    amount,
+    yearsHeld,
+    wholeYears,
+    profitPct,
+    profit,
+    value: round2(amount + profit),
+    noProfit: wholeYears === 0,
+  };
+}
+
+export interface SscProfitResult {
+  amount: number;
+  /** Completed half-year periods (whole periods only). */
+  halfYears: number;
+  /** Profit per completed period, Rs, in period order. */
+  perPeriodProfit: number[];
+  /** Total profit over the completed periods, Rs. */
+  profit: number;
+  /** Amount + profit, Rs. */
+  value: number;
+  /** True when encashed before 6 months — no profit at all. */
+  noProfit: boolean;
+}
+
+/**
+ * Special Savings Certificates / Account half-yearly profit:
+ * 12.00% p.a. for each of the first five 6-month periods, 12.80%
+ * p.a. for the 6th (final) period — so each half-year pays half of
+ * that: Rs 6,000 per Rs 100,000 for the first five periods, Rs 6,400
+ * for the last — Rs 36,400 over the full 3 years. No profit if
+ * encashed before 6 months.
+ */
+export function calcSscProfit(amount: number, halfYears: number): SscProfitResult {
+  const scheme = nssSchemeById('ssc');
+  validateNssAmount(amount, scheme);
+  if (!isFiniteNumber(halfYears) || halfYears < 0 || halfYears > SSC_TENURE_HALF_YEARS) {
+    throw new Error(`Half-years held must be between 0 and ${SSC_TENURE_HALF_YEARS} (the SSC matures at 3 years).`);
+  }
+  const periods = Math.floor(halfYears);
+  const perPeriodProfit = SSC_HALF_YEAR_RATES_PCT.slice(0, periods).map((rate) => round2((amount * rate) / 100));
+  const profit = round2(perPeriodProfit.reduce((sum, p) => sum + p, 0));
+  return {
+    amount,
+    halfYears: periods,
+    perPeriodProfit,
+    profit,
+    value: round2(amount + profit),
+    noProfit: periods === 0,
+  };
+}
+
+export interface SaProfitResult {
+  amount: number;
+  years: number;
+  /** Profit credited each year (10.00% of the amount), Rs. */
+  annualProfit: number;
+  /** Total profit over the years entered, Rs (simple sum — profit is
+   *  credited annually on 30 June on minimum balances; no
+   *  compounding is claimed). */
+  totalProfit: number;
+  /** Amount + total profit, Rs. */
+  value: number;
+}
+
+/**
+ * Savings Account annual profit: 10.00% p.a. of the amount, credited
+ * annually on 30 June on minimum balances (6th day to month-end).
+ * On Rs 100,000 that is Rs 10,000 a year.
+ */
+export function calcSaProfit(amount: number, years: number): SaProfitResult {
+  const scheme = nssSchemeById('sa');
+  validateNssAmount(amount, scheme);
+  if (!isFiniteNumber(years) || years < 1 || years > NSS_MAX_YEARS) {
+    throw new Error(`Years must be between 1 and ${NSS_MAX_YEARS}.`);
+  }
+  const annualProfit = round2((amount * scheme.ratePct) / 100);
+  return {
+    amount,
+    years,
+    annualProfit,
+    totalProfit: round2(annualProfit * years),
+    value: round2(amount + annualProfit * years),
+  };
+}
+
+export interface NssWhtResult {
+  grossProfit: number;
+  /** WHT rate deducted at source (0 where none is collected). */
+  whtRate: number;
+  whtAmount: number;
+  /** Profit after WHT, Rs. */
+  netProfit: number;
+  /** True when no WHT is collected at source (BSC/PBA/SFWA) — the
+   *  profit must still be declared in the tax return. */
+  noWhtAtSource: boolean;
+}
+
+/**
+ * Withholding tax on National Savings profit (Income Tax Ordinance
+ * 2001 s.151): 15% for filers, 30% for non-filers, where WHT
+ * applies (DSC, RIC, SSC, SA). BSC, PBA and SFWA: no WHT is
+ * collected at source — that is NOT the same as tax-free, and the
+ * page says the profit must still be declared.
+ */
+export function applyNssWht(
+  grossProfit: number,
+  whtApplies: boolean,
+  filerStatus: 'filer' | 'non-filer',
+): NssWhtResult {
+  if (!isFiniteNumber(grossProfit) || grossProfit < 0 || grossProfit > NSS_MAX_AMOUNT) {
+    throw new Error('Profit must be a number between Rs 0 and Rs 999,999,999,999.');
+  }
+  const whtRate = whtApplies ? (filerStatus === 'filer' ? NSS_WHT_FILER_RATE : NSS_WHT_NON_FILER_RATE) : 0;
+  const whtAmount = round2(grossProfit * whtRate);
+  return {
+    grossProfit,
+    whtRate,
+    whtAmount,
+    netProfit: round2(grossProfit - whtAmount),
+    noWhtAtSource: !whtApplies,
+  };
+}
+
+export interface NationalSavingsResult {
+  schemeId: NationalSavingsSchemeId;
+  schemeName: string;
+  amount: number;
+  /** Main figure shown as the headline, Rs. */
+  headlineValue: number;
+  headlineLabel: string;
+  /** Profit before WHT for the period the headline covers. */
+  grossProfit: number;
+  /** WHT rate deducted at source (0 where none is collected). */
+  whtRate: number;
+  whtAmount: number;
+  /** Profit after WHT for the period the headline covers. */
+  netProfit: number;
+  /** Principal + net profit where the scheme matures or the period
+   *  is closed; null for the open-ended SFWA. */
+  totalReceived: number | null;
+  /** Net annual profit where the scheme pays monthly or annually. */
+  annualProfit: number | null;
+  /** Net monthly profit where the scheme pays monthly. */
+  monthlyProfit: number | null;
+  /** Extra lines for the breakdown table. */
+  detail: { label: string; value: number }[];
+  note: string;
+}
+
+/**
+ * One entry point for the page: work out the National Savings
+ * result for a scheme and amount. Tenure options: `yearsHeld` for
+ * DSC (default 10, the maturity), `halfYears` for SSC (default 6,
+ * the full 3 years), `years` for the Savings Account (default 1).
+ * Monthly schemes (RIC/BSC/PBA/SFWA) pay from the issue date, so
+ * no tenure input is needed — the result shows the monthly profit
+ * and, where the scheme has a fixed tenure, the total profit to
+ * maturity. WHT is applied at source only where the scheme
+ * collects it; filerStatus defaults to 'filer'.
+ */
+export function calcNationalSavings(
+  schemeId: string,
+  amount: number,
+  opts: { yearsHeld?: number; halfYears?: number; years?: number; filerStatus?: 'filer' | 'non-filer' } = {},
+): NationalSavingsResult {
+  const scheme = nssSchemeById(schemeId);
+  validateNssAmount(amount, scheme);
+  const filerStatus = opts.filerStatus ?? 'filer';
+
+  if (scheme.id === 'dsc') {
+    const yearsHeld = opts.yearsHeld ?? DSC_TENURE_YEARS;
+    const enc = calcDscEncashment(amount, yearsHeld);
+    const wht = applyNssWht(enc.profit, scheme.whtApplies, filerStatus);
+    const totalReceived = round2(amount + wht.netProfit);
+    return {
+      schemeId: scheme.id,
+      schemeName: scheme.name,
+      amount,
+      headlineValue: totalReceived,
+      headlineLabel: enc.noProfit
+        ? 'Encashment value — no profit before 1 year'
+        : `Encashment value after ${enc.wholeYears} year${enc.wholeYears === 1 ? '' : 's'} (after tax)`,
+      grossProfit: enc.profit,
+      whtRate: wht.whtRate,
+      whtAmount: wht.whtAmount,
+      netProfit: wht.netProfit,
+      totalReceived,
+      annualProfit: null,
+      monthlyProfit: null,
+      detail: [
+        { label: `Profit — ${enc.profitPct}% of Rs ${amount.toLocaleString('en-PK')} after ${enc.wholeYears} year${enc.wholeYears === 1 ? '' : 's'} (CDNS table)`, value: enc.profit },
+        { label: `Withholding tax (${wht.whtRate * 100}% — ${filerStatus})`, value: -wht.whtAmount },
+        { label: 'Amount invested', value: amount },
+      ],
+      note: enc.noProfit
+        ? 'No profit is paid if a DSC is encashed before 1 full year — you get your amount back only. The 11.94% is the CDNS-stated rate; the amount above comes from the CDNS per-year encashment table, not from flat compounding.'
+        : `After ${enc.wholeYears} year${enc.wholeYears === 1 ? '' : 's'} the CDNS table pays ${enc.profitPct}% profit${enc.wholeYears === 10 ? ' — at maturity Rs 100,000 becomes Rs 315,000 before tax' : ''}. The 11.94% is the CDNS-stated rate; the amount above comes from the CDNS per-year encashment table, not from flat compounding. Zakat is deducted at source as per rules.`,
+    };
+  }
+
+  if (scheme.id === 'ssc') {
+    const halfYears = opts.halfYears ?? SSC_TENURE_HALF_YEARS;
+    const ssc = calcSscProfit(amount, halfYears);
+    const wht = applyNssWht(ssc.profit, scheme.whtApplies, filerStatus);
+    const totalReceived = round2(amount + wht.netProfit);
+    return {
+      schemeId: scheme.id,
+      schemeName: scheme.name,
+      amount,
+      headlineValue: totalReceived,
+      headlineLabel: ssc.noProfit
+        ? 'Value — no profit before 6 months'
+        : `Value after ${ssc.halfYears} half-year${ssc.halfYears === 1 ? '' : 's'} (after tax)`,
+      grossProfit: ssc.profit,
+      whtRate: wht.whtRate,
+      whtAmount: wht.whtAmount,
+      netProfit: wht.netProfit,
+      totalReceived,
+      annualProfit: null,
+      monthlyProfit: null,
+      detail: [
+        { label: `Profit — ${ssc.halfYears} half-year${ssc.halfYears === 1 ? '' : 's'} at 12.00% (12.80% in the 6th)`, value: ssc.profit },
+        { label: `Withholding tax (${wht.whtRate * 100}% — ${filerStatus})`, value: -wht.whtAmount },
+        { label: 'Amount invested', value: amount },
+      ],
+      note: ssc.noProfit
+        ? 'No profit is paid if an SSC is encashed before 6 months — you get your amount back only.'
+        : 'The first five half-years pay 12.00% p.a. each (Rs 6,000 per Rs 100,000 per half-year) and the 6th pays 12.80% p.a. (Rs 6,400 per Rs 100,000) — Rs 36,400 profit on Rs 100,000 over the full 3 years, before tax. Zakat is collected at source as per rules.',
+    };
+  }
+
+  if (scheme.id === 'sa') {
+    const years = opts.years ?? 1;
+    const sa = calcSaProfit(amount, years);
+    const wht = applyNssWht(sa.totalProfit, scheme.whtApplies, filerStatus);
+    const totalReceived = round2(amount + wht.netProfit);
+    return {
+      schemeId: scheme.id,
+      schemeName: scheme.name,
+      amount,
+      headlineValue: round2(wht.netProfit / years),
+      headlineLabel: 'Annual profit (after tax)',
+      grossProfit: sa.annualProfit,
+      whtRate: wht.whtRate,
+      whtAmount: round2(wht.whtAmount / years),
+      netProfit: round2(wht.netProfit / years),
+      totalReceived,
+      annualProfit: round2(wht.netProfit / years),
+      monthlyProfit: null,
+      detail: [
+        { label: `Annual profit — 10.00% of Rs ${amount.toLocaleString('en-PK')}`, value: sa.annualProfit },
+        { label: `Withholding tax per year (${wht.whtRate * 100}% — ${filerStatus})`, value: -round2(wht.whtAmount / years) },
+        { label: `Total profit over ${years} year${years === 1 ? '' : 's'} (after tax)`, value: wht.netProfit },
+        { label: 'Amount deposited', value: amount },
+      ],
+      note: 'Profit is credited annually on 30 June on minimum balances (6th day to month-end) at 10.00% p.a. — unchanged since 26 May 2026. Zakat applies as per rules. Withdrawals are limited to 3 per week.',
+    };
+  }
+
+  // Monthly-paying schemes: RIC, BSC, PBA, SFWA.
+  const monthlyGross = calcNssMonthlyProfit(amount, scheme.ratePct);
+  const wht = applyNssWht(monthlyGross, scheme.whtApplies, filerStatus);
+  const netMonthly = wht.netProfit;
+  const tenureYears = scheme.id === 'ric' ? 5 : scheme.id === 'bsc' || scheme.id === 'pba' ? 10 : null;
+  const totalProfitToMaturity = tenureYears === null ? null : round2(netMonthly * 12 * tenureYears);
+  const totalReceived = totalProfitToMaturity === null ? null : round2(amount + totalProfitToMaturity);
+  return {
+    schemeId: scheme.id,
+    schemeName: scheme.name,
+    amount,
+    headlineValue: netMonthly,
+    headlineLabel: wht.noWhtAtSource ? 'Monthly profit (no tax deducted at source)' : 'Monthly profit (after tax)',
+    grossProfit: monthlyGross,
+    whtRate: wht.whtRate,
+    whtAmount: wht.whtAmount,
+    netProfit: netMonthly,
+    totalReceived,
+    annualProfit: round2(netMonthly * 12),
+    monthlyProfit: netMonthly,
+    detail: [
+      { label: `Monthly profit — ${scheme.ratePct}% p.a. on Rs ${amount.toLocaleString('en-PK')}`, value: monthlyGross },
+      ...(wht.noWhtAtSource
+        ? [{ label: 'Withholding tax deducted at source', value: 0 }]
+        : [{ label: `Withholding tax (${wht.whtRate * 100}% — ${filerStatus})`, value: -wht.whtAmount }]),
+      { label: 'Annual profit (after tax)', value: round2(netMonthly * 12) },
+      ...(totalProfitToMaturity === null
+        ? []
+        : [{ label: `Total profit over ${tenureYears} years (after tax)`, value: totalProfitToMaturity }]),
+      { label: 'Amount invested', value: amount },
+    ],
+    note: wht.noWhtAtSource
+      ? `No withholding tax is collected at source on ${scheme.shortName} — but that does not mean tax-free: the profit must still be declared in your tax return. ${scheme.shortName} is Zakat-exempt${scheme.id === 'sfwa' ? ' (no Zakat deductible; Behbood rules apply)' : ''}.`
+      : `Monthly profit is paid from the issue date. ${scheme.shortName} is Zakat-exempt.`,
   };
 }

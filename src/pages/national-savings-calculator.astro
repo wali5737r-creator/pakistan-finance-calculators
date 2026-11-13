@@ -1,0 +1,605 @@
+---
+import Layout from '../components/Layout.astro';
+import {
+  DSC_ENCASHMENT_TABLE_PCT,
+  NATIONAL_SAVINGS_RATES_EFFECTIVE,
+  NATIONAL_SAVINGS_SCHEMES,
+  NATIONAL_SAVINGS_RATES_URL,
+} from '../config/national-savings';
+
+const title = "National Savings Calculator Pakistan | CDNS Rates Oct 2026 | Pakistan Finance Calculators";
+const description = "Work out your National Savings profit in Pakistan: monthly profit on RIC, Behbood and Pensioners' accounts, DSC maturity and SSC profit at CDNS rates.";
+const slug = "/national-savings-calculator/";
+
+const faqs = [
+  {
+    q: "What are the current National Savings profit rates?",
+    a: "The Central Directorate of National Savings (CDNS) rates in force from 21 October 2026 are: Defence Savings Certificates 11.94% (CDNS-stated — see the encashment table below), Regular Income Certificates 12.12%, Behbood Savings Certificates 12.96%, Pensioners' Benefit Account 12.96%, Special Savings Certificates 12.00% for the first five half-years and 12.80% for the 6th, Shuhada Family Welfare Account 12.96%, and the Savings Account 10.00% — the Savings Account rate is unchanged since 26 May 2026. No November 2026 revision had been published when these rates were checked on 13 November 2026. CDNS revises rates frequently, so confirm the current rate at your National Savings Centre or on savings.gov.pk before investing. Do not use older figures still shown on some websites (for example Behbood 13.68%, RIC 13.56% or DSC 13.24%) — those are pre-2026-cut rates.",
+  },
+  {
+    q: "How much monthly profit do I get on Rs 100,000?",
+    a: "At the CDNS rates from 21 October 2026: a Regular Income Certificate pays Rs 1,010 a month, and a Behbood Savings Certificate, a Pensioners' Benefit Account or a Shuhada Family Welfare Account each pay Rs 1,080 a month. Those are the amounts before withholding tax. For a filer, 15% tax is deducted at source on the RIC, so the RIC pays Rs 858.50 a month after tax (Rs 1,010 less Rs 151.50); a non-filer pays 30%, so the RIC pays Rs 707 a month after tax. No tax is deducted at source on Behbood, Pensioners' or Shuhada profit, so those pay the full Rs 1,080 a month — but the profit must still be declared in your tax return. The Defence Savings Certificate, Special Savings Certificate and Savings Account do not pay monthly profit at all.",
+  },
+  {
+    q: "How does the Defence Savings Certificate profit work?",
+    a: "A Defence Savings Certificate pays nothing monthly or half-yearly — the profit is paid only when the certificate matures or is encashed, from a CDNS per-year table, not from flat compounding. On Rs 100,000 the table pays: after 1 year Rs 110,000, after 2 years Rs 121,000, after 3 years Rs 134,000, after 4 years Rs 149,000, after 5 years Rs 167,000, after 6 years Rs 188,000, after 7 years Rs 213,000, after 8 years Rs 242,000, after 9 years Rs 276,000, and at maturity after 10 years Rs 315,000 (215% profit). If you encash before 1 full year you get no profit at all — only your amount back. The 11.94% figure is the rate CDNS states for the certificate; the amounts above come from the table, which is what CDNS actually pays. Withholding tax of 15% (filer) or 30% (non-filer) applies to the profit, so Rs 100,000 held to maturity returns Rs 282,750 after tax for a filer and Rs 250,500 for a non-filer. The minimum investment is Rs 500 and there is no maximum.",
+  },
+  {
+    q: "Is there tax on National Savings profit?",
+    a: "Yes, where it applies. Withholding tax under section 151 of the Income Tax Ordinance 2001 is 15% for filers and 30% for non-filers on the profit from Defence Savings Certificates, Regular Income Certificates, Special Savings Certificates and the Savings Account — the calculator deducts it and shows the after-tax figure. No withholding tax is collected at source on Behbood Savings Certificates, the Pensioners' Benefit Account or the Shuhada Family Welfare Account — but that does not mean tax-free: the profit must still be declared in your tax return. No tax cap figure (such as 5% or 10%) is published for Behbood or Pensioners' profit, because the secondary sources disagree — so this page states no cap.",
+  },
+  {
+    q: "Is Zakat deducted from National Savings?",
+    a: "It depends on the scheme. Zakat at 2.5% is deducted where the scheme is liable: on Defence Savings Certificates, Special Savings Certificates and the Savings Account, as per the rules, if the balance is at or above the notified nisab — Rs 503,529 for Zakat year 1446-47 AH / 2026 (Administrator General Zakat, via the State Bank, 27 September 2026) — deducted on 1 Ramadan. Behbood Savings Certificates, the Pensioners' Benefit Account and the Shuhada Family Welfare Account are Zakat-exempt, and Regular Income Certificates are also Zakat-exempt. For Defence and Special Savings Certificates this page says 'as per rules' and does not invent a deduction date.",
+  },
+  {
+    q: "Who can open a Behbood or Pensioners' account?",
+    a: "Behbood Savings Certificates are for senior citizens aged 60 and over, single widows (while unmarried), disabled persons with the disability logo on their CNIC, and special minors through a guardian. The minimum is Rs 5,000 and the maximum is Rs 7.5 million for a single investor (Rs 15 million joint) — note the CDNS FAQ still says Rs 5 million / Rs 10 million, which is stale; the product page figures are used here. The Pensioners' Benefit Account is for pensioners of the federal, provincial and AJK governments, the armed forces, semi-government and autonomous bodies — and for an eligible family member after the pensioner's death. Private-sector retirees and EOBI-only retirees do not qualify. Its minimum is Rs 10,000, its maximum Rs 7.5 million, with at most 8 deposits and one account at a time. The Shuhada Family Welfare Account is for an eligible family member of a martyr — armed forces, law enforcement, or a civilian killed in a terrorist attack — who is a citizen of Pakistan, one account per family member; a Savings Account is mandatory because the monthly profit is credited into it.",
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://pakistan-finance-calculators.pages.dev/national-savings-calculator/#webapp',
+      name: "National Savings Calculator",
+      url: 'https://pakistan-finance-calculators.pages.dev/national-savings-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://pakistan-finance-calculators.pages.dev/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: "National Savings Calculator",
+          item: 'https://pakistan-finance-calculators.pages.dev/national-savings-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+
+const related = [
+  {
+    href: "/fixed-deposit-calculator/",
+    name: "Fixed Deposit Calculator",
+    desc: "Maturity amount and profit on a fixed deposit, with the profit rate and tax you enter — the bank alternative to a National Savings certificate.",
+  },
+  {
+    href: "/compound-interest-calculator/",
+    name: "Compound Interest Calculator",
+    desc: "How savings grow with compound interest: final amount, interest earned, and a year-by-year table — useful for comparing a certificate held to maturity.",
+  },
+];
+
+// Maximum-investment wording per scheme. BSC shows both limits;
+// SFWA shows the conflict on the official page itself.
+const maxDisplay: Record<string, string> = {
+  dsc: 'No maximum',
+  ric: 'No maximum',
+  bsc: 'Rs 7.5m single / Rs 15m joint',
+  pba: 'Rs 7.5m',
+  ssc: 'No maximum',
+  sa: 'No maximum',
+  sfwa: 'See note below — official page conflicts',
+};
+const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES);
+---
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / National Savings Calculator</p>
+    </nav>
+    <p class="badge badge-info" style="margin-top: 8px;">Savings</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">National Savings Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+      On Rs 100,000, a Behbood, Pensioners' or Shuhada account pays
+      Rs 1,080 a month, a Regular Income Certificate pays Rs 1,010 a
+      month, and a Defence Savings Certificate held for 10 years returns
+      Rs 315,000 before tax — at the CDNS rates in force from 21 October
+      2026. Pick your scheme and amount below to work out your monthly,
+      half-yearly or maturity profit, before and after withholding tax.
+    </p>
+    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+      <strong>Rates checked 13 November 2026.</strong> CDNS revises
+      profit rates frequently — the last revision was 21 October 2026
+      (the Savings Account is unchanged at 10.00% since 26 May 2026).
+      Results are estimates from those rates; confirm the current rate
+      at your National Savings Centre or on
+      <a href={NATIONAL_SAVINGS_RATES_URL}>savings.gov.pk</a> before
+      investing.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="nssForm" novalidate>
+          <div class="field">
+            <label for="nssScheme">Which National Savings scheme? <span aria-hidden="true">*</span></label>
+            <select id="nssScheme" aria-required="true">
+              {NATIONAL_SAVINGS_SCHEMES.map((s) => (
+                <option value={s.id}>{s.name} ({s.shortName}) — {s.ratePct}% p.a., {s.frequency}</option>
+              ))}
+            </select>
+            <p class="hint" id="nssSchemeHint"></p>
+          </div>
+
+          <div class="field">
+            <label for="nssAmount">Investment amount (Rs) <span aria-hidden="true">*</span></label>
+            <input id="nssAmount" type="text" inputmode="decimal" autocomplete="off" placeholder="100000" />
+            <p class="hint" id="nssAmountHint"></p>
+          </div>
+
+          <div class="field" id="nssYearsHeldField" hidden>
+            <label for="nssYearsHeld">Years held (Defence Savings Certificate)</label>
+            <input id="nssYearsHeld" type="text" inputmode="decimal" autocomplete="off" placeholder="10" />
+            <p class="hint">Whole years only — the CDNS table pays per completed year. Under 1 year there is no profit. 0 to 10 years (maturity).</p>
+          </div>
+
+          <div class="field" id="nssHalfYearsField" hidden>
+            <label for="nssHalfYears">Half-years held (Special Savings Certificate)</label>
+            <input id="nssHalfYears" type="text" inputmode="decimal" autocomplete="off" placeholder="6" />
+            <p class="hint">Whole half-years only. Under 6 months there is no profit. 0 to 6 half-years (3 years, maturity).</p>
+          </div>
+
+          <div class="field" id="nssYearsField" hidden>
+            <label for="nssYears">Years (Savings Account)</label>
+            <input id="nssYears" type="text" inputmode="decimal" autocomplete="off" placeholder="1" />
+            <p class="hint">Profit is credited annually on 30 June at 10.00% a year. 1 to 30 years.</p>
+          </div>
+
+          <div class="field">
+            <label for="nssFiler">Tax status (for withholding tax) <span aria-hidden="true">*</span></label>
+            <select id="nssFiler" aria-required="true">
+              <option value="filer">Filer — 15% withholding tax</option>
+              <option value="non-filer">Non-filer — 30% withholding tax</option>
+            </select>
+            <p class="hint" id="nssFilerHint">Withholding tax of 15% (filer) or 30% (non-filer) applies to DSC, RIC, SSC and Savings Account profit. No tax is deducted at source on Behbood, Pensioners' or Shuhada profit — but it must still be declared in your return.</p>
+          </div>
+
+          <div id="nssErrors" class="error-box" role="alert" hidden></div>
+
+          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+            <button id="nssCalculate" class="btn-primary" type="submit">Calculate</button>
+            <button id="nssClear" class="btn-secondary" type="button">Clear</button>
+          </p>
+          <p id="nssFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        </form>
+      </div>
+
+      <div class="result-card" id="nssResultCard" tabindex="-1">
+        <div id="nssEmpty">
+          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p>Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            You will see your answer with the figures shown, so you can check it.
+          </p>
+        </div>
+
+        <div id="nssResult" data-result-text hidden>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" id="nssHeadlineLabel">Monthly profit</p>
+          <div aria-live="polite" aria-atomic="true">
+            <p class="result-value" id="nssHeadline"></p>
+          </div>
+          <div class="stat-grid">
+            <div>
+              <p class="stat-label" id="nssStatLabel1">Profit before tax</p>
+              <p class="stat-value" id="nssStat1"></p>
+            </div>
+            <div>
+              <p class="stat-label" id="nssStatLabel2">Withholding tax</p>
+              <p class="stat-value" id="nssStat2"></p>
+            </div>
+            <div>
+              <p class="stat-label" id="nssStatLabel3">Annual profit</p>
+              <p class="stat-value" id="nssStat3"></p>
+            </div>
+            <div>
+              <p class="stat-label" id="nssStatLabel4">Total received</p>
+              <p class="stat-value" id="nssStat4"></p>
+            </div>
+          </div>
+          <table class="breakdown-table" id="nssBreakdown" aria-label="National Savings breakdown"></table>
+          <p id="nssEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="nssFormula" style="font-size: 16px;"></p>
+          <p id="nssNote" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p style="font-size: 13px; color: var(--ink-muted);">
+            Estimate only — check important figures before acting.
+            <a href="#nssDisclaimer">Read the full disclaimer.</a>
+          </p>
+        </div>
+
+        <div class="actions-row no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size: 14px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top: 40px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Pick a scheme. Four pay monthly — Regular Income Certificates, Behbood, Pensioners' and Shuhada — one pays half-yearly (Special Savings), one pays annually (Savings Account), and the Defence Savings Certificate pays only on maturity or encashment.</li>
+      <li>Enter your amount. The calculator checks it against the scheme's minimum and maximum investment.</li>
+      <li>For a Defence certificate enter the years held (the CDNS table pays per completed year); for a Special Savings Certificate enter the half-years held; for a Savings Account enter the years. Monthly schemes need no tenure — the profit starts from the issue date.</li>
+      <li>Pick filer or non-filer. Withholding tax of 15% (filer) or 30% (non-filer) is deducted at source on DSC, RIC, SSC and Savings Account profit. No tax is deducted at source on Behbood, Pensioners' or Shuhada profit — but it must still be declared in your tax return.</li>
+    </ol>
+
+    <h2>Formula</h2>
+    <p>Monthly profit = amount x rate % / 12 (RIC, Behbood, Pensioners', Shuhada)</p>
+    <p>Defence Savings Certificate value = amount + amount x table % for completed years (CDNS table — not flat compounding)</p>
+    <p>Special Savings profit = amount x 6.00% per half-year for the first five periods, 6.40% for the 6th (12.00% / 12.80% p.a.)</p>
+    <p>Savings Account annual profit = amount x 10.00%</p>
+    <p>Profit after tax = profit x (1 − 15%) for filers, x (1 − 30%) for non-filers, where withholding tax applies</p>
+
+    <h2>Worked examples — Rs 100,000 in each scheme</h2>
+    <p><strong>Example A — Regular Income Certificate:</strong> 100,000 x 12.12% / 12 = Rs 1,010 a month before tax. A filer pays 15% tax (Rs 151.50), so Rs 858.50 a month after tax — Rs 10,302 a year, Rs 51,510 over the 5-year term. A non-filer pays 30%, so Rs 707 a month after tax.</p>
+    <p><strong>Example B — Behbood Savings Certificate:</strong> 100,000 x 12.96% / 12 = Rs 1,080 a month, and no tax is deducted at source — so Rs 1,080 a month, Rs 12,960 a year, Rs 129,600 over the 10-year tenure. The profit must still be declared in your tax return. Zakat-exempt.</p>
+    <p><strong>Example C — Pensioners' Benefit Account:</strong> the same as Behbood — 100,000 x 12.96% / 12 = Rs 1,080 a month, no tax deducted at source, Rs 12,960 a year. Only qualifying pensioners (and an eligible family member after the pensioner's death) can open one; private-sector / EOBI-only retirees do not qualify.</p>
+    <p><strong>Example D — Shuhada Family Welfare Account:</strong> the same again — 100,000 x 12.96% / 12 = Rs 1,080 a month, no tax deducted at source, Rs 12,960 a year. No Zakat is deductible. A Savings Account is mandatory for the monthly credit.</p>
+    <p><strong>Example E — Defence Savings Certificate, 10 years:</strong> the CDNS table pays 215% profit, so Rs 100,000 becomes Rs 315,000 before tax. A filer pays 15% tax on the Rs 215,000 profit (Rs 32,250), so Rs 282,750 after tax; a non-filer pays 30% (Rs 64,500), so Rs 250,500 after tax. Encash after 5 years instead and the table pays 67% — Rs 167,000 before tax. Encash before 1 year and there is no profit at all.</p>
+    <p><strong>Example F — Special Savings Certificate, 3 years:</strong> five half-years at 6.00% (Rs 6,000 each) plus the final half-year at 6.40% (Rs 6,400) = Rs 36,400 profit on Rs 100,000, so Rs 136,400 before tax. A filer pays 15% tax (Rs 5,460), so Rs 130,940 after tax. Encash before 6 months and there is no profit at all.</p>
+    <p><strong>Example G — Savings Account, 1 year:</strong> 100,000 x 10.00% = Rs 10,000 a year before tax, credited on 30 June. A filer pays 15% tax (Rs 1,500), so Rs 8,500 a year after tax; over 3 years that is Rs 25,500 after tax.</p>
+    <p style="font-size: 14px; color: var(--ink-muted);">All examples use the CDNS rates in force from 21 October 2026 (Savings Account 10.00% since 26 May 2026), checked 13 November 2026.</p>
+
+    <h2>National Savings profit rates — w.e.f. {NATIONAL_SAVINGS_RATES_EFFECTIVE}</h2>
+    <table class="breakdown-table" aria-label="National Savings profit rates">
+      <thead>
+        <tr><th scope="col">Scheme</th><th scope="col">Rate % p.a.</th><th scope="col">Paid</th><th scope="col">Tenure</th><th scope="col">Min</th><th scope="col">Max</th><th scope="col">WHT at source</th><th scope="col">Zakat</th></tr>
+      </thead>
+      <tbody>
+        {NATIONAL_SAVINGS_SCHEMES.map((s) => (
+          <tr>
+            <td>{s.name} ({s.shortName})</td>
+            <td>{s.ratePct.toFixed(2)}%</td>
+            <td>{s.frequency}</td>
+            <td>{s.tenure}</td>
+            <td>{s.minInvestment > 0 ? `Rs ${s.minInvestment.toLocaleString('en-PK')}` : '—'}</td>
+            <td>{maxDisplay[s.id]}</td>
+            <td>{s.whtApplies ? '15% / 30%' : 'None'}</td>
+            <td>{s.zakat}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p style="font-size: 14px; color: var(--ink-muted);">Rates: CDNS, "Summary of NSS Profit Rates (in %age and amount), w.e.f. 21-Oct-2026". The Savings Account rate is unchanged at 10.00% since 26 May 2026. The DSC rate of 11.94% is the CDNS-stated rate — the amount a DSC actually pays comes from the per-year table below. The SSC rate of 12.00% is the rate for the first five half-year periods; the 6th period is 12.80% p.a.</p>
+    <p style="font-size: 14px; color: var(--ink-muted);"><strong>Behbood maximum — stale FAQ.</strong> The CDNS FAQ still says the Behbood maximum is Rs 5 million single / Rs 10 million joint. That is stale: the Behbood product page and rate card say Rs 7.5 million single / Rs 15 million joint, and those are the figures used here.</p>
+    <p style="font-size: 14px; color: var(--ink-muted);"><strong>Shuhada maximum — the official page conflicts with itself.</strong> The Shuhada Family Welfare Account page's highlights say the maximum is Rs 5,000,000, while its body says Rs 7,500,000. This page does not pick one — both figures are stated here, and the calculator does not enforce a Shuhada maximum.</p>
+
+    <h2>Defence Savings Certificate — encashment table (Rs 100,000)</h2>
+    <table class="breakdown-table" aria-label="Defence Savings Certificate encashment table on Rs 100,000">
+      <thead>
+        <tr><th scope="col">Completed years</th><th scope="col">Profit %</th><th scope="col">Profit (Rs)</th><th scope="col">Value (Rs)</th></tr>
+      </thead>
+      <tbody>
+        {DSC_ENCASHMENT_TABLE_PCT.map((pct, i) => (
+          <tr>
+            <td>{i + 1}</td>
+            <td>{pct}%</td>
+            <td>{(100000 * pct / 100).toLocaleString('en-PK')}</td>
+            <td>{(100000 + 100000 * pct / 100).toLocaleString('en-PK')}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p style="font-size: 14px; color: var(--ink-muted);">CDNS schedule, w.e.f. 21 October 2026. No profit if encashed before 1 full year. The table is the amount CDNS pays — do not work a DSC out by compounding 11.94% a year, which gives a different (wrong) figure. Withholding tax of 15% (filer) or 30% (non-filer) applies to the profit shown.</p>
+
+    <h2>Who can invest — and the tax and Zakat position</h2>
+    <table class="breakdown-table" aria-label="National Savings eligibility, tax and Zakat">
+      <thead>
+        <tr><th scope="col">Scheme</th><th scope="col">Who can invest</th></tr>
+      </thead>
+      <tbody>
+        {NATIONAL_SAVINGS_SCHEMES.map((s) => (
+          <tr>
+            <td>{s.name} ({s.shortName})</td>
+            <td>{s.eligibility}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p><strong>Withholding tax.</strong> 15% for filers, 30% for non-filers (Income Tax Ordinance 2001, s.151) on Defence, Regular Income, Special Savings and Savings Account profit. No tax is collected at source on Behbood, Pensioners' or Shuhada profit — but "exempt from withholding tax" does not mean tax-free: the profit must still be declared in your tax return. No tax cap figure is published for Behbood or Pensioners' profit.</p>
+    <p><strong>Zakat.</strong> 2.5% where the scheme is liable, deducted on 1 Ramadan if the balance is at or above the notified nisab of Rs 503,529 (Zakat year 1446-47 AH / 2026, Administrator General Zakat via the State Bank, 27 September 2026). Liable: Defence, Special Savings and Savings Account. Exempt: Behbood, Pensioners', Shuhada (no Zakat deductible) and Regular Income Certificates. For Defence and Special Savings Certificates the deduction is "as per rules" — no deduction date is stated here.</p>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+
+    <section id="nssDisclaimer" class="notice-info" style="margin-top: 32px;">
+      <h2 style="font-size: 20px;">Important — please read</h2>
+      <p>
+        Results are estimates from the CDNS profit rates in force from
+        21 October 2026 (Savings Account 10.00% since 26 May 2026) —
+        they are not a promise of what a National Savings Centre will
+        pay. CDNS revises rates frequently, so confirm the current rate
+        at your National Savings Centre or on savings.gov.pk before
+        investing. The Defence Savings Certificate amounts come from
+        the CDNS per-year encashment table, not from compounding the
+        11.94% stated rate. The Behbood maximum used here is the
+        product-page figure (Rs 7.5 million single / Rs 15 million
+        joint); the CDNS FAQ's Rs 5 million / Rs 10 million is stale.
+        The Shuhada maximum is not stated as a single figure because
+        the official page gives two different figures (Rs 5,000,000
+        and Rs 7,500,000). No withholding-tax cap is published for
+        Behbood or Pensioners' profit. Always confirm your entitlement,
+        eligibility and amount with your National Savings Centre before
+        acting on a result.
+      </p>
+      <p>
+        Sources:
+        <a href={NATIONAL_SAVINGS_RATES_URL}>CDNS — Summary of NSS Profit Rates, w.e.f. 21-Oct-2026</a>.
+        Checked 13 November 2026; next review 13 January 2027.
+      </p>
+      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+    </section>
+
+    <h2 style="margin-top: 32px;">Related tools</h2>
+    <div class="related-grid">
+      {
+        related.map((tool) => (
+          <article class="card">
+            <h3 style="font-size: 18px;">
+              <a href={tool.href}>{tool.name}</a>
+            </h3>
+            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p>
+              <a href={tool.href}>Use the calculator →</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+    .field-error {
+      font-size: 14px;
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin: 12px 0;
+    }
+    .stat-grid p {
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .related-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 15px;
+    }
+    .breakdown-table th,
+    .breakdown-table td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border, #e5e7eb);
+    }
+    .breakdown-table td:last-child,
+    .breakdown-table th:last-child {
+      text-align: right;
+    }
+    .breakdown-table tr.total-row td {
+      font-weight: 700;
+    }
+  </style>
+
+  <script define:vars={{ schemeJson }}>
+    import { calcNationalSavings, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';
+
+    const schemes = JSON.parse(schemeJson);
+    const form = document.getElementById('nssForm');
+    const errorsBox = document.getElementById('nssErrors');
+    const emptyBox = document.getElementById('nssEmpty');
+    const resultBox = document.getElementById('nssResult');
+    const resultCard = document.getElementById('nssResultCard');
+    const headlineLabel = document.getElementById('nssHeadlineLabel');
+    const headline = document.getElementById('nssHeadline');
+    const stat1 = document.getElementById('nssStat1');
+    const stat2 = document.getElementById('nssStat2');
+    const stat3 = document.getElementById('nssStat3');
+    const stat4 = document.getElementById('nssStat4');
+    const statLabel1 = document.getElementById('nssStatLabel1');
+    const statLabel2 = document.getElementById('nssStatLabel2');
+    const statLabel3 = document.getElementById('nssStatLabel3');
+    const statLabel4 = document.getElementById('nssStatLabel4');
+    const breakdownEl = document.getElementById('nssBreakdown');
+    const echoEl = document.getElementById('nssEcho');
+    const formulaEl = document.getElementById('nssFormula');
+    const noteEl = document.getElementById('nssNote');
+    const copyBtn = document.querySelector('[data-copy-result]');
+    const printBtn = document.querySelector('[data-print-result]');
+    const formStatus = document.getElementById('nssFormStatus');
+    const schemeSelect = document.getElementById('nssScheme');
+    const schemeHint = document.getElementById('nssSchemeHint');
+    const amountHint = document.getElementById('nssAmountHint');
+    const yearsHeldField = document.getElementById('nssYearsHeldField');
+    const halfYearsField = document.getElementById('nssHalfYearsField');
+    const yearsField = document.getElementById('nssYearsField');
+    const filerHint = document.getElementById('nssFilerHint');
+
+    function schemeById(id) {
+      return schemes.find((s) => s.id === id) || schemes[0];
+    }
+    function readOptionalNumber(id, label) {
+      const raw = document.getElementById(id).value;
+      if (raw.trim() === '') return undefined;
+      const value = parseDecimal(raw);
+      if (value === null) throw new Error(label + ' must be a number using digits and one decimal point only.');
+      return value;
+    }
+    function showEmpty() {
+      resultBox.hidden = true;
+      emptyBox.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+    function showResult() {
+      emptyBox.hidden = true;
+      resultBox.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+    }
+    function updateConditionalFields() {
+      const scheme = schemeById(schemeSelect.value);
+      yearsHeldField.hidden = scheme.id !== 'dsc';
+      halfYearsField.hidden = scheme.id !== 'ssc';
+      yearsField.hidden = scheme.id !== 'sa';
+      schemeHint.textContent = scheme.eligibility;
+      const minText = scheme.minInvestment > 0 ? 'Minimum Rs ' + formatNumber(scheme.minInvestment, 0) + '. ' : '';
+      const maxText = scheme.maxInvestment !== null ? 'Maximum Rs ' + formatNumber(scheme.maxInvestment, 0) + '.' : (scheme.id === 'sfwa' ? 'No maximum enforced — the official page gives two different maxima (Rs 5,000,000 and Rs 7,500,000).' : 'No maximum.');
+      amountHint.textContent = minText + maxText;
+      filerHint.textContent = scheme.whtApplies
+        ? 'Withholding tax of 15% (filer) or 30% (non-filer) is deducted at source on this scheme.'
+        : 'No withholding tax is deducted at source on this scheme — but the profit must still be declared in your tax return.';
+    }
+    schemeSelect.addEventListener('change', updateConditionalFields);
+    updateConditionalFields();
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        const scheme = schemeById(schemeSelect.value);
+        const amount = readOptionalNumber('nssAmount', 'Investment amount');
+        if (amount === undefined) throw new Error('Enter your investment amount in rupees.');
+        const filerStatus = document.getElementById('nssFiler').value;
+        const opts = { filerStatus };
+        if (scheme.id === 'dsc') {
+          const yearsHeld = readOptionalNumber('nssYearsHeld', 'Years held');
+          if (yearsHeld !== undefined) opts.yearsHeld = yearsHeld;
+        } else if (scheme.id === 'ssc') {
+          const halfYears = readOptionalNumber('nssHalfYears', 'Half-years held');
+          if (halfYears !== undefined) opts.halfYears = halfYears;
+        } else if (scheme.id === 'sa') {
+          const years = readOptionalNumber('nssYears', 'Years');
+          if (years !== undefined) opts.years = years;
+        }
+        const r = calcNationalSavings(scheme.id, amount, opts);
+
+        errorsBox.textContent = '';
+        errorsBox.hidden = true;
+        headlineLabel.textContent = r.headlineLabel;
+        headline.textContent = formatPKR(r.headlineValue, 0) + (scheme.id === 'ric' || scheme.id === 'bsc' || scheme.id === 'pba' || scheme.id === 'sfwa' ? ' / month' : scheme.id === 'sa' ? ' / year' : '');
+
+        let rows = '';
+        if (scheme.id === 'ric' || scheme.id === 'bsc' || scheme.id === 'pba' || scheme.id === 'sfwa') {
+          statLabel1.textContent = 'Profit before tax / month';
+          statLabel2.textContent = 'Withholding tax / month';
+          statLabel3.textContent = 'Annual profit (after tax)';
+          statLabel4.textContent = 'Total profit to maturity (after tax)';
+          stat1.textContent = formatPKR(r.grossProfit, 0);
+          stat2.textContent = r.whtAmount > 0 ? formatPKR(r.whtAmount, 0) : 'None at source';
+          stat3.textContent = formatPKR(r.annualProfit, 0);
+          stat4.textContent = r.totalReceived !== null ? formatPKR(r.totalReceived - amount, 0) : '—';
+          echoEl.textContent = 'Based on: ' + scheme.name + ' (' + scheme.shortName + ') at ' + formatNumber(scheme.ratePct, 2) + '% p.a., amount ' + formatPKR(amount, 0) + ', ' + (filerStatus === 'filer' ? 'filer' : 'non-filer') + '.';
+          formulaEl.textContent = 'Monthly profit ' + formatPKR(r.netProfit, 0) + ' = ' + formatPKR(amount, 0) + ' × ' + formatNumber(scheme.ratePct, 2) + '% ÷ 12' + (r.whtAmount > 0 ? ' − ' + formatPKR(r.whtAmount, 0) + ' tax (' + (r.whtRate * 100) + '%)' : ', no tax deducted at source') + '.';
+        } else if (scheme.id === 'dsc') {
+          statLabel1.textContent = 'Profit before tax';
+          statLabel2.textContent = 'Withholding tax';
+          statLabel3.textContent = 'Profit after tax';
+          statLabel4.textContent = 'Amount invested';
+          stat1.textContent = formatPKR(r.grossProfit, 0);
+          stat2.textContent = formatPKR(r.whtAmount, 0);
+          stat3.textContent = formatPKR(r.netProfit, 0);
+          stat4.textContent = formatPKR(amount, 0);
+          echoEl.textContent = 'Based on: Defence Savings Certificates at the CDNS-stated 11.94% p.a., amount ' + formatPKR(amount, 0) + ', ' + (filerStatus === 'filer' ? 'filer' : 'non-filer') + '. The amount comes from the CDNS per-year encashment table.';
+          formulaEl.textContent = 'Encashment value ' + formatPKR(r.headlineValue, 0) + ' = ' + formatPKR(amount, 0) + ' + profit ' + formatPKR(r.grossProfit, 0) + ' − tax ' + formatPKR(r.whtAmount, 0) + '.';
+        } else if (scheme.id === 'ssc') {
+          statLabel1.textContent = 'Profit before tax';
+          statLabel2.textContent = 'Withholding tax';
+          statLabel3.textContent = 'Profit after tax';
+          statLabel4.textContent = 'Amount invested';
+          stat1.textContent = formatPKR(r.grossProfit, 0);
+          stat2.textContent = formatPKR(r.whtAmount, 0);
+          stat3.textContent = formatPKR(r.netProfit, 0);
+          stat4.textContent = formatPKR(amount, 0);
+          echoEl.textContent = 'Based on: Special Savings Certificates at 12.00% p.a. (12.80% in the 6th half-year), amount ' + formatPKR(amount, 0) + ', ' + (filerStatus === 'filer' ? 'filer' : 'non-filer') + '.';
+          formulaEl.textContent = 'Value ' + formatPKR(r.headlineValue, 0) + ' = ' + formatPKR(amount, 0) + ' + profit ' + formatPKR(r.grossProfit, 0) + ' − tax ' + formatPKR(r.whtAmount, 0) + '.';
+        } else {
+          statLabel1.textContent = 'Profit before tax / year';
+          statLabel2.textContent = 'Withholding tax / year';
+          statLabel3.textContent = 'Total profit (after tax)';
+          statLabel4.textContent = 'Total received';
+          stat1.textContent = formatPKR(r.grossProfit, 0);
+          stat2.textContent = formatPKR(r.whtAmount, 0);
+          stat3.textContent = formatPKR(r.netProfit * (opts.years ?? 1), 0);
+          stat4.textContent = formatPKR(r.totalReceived, 0);
+          echoEl.textContent = 'Based on: Savings Account at 10.00% p.a. (unchanged since 26 May 2026), amount ' + formatPKR(amount, 0) + ', ' + (filerStatus === 'filer' ? 'filer' : 'non-filer') + '. Profit is credited annually on 30 June.';
+          formulaEl.textContent = 'Annual profit ' + formatPKR(r.netProfit, 0) + ' = ' + formatPKR(amount, 0) + ' × 10.00% − tax ' + formatPKR(r.whtAmount, 0) + ' (' + (r.whtRate * 100) + '%).';
+        }
+
+        rows = r.detail.map((d) => '<tr><td>' + d.label + '</td><td>' + (d.value < 0 ? '− ' + formatPKR(-d.value, 0) : formatPKR(d.value, 0)) + '</td></tr>').join('');
+        rows += '<tr class="total-row"><td>' + r.headlineLabel + '</td><td>' + formatPKR(r.headlineValue, 0) + '</td></tr>';
+        breakdownEl.innerHTML = '<tbody>' + rows + '</tbody>';
+        noteEl.textContent = r.note + ' Rates: CDNS, w.e.f. 21 October 2026 (Savings Account 10.00% since 26 May 2026), checked 13 November 2026.';
+        showResult();
+        if (window.matchMedia('(max-width: 899px)').matches) resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorsBox.textContent = err.message;
+        errorsBox.hidden = false;
+        showEmpty();
+      }
+    });
+
+    document.getElementById('nssClear').addEventListener('click', () => {
+      form.reset();
+      errorsBox.textContent = '';
+      errorsBox.hidden = true;
+      formStatus.textContent = 'Form cleared.';
+      updateConditionalFields();
+      showEmpty();
+    });
+    showEmpty();
+  </script>
+</Layout>

@@ -7,6 +7,7 @@ import { ELECTRICITY_LAST_CHECKED, ELECTRICITY_NEXT_REVIEW } from '../src/config
 import { GAS_LAST_CHECKED, GAS_NEXT_REVIEW } from '../src/config/gas';
 import { FREELANCER_LAST_CHECKED, FREELANCER_NEXT_REVIEW } from '../src/config/freelancer-tax';
 import { PENSION_LAST_CHECKED, PENSION_NEXT_REVIEW } from '../src/config/pension';
+import { NATIONAL_SAVINGS_LAST_CHECKED, NATIONAL_SAVINGS_NEXT_REVIEW } from '../src/config/national-savings';
 import { isReviewDue, isValidIsoDate, reviewStatuses } from '../src/lib/review-dates';
 
 let passed = 0;
@@ -31,6 +32,9 @@ check('FREELANCER_NEXT_REVIEW is a valid ISO date', () => {
 });
 check('PENSION_NEXT_REVIEW is a valid ISO date', () => {
   assert.equal(isValidIsoDate(PENSION_NEXT_REVIEW), true);
+});
+check('NATIONAL_SAVINGS_NEXT_REVIEW is a valid ISO date', () => {
+  assert.equal(isValidIsoDate(NATIONAL_SAVINGS_NEXT_REVIEW), true);
 });
 check('isValidIsoDate rejects bad dates', () => {
   assert.equal(isValidIsoDate('2027-13-01'), false); // month 13
@@ -99,6 +103,20 @@ check('pension review date is the expected value', () => {
   assert.equal(PENSION_NEXT_REVIEW, '2027-02-01');
 });
 
+// --- National Savings review must fall after the last check
+// --- (13 Nov 2026) and within 2 months — CDNS revises frequently ---
+check('national-savings review date is after NATIONAL_SAVINGS_LAST_CHECKED', () => {
+  const lastChecked = new Date(NATIONAL_SAVINGS_LAST_CHECKED);
+  const review = new Date(`${NATIONAL_SAVINGS_NEXT_REVIEW}T00:00:00Z`);
+  assert.ok(review > lastChecked, `expected ${NATIONAL_SAVINGS_NEXT_REVIEW} after ${NATIONAL_SAVINGS_LAST_CHECKED}`);
+});
+check('national-savings review date is within 2 months of the last check', () => {
+  assert.ok(NATIONAL_SAVINGS_NEXT_REVIEW <= '2027-01-13', `expected ${NATIONAL_SAVINGS_NEXT_REVIEW} <= 2027-01-13`);
+});
+check('national-savings review date is the expected value', () => {
+  assert.equal(NATIONAL_SAVINGS_NEXT_REVIEW, '2027-01-13');
+});
+
 // --- Due / not-yet-due flag logic, with injected "today" dates ---
 check('isReviewDue: day before review is not due', () => {
   assert.equal(isReviewDue('2027-05-01', '2027-04-30'), false);
@@ -113,7 +131,7 @@ check('isReviewDue: far past date is not due', () => {
   assert.equal(isReviewDue('2027-02-08', '2026-11-13'), false);
 });
 check('reviewStatuses: nothing due before any review date', () => {
-  const s = reviewStatuses('2027-01-15');
+  const s = reviewStatuses('2027-01-12');
   assert.deepEqual(s, [
     { name: 'tax', reviewDate: '2027-05-01', due: false },
     { name: 'electricity', reviewDate: '2027-02-08', due: false },
@@ -121,6 +139,7 @@ check('reviewStatuses: nothing due before any review date', () => {
     { name: 'freelancer', reviewDate: '2027-05-01', due: false },
     { name: 'solar', reviewDate: '2027-02-13', due: false },
     { name: 'pension', reviewDate: '2027-02-01', due: false },
+    { name: 'national-savings', reviewDate: '2027-01-13', due: false },
   ]);
 });
 check('reviewStatuses: electricity due, tax and gas not yet due', () => {
@@ -132,6 +151,7 @@ check('reviewStatuses: electricity due, tax and gas not yet due', () => {
     { name: 'freelancer', reviewDate: '2027-05-01', due: false },
     { name: 'solar', reviewDate: '2027-02-13', due: false },
     { name: 'pension', reviewDate: '2027-02-01', due: true },
+    { name: 'national-savings', reviewDate: '2027-01-13', due: true },
   ]);
 });
 check('reviewStatuses: all due after the latest review date', () => {
@@ -143,6 +163,7 @@ check('reviewStatuses: all due after the latest review date', () => {
     { name: 'freelancer', reviewDate: '2027-05-01', due: true },
     { name: 'solar', reviewDate: '2027-02-13', due: true },
     { name: 'pension', reviewDate: '2027-02-01', due: true },
+    { name: 'national-savings', reviewDate: '2027-01-13', due: true },
   ]);
 });
 
