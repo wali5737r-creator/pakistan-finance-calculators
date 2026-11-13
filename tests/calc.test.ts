@@ -3,10 +3,10 @@
 // they are never a live rate and never appear in site copy (SRS §6.5/§7.5).
 import assert from 'node:assert/strict';
 import {
-  calcAge, calcEMI, calcExportTax, calcFreelancerTax, calcGold, calcNonSalariedTax, calcPercentage, calcTax, calcZakat,
+  calcAge, calcEMI, calcEobiContributions, calcEobiPension, calcExportTax, calcFreelancerTax, calcGold, calcInvalidityPension, calcNonSalariedTax, calcOldAgeGrant, calcPercentage, calcReducedPension, calcSurvivorPension, calcTax, calcZakat,
   convertArea, convertAreaToAll, convertAreaWithUnits, convertAreaToAllWithUnits,
   convertCurrency, formatNumber,
-  goldValueFromWeight, parseDecimal, round2, todayInKarachi,
+  goldValueFromWeight, parseDecimal, pensionCreditedYears, pensionWageForPreset, round2, todayInKarachi,
 } from '../src/lib/calc';
 import { NON_SALARIED_SLABS } from '../src/config/freelancer-tax';
 import { AREA_UNITS, areaUnitsForStandard } from '../src/config/units';
@@ -888,6 +888,142 @@ check('solar: validation throws', () => {
   assert.throws(() => calcSolarPayback({ systemKw: 5, monthlyGeneration: 585.52, systemCost: 650000, importRatePerUnit: 0 }), /Import rate/);
   assert.throws(() => calcSolarPayback({ systemKw: 5, monthlyGeneration: 585.52, systemCost: 0 }), /positive/);
   assert.throws(() => calcSolarPayback({ systemKw: 5, monthlyGeneration: 585.52, systemCost: 650000, inverterReplacementCost: -1 }), /zero or more/);
+});
+// --- Pension / EOBI (EOB Act 1976 Schedule: wage x years / 50) ---
+check('pension credited years: 6+ months counts as a full year', () => {
+  assert.equal(pensionCreditedYears(14.5), 15); // FCC rounding-off point
+  assert.equal(pensionCreditedYears(14.4), 14);
+  assert.equal(pensionCreditedYears(14.6), 15);
+  assert.equal(pensionCreditedYears(15), 15);
+  assert.equal(pensionCreditedYears(8), 8);
+  assert.equal(pensionCreditedYears(1.9), 2);
+});
+check('pension worked examples on Rs 40,700 (ICT wage)', () => {
+  assert.equal(calcEobiPension(40700, 15).monthlyPension, 12210);
+  assert.equal(calcEobiPension(40700, 20).monthlyPension, 16280);
+  assert.equal(calcEobiPension(40700, 25).monthlyPension, 20350);
+  assert.equal(calcEobiPension(40700, 30).monthlyPension, 24420);
+  assert.equal(calcEobiPension(40700, 40).monthlyPension, 32560);
+  assert.equal(calcEobiPension(40700, 25).annualPension, 244200);
+  assert.equal(calcEobiPension(40700, 25).formulaPension, 20350);
+  assert.equal(calcEobiPension(40700, 25).floorApplied, false);
+});
+check('pension minimum floor: formula below Rs 11,500 is raised to it', () => {
+  // 15 years at a Rs 30,000 wage: formula Rs 9,000 -> floored to Rs 11,500.
+  const r = calcEobiPension(30000, 15);
+  assert.equal(r.formulaPension, 9000);
+  assert.equal(r.monthlyPension, 11500);
+  assert.equal(r.floorApplied, true);
+  assert.equal(r.entitled, true);
+  // 15 years at Rs 37,000 (Balochistan wage): formula Rs 11,100 -> floored.
+  assert.equal(calcEobiPension(37000, 15).monthlyPension, 11500);
+  // 20 years at Rs 37,000: formula Rs 14,800 -> above the floor.
+  assert.equal(calcEobiPension(37000, 20).monthlyPension, 14800);
+});
+check('pension 14.5 years counts as 15 (FCC rounding-off); 14 years does not', () => {
+  const r = calcEobiPension(40700, 14.5);
+  assert.equal(r.creditedYears, 15);
+  assert.equal(r.entitled, true);
+  assert.equal(r.monthlyPension, 12210);
+  const short = calcEobiPension(40700, 14);
+  assert.equal(short.entitled, false);
+  assert.equal(short.monthlyPension, 0);
+  assert.equal(short.formulaPension, 11396);
+});
+check('pension contributions on Rs 40,700: 5% + 1% = Rs 2,442/month', () => {
+  const c = calcEobiContributions(40700);
+  assert.equal(c.employerMonthly, 2035);
+  assert.equal(c.employeeMonthly, 407);
+  assert.equal(c.totalMonthly, 2442);
+  assert.equal(c.employerAnnual, 24420);
+  assert.equal(c.employeeAnnual, 4884);
+  assert.equal(c.totalAnnual, 29304);
+  // Sindh Rs 43,000: employer Rs 2,150, employee Rs 430, total Rs 2,580.
+  const s = calcEobiContributions(43000);
+  assert.equal(s.employerMonthly, 2150);
+  assert.equal(s.employeeMonthly, 430);
+  assert.equal(s.totalMonthly, 2580);
+});
+check('pension wage presets', () => {
+  assert.equal(pensionWageForPreset('ICT / federal'), 40700);
+  assert.equal(pensionWageForPreset('Sindh'), 43000);
+  assert.equal(pensionWageForPreset('Punjab'), 40000);
+  assert.equal(pensionWageForPreset('Khyber Pakhtunkhwa'), 40000);
+  assert.equal(pensionWageForPreset('Balochistan'), 37000);
+});
+check('pension reduced: 0.5% per month short, for life', () => {
+  // 25 years at Rs 40,700, retiring 36 months early: 20,350 x (1 - 0.18) = 16,687.
+  const r = calcReducedPension(40700, 25, 36);
+  assert.equal(r.reductionFraction, 0.18);
+  assert.equal(r.reducedMonthlyPension, 16687);
+  assert.equal(r.reducedAnnualPension, 200244);
+  // 12 months short: 6% cut — 20,350 x 0.94 = 19,129.
+  assert.equal(calcReducedPension(40700, 25, 12).reducedMonthlyPension, 19129);
+  // 60 months short (retire at 55): 30% cut — 20,350 x 0.70 = 14,245.
+  assert.equal(calcReducedPension(40700, 25, 60).reducedMonthlyPension, 14245);
+  // Minimum also cut the same way: 15 yrs at Rs 30,000 floored to 11,500,
+  // 12 months short -> 11,500 x 0.94 = 10,810.
+  assert.equal(calcReducedPension(30000, 15, 12).reducedMonthlyPension, 10810);
+});
+check('pension old-age grant: one month wage per credited year, 2 to under 15 years', () => {
+  // 8 years at Rs 40,700 = Rs 325,600 once.
+  const g = calcOldAgeGrant(40700, 8);
+  assert.equal(g.entitled, true);
+  assert.equal(g.grant, 325600);
+  assert.equal(calcOldAgeGrant(40700, 2).grant, 81400);
+  assert.equal(calcOldAgeGrant(40700, 14.5).grant, 0); // 14.5 -> 15 credited, so pension not grant
+  assert.equal(calcOldAgeGrant(40700, 14.5).entitled, false);
+  assert.equal(calcOldAgeGrant(40700, 14).grant, 569800);
+  assert.equal(calcOldAgeGrant(40700, 1).entitled, false);
+  assert.equal(calcOldAgeGrant(40700, 15).entitled, false);
+});
+check('pension survivor: formula with minimum floor; pensioner spouse gets his pension', () => {
+  // Deceased with 20 years at Rs 40,700, died in service: formula Rs 16,280.
+  const s = calcSurvivorPension(40700, 20, false, undefined, true);
+  assert.equal(s.entitled, true);
+  assert.equal(s.monthlyPension, 16280);
+  assert.equal(s.floorApplied, false);
+  // 5 years at Rs 40,700: formula Rs 4,070 -> floored to Rs 11,500.
+  const low = calcSurvivorPension(40700, 5, false, undefined, true);
+  assert.equal(low.formulaPension, 4070);
+  assert.equal(low.monthlyPension, 11500);
+  assert.equal(low.floorApplied, true);
+  // Under 36 months in service: not entitled.
+  assert.equal(calcSurvivorPension(40700, 2, false, undefined, true).entitled, false);
+  // Out of service needs 5 years: 4 years is not enough, 5 is.
+  assert.equal(calcSurvivorPension(40700, 4, false, undefined, false).entitled, false);
+  assert.equal(calcSurvivorPension(40700, 5, false, undefined, false).entitled, true);
+  // Deceased was a pensioner on Rs 18,000: spouse gets Rs 18,000 (s.22B(2)).
+  const p = calcSurvivorPension(40700, 25, true, 18000);
+  assert.equal(p.monthlyPension, 18000);
+  assert.equal(p.annualPension, 216000);
+});
+check('pension invalidity: same formula; 15 years or 5-since-entry + 3-in-last-5', () => {
+  // 18 years: route (a), formula Rs 14,652.
+  const a = calcInvalidityPension(40700, 18, 5);
+  assert.equal(a.entitled, true);
+  assert.equal(a.monthlyPension, 14652);
+  // 8 years, 4 of them in the last 5: route (b), formula Rs 6,512 -> floored.
+  const b = calcInvalidityPension(40700, 8, 4);
+  assert.equal(b.entitled, true);
+  assert.equal(b.monthlyPension, 11500);
+  assert.equal(b.floorApplied, true);
+  // 8 years but only 2 in the last 5: neither route.
+  assert.equal(calcInvalidityPension(40700, 8, 2).entitled, false);
+  // 4 years since entry: route (b) needs 5.
+  assert.equal(calcInvalidityPension(40700, 4, 4).entitled, false);
+});
+check('pension: validation throws', () => {
+  assert.throws(() => calcEobiPension(0, 25), /between/);
+  assert.throws(() => calcEobiPension(40700, -1), /between 0/);
+  assert.throws(() => calcEobiPension(40700, 61), /between 0/);
+  assert.throws(() => calcEobiContributions(-100), /between/);
+  assert.throws(() => calcReducedPension(40700, 25, 0), /between 1/);
+  assert.throws(() => calcReducedPension(40700, 25, 61), /between 1/);
+  assert.throws(() => calcOldAgeGrant(40700, 100), /between 0/);
+  assert.throws(() => calcSurvivorPension(40700, 25, true), /pensioner/);
+  assert.throws(() => calcSurvivorPension(40700, 25, true, 0), /pensioner/);
+  assert.throws(() => calcInvalidityPension(40700, 10, 6), /between 0 and 5/);
 });
 
 console.log(`\n${passed} checks passed.`);

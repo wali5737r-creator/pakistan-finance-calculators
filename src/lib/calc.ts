@@ -48,6 +48,20 @@ import {
   SOLAR_ROOF_SQFT_PER_KW,
   SOLAR_SYSTEM_LIFE_YEARS,
 } from '../config/solar';
+import {
+  EOBI_EMPLOYEE_RATE,
+  EOBI_EMPLOYER_RATE,
+  EOBI_FORMULA_DIVISOR,
+  EOBI_GRANT_MIN_YEARS,
+  EOBI_INVALIDITY_MIN_YEARS_IN_LAST_FIVE,
+  EOBI_INVALIDITY_MIN_YEARS_SINCE_ENTRY,
+  EOBI_MIN_SERVICE_YEARS,
+  EOBI_MINIMUM_PENSION,
+  EOBI_REDUCTION_PER_MONTH,
+  EOBI_SURVIVOR_MIN_YEARS_IN_SERVICE,
+  EOBI_SURVIVOR_MIN_YEARS_OUT_OF_SERVICE,
+  PENSION_WAGE_PRESETS,
+} from '../config/pension';
 
 export const MAX_AMOUNT = 999999999999;
 
@@ -1649,5 +1663,284 @@ export function calcSolarPayback(input: SolarPaybackInput): SolarPaybackResult {
     paybackMonthsAt70Pct: round2(systemCost / savingAt70),
     lifetimeGrossSaving,
     lifetimeNetSaving,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Pension / EOBI (Employees' Old-Age Benefits Act, 1976)
+// ---------------------------------------------------------------------------
+
+export const PENSION_MAX_WAGE = 1000000;
+export const PENSION_MAX_SERVICE_YEARS = 60;
+export const PENSION_MAX_MONTHS_SHORT = 60;
+export const PENSION_MAX_PENSIONER_PENSION = 1000000;
+
+function validatePensionWage(wage: number): void {
+  if (!isFiniteNumber(wage) || wage <= 0 || wage > PENSION_MAX_WAGE) {
+    throw new Error(`Contribution wage must be between Rs 1 and Rs ${PENSION_MAX_WAGE.toLocaleString('en-PK')} a month.`);
+  }
+}
+
+function validateServiceYears(serviceYears: number): void {
+  if (!isFiniteNumber(serviceYears) || serviceYears < 0 || serviceYears > PENSION_MAX_SERVICE_YEARS) {
+    throw new Error(`Years of service must be between 0 and ${PENSION_MAX_SERVICE_YEARS}.`);
+  }
+}
+
+/**
+ * Credited years of insurable employment. Schedule para (1): a period
+ * of six months or more counts as one full year — so 14.5 years counts
+ * as 15 (the same point the FCC rounding-off ruling made, Dec 2025 /
+ * Jan 2026). 14.4 counts as 14; 14.6 counts as 15.
+ */
+export function pensionCreditedYears(serviceYears: number): number {
+  validateServiceYears(serviceYears);
+  const whole = Math.floor(serviceYears);
+  return whole + (serviceYears - whole >= 0.5 ? 1 : 0);
+}
+
+/** Contribution wage for a preset label, or the ICT default for
+ *  anything unrecognised (the page always passes a known label). */
+export function pensionWageForPreset(label: string): number {
+  const found = PENSION_WAGE_PRESETS.find((p) => p.label.toLowerCase() === label.trim().toLowerCase());
+  return found ? found.wage : PENSION_WAGE_PRESETS[0].wage;
+}
+
+export interface EobiContributionResult {
+  wage: number;
+  employerMonthly: number;
+  employeeMonthly: number;
+  totalMonthly: number;
+  employerAnnual: number;
+  employeeAnnual: number;
+  totalAnnual: number;
+}
+
+/** Monthly EOBI contributions on the contribution wage: employer 5%
+ *  (s.9) + employee 1% (s.9B) = 6%. On Rs 40,700: Rs 2,035 + Rs 407
+ *  = Rs 2,442 a month. */
+export function calcEobiContributions(wage: number): EobiContributionResult {
+  validatePensionWage(wage);
+  const employerMonthly = round2(wage * EOBI_EMPLOYER_RATE);
+  const employeeMonthly = round2(wage * EOBI_EMPLOYEE_RATE);
+  return {
+    wage,
+    employerMonthly,
+    employeeMonthly,
+    totalMonthly: round2(employerMonthly + employeeMonthly),
+    employerAnnual: round2(employerMonthly * 12),
+    employeeAnnual: round2(employeeMonthly * 12),
+    totalAnnual: round2((employerMonthly + employeeMonthly) * 12),
+  };
+}
+
+export interface EobiPensionResult {
+  wage: number;
+  serviceYears: number;
+  creditedYears: number;
+  /** True when the 15-year minimum (s.22(1)(b)) is met. */
+  entitled: boolean;
+  /** Formula pension before the minimum floor, Rs/month. */
+  formulaPension: number;
+  /** Monthly pension payable, Rs/month (formula floored at Rs 11,500). */
+  monthlyPension: number;
+  /** True when the formula was below Rs 11,500 and the floor applied. */
+  floorApplied: boolean;
+  annualPension: number;
+}
+
+/**
+ * Monthly old-age pension (Schedule: wage x credited years / 50,
+ * i.e. 2% a year), floored at the notified minimum pension of
+ * Rs 11,500/month. Entitlement needs 15 credited years (s.22(1)(b)).
+ * There is NO fixed maximum ("As Per Formula" per EOBI) and no 1.15
+ * multiplier on new awards — the 15% uplift of 2025 was for pensions
+ * already in payment.
+ */
+export function calcEobiPension(wage: number, serviceYears: number): EobiPensionResult {
+  validatePensionWage(wage);
+  validateServiceYears(serviceYears);
+  const creditedYears = pensionCreditedYears(serviceYears);
+  const formulaPension = round2((wage * creditedYears) / EOBI_FORMULA_DIVISOR);
+  const entitled = creditedYears >= EOBI_MIN_SERVICE_YEARS;
+  const monthlyPension = entitled ? Math.max(formulaPension, EOBI_MINIMUM_PENSION) : 0;
+  return {
+    wage,
+    serviceYears,
+    creditedYears,
+    entitled,
+    formulaPension,
+    monthlyPension,
+    floorApplied: entitled && formulaPension < EOBI_MINIMUM_PENSION,
+    annualPension: round2(monthlyPension * 12),
+  };
+}
+
+export interface ReducedPensionResult extends EobiPensionResult {
+  monthsShort: number;
+  /** Reduction fraction applied (0.5% per completed month short). */
+  reductionFraction: number;
+  /** Monthly pension after the reduction, Rs/month. */
+  reducedMonthlyPension: number;
+  reducedAnnualPension: number;
+}
+
+/**
+ * Reduced / early pension, s.22(2C)-(2E): retire at 55-60 (50-55
+ * women) where the employer has a definite retirement age below
+ * 60/55. The pension — and the minimum pension — is cut by 0.5%
+ * for each completed month short of 60/55 (s.22(2D)), and the cut
+ * is FOR LIFE, not restored at normal pension age (s.22(2E)).
+ * Months short runs 1-60 (five years at most).
+ */
+export function calcReducedPension(wage: number, serviceYears: number, monthsShort: number): ReducedPensionResult {
+  if (!isFiniteNumber(monthsShort) || monthsShort < 1 || monthsShort > PENSION_MAX_MONTHS_SHORT) {
+    throw new Error(`Months short of pension age must be between 1 and ${PENSION_MAX_MONTHS_SHORT}.`);
+  }
+  const base = calcEobiPension(wage, serviceYears);
+  const reductionFraction = round2(monthsShort * EOBI_REDUCTION_PER_MONTH);
+  const reducedMonthlyPension = round2(base.monthlyPension * (1 - reductionFraction));
+  return {
+    ...base,
+    monthsShort,
+    reductionFraction,
+    reducedMonthlyPension,
+    reducedAnnualPension: round2(reducedMonthlyPension * 12),
+  };
+}
+
+export interface OldAgeGrantResult {
+  wage: number;
+  serviceYears: number;
+  creditedYears: number;
+  /** True when service is 2 to under 15 credited years (s.22A). */
+  entitled: boolean;
+  /** One-off lump sum, Rs (one month's wage per credited year). */
+  grant: number;
+}
+
+/**
+ * Old-age grant (s.22A): at pension age with 2 to under 15 years'
+ * service and no pension entitlement — a lump sum of one month's
+ * average wage for every completed year (6+ months counts). E.g.
+ * 8 years at Rs 40,700 = Rs 325,600 once.
+ */
+export function calcOldAgeGrant(wage: number, serviceYears: number): OldAgeGrantResult {
+  validatePensionWage(wage);
+  validateServiceYears(serviceYears);
+  const creditedYears = pensionCreditedYears(serviceYears);
+  const entitled = creditedYears >= EOBI_GRANT_MIN_YEARS && creditedYears < EOBI_MIN_SERVICE_YEARS;
+  return {
+    wage,
+    serviceYears,
+    creditedYears,
+    entitled,
+    grant: entitled ? round2(wage * creditedYears) : 0,
+  };
+}
+
+export interface SurvivorPensionResult {
+  wage: number;
+  serviceYears: number;
+  creditedYears: number;
+  deceasedWasPensioner: boolean;
+  /** True when the qualifying service is met (36 months in service,
+   *  or 5 years out of service, or already a pensioner). */
+  entitled: boolean;
+  /** Formula pension before the minimum floor, Rs/month. */
+  formulaPension: number;
+  /** Monthly survivor's pension payable, Rs/month. */
+  monthlyPension: number;
+  /** True when the formula was below Rs 11,500 and the floor applied. */
+  floorApplied: boolean;
+  annualPension: number;
+}
+
+/**
+ * Survivor's pension (s.22B), as the Act reads it — see the config
+ * header for the discrepancy this follows. s.22B(1): death in
+ * insurable employment after 36+ months — spouse gets a life pension
+ * "at the rate specified in the Schedule". s.22B(1A): death out of
+ * insurable employment after 5+ years — same. The Schedule para (1)
+ * calculates the survivor's pension by the SAME formula as the
+ * old-age pension (wage x years / 50), floored at the notified
+ * minimum of Rs 11,500. s.22B(2): if the deceased was already a
+ * pensioner, the spouse gets a life pension EQUAL TO the pensioner's
+ * pension. EOBI's own published pension-rates summary describes the
+ * survivor's pension as the minimum pension — the page says so and
+ * tells the user to confirm the amount with EOBI.
+ */
+export function calcSurvivorPension(
+  wage: number,
+  serviceYears: number,
+  deceasedWasPensioner: boolean,
+  pensionerPension?: number,
+  diedInService = true,
+): SurvivorPensionResult {
+  validatePensionWage(wage);
+  validateServiceYears(serviceYears);
+  const creditedYears = pensionCreditedYears(serviceYears);
+  if (deceasedWasPensioner) {
+    if (!isFiniteNumber(pensionerPension) || (pensionerPension as number) <= 0 || (pensionerPension as number) > PENSION_MAX_PENSIONER_PENSION) {
+      throw new Error(`The pensioner's monthly pension must be between Rs 1 and Rs ${PENSION_MAX_PENSIONER_PENSION.toLocaleString('en-PK')}.`);
+    }
+    const monthly = round2(pensionerPension as number);
+    return {
+      wage,
+      serviceYears,
+      creditedYears,
+      deceasedWasPensioner: true,
+      entitled: true,
+      formulaPension: monthly,
+      monthlyPension: monthly,
+      floorApplied: false,
+      annualPension: round2(monthly * 12),
+    };
+  }
+  const minYears = diedInService ? EOBI_SURVIVOR_MIN_YEARS_IN_SERVICE : EOBI_SURVIVOR_MIN_YEARS_OUT_OF_SERVICE;
+  const entitled = serviceYears >= minYears;
+  const formulaPension = round2((wage * creditedYears) / EOBI_FORMULA_DIVISOR);
+  const monthlyPension = entitled ? Math.max(formulaPension, EOBI_MINIMUM_PENSION) : 0;
+  return {
+    wage,
+    serviceYears,
+    creditedYears,
+    deceasedWasPensioner: false,
+    entitled,
+    formulaPension,
+    monthlyPension,
+    floorApplied: entitled && formulaPension < EOBI_MINIMUM_PENSION,
+    annualPension: round2(monthlyPension * 12),
+  };
+}
+
+export interface InvalidityPensionResult extends EobiPensionResult {
+  yearsInLastFive: number;
+}
+
+/**
+ * Invalidity pension (s.23): the same Schedule formula, floored at
+ * Rs 11,500. Qualifies if under 60/55 and (a) 15+ years'
+ * contributions, or (b) 5+ years since entry into insurable
+ * employment and 3+ years in the 5 years before invalidity.
+ * Payable while invalidity continues; for life after 5 continuous
+ * years or on reaching pension age (s.23(3)).
+ */
+export function calcInvalidityPension(wage: number, serviceYears: number, yearsInLastFive: number): InvalidityPensionResult {
+  validateServiceYears(serviceYears);
+  if (!isFiniteNumber(yearsInLastFive) || yearsInLastFive < 0 || yearsInLastFive > 5) {
+    throw new Error('Years in the last 5 years must be between 0 and 5.');
+  }
+  const base = calcEobiPension(wage, serviceYears);
+  const routeB = serviceYears >= EOBI_INVALIDITY_MIN_YEARS_SINCE_ENTRY && yearsInLastFive >= EOBI_INVALIDITY_MIN_YEARS_IN_LAST_FIVE;
+  const entitled = base.entitled || routeB;
+  const monthlyPension = entitled ? Math.max(base.formulaPension, EOBI_MINIMUM_PENSION) : 0;
+  return {
+    ...base,
+    yearsInLastFive,
+    entitled,
+    monthlyPension,
+    floorApplied: entitled && base.formulaPension < EOBI_MINIMUM_PENSION,
+    annualPension: round2(monthlyPension * 12),
   };
 }

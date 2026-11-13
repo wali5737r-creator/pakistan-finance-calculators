@@ -6,6 +6,7 @@ import { TAX_NEXT_REVIEW } from '../src/config/tax';
 import { ELECTRICITY_LAST_CHECKED, ELECTRICITY_NEXT_REVIEW } from '../src/config/electricity';
 import { GAS_LAST_CHECKED, GAS_NEXT_REVIEW } from '../src/config/gas';
 import { FREELANCER_LAST_CHECKED, FREELANCER_NEXT_REVIEW } from '../src/config/freelancer-tax';
+import { PENSION_LAST_CHECKED, PENSION_NEXT_REVIEW } from '../src/config/pension';
 import { isReviewDue, isValidIsoDate, reviewStatuses } from '../src/lib/review-dates';
 
 let passed = 0;
@@ -27,6 +28,9 @@ check('GAS_NEXT_REVIEW is a valid ISO date', () => {
 });
 check('FREELANCER_NEXT_REVIEW is a valid ISO date', () => {
   assert.equal(isValidIsoDate(FREELANCER_NEXT_REVIEW), true);
+});
+check('PENSION_NEXT_REVIEW is a valid ISO date', () => {
+  assert.equal(isValidIsoDate(PENSION_NEXT_REVIEW), true);
 });
 check('isValidIsoDate rejects bad dates', () => {
   assert.equal(isValidIsoDate('2027-13-01'), false); // month 13
@@ -81,6 +85,20 @@ check('freelancer review date is the expected value', () => {
   assert.equal(FREELANCER_NEXT_REVIEW, '2027-05-01');
 });
 
+// --- Pension review must fall after the last check (13 Nov 2026)
+// --- and before the next July minimum-wage revision ---
+check('pension review date is after PENSION_LAST_CHECKED', () => {
+  const lastChecked = new Date(PENSION_LAST_CHECKED);
+  const review = new Date(`${PENSION_NEXT_REVIEW}T00:00:00Z`);
+  assert.ok(review > lastChecked, `expected ${PENSION_NEXT_REVIEW} after ${PENSION_LAST_CHECKED}`);
+});
+check('pension review date is before 2027-07-01', () => {
+  assert.ok(PENSION_NEXT_REVIEW < '2027-07-01', `expected ${PENSION_NEXT_REVIEW} < 2027-07-01`);
+});
+check('pension review date is the expected value', () => {
+  assert.equal(PENSION_NEXT_REVIEW, '2027-02-01');
+});
+
 // --- Due / not-yet-due flag logic, with injected "today" dates ---
 check('isReviewDue: day before review is not due', () => {
   assert.equal(isReviewDue('2027-05-01', '2027-04-30'), false);
@@ -102,6 +120,7 @@ check('reviewStatuses: nothing due before any review date', () => {
     { name: 'gas', reviewDate: '2027-10-01', due: false },
     { name: 'freelancer', reviewDate: '2027-05-01', due: false },
     { name: 'solar', reviewDate: '2027-02-13', due: false },
+    { name: 'pension', reviewDate: '2027-02-01', due: false },
   ]);
 });
 check('reviewStatuses: electricity due, tax and gas not yet due', () => {
@@ -112,6 +131,7 @@ check('reviewStatuses: electricity due, tax and gas not yet due', () => {
     { name: 'gas', reviewDate: '2027-10-01', due: false },
     { name: 'freelancer', reviewDate: '2027-05-01', due: false },
     { name: 'solar', reviewDate: '2027-02-13', due: false },
+    { name: 'pension', reviewDate: '2027-02-01', due: true },
   ]);
 });
 check('reviewStatuses: all due after the latest review date', () => {
@@ -122,6 +142,7 @@ check('reviewStatuses: all due after the latest review date', () => {
     { name: 'gas', reviewDate: '2027-10-01', due: true },
     { name: 'freelancer', reviewDate: '2027-05-01', due: true },
     { name: 'solar', reviewDate: '2027-02-13', due: true },
+    { name: 'pension', reviewDate: '2027-02-01', due: true },
   ]);
 });
 

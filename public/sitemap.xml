@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- All indexed pages are listed (SEO plan §1): home, 21 tool pages, About, Contact, Privacy, Terms. -->
+<!-- All indexed pages are listed (SEO plan §1): home, 22 tool pages, About, Contact, Privacy, Terms. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://pakistan-finance-calculators.pages.dev/</loc></url>
   <url><loc>https://pakistan-finance-calculators.pages.dev/salary-income-tax-calculator/</loc></url>
@@ -23,6 +23,7 @@
   <url><loc>https://pakistan-finance-calculators.pages.dev/gas-bill-calculator/</loc></url>
   <url><loc>https://pakistan-finance-calculators.pages.dev/freelancer-tax-calculator/</loc></url>
   <url><loc>https://pakistan-finance-calculators.pages.dev/solar-size-payback-calculator/</loc></url>
+  <url><loc>https://pakistan-finance-calculators.pages.dev/pension-eobi-calculator/</loc></url>
   <url><loc>https://pakistan-finance-calculators.pages.dev/about/</loc></url>
   <url><loc>https://pakistan-finance-calculators.pages.dev/contact/</loc></url>
   <url><loc>https://pakistan-finance-calculators.pages.dev/privacy/</loc></url>
