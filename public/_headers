@@ -1,3 +1,33 @@
+# Cache-Control (2026-11-13, audit P2 performance). Cloudflare Pages serves
+# every static file with `public, max-age=0, must-revalidate` by default, so
+# repeat visits re-downloaded every script, font and image. These rules fix
+# that. Specific rules come first: Cloudflare Pages applies the first rule
+# that matches a path for a given header.
+#
+# Hashed Astro bundles: the filenames contain a content hash
+# (e.g. /_astro/calc.BSFSJBk3.js), so a new build gets a new URL and the old
+# file can never go stale. Safe to cache for a year and mark immutable.
+# HTML pages and /api/* are DELIBERATELY absent here: pages must stay fresh
+# (rates, lastmod, new tools) and the API Functions set their own headers
+# (/api/rates is no-store). Do not add a Cache-Control to the /* rule below.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Unhashed public files that change on deploy (i18n.js carries 2,011 Urdu
+# keys and grows every phase; shared.js, the font and og-image.png change
+# too). A year-long cache here would serve stale files after a deploy, so
+# these get 1 hour only — repeat visits within the hour are fast, and a new
+# deploy reaches every user within an hour at most (ETag revalidation still
+# applies after expiry). NOT immutable, NOT max-age=31536000.
+/js/*
+  Cache-Control: public, max-age=3600, must-revalidate
+/fonts/*
+  Cache-Control: public, max-age=3600, must-revalidate
+/og-image.png
+  Cache-Control: public, max-age=3600, must-revalidate
+/favicon.svg
+  Cache-Control: public, max-age=3600, must-revalidate
+
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
