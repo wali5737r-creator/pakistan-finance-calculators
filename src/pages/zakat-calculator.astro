@@ -88,6 +88,10 @@ const schema = JSON.stringify({
       display: flex; gap: 12px; align-items: center; justify-content: space-between;
       box-shadow: 0 -4px 16px rgba(15, 27, 22, 0.08);
     }
+    /* Without this, display:flex above overrides the hidden attribute and
+       the bar is rendered permanently — even before any calculation and
+       after Dismiss — covering the footer. */
+    #sticky-bar[hidden] { display: none; }
   </style>
 
   <div class="container" style="padding-top:32px;">
@@ -621,17 +625,42 @@ const schema = JSON.stringify({
       document.querySelectorAll('[data-copy-result],[data-share-result],[data-print-result]').forEach((b) => { b.disabled = !enabled; });
     }
 
+    // The bar is position:fixed, so the page needs bottom padding equal to
+    // the bar's *measured* height while it is visible — the old fixed 76px
+    // was too small whenever the headline wrapped. When the footer scrolls
+    // into view the bar hides instead, so the footer is never covered.
+    let footerInView = false;
+    function syncStickyPadding() {
+      if (stickyBar.hidden) { document.body.style.paddingBottom = ''; return; }
+      document.body.style.paddingBottom = `${stickyBar.offsetHeight}px`;
+    }
+
     function showSticky(headline) {
-      if (stickyDismissed) return;
+      if (stickyDismissed || footerInView) return;
       $('sticky-text').textContent = headline;
       stickyBar.hidden = false;
-      document.body.style.paddingBottom = '76px';
+      syncStickyPadding();
     }
 
     function hideSticky() {
       stickyBar.hidden = true;
       document.body.style.paddingBottom = '';
     }
+
+    const footerEl = document.querySelector('.site-footer');
+    if (footerEl && 'IntersectionObserver' in window) {
+      new IntersectionObserver((entries) => {
+        footerInView = entries[0].isIntersecting;
+        if (footerInView) {
+          hideSticky();
+        } else if (lastValidHTML && !stickyDismissed) {
+          showSticky(lastValidHeadline);
+        }
+      }, { threshold: 0 }).observe(footerEl);
+    }
+    window.addEventListener('resize', () => {
+      if (!stickyBar.hidden) syncStickyPadding();
+    });
 
     function renderResult(values, parsed) {
       const selection = checkedValue('nisab-basis');

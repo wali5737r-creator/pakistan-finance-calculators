@@ -104,4 +104,18 @@ assert.ok(currencyPage.includes('IntersectionObserver'), 'sticky bar must hide w
 assert.ok(currencyPage.includes('syncStickyPadding'), 'body padding must match the measured bar height');
 assert.ok(!currencyPage.includes('overflow-wrap: anywhere'), 'stat values must not break anywhere');
 
+// Same sticky-bar bug, every page: Zakat used the identical #sticky-bar
+// pattern — display:flex overriding hidden, a fixed 76px body padding, and
+// no footer observer — so guard every sticky-bar page, not just currency.
+const stickyPages = astroFiles(SRC_DIR)
+  .map((f) => ({ file: f, src: readFileSync(f, 'utf8') }))
+  .filter(({ src }) => src.includes('id="sticky-bar"'));
+assert.ok(stickyPages.length >= 2, `expected at least 2 sticky-bar pages, found ${stickyPages.length}`);
+for (const { file, src } of stickyPages) {
+  assert.ok(src.includes('#sticky-bar[hidden] { display: none; }'), `${file}: sticky bar hidden attribute must actually hide it`);
+  assert.ok(src.includes('IntersectionObserver'), `${file}: sticky bar must hide when the footer is in view`);
+  assert.ok(src.includes('syncStickyPadding'), `${file}: body padding must match the measured bar height`);
+  assert.ok(!src.includes("paddingBottom = '76px'"), `${file}: fixed 76px body padding must not come back`);
+}
+
 console.log(`formatting: ${checked} .astro files scanned, no glued text/link lines; gas table + nav guards present.`);
