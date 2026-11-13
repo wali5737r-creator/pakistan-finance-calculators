@@ -14,6 +14,20 @@ import {
   PROTECTED_SLABS,
   UNPROTECTED_SLABS,
 } from '../config/electricity';
+import {
+  GAS_DEFAULT_GCV,
+  GAS_DEFAULT_PCF,
+  GAS_FIXED_CHARGE_BOUNDARY_HM3,
+  GAS_GST_RATE,
+  GAS_METER_RENT,
+  GAS_NON_PROTECTED_FIXED_CHARGE_HIGH,
+  GAS_NON_PROTECTED_FIXED_CHARGE_LOW,
+  GAS_PROTECTED_FIXED_CHARGE,
+  MMBTU_DIVISOR,
+  NON_PROTECTED_GAS_SLABS,
+  PROTECTED_GAS_SLABS,
+  ROUNDED_MMBTU_PER_HM3,
+} from '../config/gas';
 
 export const MAX_AMOUNT = 999999999999;
 
@@ -1009,5 +1023,214 @@ export function calcElectricityBill(
     gst,
     total: round2(subtotal + gst),
     minimumChargeApplied,
+  };
+}
+
+// ------------------------------------------------------------ Gas bill --
+// (OGRA domestic gas sale price, notification 29 June 2025, effective
+// 1 July 2025 — see src/config/gas.ts)
+export type GasCategory = 'protected' | 'non-protected';
+
+export interface GasSlabRow {
+  label: string;
+  /** Consumption in this slab, hm3. */
+  hm3: number;
+  /** Consumption in this slab, MMBTU. */
+  mmbtu: number;
+  ratePerMmbtu: number;
+  amount: number;
+}
+
+export interface GasBillResult {
+  hm3: number;
+  mmbtu: number;
+  category: GasCategory;
+  gcv: number;
+  pcf: number;
+  mmbtuPerHm3: number;
+  /** True when the rounded 3.5 factor was used instead of the exact
+   *  GCV conversion (worked-example mode only). */
+  usedRoundedFactor: boolean;
+  slabRows: GasSlabRow[];
+  gasCharge: number;
+  fixedCharge: number;
+  meterRent: number;
+  subtotal: number;
+  gst: number;
+  total: number;
+}
+
+export interface ProtectedStatusResult {
+  averageHm3: number;
+  protected: boolean;
+}
+
+export const GAS_MAX_HM3 = 100;
+export const GAS_GCV_MIN = 500;
+export const GAS_GCV_MAX = 1500;
+export const GAS_PCF_MIN = 0.5;
+export const GAS_PCF_MAX = 2.0;
+/** Protected status: average winter (Nov-Feb) consumption at or below
+ *  this many hm3 per month. */
+export const GAS_PROTECTED_LIMIT_HM3 = 0.9;
+
+/** MMBTU in one hm3 at the given GCV and PCF. With the rounded factor
+ *  the answer is exactly 3.5 (the labelled estimate used by the worked
+ *  examples); otherwise it is GCV / 281.7385 x PCF (3.5139 at GCV 990,
+ *  PCF 1.00). */
+export function mmbtuPerHm3(gcv: number, pcf: number, useRoundedFactor = false): number {
+  if (useRoundedFactor) return ROUNDED_MMBTU_PER_HM3;
+  return (gcv / MMBTU_DIVISOR) * pcf;
+}
+
+/** The meter reads in cubic metres; 1 hm3 = 100 m3. */
+export function cubicMetresToHm3(m3: number): number {
+  if (!isFiniteNumber(m3) || m3 <= 0 || m3 > GAS_MAX_HM3 * 100) {
+    throw new Error(`Consumption must be between 1 and ${GAS_MAX_HM3 * 100} cubic metres.`);
+  }
+  return m3 / 100;
+}
+
+/**
+ * Protected or not, from the last four winter months (Nov-Feb).
+ * Average of 0.9 hm3/month or less = protected; above that =
+ * non-protected (OGRA rule). Each month's usage is in hm3.
+ */
+export function checkProtectedStatus(nov: number, dec: number, jan: number, feb: number): ProtectedStatusResult {
+  const months = [nov, dec, jan, feb];
+  if (months.some((v) => !isFiniteNumber(v) || v < 0 || v > GAS_MAX_HM3)) {
+    throw new Error(`Each winter month's usage must be between 0 and ${GAS_MAX_HM3} hm3.`);
+  }
+  const averageHm3 = round2(months.reduce((sum, v) => sum + v, 0) / 4);
+  return { averageHm3, protected: averageHm3 <= GAS_PROTECTED_LIMIT_HM3 };
+}
+
+/**
+ * Monthly domestic gas bill estimate on OGRA's sale price (notification
+ * 29 June 2025, effective 1 July 2025), from src/config/gas.ts.
+ *
+ * Slab rules, exactly as verified (see the config comments):
+ * - One preceding slab benefit: consumption up to the previous slab's
+ *   boundary bills at the previous slab's rate; only the excess bills
+ *   at the landed slab's rate. The first slab has no previous slab, so
+ *   it bills entirely at its own rate.
+ * - Above 4 hm3 (non-protected): NO benefit — the entire consumption
+ *   bills at Rs 4,200/MMBTU.
+ * - Protected slabs end at 0.90 hm3. A protected consumer using more
+ *   than that in a month is outside the protected table and must use
+ *   the non-protected category.
+ * - Fixed charge: protected Rs 600/month; non-protected Rs 1,500 up to
+ *   1.5 hm3, Rs 3,000 above 1.5 hm3. Meter rent Rs 40/month.
+ * - GST is 18% of gas charge + fixed charge + meter rent. WHT, TV fee
+ *   and GIDC are NOT included, and no rupee minimum-bill figure is
+ *   applied (the official minimum-bill rule has no verified amount).
+ * Conversion: MMBTU = hm3 x GCV / 281.7385 x PCF (GCV default 990,
+ * PCF default 1.00). Pass useRoundedFactor to use the rounded 3.5
+ * MMBTU per hm3 instead — the worked-example mode, labelled as an
+ * estimate on the page.
+ */
+export function calcGasBill(
+  consumptionHm3: number,
+  category: GasCategory,
+  options: { gcv?: number; pcf?: number; useRoundedFactor?: boolean } = {},
+): GasBillResult {
+  if (!isFiniteNumber(consumptionHm3) || consumptionHm3 <= 0 || consumptionHm3 > GAS_MAX_HM3) {
+    throw new Error(`Monthly consumption must be between 0 and ${GAS_MAX_HM3} hm3.`);
+  }
+  if (category !== 'protected' && category !== 'non-protected') {
+    throw new Error('Choose a consumer category: protected or non-protected.');
+  }
+  const gcv = options.gcv ?? GAS_DEFAULT_GCV;
+  const pcf = options.pcf ?? GAS_DEFAULT_PCF;
+  if (!isFiniteNumber(gcv) || gcv < GAS_GCV_MIN || gcv > GAS_GCV_MAX) {
+    throw new Error(`GCV must be between ${GAS_GCV_MIN} and ${GAS_GCV_MAX} BTU/SCF.`);
+  }
+  if (!isFiniteNumber(pcf) || pcf < GAS_PCF_MIN || pcf > GAS_PCF_MAX) {
+    throw new Error(`PCF must be between ${GAS_PCF_MIN} and ${GAS_PCF_MAX}.`);
+  }
+  const usedRoundedFactor = options.useRoundedFactor ?? false;
+  const factor = mmbtuPerHm3(gcv, pcf, usedRoundedFactor);
+
+  const slabs = category === 'protected' ? PROTECTED_GAS_SLABS : NON_PROTECTED_GAS_SLABS;
+  const landedIndex = slabs.findIndex((s) => s.upTo === null || consumptionHm3 <= s.upTo);
+  if (landedIndex === -1) {
+    // Only reachable for protected above 0.90 hm3 (the table ends there).
+    throw new Error('Protected slabs only go up to 0.90 hm3 a month. If you used more than that, choose non-protected — the protected table has no rate above 0.90 hm3.');
+  }
+  const landed = slabs[landedIndex];
+
+  let slabRows: GasSlabRow[] = [];
+  if (landed.upTo === null) {
+    // Above 4 hm3: no preceding-slab benefit — everything at Rs 4,200.
+    // The MMBTU figure is kept at full precision here: rounding it to
+    // 2 decimals first would move the charge by about a rupee (e.g.
+    // worked example A would come to Rs 1,000.50 instead of Rs 1,001.46).
+    // Rounding is display-only — the page formats MMBTU to 4 decimals.
+    const mmbtu = consumptionHm3 * factor;
+    slabRows = [{
+      label: 'Above 4.00 hm3 (whole consumption)',
+      hm3: consumptionHm3,
+      mmbtu,
+      ratePerMmbtu: landed.ratePerMmbtu,
+      amount: round2(mmbtu * landed.ratePerMmbtu),
+    }];
+  } else if (landedIndex === 0) {
+    const mmbtu = consumptionHm3 * factor;
+    slabRows = [{
+      label: `Up to ${landed.upTo.toFixed(2)} hm3`,
+      hm3: consumptionHm3,
+      mmbtu,
+      ratePerMmbtu: landed.ratePerMmbtu,
+      amount: round2(mmbtu * landed.ratePerMmbtu),
+    }];
+  } else {
+    const prevBoundary = slabs[landedIndex - 1].upTo as number;
+    const prevRate = slabs[landedIndex - 1].ratePerMmbtu;
+    const firstHm3 = prevBoundary;
+    const restHm3 = round2(consumptionHm3 - prevBoundary);
+    const firstMmbtu = firstHm3 * factor;
+    const restMmbtu = restHm3 * factor;
+    slabRows = [
+      {
+        label: `First ${prevBoundary.toFixed(2)} hm3`,
+        hm3: firstHm3,
+        mmbtu: firstMmbtu,
+        ratePerMmbtu: prevRate,
+        amount: round2(firstMmbtu * prevRate),
+      },
+      {
+        label: `Next ${restHm3.toFixed(2)} hm3`,
+        hm3: restHm3,
+        mmbtu: restMmbtu,
+        ratePerMmbtu: landed.ratePerMmbtu,
+        amount: round2(restMmbtu * landed.ratePerMmbtu),
+      },
+    ];
+  }
+
+  const gasCharge = round2(slabRows.reduce((sum, row) => sum + row.amount, 0));
+  const fixedCharge = category === 'protected'
+    ? GAS_PROTECTED_FIXED_CHARGE
+    : consumptionHm3 <= GAS_FIXED_CHARGE_BOUNDARY_HM3
+      ? GAS_NON_PROTECTED_FIXED_CHARGE_LOW
+      : GAS_NON_PROTECTED_FIXED_CHARGE_HIGH;
+  const meterRent = GAS_METER_RENT;
+  const subtotal = round2(gasCharge + fixedCharge + meterRent);
+  const gst = round2(subtotal * GAS_GST_RATE);
+  return {
+    hm3: consumptionHm3,
+    mmbtu: round2(consumptionHm3 * factor),
+    category,
+    gcv,
+    pcf,
+    mmbtuPerHm3: Math.round(factor * 10000) / 10000,
+    usedRoundedFactor,
+    slabRows,
+    gasCharge,
+    fixedCharge,
+    meterRent,
+    subtotal,
+    gst,
+    total: round2(subtotal + gst),
   };
 }

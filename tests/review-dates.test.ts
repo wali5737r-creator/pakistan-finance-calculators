@@ -4,6 +4,7 @@
 import assert from 'node:assert/strict';
 import { TAX_NEXT_REVIEW } from '../src/config/tax';
 import { ELECTRICITY_LAST_CHECKED, ELECTRICITY_NEXT_REVIEW } from '../src/config/electricity';
+import { GAS_LAST_CHECKED, GAS_NEXT_REVIEW } from '../src/config/gas';
 import { isReviewDue, isValidIsoDate, reviewStatuses } from '../src/lib/review-dates';
 
 let passed = 0;
@@ -19,6 +20,9 @@ check('TAX_NEXT_REVIEW is a valid ISO date', () => {
 });
 check('ELECTRICITY_NEXT_REVIEW is a valid ISO date', () => {
   assert.equal(isValidIsoDate(ELECTRICITY_NEXT_REVIEW), true);
+});
+check('GAS_NEXT_REVIEW is a valid ISO date', () => {
+  assert.equal(isValidIsoDate(GAS_NEXT_REVIEW), true);
 });
 check('isValidIsoDate rejects bad dates', () => {
   assert.equal(isValidIsoDate('2027-13-01'), false); // month 13
@@ -45,6 +49,20 @@ check('electricity review date is the expected value', () => {
   assert.equal(ELECTRICITY_NEXT_REVIEW, '2027-02-08');
 });
 
+// --- Gas review must fall after the last check (13 Nov 2026) and
+// --- before the next winter (November 2027) ---
+check('gas review date is after GAS_LAST_CHECKED', () => {
+  const lastChecked = new Date(GAS_LAST_CHECKED);
+  const review = new Date(`${GAS_NEXT_REVIEW}T00:00:00Z`);
+  assert.ok(review > lastChecked, `expected ${GAS_NEXT_REVIEW} after ${GAS_LAST_CHECKED}`);
+});
+check('gas review date is before winter 2027 (1 November 2027)', () => {
+  assert.ok(GAS_NEXT_REVIEW < '2027-11-01', `expected ${GAS_NEXT_REVIEW} < 2027-11-01`);
+});
+check('gas review date is the expected value', () => {
+  assert.equal(GAS_NEXT_REVIEW, '2027-10-01');
+});
+
 // --- Due / not-yet-due flag logic, with injected "today" dates ---
 check('isReviewDue: day before review is not due', () => {
   assert.equal(isReviewDue('2027-05-01', '2027-04-30'), false);
@@ -58,25 +76,28 @@ check('isReviewDue: day after review is overdue', () => {
 check('isReviewDue: far past date is not due', () => {
   assert.equal(isReviewDue('2027-02-08', '2026-11-13'), false);
 });
-check('reviewStatuses: nothing due before either review date', () => {
+check('reviewStatuses: nothing due before any review date', () => {
   const s = reviewStatuses('2027-01-15');
   assert.deepEqual(s, [
     { name: 'tax', reviewDate: '2027-05-01', due: false },
     { name: 'electricity', reviewDate: '2027-02-08', due: false },
+    { name: 'gas', reviewDate: '2027-10-01', due: false },
   ]);
 });
-check('reviewStatuses: electricity due, tax not yet due', () => {
+check('reviewStatuses: electricity due, tax and gas not yet due', () => {
   const s = reviewStatuses('2027-02-08');
   assert.deepEqual(s, [
     { name: 'tax', reviewDate: '2027-05-01', due: false },
     { name: 'electricity', reviewDate: '2027-02-08', due: true },
+    { name: 'gas', reviewDate: '2027-10-01', due: false },
   ]);
 });
-check('reviewStatuses: both due after the later review date', () => {
-  const s = reviewStatuses('2027-06-01');
+check('reviewStatuses: all due after the latest review date', () => {
+  const s = reviewStatuses('2027-10-01');
   assert.deepEqual(s, [
     { name: 'tax', reviewDate: '2027-05-01', due: true },
     { name: 'electricity', reviewDate: '2027-02-08', due: true },
+    { name: 'gas', reviewDate: '2027-10-01', due: true },
   ]);
 });
 

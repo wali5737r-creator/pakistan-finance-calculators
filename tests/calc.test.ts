@@ -270,8 +270,8 @@ check('area society standard', () => {
 // --- debt payoff, fixed deposit, loan comparison, goal savings ---
 import {
   calcBudget, calcCompound, calcDebtPayoff, calcElectricityBill, calcFixedDeposit, calcFuel,
-  calcGoalDuration, calcGoalMonthly, calcInflation, calcLoanComparison,
-  calcLoanEligibility,
+  calcGasBill, calcGoalDuration, calcGoalMonthly, calcInflation, calcLoanComparison,
+  calcLoanEligibility, checkProtectedStatus, cubicMetresToHm3, mmbtuPerHm3,
 } from '../src/lib/calc';
 
 check('fuel one-way and return trip', () => {
@@ -520,6 +520,162 @@ check('electricity FPA and validation', () => {
   assert.throws(() => calcElectricityBill(100, 'unprotected', 0, 0), /Sanctioned load/);
   assert.throws(() => calcElectricityBill(0, 'unprotected', 1, 0), /units/);
   assert.throws(() => calcElectricityBill(100, 'unprotected', 1, 11), /Fuel price adjustment/);
+});
+
+// --- Gas bill (OGRA domestic sale price, notification 29 June 2025, effective 1 July 2025) ---
+// Worked examples use the rounded 3.5 MMBTU per hm3 factor, exactly as
+// the page presents them; the exact-formula variants use GCV 990
+// (3.5139 MMBTU per hm3).
+check('gas worked example A protected 0.9 hm3 (rounded factor)', () => {
+  // First 0.6 hm3 at 300: 0.6 x 3.5 = 2.10 MMBTU x 300 = 630.00.
+  // Rest 0.3 hm3 at 350: 0.3 x 3.5 = 1.05 MMBTU x 350 = 367.50.
+  // Gas 997.50 + fixed 600 + meter rent 40 = 1,637.50; GST 294.75.
+  const r = calcGasBill(0.9, 'protected', { useRoundedFactor: true });
+  assert.equal(r.slabRows.length, 2);
+  assert.equal(r.slabRows[0].amount, 630);
+  assert.equal(r.slabRows[1].amount, 367.5);
+  assert.equal(r.gasCharge, 997.5);
+  assert.equal(r.fixedCharge, 600);
+  assert.equal(r.meterRent, 40);
+  assert.equal(r.subtotal, 1637.5);
+  assert.equal(r.gst, 294.75);
+  assert.equal(r.total, 1932.25);
+});
+
+check('gas worked example B non-protected 2.0 hm3 (rounded factor)', () => {
+  // First 1.5 hm3 at 1,450: 1.5 x 3.5 = 5.25 MMBTU x 1,450 = 7,612.50.
+  // Rest 0.5 hm3 at 1,900: 0.5 x 3.5 = 1.75 MMBTU x 1,900 = 3,325.00.
+  // Gas 10,937.50 + fixed 3,000 + meter rent 40 = 13,977.50; GST 2,515.95.
+  const r = calcGasBill(2.0, 'non-protected', { useRoundedFactor: true });
+  assert.equal(r.slabRows.length, 2);
+  assert.equal(r.slabRows[0].amount, 7612.5);
+  assert.equal(r.slabRows[1].amount, 3325);
+  assert.equal(r.gasCharge, 10937.5);
+  assert.equal(r.fixedCharge, 3000);
+  assert.equal(r.subtotal, 13977.5);
+  assert.equal(r.gst, 2515.95);
+  assert.equal(r.total, 16493.45);
+});
+
+check('gas worked example C non-protected 1.0 hm3 (rounded factor)', () => {
+  // First 0.6 hm3 at 850: 0.6 x 3.5 = 2.10 MMBTU x 850 = 1,785.00.
+  // Rest 0.4 hm3 at 1,250: 0.4 x 3.5 = 1.40 MMBTU x 1,250 = 1,750.00.
+  // Gas 3,535.00 + fixed 1,500 + meter rent 40 = 5,075.00; GST 913.50.
+  const r = calcGasBill(1.0, 'non-protected', { useRoundedFactor: true });
+  assert.equal(r.gasCharge, 3535);
+  assert.equal(r.fixedCharge, 1500);
+  assert.equal(r.subtotal, 5075);
+  assert.equal(r.gst, 913.5);
+  assert.equal(r.total, 5988.5);
+});
+
+check('gas worked example D non-protected 4.5 hm3, no benefit (rounded factor)', () => {
+  // Above 4 hm3 the WHOLE consumption bills at 4,200: 4.5 x 3.5 = 15.75
+  // MMBTU x 4,200 = 66,150.00. Gas + fixed 3,000 + meter rent 40 =
+  // 69,190.00; GST 12,454.20.
+  const r = calcGasBill(4.5, 'non-protected', { useRoundedFactor: true });
+  assert.equal(r.slabRows.length, 1);
+  assert.equal(r.slabRows[0].ratePerMmbtu, 4200);
+  assert.equal(r.gasCharge, 66150);
+  assert.equal(r.fixedCharge, 3000);
+  assert.equal(r.subtotal, 69190);
+  assert.equal(r.gst, 12454.2);
+  assert.equal(r.total, 81644.2);
+});
+
+check('gas worked examples with the exact GCV formula', () => {
+  // Same four examples, exact conversion (GCV 990 -> 3.5139 MMBTU/hm3).
+  const a = calcGasBill(0.9, 'protected');
+  assert.equal(a.mmbtuPerHm3, 3.5139);
+  assert.equal(a.gasCharge, 1001.46);
+  assert.equal(a.total, 1936.92);
+  const b = calcGasBill(2.0, 'non-protected');
+  assert.equal(b.gasCharge, 10980.93);
+  assert.equal(b.total, 16544.7);
+  const c = calcGasBill(1.0, 'non-protected');
+  assert.equal(c.gasCharge, 3549.04);
+  assert.equal(c.total, 6005.07);
+  const d = calcGasBill(4.5, 'non-protected');
+  assert.equal(d.gasCharge, 66412.65);
+  assert.equal(d.total, 81954.13);
+});
+
+check('gas slab boundaries (exact formula)', () => {
+  // Protected first slab: 0.25 hm3 entirely at 200.
+  const p25 = calcGasBill(0.25, 'protected');
+  assert.equal(p25.slabRows.length, 1);
+  assert.equal(p25.gasCharge, 175.69);
+  assert.equal(p25.total, 962.51);
+  // Protected 0.5 hm3: first 0.25 at 200, rest at 250.
+  const p50 = calcGasBill(0.5, 'protected');
+  assert.equal(p50.gasCharge, 395.31);
+  assert.equal(p50.total, 1221.67);
+  // Protected 0.9 hm3 is the top of the protected table.
+  assert.equal(calcGasBill(0.9, 'protected').fixedCharge, 600);
+  // Non-protected first slab: 0.25 hm3 at 500.
+  const n25 = calcGasBill(0.25, 'non-protected');
+  assert.equal(n25.gasCharge, 439.24);
+  assert.equal(n25.total, 2335.5);
+  // Non-protected 0.6 hm3: first 0.25 at 500, rest at 850.
+  const n06 = calcGasBill(0.6, 'non-protected');
+  assert.equal(n06.gasCharge, 1484.62);
+  assert.equal(n06.total, 3569.05);
+  // Non-protected 1.5 hm3: first 1.0 at 1,250, rest at 1,450.
+  const n15 = calcGasBill(1.5, 'non-protected');
+  assert.equal(n15.gasCharge, 6939.95);
+  assert.equal(n15.fixedCharge, 1500);
+  assert.equal(n15.total, 10006.34);
+  // Non-protected 3.0 hm3: first 2.0 at 1,900, rest at 3,300.
+  const n30 = calcGasBill(3.0, 'non-protected');
+  assert.equal(n30.gasCharge, 24948.67);
+  assert.equal(n30.fixedCharge, 3000);
+  assert.equal(n30.total, 33026.63);
+  // Non-protected 4.0 hm3: first 3.0 at 3,300, rest at 3,800.
+  const n40 = calcGasBill(4.0, 'non-protected');
+  assert.equal(n40.gasCharge, 48140.39);
+  assert.equal(n40.total, 60392.86);
+  // 4.01 hm3: the cliff — everything at 4,200, no benefit.
+  const n401 = calcGasBill(4.01, 'non-protected');
+  assert.equal(n401.slabRows.length, 1);
+  assert.equal(n401.gasCharge, 59181.05);
+  assert.equal(n401.total, 73420.84);
+});
+
+check('gas fixed-charge boundary and validation', () => {
+  // 1.5 hm3 still takes the lower fixed charge; just above it, the higher.
+  assert.equal(calcGasBill(1.5, 'non-protected').fixedCharge, 1500);
+  assert.equal(calcGasBill(1.51, 'non-protected').fixedCharge, 3000);
+  // Protected above 0.90 hm3 is outside the protected table.
+  assert.throws(() => calcGasBill(0.91, 'protected'), /Protected slabs/);
+  assert.throws(() => calcGasBill(0, 'non-protected'), /consumption/);
+  assert.throws(() => calcGasBill(101, 'non-protected'), /consumption/);
+  assert.throws(() => calcGasBill(1, 'non-protected', { gcv: 400 }), /GCV/);
+  assert.throws(() => calcGasBill(1, 'non-protected', { gcv: 1600 }), /GCV/);
+  assert.throws(() => calcGasBill(1, 'non-protected', { pcf: 0.4 }), /PCF/);
+  assert.throws(() => calcGasBill(1, 'non-protected', { pcf: 2.5 }), /PCF/);
+});
+
+check('gas conversion helpers and protected-status helper', () => {
+  approx(mmbtuPerHm3(990, 1.0), 3.5139, 0.0001);
+  assert.equal(mmbtuPerHm3(990, 1.0, true), 3.5);
+  approx(mmbtuPerHm3(990, 1.05), 3.6896, 0.0001);
+  assert.equal(cubicMetresToHm3(90), 0.9);
+  assert.equal(cubicMetresToHm3(250), 2.5);
+  assert.throws(() => cubicMetresToHm3(0), /Consumption/);
+  assert.throws(() => cubicMetresToHm3(10001), /Consumption/);
+  // Winter average 0.8625 -> 0.86 hm3: protected.
+  const prot = checkProtectedStatus(0.8, 0.9, 0.85, 0.9);
+  assert.equal(prot.averageHm3, 0.86);
+  assert.equal(prot.protected, true);
+  // Exactly 0.90 average is still protected.
+  const edge = checkProtectedStatus(0.9, 0.9, 0.9, 0.9);
+  assert.equal(edge.averageHm3, 0.9);
+  assert.equal(edge.protected, true);
+  // Average 0.925 -> 0.93 hm3: non-protected.
+  const non = checkProtectedStatus(1.0, 0.9, 0.9, 0.9);
+  assert.equal(non.averageHm3, 0.93);
+  assert.equal(non.protected, false);
+  assert.throws(() => checkProtectedStatus(-0.1, 0.9, 0.9, 0.9), /winter month/);
 });
 
 console.log(`\n${passed} checks passed.`);

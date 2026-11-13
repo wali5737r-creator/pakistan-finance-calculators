@@ -1,0 +1,498 @@
+---
+import Layout from '../components/Layout.astro';
+
+const title = "Gas Bill Calculator Pakistan | SNGPL & SSGC Slabs 2025 | Pakistan Finance Calculators";
+const description = "Estimate your monthly gas bill in Pakistan from OGRA's 2025 domestic slabs: protected and non-protected rates, fixed charge, meter rent and 18% GST.";
+const slug = "/gas-bill-calculator/";
+
+const faqs = [
+  {
+    q: "How is my gas bill worked out?",
+    a: "Four parts, then tax. First the gas charge: your consumption in MMBTU multiplied by the OGRA slab rate for your category. Then the fixed charge (Rs 600 a month protected; Rs 1,500 non-protected up to 1.5 hm3, Rs 3,000 above it) and meter rent of Rs 40 a month. GST at 18% is charged on the subtotal of those three. For example, 2.0 hm3 as a non-protected consumer: 1.5 hm3 at Rs 1,450 is Rs 7,612.50 and 0.5 hm3 at Rs 1,900 is Rs 3,325, so the gas charge is Rs 10,937.50; plus Rs 3,000 fixed and Rs 40 meter rent is Rs 13,977.50; GST of Rs 2,515.95 brings the estimated total to Rs 16,493.45. This example uses the rounded 3.5 MMBTU per hm3 factor.",
+  },
+  {
+    q: "Am I a protected or a non-protected consumer?",
+    a: "It depends on your winter usage. If your average consumption over the last four winter months (November, December, January and February) was 0.9 hm3 a month or less, you are protected; above that, non-protected. Use the helper below the calculator: enter your usage for those four months and it works out the average and tells you which category you fall in. Protected consumers pay lower slab rates and a lower fixed charge.",
+  },
+  {
+    q: "What is an hm3, and how do I read my meter?",
+    a: "Your gas meter reads in cubic metres (m3). One hm3 is 100 m3, so divide your meter reading by 100 to get hm3. The bill is charged per MMBTU, and MMBTU = hm3 x GCV / 281.7385 x PCF, where GCV is the gross calorific value (usually around 990 BTU/SCF) and PCF is the pressure correction factor (usually 1.00) — both are printed on your bill. At GCV 990, one hm3 is 3.5139 MMBTU. The worked examples on this page use the rounded 3.5 MMBTU per hm3 factor, labelled as an estimate; the calculator uses the exact conversion.",
+  },
+  {
+    q: "What is the one-previous-slab benefit?",
+    a: "Consumption up to the previous slab's boundary is billed at the previous slab's rate, and only the excess is billed at the rate of the slab you landed in. For example, a non-protected consumer using 2.0 hm3 pays the Rs 1,450 rate on the first 1.5 hm3 and the Rs 1,900 rate only on the remaining 0.5 hm3. Above 4 hm3 there is no benefit — the whole consumption is billed at Rs 4,200 per MMBTU. This slab-split method is the standard applied interpretation of OGRA's 'one preceding slab' rule.",
+  },
+  {
+    q: "Why does the GST line say 'confirm against your bill'?",
+    a: "GST of 18% is the standard rate and is corroborated by real gas bills, but it is not stated on an official OGRA or company page, so the calculator labels it '18% (standard rate — confirm against your bill)' instead of presenting it as an officially published figure. If your bill shows a different GST rate, the estimate will differ by that amount.",
+  },
+  {
+    q: "Why is my real bill different from this estimate?",
+    a: "This is an estimate from the notified base tariff only. Your real bill's GCV and PCF change from month to month, and it may also carry withholding tax, TV fee, GIDC and other charges, which are not in this calculation. No rupee minimum-bill figure is applied, because the official minimum-bill rule has no verified rupee amount. New domestic connections are RLNG-only on a monthly USD tariff and are not priced on these slabs at all. Always check the final amount on your official bill.",
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://pakistan-finance-calculators.pages.dev/gas-bill-calculator/#webapp',
+      name: "Gas Bill Calculator",
+      url: 'https://pakistan-finance-calculators.pages.dev/gas-bill-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://pakistan-finance-calculators.pages.dev/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: "Gas Bill Calculator",
+          item: 'https://pakistan-finance-calculators.pages.dev/gas-bill-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+
+const related = [
+  {
+    href: "/electricity-bill-calculator/",
+    name: "Electricity Bill Calculator",
+    desc: "Estimate your monthly electricity bill from NEPRA's 2026 domestic tariff: lifeline, protected and unprotected slabs, fixed charge, FPA and 18% GST.",
+  },
+  {
+    href: "/budget-planner-calculator/",
+    name: "Budget Planner Calculator",
+    desc: "Split monthly take-home pay into needs, wants, and savings — including what the gas and electricity bills leave for everything else.",
+  },
+];
+---
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Gas Bill Calculator</p>
+    </nav>
+    <p class="badge badge-info" style="margin-top: 8px;">Utility Bills</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Gas Bill Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+      Estimate your monthly gas bill from OGRA's 2025 domestic sale price. Enter your consumption, your consumer category, and the GCV and PCF from your bill, and you will see the gas charge by slab, the fixed charge, meter rent, GST, and the estimated total.
+    </p>
+    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+      <strong>Estimate only.</strong> This uses the OGRA Gas Sale Price Notification
+      dated 29 June 2025 (effective 1 July 2025), checked 13 November 2026.
+      GCV and PCF change from month to month, and withholding tax, TV fee,
+      GIDC, and other charges are not included — so your real bill will
+      differ. Nothing here is a live or official bill amount.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="gasForm" novalidate>
+          <div class="field">
+            <label for="gasCompany">Gas company <span aria-hidden="true">*</span></label>
+            <select id="gasCompany" aria-required="true">
+              <option value="SNGPL">SNGPL (Punjab, KP, Islamabad)</option>
+              <option value="SSGC">SSGC (Sindh, Balochistan)</option>
+            </select>
+            <p class="hint">The tariff is the same for both companies — this only labels your result.</p>
+          </div>
+
+          <div class="field">
+            <label for="gasCategory">Consumer category <span aria-hidden="true">*</span></label>
+            <select id="gasCategory" aria-required="true">
+              <option value="non-protected">Non-protected — winter average above 0.9 hm3/month</option>
+              <option value="protected">Protected — winter average 0.9 hm3/month or less</option>
+            </select>
+            <p class="hint">Protected means your average consumption over the last four winter months (November to February) was 0.9 hm3 a month or less. If you are not sure, use the helper below, or choose non-protected — it gives the higher, safer estimate.</p>
+          </div>
+
+          <div class="field">
+            <label for="gasConsumption">Monthly consumption <span aria-hidden="true">*</span></label>
+            <input id="gasConsumption" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
+            <p class="hint">The gas used in the month. Your meter reads in cubic metres (m3) — 1 hm3 is 100 m3.</p>
+          </div>
+
+          <div class="field">
+            <label for="gasUnit">Consumption unit <span aria-hidden="true">*</span></label>
+            <select id="gasUnit" aria-required="true">
+              <option value="hm3">hm3 (cubic hectometres — 100 m3 each)</option>
+              <option value="m3">m3 (cubic metres, as on your meter)</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="gasGcv">GCV (BTU/SCF) — optional</label>
+            <input id="gasGcv" type="text" inputmode="decimal" autocomplete="off" placeholder="990" />
+            <p class="hint">Gross calorific value, printed on your bill. Leave blank for the default 990.</p>
+          </div>
+
+          <div class="field">
+            <label for="gasPcf">PCF — optional</label>
+            <input id="gasPcf" type="text" inputmode="decimal" autocomplete="off" placeholder="1.00" />
+            <p class="hint">Pressure correction factor, printed on your bill. Leave blank for the default 1.00.</p>
+          </div>
+
+          <div id="gasErrors" class="error-box" role="alert" hidden></div>
+
+          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+            <button id="gasCalculate" class="btn-primary" type="submit">Calculate</button>
+            <button id="gasClear" class="btn-secondary" type="button">Clear</button>
+          </p>
+          <p id="gasFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        </form>
+
+        <div style="border-top: 1px solid var(--border, #e5e7eb); margin-top: 24px; padding-top: 16px;">
+          <h2 style="font-size: 18px;">Am I protected? Winter-average helper</h2>
+          <p style="font-size: 14px; color: var(--ink-muted);">Enter your usage for the last four winter months, in hm3, and the helper works out the average. 0.9 hm3 a month or less means protected.</p>
+          <form id="gasHelperForm" novalidate>
+            <div class="field">
+              <label for="gasNov">November (hm3)</label>
+              <input id="gasNov" type="text" inputmode="decimal" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="gasDec">December (hm3)</label>
+              <input id="gasDec" type="text" inputmode="decimal" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="gasJan">January (hm3)</label>
+              <input id="gasJan" type="text" inputmode="decimal" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="gasFeb">February (hm3)</label>
+              <input id="gasFeb" type="text" inputmode="decimal" autocomplete="off" />
+            </div>
+            <div id="gasHelperErrors" class="error-box" role="alert" hidden></div>
+            <p style="margin-top: 12px;">
+              <button id="gasHelperCheck" class="btn-secondary" type="submit">Check my category</button>
+            </p>
+            <p id="gasHelperResult" role="status" style="font-size: 15px;"></p>
+          </form>
+        </div>
+      </div>
+
+      <div class="result-card" id="gasResultCard" tabindex="-1">
+        <div id="gasEmpty">
+          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p>Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            You will see your answer with the figures shown, so you can check it.
+          </p>
+        </div>
+
+        <div id="gasResult" data-result-text hidden>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Estimated bill</p>
+          <div aria-live="polite" aria-atomic="true">
+            <p class="result-value" id="gasHeadline"></p>
+          </div>
+          <div class="stat-grid">
+            <div>
+              <p class="stat-label">Gas charge</p>
+              <p class="stat-value" id="gasStat1"></p>
+            </div>
+            <div>
+              <p class="stat-label">Fixed charge</p>
+              <p class="stat-value" id="gasStat2"></p>
+            </div>
+            <div>
+              <p class="stat-label">GST (18%)</p>
+              <p class="stat-value" id="gasStat3"></p>
+            </div>
+          </div>
+          <table class="breakdown-table" id="gasBreakdown" aria-label="Bill breakdown"></table>
+          <p id="gasEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="gasFormula" style="font-size: 16px;"></p>
+          <p style="font-size: 13px; color: var(--ink-muted);">
+            Estimate only — check important figures before acting.
+            <a href="#gasDisclaimer">Read the full disclaimer.</a>
+          </p>
+        </div>
+
+        <div class="actions-row no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size: 14px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top: 40px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Enter the gas used in the month, in hm3 or in m3 as your meter reads it (1 hm3 = 100 m3), and choose your category: protected (winter average 0.9 hm3 a month or less) or non-protected.</li>
+      <li>Optionally enter the GCV and PCF printed on your bill — otherwise the defaults of 990 BTU/SCF and 1.00 are used. Your consumption is converted to MMBTU, then charged by slab.</li>
+      <li>You see the gas charge by slab, the fixed charge, meter rent of Rs 40, GST at 18%, and the estimated total.</li>
+    </ol>
+    <p>Both categories get the one-previous-slab benefit: consumption up to the previous slab's boundary is billed at the previous slab's rate, and only the excess at the rate of the slab you landed in. The one exception is above 4 hm3, where the whole consumption is billed at Rs 4,200 per MMBTU with no benefit — so a bill jumps sharply when you cross 4 hm3. This slab-split method is the standard applied interpretation of OGRA's "one preceding slab" rule.</p>
+
+    <h2>Formula</h2>
+    <p>MMBTU = hm3 × GCV ÷ 281.7385 × PCF (at GCV 990 and PCF 1.00, 1 hm3 = 3.5139 MMBTU)</p>
+    <p>Gas charge = MMBTU in each slab × slab rate (Rs per MMBTU, OGRA sale price)</p>
+    <p>GST = 18% × (Gas charge + Fixed charge + Meter rent)</p>
+    <p>Estimated total = Gas charge + Fixed charge + Meter rent + GST</p>
+    <p>Withholding tax, TV fee, and GIDC are not in this calculation. A <a href="/percentage-calculator/">Percentage Calculator</a> can help if you want to work out what share of your budget the bill takes.</p>
+
+    <h2>Worked example</h2>
+    <p><strong>Example (protected):</strong> 0.9 hm3 as a protected consumer, using the rounded 3.5 MMBTU per hm3 factor. The first 0.6 hm3 is 2.10 MMBTU at Rs 300 = Rs 630.00, and the remaining 0.3 hm3 is 1.05 MMBTU at Rs 350 = Rs 367.50, so the gas charge is Rs 997.50. The fixed charge is Rs 600 and meter rent is Rs 40, giving a subtotal of Rs 1,637.50. GST at 18% is Rs 294.75, and the estimated total is Rs 1,932.25.</p>
+    <p><strong>Example (non-protected):</strong> 2.0 hm3 as a non-protected consumer, using the same rounded factor. The first 1.5 hm3 is 5.25 MMBTU at Rs 1,450 = Rs 7,612.50, and the remaining 0.5 hm3 is 1.75 MMBTU at Rs 1,900 = Rs 3,325.00, so the gas charge is Rs 10,937.50. The fixed charge is Rs 3,000 and meter rent is Rs 40, giving a subtotal of Rs 13,977.50. GST at 18% is Rs 2,515.95, and the estimated total is Rs 16,493.45.</p>
+    <p style="font-size: 14px; color: var(--ink-muted);">The calculator above uses the exact conversion instead (3.5139 MMBTU per hm3 at GCV 990), so for the same 0.9 hm3 it gives Rs 1,936.92 and for the same 2.0 hm3 it gives Rs 16,544.70 — the small difference is the rounding in the 3.5 factor.</p>
+
+    <h2>2025 domestic gas sale price (OGRA)</h2>
+    <table class="breakdown-table" aria-label="OGRA domestic gas sale price 2025">
+      <thead>
+        <tr><th scope="col">Consumption per month</th><th scope="col">Rate per MMBTU</th><th scope="col">Fixed charge</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Up to 0.25 hm3 (protected)</td><td>Rs 200</td><td rowspan="4">Rs 600 / month</td></tr>
+        <tr><td>Up to 0.50 hm3 (protected)</td><td>Rs 250</td></tr>
+        <tr><td>Up to 0.60 hm3 (protected)</td><td>Rs 300</td></tr>
+        <tr><td>Up to 0.90 hm3 (protected)</td><td>Rs 350</td></tr>
+        <tr><td>Up to 0.25 hm3 (non-protected)</td><td>Rs 500</td><td rowspan="3">Rs 1,500 / month</td></tr>
+        <tr><td>Up to 0.60 hm3 (non-protected)</td><td>Rs 850</td></tr>
+        <tr><td>Up to 1.00 hm3 (non-protected)</td><td>Rs 1,250</td></tr>
+        <tr><td>Up to 1.50 hm3 (non-protected)</td><td>Rs 1,450</td><td rowspan="5">Rs 3,000 / month</td></tr>
+        <tr><td>Up to 2.00 hm3 (non-protected)</td><td>Rs 1,900</td></tr>
+        <tr><td>Up to 3.00 hm3 (non-protected)</td><td>Rs 3,300</td></tr>
+        <tr><td>Up to 4.00 hm3 (non-protected)</td><td>Rs 3,800</td></tr>
+        <tr><td>Above 4.00 hm3 (non-protected)</td><td>Rs 4,200</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size: 14px; color: var(--ink-muted);">Meter rent is Rs 40 a month for a normal domestic meter. Source: OGRA Gas Sale Price Notification dated 29 June 2025, effective 1 July 2025. Checked 13 November 2026. Consumer tariffs are frozen for FY 2026-27. New domestic connections are RLNG-only on a monthly USD tariff and are not priced on these slabs.</p>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+
+    <section id="gasDisclaimer" class="notice-info" style="margin-top: 32px;">
+      <h2 style="font-size: 20px;">Important — please read</h2>
+      <p>
+        Results are estimates from the notified base tariff only. Your real bill
+        also carries withholding tax, TV fee, GIDC, and other charges, and its
+        GCV and PCF change from month to month. No rupee minimum-bill figure is
+        applied, because the official minimum-bill rule has no verified rupee
+        amount. New domestic connections are RLNG-only and are not covered by
+        this calculator. OGRA revises the sale price from time to time — always
+        check the final amount on your official bill.
+      </p>
+      <p>
+        Sources:
+        <a href="https://www.ssgc.com.pk/web/?page_id=103">SSGC domestic rates</a>,
+        <a href="https://www.ogra.org.pk/consumer-gas-prices">OGRA consumer gas prices</a>,
+        and the
+        <a href="https://www.sngpl.com.pk/billcalc.jsp?mdids=92">SNGPL bill estimator</a>.
+      </p>
+      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+    </section>
+
+    <h2 style="margin-top: 32px;">Related tools</h2>
+    <div class="related-grid">
+      {
+        related.map((tool) => (
+          <article class="card">
+            <h3 style="font-size: 18px;">
+              <a href={tool.href}>{tool.name}</a>
+            </h3>
+            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p>
+              <a href={tool.href}>Use the calculator →</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+    .field-error {
+      font-size: 14px;
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin: 12px 0;
+    }
+    .stat-grid p {
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .related-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 15px;
+    }
+    .breakdown-table th,
+    .breakdown-table td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border, #e5e7eb);
+    }
+    .breakdown-table td:last-child,
+    .breakdown-table th:last-child {
+      text-align: right;
+    }
+    .breakdown-table tr.total-row td {
+      font-weight: 700;
+    }
+  </style>
+
+  <script>
+    import { calcGasBill, checkProtectedStatus, cubicMetresToHm3, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';
+
+    const form = document.getElementById('gasForm');
+    const errorsBox = document.getElementById('gasErrors');
+    const emptyBox = document.getElementById('gasEmpty');
+    const resultBox = document.getElementById('gasResult');
+    const resultCard = document.getElementById('gasResultCard');
+    const headline = document.getElementById('gasHeadline');
+    const stat1 = document.getElementById('gasStat1');
+    const stat2 = document.getElementById('gasStat2');
+    const stat3 = document.getElementById('gasStat3');
+    const breakdownEl = document.getElementById('gasBreakdown');
+    const echoEl = document.getElementById('gasEcho');
+    const formulaEl = document.getElementById('gasFormula');
+    const copyBtn = document.querySelector('[data-copy-result]');
+    const printBtn = document.querySelector('[data-print-result]');
+    const formStatus = document.getElementById('gasFormStatus');
+
+    function readNumber(id, label) {
+      const raw = document.getElementById(id).value;
+      if (raw.trim() === '') throw new Error(label + ' is required.');
+      const value = parseDecimal(raw);
+      if (value === null) throw new Error(label + ' must be a number using digits and one decimal point only.');
+      return value;
+    }
+    function showEmpty() {
+      resultBox.hidden = true;
+      emptyBox.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+    function showResult() {
+      emptyBox.hidden = true;
+      resultBox.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        const company = document.getElementById('gasCompany').value;
+        const category = document.getElementById('gasCategory').value;
+        const consumption = readNumber('gasConsumption', 'Monthly consumption');
+        const unit = document.getElementById('gasUnit').value;
+        const hm3 = unit === 'm3' ? cubicMetresToHm3(consumption) : consumption;
+        const gcvRaw = document.getElementById('gasGcv').value;
+        const pcfRaw = document.getElementById('gasPcf').value;
+        const gcv = gcvRaw.trim() === '' ? undefined : parseDecimal(gcvRaw);
+        const pcf = pcfRaw.trim() === '' ? undefined : parseDecimal(pcfRaw);
+        if (gcv === null) throw new Error('GCV must be a number using digits and one decimal point only.');
+        if (pcf === null) throw new Error('PCF must be a number using digits and one decimal point only.');
+        const r = calcGasBill(hm3, category, { gcv, pcf });
+        errorsBox.textContent = '';
+        errorsBox.hidden = true;
+        headline.textContent = formatPKR(r.total, 2);
+        stat1.textContent = formatPKR(r.gasCharge, 2);
+        stat2.textContent = formatPKR(r.fixedCharge, 2);
+        stat3.textContent = formatPKR(r.gst, 2);
+        let rows = r.slabRows.map((row) => {
+          return '<tr><td>' + row.label + ' — ' + formatNumber(row.hm3, 2) + ' hm3 (' + formatNumber(row.mmbtu, 4) + ' MMBTU) × ' + formatPKR(row.ratePerMmbtu, 2) + '</td><td>' + formatPKR(row.amount, 2) + '</td></tr>';
+        }).join('');
+        rows += '<tr><td>Fixed charge</td><td>' + formatPKR(r.fixedCharge, 2) + '</td></tr>';
+        rows += '<tr><td>Meter rent</td><td>' + formatPKR(r.meterRent, 2) + '</td></tr>';
+        rows += '<tr><td>Subtotal</td><td>' + formatPKR(r.subtotal, 2) + '</td></tr>';
+        rows += '<tr><td>GST — 18% (standard rate — confirm against your bill)</td><td>' + formatPKR(r.gst, 2) + '</td></tr>';
+        rows += '<tr class="total-row"><td>Estimated total</td><td>' + formatPKR(r.total, 2) + '</td></tr>';
+        breakdownEl.innerHTML = '<tbody>' + rows + '</tbody>';
+        const categoryLabel = category === 'protected' ? 'protected' : 'non-protected';
+        echoEl.textContent = 'Based on: ' + company + ', ' + categoryLabel + ', ' + formatNumber(r.hm3, 2) + ' hm3 (' + formatNumber(r.mmbtu, 2) + ' MMBTU at GCV ' + formatNumber(r.gcv, 0) + ', PCF ' + formatNumber(r.pcf, 2) + ').';
+        formulaEl.textContent = 'Gas ' + formatPKR(r.gasCharge, 2) + ' + fixed ' + formatPKR(r.fixedCharge, 2) + ' + meter rent ' + formatPKR(r.meterRent, 2) + ' = subtotal ' + formatPKR(r.subtotal, 2) + '. GST 18% = ' + formatPKR(r.gst, 2) + '. Total = ' + formatPKR(r.total, 2) + '.';
+        showResult();
+        if (window.matchMedia('(max-width: 899px)').matches) resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorsBox.textContent = err.message;
+        errorsBox.hidden = false;
+        showEmpty();
+      }
+    });
+
+    document.getElementById('gasClear').addEventListener('click', () => {
+      form.reset();
+      errorsBox.textContent = '';
+      errorsBox.hidden = true;
+      formStatus.textContent = 'Form cleared.';
+      showEmpty();
+    });
+
+    document.getElementById('gasHelperForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const helperErrors = document.getElementById('gasHelperErrors');
+      const helperResult = document.getElementById('gasHelperResult');
+      try {
+        const nov = readNumber('gasNov', 'November usage');
+        const dec = readNumber('gasDec', 'December usage');
+        const jan = readNumber('gasJan', 'January usage');
+        const feb = readNumber('gasFeb', 'February usage');
+        const r = checkProtectedStatus(nov, dec, jan, feb);
+        helperErrors.textContent = '';
+        helperErrors.hidden = true;
+        helperResult.textContent = 'Average winter usage: ' + formatNumber(r.averageHm3, 2) + ' hm3 a month — you are ' + (r.protected ? 'PROTECTED' : 'NON-PROTECTED') + '. ' + (r.protected ? 'Choose protected in the calculator above.' : 'Choose non-protected in the calculator above.');
+      } catch (err) {
+        helperErrors.textContent = err.message;
+        helperErrors.hidden = false;
+        helperResult.textContent = '';
+      }
+    });
+    showEmpty();
+
+  </script>
+</Layout>
