@@ -65,6 +65,36 @@ assert.ok(
   scriptSrc.includes('https://s3.tradingview.com'),
   'script-src must still allow s3.tradingview.com (Gold page widget)',
 );
+// frame-src must allow the TradingView widget iframe host (2026-11-13):
+// the embed script (https://s3.tradingview.com/external-embedding/
+// embed-widget-single-quote.js) builds its iframe at
+// https://www.tradingview-widget.com/embed-widget/single-quote/ — NOT
+// www.tradingview.com. Before this fix frame-src allowed only
+// www.tradingview.com (since the initial commit), so the iframe was
+// blocked by CSP and the widget rendered blank from the day it was
+// added; TradingView's own fallback rewrites the iframe to
+// https://s.tradingview.com, which frame-src also did not allow.
+// Verified live 2026-11-13: both widget URLs return HTTP 200, so this
+// was a CSP allowlist gap, not a TradingView outage.
+const frameSrc = directive('frame-src');
+assert.ok(
+  frameSrc.includes('https://www.tradingview-widget.com'),
+  `frame-src must allow www.tradingview-widget.com (Gold page widget iframe host): ${frameSrc}`,
+);
+assert.ok(
+  frameSrc.includes('https://www.tradingview.com'),
+  'frame-src must still allow www.tradingview.com (widget attribution links)',
+);
+// The Gold page must still load the widget the way the CSP expects:
+// a dynamically created <script src="https://s3.tradingview.com/...">
+// (script-src allows that host) with the iframe host above in frame-src.
+const gold = readFileSync(join(SRC_DIR, 'pages', 'gold-price-calculator.astro'), 'utf8');
+assert.ok(
+  gold.includes("https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js"),
+  'Gold page must load the TradingView single-quote embed script from s3.tradingview.com',
+);
+assert.ok(gold.includes('id="tvGoldWidget"'), 'Gold page must have the tvGoldWidget container');
+assert.ok(gold.includes('id="tvGoldFallback"'), 'Gold page must have the tvGoldFallback paragraph');
 // style-src must NOT contain 'unsafe-inline' any more — every inline
 // style attribute and <style> block is gone (guarded in section 5 below).
 const styleSrc = directive('style-src');

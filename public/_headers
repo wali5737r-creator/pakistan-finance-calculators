@@ -33,7 +33,7 @@
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://s3.tradingview.com; style-src 'self'; img-src 'self' data: https://s3.tradingview.com https://*.tradingview.com; connect-src 'self' https://*.tradingview.com; frame-src https://www.tradingview.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://s3.tradingview.com; style-src 'self'; img-src 'self' data: https://s3.tradingview.com https://*.tradingview.com; connect-src 'self' https://*.tradingview.com; frame-src https://www.tradingview.com https://www.tradingview-widget.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'
   # NOTE (2026-11-13): 'unsafe-inline' was removed from script-src. Every
   # executable script is now an external file: tool calculators are bundled
   # by Astro into /_astro/*.js, the shared copy/print handler lives in
@@ -43,6 +43,21 @@
   # application/ld+json schema blocks). The TradingView widget on the Gold
   # page is still allowed: it is loaded by creating a <script> element with
   # src https://s3.tradingview.com/..., which the host source permits.
+  # frame-src MUST include https://www.tradingview-widget.com (added
+  # 2026-11-13): the embed script's widgetHost is
+  # https://www.tradingview-widget.com and the widget iframe loads from
+  # https://www.tradingview-widget.com/embed-widget/single-quote/ — NOT
+  # from www.tradingview.com. Before this fix frame-src allowed only
+  # www.tradingview.com (since the initial commit), so the iframe was
+  # blocked by CSP and the widget rendered blank from the day it was
+  # added (2026-10-29); TradingView's own fallback rewrites the iframe
+  # to https://s.tradingview.com, which frame-src also did not allow,
+  # so the fallback failed too. The widget script makes no fetch/XHR/
+  # WebSocket calls from our page, so connect-src needs no change.
+  # Known cosmetic caveat: the embed script also injects a <style>
+  # element for the copyright-attribution text, which style-src 'self'
+  # blocks — the attribution link itself still shows, only its
+  # widget-supplied styling is lost. Guarded by tests/csp.test.ts.
   # style-src 'unsafe-inline' was REMOVED 2026-11-13 (second half of the
   # CSP audit item): all 729 inline style attributes across src/
   # became .u-* utility classes in src/styles/global.css (91 canonical
