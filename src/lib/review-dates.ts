@@ -4,6 +4,7 @@
 import { TAX_NEXT_REVIEW } from '../config/tax';
 import { ELECTRICITY_NEXT_REVIEW } from '../config/electricity';
 import { GAS_NEXT_REVIEW } from '../config/gas';
+import { FREELANCER_NEXT_REVIEW } from '../config/freelancer-tax';
 
 /** True only for a real calendar date in strict YYYY-MM-DD form. */
 export function isValidIsoDate(value: string): boolean {
@@ -23,18 +24,19 @@ export function isReviewDue(reviewDate: string, today: string): boolean {
 }
 
 export interface ReviewStatus {
-  /** Which config the review belongs to: 'tax' | 'electricity' | 'gas'. */
-  name: 'tax' | 'electricity' | 'gas';
+  /** Which config the review belongs to: 'tax' | 'electricity' | 'gas' | 'freelancer'. */
+  name: 'tax' | 'electricity' | 'gas' | 'freelancer';
   reviewDate: string;
   /** True when `today` is on or after reviewDate. */
   due: boolean;
 }
 
-/** Due/overdue status of all three review tripwires for an injected `today`. */
+/** Due/overdue status of all four review tripwires for an injected `today`. */
 export function reviewStatuses(today: string): ReviewStatus[] {
   return [
     { name: 'tax', reviewDate: TAX_NEXT_REVIEW, due: isReviewDue(TAX_NEXT_REVIEW, today) },
     { name: 'electricity', reviewDate: ELECTRICITY_NEXT_REVIEW, due: isReviewDue(ELECTRICITY_NEXT_REVIEW, today) },
     { name: 'gas', reviewDate: GAS_NEXT_REVIEW, due: isReviewDue(GAS_NEXT_REVIEW, today) },
+    { name: 'freelancer', reviewDate: FREELANCER_NEXT_REVIEW, due: isReviewDue(FREELANCER_NEXT_REVIEW, today) },
   ];
 }

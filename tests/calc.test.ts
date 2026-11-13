@@ -3,11 +3,12 @@
 // they are never a live rate and never appear in site copy (SRS §6.5/§7.5).
 import assert from 'node:assert/strict';
 import {
-  calcAge, calcEMI, calcGold, calcPercentage, calcTax, calcZakat,
+  calcAge, calcEMI, calcExportTax, calcFreelancerTax, calcGold, calcNonSalariedTax, calcPercentage, calcTax, calcZakat,
   convertArea, convertAreaToAll, convertAreaWithUnits, convertAreaToAllWithUnits,
   convertCurrency, formatNumber,
   goldValueFromWeight, parseDecimal, round2, todayInKarachi,
 } from '../src/lib/calc';
+import { NON_SALARIED_SLABS } from '../src/config/freelancer-tax';
 import { AREA_UNITS, areaUnitsForStandard } from '../src/config/units';
 
 let passed = 0;
@@ -676,6 +677,113 @@ check('gas conversion helpers and protected-status helper', () => {
   assert.equal(non.averageHm3, 0.93);
   assert.equal(non.protected, false);
   assert.throws(() => checkProtectedStatus(-0.1, 0.9, 0.9, 0.9), /winter month/);
+});
+
+
+// --- Freelancer / non-salaried tax (s.154A + clause (1) slabs) ---
+check('non-salaried: every slab boundary', () => {
+  assert.equal(calcNonSalariedTax(600000).tax, 0);
+  assert.equal(calcNonSalariedTax(600001).tax, 0.15);
+  assert.equal(calcNonSalariedTax(1200000).tax, 90000);
+  assert.equal(calcNonSalariedTax(1200001).tax, 90000.2);
+  assert.equal(calcNonSalariedTax(1600000).tax, 170000);
+  assert.equal(calcNonSalariedTax(3200000).tax, 650000);
+  assert.equal(calcNonSalariedTax(5600000).tax, 1610000);
+  assert.equal(calcNonSalariedTax(5600001).tax, 1610000.45);
+});
+check('non-salaried: baseTax equals tax at each boundary (continuous slabs)', () => {
+  // baseTax of slab i+1 is the tax due at the top of slab i's band.
+  for (let i = 0; i < NON_SALARIED_SLABS.length - 1; i++) {
+    const slab = NON_SALARIED_SLABS[i];
+    if (slab.upTo === null) continue;
+    assert.equal(calcNonSalariedTax(slab.upTo).tax, NON_SALARIED_SLABS[i + 1].baseTax, `boundary ${slab.upTo}`);
+  }
+});
+check('non-salaried: slab rows sum to the headline tax', () => {
+  for (const income of [100000, 1000000, 3000000, 7000000, 12000000]) {
+    const r = calcNonSalariedTax(income);
+    const sum = round2(r.slabRows.reduce((s, row) => s + row.amount, 0));
+    assert.equal(sum, r.tax, `income ${income}`);
+  }
+});
+check('non-salaried: zero income is zero tax, no surcharge', () => {
+  const r = calcNonSalariedTax(0);
+  assert.equal(r.tax, 0);
+  assert.equal(r.surcharge, 0);
+  assert.equal(r.total, 0);
+});
+check('freelancer example D: local only Rs 3,000,000 = Rs 590,000', () => {
+  const r = calcNonSalariedTax(3000000);
+  assert.equal(r.tax, 590000);
+  assert.equal(r.surcharge, 0);
+  assert.equal(r.total, 590000);
+  assert.equal(r.marginalRate, 30);
+});
+check('freelancer example F: Rs 11,000,000 local = Rs 4,444,000 with surcharge', () => {
+  const r = calcNonSalariedTax(11000000);
+  assert.equal(r.tax, 4040000);
+  assert.equal(r.surcharge, 404000);
+  assert.equal(r.total, 4444000);
+});
+check('freelancer surcharge: exactly Rs 10,000,000 has NO surcharge', () => {
+  const r = calcNonSalariedTax(10000000);
+  assert.equal(r.tax, 3590000);
+  assert.equal(r.surcharge, 0);
+  assert.equal(r.total, 3590000);
+});
+check('freelancer surcharge: just above Rs 10m triggers 10%', () => {
+  const r = calcNonSalariedTax(10000001);
+  assert.equal(r.tax, 3590000.45);
+  assert.equal(r.surcharge, 359000.05);
+  assert.equal(r.total, 3949000.5);
+});
+check('freelancer example A: export Rs 2,000,000 PSEB = Rs 5,000 final tax', () => {
+  const r = calcExportTax(2000000, true);
+  assert.equal(r.rate, 0.0025);
+  assert.equal(r.tax, 5000);
+});
+check('freelancer example B: export Rs 2,000,000 non-PSEB = Rs 20,000 final tax', () => {
+  const r = calcExportTax(2000000, false);
+  assert.equal(r.rate, 0.01);
+  assert.equal(r.tax, 20000);
+});
+check('freelancer example C: mixed — export excluded from slabs', () => {
+  const pseb = calcFreelancerTax({ exportIncome: 2000000, psebRegistered: true, localTaxableIncome: 1000000, returnFiled: true });
+  assert.equal(pseb.totalPayable, 65000); // 5,000 export + 60,000 local
+  assert.equal(pseb.slabTax, 60000);
+  assert.equal(pseb.slabIncome, 1000000);
+  assert.equal(pseb.finalityLost, false);
+  const nonPseb = calcFreelancerTax({ exportIncome: 2000000, psebRegistered: false, localTaxableIncome: 1000000, returnFiled: true });
+  assert.equal(nonPseb.totalPayable, 80000); // 20,000 export + 60,000 local
+  // Slabbing the combined Rs 3,000,000 (Rs 590,000) would be WRONG.
+  assert.notEqual(pseb.slabTax, 590000);
+});
+check('freelancer example E: non-filer — slabs on combined, less deduction credit', () => {
+  const r = calcFreelancerTax({ exportIncome: 2000000, psebRegistered: false, localTaxableIncome: 0, returnFiled: false });
+  assert.equal(r.slabTax, 290000);
+  assert.equal(r.exportDeduction, 20000);
+  assert.equal(r.totalPayable, 270000);
+  assert.equal(r.finalityLost, true);
+  assert.equal(r.slabIncome, 2000000);
+});
+check('freelancer non-filer with local income: surcharge on combined income', () => {
+  const r = calcFreelancerTax({ exportIncome: 2000000, psebRegistered: true, localTaxableIncome: 9000000, returnFiled: false });
+  // Combined 11,000,000: slabs 4,040,000 + surcharge 404,000 = 4,444,000, less 5,000 deducted.
+  assert.equal(r.slabTax, 4040000);
+  assert.equal(r.surcharge, 404000);
+  assert.equal(r.totalPayable, 4439000);
+});
+check('freelancer: return filed with no export is just the local slabs', () => {
+  const r = calcFreelancerTax({ exportIncome: 0, psebRegistered: true, localTaxableIncome: 3000000, returnFiled: true });
+  assert.equal(r.totalPayable, 590000);
+  assert.equal(r.exportDeduction, 0);
+});
+check('freelancer: validation throws', () => {
+  assert.throws(() => calcNonSalariedTax(-1), /zero or more/);
+  assert.throws(() => calcNonSalariedTax(NaN), /zero or more/);
+  assert.throws(() => calcNonSalariedTax(1e15), /zero or more/);
+  assert.throws(() => calcExportTax(-100, true), /zero or more/);
+  assert.throws(() => calcFreelancerTax({ exportIncome: 0, psebRegistered: true, localTaxableIncome: -5, returnFiled: true }), /zero or more/);
 });
 
 console.log(`\n${passed} checks passed.`);

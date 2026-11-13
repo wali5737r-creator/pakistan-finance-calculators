@@ -3,11 +3,15 @@
 [![CI](https://github.com/wali5737r-creator/pakistan-finance-calculators/actions/workflows/ci.yml/badge.svg)](https://github.com/wali5737r-creator/pakistan-finance-calculators/actions/workflows/ci.yml)
 
 Astro + TypeScript + Tailwind CSS, static output for Cloudflare Pages.
-Eight free calculator tools, all calculations client-side, no accounts,
+Twenty free calculator tools, all calculations client-side, no accounts,
 no stored inputs. Built from the specs in
 `~/workspace/teams/pakistan-finance-calculators/` (SRS review, design
 system, per-tool frontend specs with QA fixes applied, rates design,
-SEO plan, content/security/launch handoff).
+SEO plan, content/security/launch handoff). The 20 tools: salary tax,
+EMI, Zakat, currency, gold, percentage, age, unit/marla, fuel cost,
+compound interest, loan eligibility, inflation, budget planner, debt
+payoff, fixed deposit, loan comparison, goal savings, electricity bill,
+gas bill, freelancer tax.
 
 ## Run locally
 

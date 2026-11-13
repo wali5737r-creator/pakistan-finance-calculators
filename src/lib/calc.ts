@@ -28,6 +28,14 @@ import {
   PROTECTED_GAS_SLABS,
   ROUNDED_MMBTU_PER_HM3,
 } from '../config/gas';
+import {
+  NON_PSEB_EXPORT_RATE,
+  NON_SALARIED_SLAB_LOWER_BOUNDS,
+  NON_SALARIED_SLABS,
+  PSEB_EXPORT_RATE,
+  SURCHARGE_RATE,
+  SURCHARGE_THRESHOLD,
+} from '../config/freelancer-tax';
 
 export const MAX_AMOUNT = 999999999999;
 
@@ -1232,5 +1240,190 @@ export function calcGasBill(
     subtotal,
     gst,
     total: round2(subtotal + gst),
+  };
+}
+
+// --------------------------------------- Freelancer / non-salaried tax --
+// Non-salaried slabs, clause (1), Division I, Part I, First Schedule,
+// Income Tax Ordinance 2001 (Finance Act 2024 table, unchanged by
+// Finance Act 2026), from src/config/freelancer-tax.ts. Scope:
+// individual freelancers / sole proprietors ONLY. The AOP
+// professional-firm 40% top-rate cap is OUT of scope and is NOT
+// applied here.
+//
+// s.154A export tax is FINAL on gross export proceeds when the return
+// is filed (s.169): export income is EXCLUDED from the slab
+// calculation entirely — not added to local income, no expenses
+// deductible against it. When the return is NOT filed, finality is
+// lost: export income is taxed under the normal slabs, with the bank
+// deduction credited against it. s.154A rates are NOT doubled for
+// non-filers. Surcharge s.4AB: 10% of the tax where taxable income
+// EXCEEDS Rs 10,000,000; at exactly Rs 10m, no surcharge.
+export interface NonSalariedSlabRow {
+  label: string;
+  income: number;
+  rate: number;
+  amount: number;
+}
+
+export interface NonSalariedTaxResult {
+  taxableIncome: number;
+  /** Tax from the slabs, before surcharge. */
+  tax: number;
+  surcharge: number;
+  total: number;
+  effectiveRate: number;
+  marginalRate: number;
+  bracketIndex: number;
+  slabRows: NonSalariedSlabRow[];
+}
+
+export function calcNonSalariedTax(localTaxableIncome: number): NonSalariedTaxResult {
+  if (!isFiniteNumber(localTaxableIncome) || localTaxableIncome < 0 || localTaxableIncome > MAX_AMOUNT) {
+    throw new Error('Taxable income must be zero or more.');
+  }
+  if (localTaxableIncome === 0) {
+    return {
+      taxableIncome: 0,
+      tax: 0,
+      surcharge: 0,
+      total: 0,
+      effectiveRate: 0,
+      marginalRate: 0,
+      bracketIndex: 0,
+      slabRows: [],
+    };
+  }
+  let bracketIndex = 0;
+  for (let i = 0; i < NON_SALARIED_SLABS.length; i++) {
+    const slab = NON_SALARIED_SLABS[i];
+    if (slab.upTo === null || localTaxableIncome <= slab.upTo) {
+      bracketIndex = i;
+      break;
+    }
+  }
+  const slab = NON_SALARIED_SLABS[bracketIndex];
+  const lower = NON_SALARIED_SLAB_LOWER_BOUNDS[bracketIndex];
+  const tax = round2(slab.baseTax + slab.rate * (localTaxableIncome - lower));
+  const surcharge = localTaxableIncome > SURCHARGE_THRESHOLD ? round2(tax * SURCHARGE_RATE) : 0;
+  const slabRows: NonSalariedSlabRow[] = [];
+  for (let i = 0; i <= bracketIndex; i++) {
+    const s = NON_SALARIED_SLABS[i];
+    const bandLower = NON_SALARIED_SLAB_LOWER_BOUNDS[i];
+    const bandUpper = s.upTo === null ? localTaxableIncome : Math.min(localTaxableIncome, s.upTo);
+    const bandIncome = bandUpper - bandLower;
+    if (bandIncome <= 0) continue;
+    const label = s.upTo === null
+      ? `Above Rs ${formatNumber(5600000, 0)}`
+      : bandLower === 0
+        ? `Up to Rs ${formatNumber(s.upTo, 0)}`
+        : `Rs ${formatNumber(bandLower + 1, 0)} – Rs ${formatNumber(s.upTo, 0)}`;
+    slabRows.push({
+      label,
+      income: bandIncome,
+      rate: s.rate,
+      amount: round2(s.rate * bandIncome),
+    });
+  }
+  return {
+    taxableIncome: localTaxableIncome,
+    tax,
+    surcharge,
+    total: round2(tax + surcharge),
+    effectiveRate: Number(((tax / localTaxableIncome) * 100).toFixed(6)),
+    marginalRate: Number((slab.rate * 100).toFixed(6)),
+    bracketIndex,
+    slabRows,
+  };
+}
+
+export interface ExportTaxResult {
+  exportIncome: number;
+  psebRegistered: boolean;
+  rate: number;
+  tax: number;
+}
+
+export function calcExportTax(exportIncome: number, psebRegistered: boolean): ExportTaxResult {
+  if (!isFiniteNumber(exportIncome) || exportIncome < 0 || exportIncome > MAX_AMOUNT) {
+    throw new Error('Export income must be zero or more.');
+  }
+  const rate = psebRegistered ? PSEB_EXPORT_RATE : NON_PSEB_EXPORT_RATE;
+  return {
+    exportIncome,
+    psebRegistered,
+    rate,
+    tax: round2(exportIncome * rate),
+  };
+}
+
+export interface FreelancerTaxInput {
+  exportIncome: number;
+  psebRegistered: boolean;
+  localTaxableIncome: number;
+  returnFiled: boolean;
+}
+
+export interface FreelancerTaxResult {
+  exportIncome: number;
+  psebRegistered: boolean;
+  exportRate: number;
+  /** Bank deduction already taken on export proceeds (0.25%/1%). */
+  exportDeduction: number;
+  localTaxableIncome: number;
+  returnFiled: boolean;
+  /** Slab tax on the income the slabs apply to (local only when the
+   *  return is filed; export + local combined when it is not). */
+  slabTax: number;
+  surcharge: number;
+  /** Tax still payable after crediting the export deduction (only
+   *  reduced when the return was not filed). */
+  totalPayable: number;
+  /** True when the return was not filed and finality was lost. */
+  finalityLost: boolean;
+  slabRows: NonSalariedSlabRow[];
+  /** Income the slabs were applied to. */
+  slabIncome: number;
+}
+
+export function calcFreelancerTax(input: FreelancerTaxInput): FreelancerTaxResult {
+  const exportTax = calcExportTax(input.exportIncome, input.psebRegistered);
+  if (!isFiniteNumber(input.localTaxableIncome) || input.localTaxableIncome < 0 || input.localTaxableIncome > MAX_AMOUNT) {
+    throw new Error('Local taxable income must be zero or more.');
+  }
+  if (input.returnFiled) {
+    // Final tax: export income is excluded from the slabs entirely.
+    const local = calcNonSalariedTax(input.localTaxableIncome);
+    return {
+      exportIncome: input.exportIncome,
+      psebRegistered: input.psebRegistered,
+      exportRate: exportTax.rate,
+      exportDeduction: exportTax.tax,
+      localTaxableIncome: input.localTaxableIncome,
+      returnFiled: true,
+      slabTax: local.tax,
+      surcharge: local.surcharge,
+      totalPayable: round2(exportTax.tax + local.total),
+      finalityLost: false,
+      slabRows: local.slabRows,
+      slabIncome: input.localTaxableIncome,
+    };
+  }
+  // Return not filed: finality lost — slabs on export + local combined,
+  // less the bank deduction already taken on the export proceeds.
+  const combined = calcNonSalariedTax(input.exportIncome + input.localTaxableIncome);
+  return {
+    exportIncome: input.exportIncome,
+    psebRegistered: input.psebRegistered,
+    exportRate: exportTax.rate,
+    exportDeduction: exportTax.tax,
+    localTaxableIncome: input.localTaxableIncome,
+    returnFiled: false,
+    slabTax: combined.tax,
+    surcharge: combined.surcharge,
+    totalPayable: round2(Math.max(0, combined.total - exportTax.tax)),
+    finalityLost: true,
+    slabRows: combined.slabRows,
+    slabIncome: input.exportIncome + input.localTaxableIncome,
   };
 }

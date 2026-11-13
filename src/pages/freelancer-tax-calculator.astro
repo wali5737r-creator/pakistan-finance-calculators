@@ -1,0 +1,479 @@
+---
+import Layout from '../components/Layout.astro';
+import {
+  NON_SALARIED_SLAB_LOWER_BOUNDS,
+  NON_SALARIED_SLABS,
+  PSEB_NEW_REGISTRATION_FEE,
+  PSEB_RENEWAL_FEE,
+} from '../config/freelancer-tax';
+
+const title = "Freelancer Tax Calculator Pakistan | PSEB 0.25% & Non-Salaried Slabs | Pakistan Finance Calculators";
+const description = "Work out freelancer tax in Pakistan: PSEB 0.25% export tax or 1% without it, plus non-salaried slabs on local income, with the 10% surcharge above Rs 10m.";
+const slug = "/freelancer-tax-calculator/";
+
+// Slab table, rendered from src/config/freelancer-tax.ts — never
+// hard-coded in the page markup. "Tax at the top of the band" is the
+// next slab's baseTax (the slabs are continuous).
+const slabTableRows = NON_SALARIED_SLABS.map((slab, i) => {
+  const lower = NON_SALARIED_SLAB_LOWER_BOUNDS[i];
+  const range = slab.upTo === null
+    ? `Above Rs ${lower.toLocaleString('en-PK')}`
+    : lower === 0
+      ? `Up to Rs ${slab.upTo.toLocaleString('en-PK')}`
+      : `Rs ${(lower + 1).toLocaleString('en-PK')} – Rs ${slab.upTo.toLocaleString('en-PK')}`;
+  const rateText = slab.rate === 0
+    ? '0%'
+    : slab.upTo === null
+      ? `Rs ${slab.baseTax.toLocaleString('en-PK')} + ${(slab.rate * 100).toFixed(0)}% of the amount above Rs ${lower.toLocaleString('en-PK')}`
+      : `Rs ${slab.baseTax.toLocaleString('en-PK')} + ${(slab.rate * 100).toFixed(0)}% of the amount above Rs ${lower.toLocaleString('en-PK')}`;
+  const taxAtTop = i + 1 < NON_SALARIED_SLABS.length
+    ? `Rs ${NON_SALARIED_SLABS[i + 1].baseTax.toLocaleString('en-PK')}`
+    : '—';
+  return { range, rateText, taxAtTop };
+});
+
+const faqs = [
+  {
+    q: "How is freelancer tax worked out in Pakistan?",
+    a: "In two separate parts. Export income from IT and ITeS services is taxed under section 154A at 0.25% of the gross export proceeds if you are PSEB-registered, or 1% if you are not — that is a final tax, and the export income is not added to your local income. Local taxable profit (your local income after expenses) is taxed under the non-salaried slabs in clause (1): 0% up to Rs 600,000, 15% to Rs 1,200,000, 20% to Rs 1,600,000, 30% to Rs 3,200,000, 40% to Rs 5,600,000, and 45% above that. If your taxable income is above Rs 10,000,000, a 10% surcharge applies to the tax. For example, Rs 2,000,000 of PSEB-registered export income is Rs 5,000 of tax, and Rs 1,000,000 of local taxable profit is Rs 60,000 — Rs 65,000 in total.",
+  },
+  {
+    q: "What is the PSEB 0.25% rate, and how do I get it?",
+    a: "PSEB is the Pakistan Software Export Board. IT and ITeS exporters registered with PSEB pay 0.25% of their gross export proceeds under section 154A, instead of 1%. Registration is through portal.techdestination.com, costs Rs 1,000 for a new freelancer registration and Rs 2,000 a year to renew, and must be renewed every year. Registration is the gateway to the 0.25% rate — it is not legally mandatory just to export. Your bank deducts the 0.25% or 1% when the export payment arrives.",
+  },
+  {
+    q: "Is my export income added to my local income for the slabs?",
+    a: "No — when your return is filed, the export tax under section 154A is final, and the export income is excluded from the slab calculation entirely (section 169). It is not added to your local income, and no expenses are deductible against it. So Rs 2,000,000 of export income plus Rs 1,000,000 of local taxable profit is taxed as Rs 5,000 (PSEB) plus Rs 60,000 — Rs 65,000 in total. Adding the two together and slabbing Rs 3,000,000, which would give Rs 590,000, is wrong.",
+  },
+  {
+    q: "What happens if I do not file my tax return?",
+    a: "You lose the final-tax treatment. The export income is then taxed under the normal non-salaried slabs, with the amount your bank already deducted credited against it. For example, Rs 2,000,000 of export income with no return filed is taxed at Rs 290,000 under the slabs, less the Rs 20,000 already deducted at 1%, leaving Rs 270,000 still payable. Filing the return is what keeps the 0.25% or 1% final rate. The section 154A rate itself is not doubled for non-filers.",
+  },
+  {
+    q: "Does the 10% surcharge apply to freelancers?",
+    a: "Yes, where your taxable income is above Rs 10,000,000. The surcharge under section 4AB is 10% of the tax, and it applies to non-salaried individuals. At exactly Rs 10,000,000 there is no surcharge. For example, Rs 11,000,000 of local taxable income gives slab tax of Rs 4,040,000, plus a 10% surcharge of Rs 404,000 — Rs 4,444,000 in total. The old 9% surcharge on salaried income was withdrawn by the Finance Act 2026 and does not apply here.",
+  },
+  {
+    q: "I am salaried but also freelance — which slabs apply to me?",
+    a: "It depends on the 75% test: if 75% or more of your taxable income is salary, you are taxed as a salaried individual on the salaried slabs — use the Salary / Income Tax Calculator for that. Otherwise the non-salaried slabs on this page apply to your non-salary income. This calculator is for individual freelancers and sole proprietors only; associations of persons (AOPs) and companies are out of scope, and the AOP professional-firm 40% top-rate cap is not applied here.",
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://pakistan-finance-calculators.pages.dev/freelancer-tax-calculator/#webapp',
+      name: "Freelancer Tax Calculator",
+      url: 'https://pakistan-finance-calculators.pages.dev/freelancer-tax-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://pakistan-finance-calculators.pages.dev/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: "Freelancer Tax Calculator",
+          item: 'https://pakistan-finance-calculators.pages.dev/freelancer-tax-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+
+const related = [
+  {
+    href: "/salary-income-tax-calculator/",
+    name: "Salary / Income Tax Calculator",
+    desc: "Monthly and annual tax on your salary for 2026-27, using the FBR salaried slabs — use this instead if 75% or more of your income is salary.",
+  },
+  {
+    href: "/emi-loan-calculator/",
+    name: "EMI / Loan Calculator",
+    desc: "Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan — for the laptop or equipment you buy with your freelance income.",
+  },
+];
+---
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Freelancer Tax Calculator</p>
+    </nav>
+    <p class="badge badge-info" style="margin-top: 8px;">Tax</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Freelancer Tax Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+      Work out the tax on your freelance income in Pakistan. Export income from IT and ITeS services is taxed at 0.25% if you are PSEB-registered, or 1% if you are not — a final tax on the gross amount. Your local income is taxed separately under the non-salaried slabs. Enter both below and you will see each part, the surcharge if it applies, and the total.
+    </p>
+    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+      <strong>For individual freelancers and sole proprietors only.</strong> This
+      uses the non-salaried slabs in clause (1), Division I, Part I, First
+      Schedule to the Income Tax Ordinance, 2001 (Finance Act 2024 table,
+      unchanged by the Finance Act 2026), and section 154A export tax as
+      extended to Tax Year 2029, checked 13 November 2026. Associations of
+      persons (AOPs) and companies are out of scope — the AOP
+      professional-firm 40% top-rate cap is not applied here. Results are
+      estimates, not tax advice.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="freelancerForm" novalidate>
+          <div class="field">
+            <label for="freelancerExport">Annual export income — IT / ITeS (gross, Rs) <span aria-hidden="true">*</span></label>
+            <input id="freelancerExport" type="text" inputmode="decimal" autocomplete="off" aria-required="true" placeholder="e.g. 2000000" />
+            <p class="hint">The gross amount your foreign clients paid you, before any expenses. Leave blank or enter 0 if you had no export income.</p>
+          </div>
+
+          <div class="field">
+            <label for="freelancerPseb">PSEB registered? <span aria-hidden="true">*</span></label>
+            <select id="freelancerPseb" aria-required="true">
+              <option value="yes">Yes — PSEB-registered (0.25% export tax)</option>
+              <option value="no">No — not PSEB-registered (1% export tax)</option>
+            </select>
+            <p class="hint">Registration is through portal.techdestination.com — Rs {PSEB_NEW_REGISTRATION_FEE.toLocaleString('en-PK')} for a new freelancer, Rs {PSEB_RENEWAL_FEE.toLocaleString('en-PK')} a year to renew. It is the gateway to the 0.25% rate, not legally mandatory just to export.</p>
+          </div>
+
+          <div class="field">
+            <label for="freelancerLocal">Annual local taxable income / profit (Rs) <span aria-hidden="true">*</span></label>
+            <input id="freelancerLocal" type="text" inputmode="decimal" autocomplete="off" aria-required="true" placeholder="e.g. 1000000" />
+            <p class="hint">Your taxable profit from local clients — income after business expenses, not your gross local receipts. Leave blank or enter 0 if you had no local income.</p>
+          </div>
+
+          <div class="field">
+            <label for="freelancerReturn">Will you file your income tax return? <span aria-hidden="true">*</span></label>
+            <select id="freelancerReturn" aria-required="true">
+              <option value="yes">Yes — return filed (export tax stays final)</option>
+              <option value="no">No — return not filed (finality is lost)</option>
+            </select>
+            <p class="hint">Filing the return is what keeps the 0.25% or 1% export rate final. If the return is not filed, your export income is taxed under the normal slabs instead, with the bank deduction credited against it — see worked example E below.</p>
+          </div>
+
+          <div id="freelancerErrors" class="error-box" role="alert" hidden></div>
+
+          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+            <button id="freelancerCalculate" class="btn-primary" type="submit">Calculate</button>
+            <button id="freelancerClear" class="btn-secondary" type="button">Clear</button>
+          </p>
+          <p id="freelancerFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        </form>
+      </div>
+
+      <div class="result-card" id="freelancerResultCard" tabindex="-1">
+        <div id="freelancerEmpty">
+          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p>Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            You will see your answer with the figures shown, so you can check it.
+          </p>
+        </div>
+
+        <div id="freelancerResult" data-result-text hidden>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Total tax payable</p>
+          <div aria-live="polite" aria-atomic="true">
+            <p class="result-value" id="freelancerHeadline"></p>
+          </div>
+          <div class="stat-grid">
+            <div>
+              <p class="stat-label">Export tax (s.154A)</p>
+              <p class="stat-value" id="freelancerStat1"></p>
+            </div>
+            <div>
+              <p class="stat-label">Local slab tax</p>
+              <p class="stat-value" id="freelancerStat2"></p>
+            </div>
+            <div>
+              <p class="stat-label">Surcharge (s.4AB)</p>
+              <p class="stat-value" id="freelancerStat3"></p>
+            </div>
+          </div>
+          <table class="breakdown-table" id="freelancerBreakdown" aria-label="Tax breakdown"></table>
+          <p id="freelancerWarning" class="error-box" role="alert" hidden></p>
+          <p id="freelancerEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="freelancerFormula" style="font-size: 16px;"></p>
+          <p style="font-size: 13px; color: var(--ink-muted);">
+            Estimate only — check important figures before acting.
+            <a href="#freelancerDisclaimer">Read the full disclaimer.</a>
+          </p>
+        </div>
+
+        <div class="actions-row no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size: 14px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top: 40px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Enter your gross annual export income from IT / ITeS services and whether you are PSEB-registered. The export tax is 0.25% of the gross amount if you are registered, 1% if you are not — your bank deducts it when the payment arrives.</li>
+      <li>Enter your annual local taxable profit — local income after business expenses, not gross receipts. It is taxed under the non-salaried slabs below.</li>
+      <li>Say whether you will file your return. If yes, the export tax is final and the export income never enters the slabs. If no, finality is lost: the slabs apply to your export and local income combined, and the bank deduction is credited against that tax.</li>
+    </ol>
+    <p>The most common mistake is adding export income to local income and slabbing the total. That is wrong when the return is filed — the export income is excluded from the slabs entirely (section 169), and no expenses are deductible against it. Worked example C below shows the difference: Rs 65,000 the right way, Rs 590,000 the wrong way.</p>
+
+    <h2>Formula</h2>
+    <p>Export tax (s.154A) = Gross export proceeds × 0.25% (PSEB-registered) or × 1% (not registered)</p>
+    <p>Local tax = Slab tax on local taxable profit (non-salaried slabs, clause (1))</p>
+    <p>Surcharge (s.4AB) = 10% × slab tax, only where taxable income exceeds Rs 10,000,000</p>
+    <p>Total payable (return filed) = Export tax + Local tax + Surcharge</p>
+    <p>Total payable (return not filed) = Slab tax on (export + local income) + Surcharge − Bank deduction already taken</p>
+
+    <h2>Worked examples</h2>
+    <p><strong>A. Export only, PSEB-registered:</strong> Rs 2,000,000 export income × 0.25% = Rs 5,000 final tax.</p>
+    <p><strong>B. Export only, not PSEB-registered:</strong> Rs 2,000,000 export income × 1% = Rs 20,000 final tax.</p>
+    <p><strong>C. Mixed — Rs 2,000,000 export + Rs 1,000,000 local taxable profit:</strong> local tax alone is 15% × Rs 400,000 (the amount above Rs 600,000) = Rs 60,000. Total: Rs 5,000 + Rs 60,000 = Rs 65,000 if PSEB-registered, or Rs 20,000 + Rs 60,000 = Rs 80,000 if not. Adding the export to the local income and slabbing Rs 3,000,000 would give Rs 590,000 — that is wrong.</p>
+    <p><strong>D. Local only, Rs 3,000,000:</strong> Rs 170,000 + 30% × Rs 1,400,000 (the amount above Rs 1,600,000) = Rs 170,000 + Rs 420,000 = Rs 590,000.</p>
+    <p><strong>E. Non-filer warning — Rs 2,000,000 export, return not filed:</strong> slabs on Rs 2,000,000 = Rs 90,000 + Rs 80,000 + Rs 120,000 = Rs 290,000, less the Rs 20,000 already deducted at 1% = Rs 270,000 still payable. This is a warning, not the headline rate — filing the return keeps the tax at Rs 20,000.</p>
+    <p><strong>F. Surcharge — Rs 11,000,000 local:</strong> Rs 1,610,000 + 45% × Rs 5,400,000 (the amount above Rs 5,600,000) = Rs 1,610,000 + Rs 2,430,000 = Rs 4,040,000, plus 10% surcharge of Rs 404,000 = Rs 4,444,000. At exactly Rs 10,000,000 the tax is Rs 3,590,000 with no surcharge.</p>
+
+    <h2>Non-salaried tax slabs 2026-27 (clause (1))</h2>
+    <table class="breakdown-table" aria-label="Non-salaried tax slabs 2026-27">
+      <thead>
+        <tr><th scope="col">Annual taxable income</th><th scope="col">Tax</th><th scope="col">Tax at the top of the band</th></tr>
+      </thead>
+      <tbody>
+        {
+          slabTableRows.map((row) => (
+            <tr>
+              <td>{row.range}</td>
+              <td>{row.rateText}</td>
+              <td>{row.taxAtTop}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <p style="font-size: 14px; color: var(--ink-muted);">Source: clause (1), Division I, Part I, First Schedule to the Income Tax Ordinance, 2001, as substituted by the Finance Act 2024 — unchanged by the Finance Act 2026, which substituted only the salaried clause (2) table. Surcharge under section 4AB: 10% of the tax where taxable income exceeds Rs 10,000,000; no surcharge at exactly Rs 10,000,000. Checked 13 November 2026. Re-verify by 1 May 2027, before Tax Year 2026-27 ends on 30 June 2027.</p>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+
+    <section id="freelancerDisclaimer" class="notice-info" style="margin-top: 32px;">
+      <h2 style="font-size: 20px;">Important — please read</h2>
+      <p>
+        Results are estimates, not tax advice. This calculator covers
+        individual freelancers and sole proprietors only. Associations of
+        persons (AOPs) and companies are out of scope, and the AOP
+        professional-firm 40% top-rate cap is not applied. Withholding tax
+        deducted by local clients under section 153 is not included, and
+        neither are super tax (section 4C), minimum tax (section 113), or
+        the section 154B social-media tax (5%/10%) — a different regime,
+        not to be confused with section 154A. Confirm your PSEB and export
+        status with FBR or PSEB before filing.
+      </p>
+      <p>
+        Sources:
+        <a href="http://na.gov.pk/uploads/documents/6a422720f05a0_626.pdf">Finance Act, 2026 Gazette (PDF)</a>,
+        <a href="https://www.fbr.gov.pk/Downloads/?id=90590&Type=Docs">FBR Circular No. 02 of 2026-27</a>,
+        <a href="https://download1.fbr.gov.pk/Docs/202681113864992WithholdingTaxRatesCard2027.pdf">FBR withholding-tax rate card 2027 (PDF)</a>,
+        and
+        <a href="https://portal.techdestination.com">PSEB registration portal</a>.
+      </p>
+      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+    </section>
+
+    <h2 style="margin-top: 32px;">Related tools</h2>
+    <div class="related-grid">
+      {
+        related.map((tool) => (
+          <article class="card">
+            <h3 style="font-size: 18px;">
+              <a href={tool.href}>{tool.name}</a>
+            </h3>
+            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p>
+              <a href={tool.href}>Use the calculator →</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+    .field-error {
+      font-size: 14px;
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin: 12px 0;
+    }
+    .stat-grid p {
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .related-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 15px;
+    }
+    .breakdown-table th,
+    .breakdown-table td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border, #e5e7eb);
+    }
+    .breakdown-table td:last-child,
+    .breakdown-table th:last-child {
+      text-align: right;
+    }
+    .breakdown-table tr.total-row td {
+      font-weight: 700;
+    }
+  </style>
+
+  <script>
+    import { calcFreelancerTax, parseDecimal, formatPKR } from '../lib/calc.ts';
+
+    const form = document.getElementById('freelancerForm');
+    const errorsBox = document.getElementById('freelancerErrors');
+    const emptyBox = document.getElementById('freelancerEmpty');
+    const resultBox = document.getElementById('freelancerResult');
+    const resultCard = document.getElementById('freelancerResultCard');
+    const headline = document.getElementById('freelancerHeadline');
+    const stat1 = document.getElementById('freelancerStat1');
+    const stat2 = document.getElementById('freelancerStat2');
+    const stat3 = document.getElementById('freelancerStat3');
+    const breakdownEl = document.getElementById('freelancerBreakdown');
+    const warningEl = document.getElementById('freelancerWarning');
+    const echoEl = document.getElementById('freelancerEcho');
+    const formulaEl = document.getElementById('freelancerFormula');
+    const copyBtn = document.querySelector('[data-copy-result]');
+    const printBtn = document.querySelector('[data-print-result]');
+    const formStatus = document.getElementById('freelancerFormStatus');
+
+    function readAmount(id, label) {
+      const raw = document.getElementById(id).value;
+      if (raw.trim() === '') return 0;
+      const value = parseDecimal(raw);
+      if (value === null) throw new Error(label + ' must be a number using digits and one decimal point only.');
+      return value;
+    }
+    function showEmpty() {
+      resultBox.hidden = true;
+      emptyBox.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+    function showResult() {
+      emptyBox.hidden = true;
+      resultBox.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        const exportIncome = readAmount('freelancerExport', 'Annual export income');
+        const psebRegistered = document.getElementById('freelancerPseb').value === 'yes';
+        const localTaxableIncome = readAmount('freelancerLocal', 'Annual local taxable income');
+        const returnFiled = document.getElementById('freelancerReturn').value === 'yes';
+        const r = calcFreelancerTax({ exportIncome, psebRegistered, localTaxableIncome, returnFiled });
+        errorsBox.textContent = '';
+        errorsBox.hidden = true;
+        headline.textContent = formatPKR(r.totalPayable, 2);
+        stat1.textContent = formatPKR(r.returnFiled ? r.exportDeduction : 0, 2);
+        stat2.textContent = formatPKR(r.slabTax, 2);
+        stat3.textContent = formatPKR(r.surcharge, 2);
+        let rows = '';
+        if (r.returnFiled) {
+          if (exportIncome > 0) {
+            rows += '<tr><td>Export tax (s.154A, final) — ' + formatPKR(exportIncome, 2) + ' × ' + (r.exportRate * 100) + '%</td><td>' + formatPKR(r.exportDeduction, 2) + '</td></tr>';
+          }
+        } else {
+          rows += '<tr><td>Bank deduction already taken (s.154A) — ' + formatPKR(exportIncome, 2) + ' × ' + (r.exportRate * 100) + '%</td><td>−' + formatPKR(r.exportDeduction, 2) + '</td></tr>';
+        }
+        rows += r.slabRows.map((row) => {
+          return '<tr><td>Slab: ' + row.label + ' — ' + formatPKR(row.income, 2) + ' × ' + (row.rate * 100) + '%</td><td>' + formatPKR(row.amount, 2) + '</td></tr>';
+        }).join('');
+        if (r.surcharge > 0) {
+          rows += '<tr><td>Surcharge (s.4AB) — 10% of slab tax (income above Rs 10,000,000)</td><td>' + formatPKR(r.surcharge, 2) + '</td></tr>';
+        }
+        rows += '<tr class="total-row"><td>Total tax payable</td><td>' + formatPKR(r.totalPayable, 2) + '</td></tr>';
+        breakdownEl.innerHTML = '<tbody>' + rows + '</tbody>';
+        if (r.finalityLost) {
+          warningEl.textContent = 'Warning: the return is not filed, so the export tax is NOT final. The slabs were applied to your export and local income combined, and the bank deduction was credited against that tax. Filing the return would keep the export tax at ' + formatPKR(r.exportDeduction, 2) + ' — see worked example E below.';
+          warningEl.hidden = false;
+        } else {
+          warningEl.textContent = '';
+          warningEl.hidden = true;
+        }
+        const psebLabel = psebRegistered ? 'PSEB-registered (0.25%)' : 'not PSEB-registered (1%)';
+        echoEl.textContent = 'Based on: export ' + formatPKR(exportIncome, 2) + ' (' + psebLabel + '), local taxable profit ' + formatPKR(localTaxableIncome, 2) + ', return ' + (returnFiled ? 'filed' : 'not filed') + '. Slabs applied to ' + formatPKR(r.slabIncome, 2) + '.';
+        formulaEl.textContent = returnFiled
+          ? 'Export ' + formatPKR(r.exportDeduction, 2) + ' + local slab tax ' + formatPKR(r.slabTax, 2) + ' + surcharge ' + formatPKR(r.surcharge, 2) + ' = total ' + formatPKR(r.totalPayable, 2) + '.'
+          : 'Slab tax ' + formatPKR(r.slabTax, 2) + ' + surcharge ' + formatPKR(r.surcharge, 2) + ' − bank deduction ' + formatPKR(r.exportDeduction, 2) + ' = total ' + formatPKR(r.totalPayable, 2) + '.';
+        showResult();
+        if (window.matchMedia('(max-width: 899px)').matches) resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorsBox.textContent = err.message;
+        errorsBox.hidden = false;
+        showEmpty();
+      }
+    });
+
+    document.getElementById('freelancerClear').addEventListener('click', () => {
+      form.reset();
+      errorsBox.textContent = '';
+      errorsBox.hidden = true;
+      formStatus.textContent = 'Form cleared.';
+      showEmpty();
+    });
+    showEmpty();
+  </script>
+</Layout>
