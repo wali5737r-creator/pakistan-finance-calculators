@@ -1,17 +1,20 @@
-// Urdu Phase 1 + 2 + 3 + 4 + 5 + 6 regression tests — homepage + navigation toggle,
+// Urdu Phase 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 regression tests — homepage + navigation toggle,
 // plus the Phase 2 tax cluster (Salary, Freelancer, GST), the Phase 3
 // loans cluster (EMI, Eligibility, Comparison, Car, Home), the Phase 4
 // Zakat/savings cluster (Zakat, National Savings, Fixed Deposit), the
 // Phase 5 bills cluster (Electricity, Gas) and the Phase 6 converters
 // cluster (Percentage, Age, Unit/Marla, Fuel, Compound Interest,
 // Inflation, Budget, Debt, Goal) and the Phase 7 solar/pension
-// cluster (Solar Size & Payback, Pension / EOBI).
+// cluster (Solar Size & Payback, Pension / EOBI) and the Phase 8
+// currency/gold cluster (Currency Converter, Gold Price Calculator) —
+// the final cluster; all 26 tool pages are now in Urdu.
 // Run: npx tsx tests/i18n.test.ts
 //
 // Guards:
 //   - every data-i18n key used in Layout.astro / index.astro / the three
 //     tax pages / the five loans pages / the three Zakat/savings pages
-//     / the two bills pages / the nine converters pages
+//     / the two bills pages / the nine converters pages / the two
+//     solar/pension pages / the two currency/gold pages
 //     has a non-empty Urdu entry in public/js/i18n.js (26/26 tool labels,
 //     26/26 card names + descriptions included, plus 58 salary + 73
 //     freelancer + 99 GST + 71 EMI + 61 eligibility + 63 comparison +
@@ -19,7 +22,13 @@
 //     fixed-deposit + 63 electricity + 92 gas + 44 percentage + 43 age
 //     + 43 unit/marla + 53 fuel + 62 compound interest + 47 inflation
 //     + 52 budget + 51 debt + 53 goal keys) + the Phase 7
-//     solar/pension cluster (Solar 102 + Pension 144 keys);
+//     solar/pension cluster (Solar 102 + Pension 144 keys) + the Phase 8
+//     currency/gold cluster (Currency 44 + Gold 55 keys);
+//   - the stale "other calculators are still in English" note is gone:
+//     no tool page carries a #lang-note element or the tax.others-note
+//     key, and the key is gone from the dictionary; only the homepage
+//     keeps its note (home.tools-note), now saying all 26 calculators
+//     are available in Urdu;
 //   - the toggle exists, is a plain <button> (no inline handler — the
 //     CSP has no 'unsafe-inline' in script-src), and Layout loads the
 //     external /js/i18n.js with defer;
@@ -33,7 +42,7 @@
 // deploy. The CSP test (tests/csp.test.ts) independently scans every
 // .astro file for inline scripts / inline handlers.
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -52,7 +61,7 @@ const dictBlock = i18nJs.match(/var UR = \{([\s\S]*?)\n  \};/);
 assert.ok(dictBlock, 'i18n.js must define a var UR = { ... } dictionary');
 const entries = [...dictBlock[1].matchAll(/'([^']+)':\s*'([^']*)'/g)];
 const UR = new Map(entries.map((m) => [m[1], m[2]]));
-check(UR.size >= 1913, `dictionary must hold 1913+ keys, found ${UR.size}`);
+check(UR.size >= 2011, `dictionary must hold 2011+ keys, found ${UR.size}`);
 for (const [key, value] of UR) {
   check(value.trim().length > 0, `dictionary entry ${key} must be non-empty`);
   // GST is a Latin acronym kept as-is in the short nav label (the card
@@ -106,6 +115,9 @@ const convertersPages = [pctPage, agePage, marlaPage, fuelPage, cintPage, inflPa
 const solarPage = readFileSync(join(SRC, 'pages', 'solar-size-payback-calculator.astro'), 'utf8');
 const pensionPage = readFileSync(join(SRC, 'pages', 'pension-eobi-calculator.astro'), 'utf8');
 const solarPensionPages = [solarPage, pensionPage];
+const currencyPage = readFileSync(join(SRC, 'pages', 'currency-converter.astro'), 'utf8');
+const goldPage = readFileSync(join(SRC, 'pages', 'gold-price-calculator.astro'), 'utf8');
+const currencyGoldPages = [currencyPage, goldPage];
 
 function staticKeys(src: string): string[] {
   return [...src.matchAll(/data-i18n="([^"]+)"/g)].map((m) => m[1]);
@@ -130,6 +142,7 @@ for (const page of savingsPages) for (const k of staticKeys(page)) used.add(k);
 for (const page of billsPages) for (const k of staticKeys(page)) used.add(k);
 for (const page of convertersPages) for (const k of staticKeys(page)) used.add(k);
 for (const page of solarPensionPages) for (const k of staticKeys(page)) used.add(k);
+for (const page of currencyGoldPages) for (const k of staticKeys(page)) used.add(k);
 // Dynamic keys: the FAQ maps use indexed sal/fr/gst.faq${i}q/a keys, the
 // GST preset options use gst.preset.${id} from src/config/gst.ts, and the
 // related-tool cards use fr/gst.rel${i}(-desc).
@@ -231,6 +244,22 @@ for (let i = 1; i <= 2; i++) {
   used.add(`pen.rel${i}`);
   used.add(`pen.rel${i}-desc`);
 }
+// Dynamic keys: the FAQ maps use indexed cur/gold.faq${i}q/a keys, and
+// the related-tool cards use gold.rel${i}(-desc). Currency's related
+// cards are static markup, so cur.rel${i}(-desc) are picked up by
+// staticKeys above, not added here.
+for (let i = 1; i <= 5; i++) {
+  used.add(`cur.faq${i}q`);
+  used.add(`cur.faq${i}a`);
+}
+for (let i = 1; i <= 7; i++) {
+  used.add(`gold.faq${i}q`);
+  used.add(`gold.faq${i}a`);
+}
+for (let i = 1; i <= 2; i++) {
+  used.add(`gold.rel${i}`);
+  used.add(`gold.rel${i}-desc`);
+}
 for (let i = 1; i <= 4; i++) {
   used.add(`pct.faq${i}q`);
   used.add(`pct.faq${i}a`);
@@ -315,6 +344,13 @@ check(solarPage.includes('sol.faq${i + 1}q'), 'solar FAQ summaries must use inde
 check(pensionPage.includes('pen.faq${i + 1}q'), 'pension FAQ summaries must use indexed pen.faq keys');
 check(solarPage.includes('sol.rel${i + 1}'), 'solar related cards must use indexed sol.rel keys');
 check(pensionPage.includes('pen.rel${i + 1}'), 'pension related cards must use indexed pen.rel keys');
+check(currencyPage.includes('cur.faq${i + 1}q'), 'currency FAQ summaries must use indexed cur.faq keys');
+check(goldPage.includes('gold.faq${i + 1}q'), 'gold FAQ summaries must use indexed gold.faq keys');
+// Currency's related cards are static markup (direct data-i18n keys);
+// gold's are mapped like the other clusters (indexed gold.rel keys).
+check(currencyPage.includes('data-i18n="cur.rel1"'), 'currency related cards must use cur.rel keys');
+check(currencyPage.includes('data-i18n="cur.rel2-desc"'), 'currency related cards must use cur.rel-desc keys');
+check(goldPage.includes('gold.rel${i + 1}'), 'gold related cards must use indexed gold.rel keys');
 // Unit/Marla FAQ 4's answer ends with the full CDA source citation, so
 // it stays English and has no marla.faq4a key.
 check(!marlaPage.includes('marla.faq4a'), 'unit/marla FAQ 4 answer must stay English (CDA citation) — no marla.faq4a key');
@@ -473,41 +509,66 @@ check(solarPage.includes('__pfcAfterLang'), 'solar page must define the __pfcAft
 check(pensionPage.includes('__pfcAfterLang'), 'pension page must define the __pfcAfterLang hook for its Form cleared status');
 check(solarPage.includes('فارم صاف کر دیا گیا۔'), 'solar page script must carry the Urdu Form cleared status');
 check(pensionPage.includes('فارم صاف کر دیا گیا۔'), 'pension page script must carry the Urdu Form cleared status');
+// Labels the currency/gold scripts rewrite ("Form cleared." status)
+// are translated in the page scripts and refreshed via the hook.
+check(currencyPage.includes('__pfcAfterLang'), 'currency page must define the __pfcAfterLang hook for its Form cleared status');
+check(goldPage.includes('__pfcAfterLang'), 'gold page must define the __pfcAfterLang hook for its Form cleared status');
+check(currencyPage.includes('فارم صاف کر دیا گیا۔'), 'currency page script must carry the Urdu Form cleared status');
+check(goldPage.includes('فارم صاف کر دیا گیا۔'), 'gold page script must carry the Urdu Form cleared status');
+// The Urdu strings hard-code the tola figure (11.664 g per tola): a
+// config change must update them too. The gold FAQ 3 answer embeds the
+// figure in the Urdu string itself (the FAQ map renders from the
+// dictionary), while the silver paragraph and the formula paragraph keep
+// it as a {TOLA_GRAMS} fragment span so the figure stays byte-exact.
+check((UR.get('gold.faq3a') ?? '').includes('11.664'), 'gold.faq3a must keep the 11.664 g per tola figure — it is embedded in the Urdu string, not a separate literal');
+check(goldPage.includes('{TOLA_GRAMS}'), 'gold page must keep the TOLA_GRAMS fragment spans so the 11.664 figure stays byte-exact');
+// The currency and gold result cards are rewritten by their calculator
+// scripts on load and on every calculation (rate strip, result card,
+// sticky text, validation errors, refresh/copy status), so no data-i18n
+// key may sit inside them — translating them would mislabel a live
+// rate or be overwritten instantly. Only the static sticky heading and
+// Details button switch.
+function regionHasNoI18n(src: string, start: string, end: string, label: string): void {
+  const from = src.indexOf(start);
+  check(from >= 0, `${label} region must exist`);
+  const to = src.indexOf(end, from + start.length);
+  check(to > from, `${label} region must end at its marker`);
+  check(!src.slice(from, to).includes('data-i18n'), `${label} must carry no data-i18n — it is JS-rewritten`);
+}
+regionHasNoI18n(currencyPage, '<div id="result-content"', '<div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;" class="no-print">', 'currency result card');
+regionHasNoI18n(currencyPage, '<div id="rate-strip"', '</div>', 'currency rate strip');
+regionHasNoI18n(goldPage, '<div id="goldResult"', '<div class="actions-row no-print">', 'gold result card');
+regionHasNoI18n(goldPage, '<div id="goldStrip"', '<div class="container" style="margin-top: 20px;">\n    <div class="tool-grid">', 'gold strip');
+regionHasNoI18n(goldPage, '<div id="silverStrip"', '<p id="silverPerGramLine"', 'silver strip');
 // The solar yields source paragraph and the pension sources paragraph
 // are source/citation lines, so they stay English (bills pattern).
 check(!solarPage.includes('data-i18n="sol.yields-source"'), 'solar yields source paragraph must stay English — no sol.yields-source key');
 check(!pensionPage.includes('data-i18n="pen.sources"'), 'pension sources paragraph must stay English — no pen.sources key');
-// Each tax page carries the Urdu-only note that the other tools are
-// still English in this phase (same hidden-until-Urdu pattern as home).
-for (const [name, page] of [['salary', salaryPage], ['freelancer', freelancerPage], ['gst', gstPage]] as const) {
-  check(page.includes('id="lang-note"'), `${name} page must contain the #lang-note element`);
-  check(page.includes('data-i18n="tax.others-note"'), `${name} page note must use the tax.others-note key`);
+// Phase 8 removed the stale "other calculators are still in English"
+// note from every tool page: all 26 calculators are now in Urdu, so no
+// tool page carries a #lang-note element or the tax.others-note key.
+// The homepage keeps its own note (home.tools-note), now saying all 26
+// are available in Urdu.
+const allToolPages: Array<readonly [string, string]> = [
+  ['salary', salaryPage], ['freelancer', freelancerPage], ['gst', gstPage],
+  ['emi', emiPage], ['eligibility', eligPage], ['comparison', compPage], ['car', carPage], ['home', homePage],
+  ['zakat', zakatPage], ['national-savings', nssPage], ['fixed-deposit', fdPage],
+  ['electricity', elecPage], ['gas', gasPage],
+  ['percentage', pctPage], ['age', agePage], ['unit/marla', marlaPage], ['fuel', fuelPage], ['compound', cintPage], ['inflation', inflPage], ['budget', budPage], ['debt', debtPage], ['goal', goalPage],
+  ['solar', solarPage], ['pension', pensionPage],
+  ['currency', currencyPage], ['gold', goldPage],
+];
+for (const [name, page] of allToolPages) {
+  check(!page.includes('id="lang-note"'), `${name} page must not contain the #lang-note element — all 26 calculators are now in Urdu`);
+  check(!page.includes('data-i18n="tax.others-note"'), `${name} page must not use the tax.others-note key`);
 }
-// Each loans page carries the same Urdu-only note (same key, same pattern).
-for (const [name, page] of [['emi', emiPage], ['eligibility', eligPage], ['comparison', compPage], ['car', carPage], ['home', homePage]] as const) {
-  check(page.includes('id="lang-note"'), `${name} page must contain the #lang-note element`);
-  check(page.includes('data-i18n="tax.others-note"'), `${name} page note must use the tax.others-note key`);
+// Guard: no data-i18n="tax.others-note" remains anywhere in src/pages,
+// and the key is gone from the dictionary.
+for (const file of readdirSync(join(SRC, 'pages')).filter((f) => f.endsWith('.astro'))) {
+  const src = readFileSync(join(SRC, 'pages', file), 'utf8');
+  check(!src.includes('data-i18n="tax.others-note"'), `${file} must not reference the removed tax.others-note key`);
 }
-// Each Zakat/savings page carries the same Urdu-only note.
-for (const [name, page] of [['zakat', zakatPage], ['national-savings', nssPage], ['fixed-deposit', fdPage]] as const) {
-  check(page.includes('id="lang-note"'), `${name} page must contain the #lang-note element`);
-  check(page.includes('data-i18n="tax.others-note"'), `${name} page note must use the tax.others-note key`);
-}
-// Each bills page carries the same Urdu-only note.
-for (const [name, page] of [['electricity', elecPage], ['gas', gasPage]] as const) {
-  check(page.includes('id="lang-note"'), `${name} page must contain the #lang-note element`);
-  check(page.includes('data-i18n="tax.others-note"'), `${name} page note must use the tax.others-note key`);
-}
-// Each converters page carries the same Urdu-only note.
-for (const [name, page] of [['percentage', pctPage], ['age', agePage], ['unit/marla', marlaPage], ['fuel', fuelPage], ['compound', cintPage], ['inflation', inflPage], ['budget', budPage], ['debt', debtPage], ['goal', goalPage]] as const) {
-  check(page.includes('id="lang-note"'), `${name} page must contain the #lang-note element`);
-  check(page.includes('data-i18n="tax.others-note"'), `${name} page note must use the tax.others-note key`);
-}
-// Each solar/pension page carries the same Urdu-only note.
-for (const [name, page] of [['solar', solarPage], ['pension', pensionPage]] as const) {
-  check(page.includes('id="lang-note"'), `${name} page must contain the #lang-note element`);
-  check(page.includes('data-i18n="tax.others-note"'), `${name} page note must use the tax.others-note key`);
-}
+check(!UR.has('tax.others-note'), 'the tax.others-note key must be removed from the dictionary');
 for (const k of layoutTools) used.add(`tool.${k}`);
 for (const k of indexTools) {
   used.add(`card.${k}.name`);
@@ -531,7 +592,7 @@ check(layout.includes('aria-pressed="false"'), 'the toggle must expose aria-pres
 check(layout.includes('<script src="/js/i18n.js" defer>'), 'Layout must load /js/i18n.js with defer');
 check(layout.includes('id="lang-note"') === false, 'the Urdu-only tools note lives on the homepage, not in Layout');
 check(indexPage.includes('id="lang-note"'), 'homepage must contain the #lang-note element');
-check(indexPage.includes('hidden>Tax, loans, Zakat/savings, bills, converters and solar/pension calculators are now available in Urdu — only currency and gold are left'), 'the tools note must say plainly (in English) that the tax, loans, Zakat/savings, bills, converters and solar/pension calculators are now in Urdu and only currency and gold are left');
+check(indexPage.includes('hidden>All 26 calculators are now available in Urdu.'), 'the tools note must say plainly (in English) that all 26 calculators are now available in Urdu');
 check(indexPage.includes('data-i18n="home.tools-note"'), 'the tools note must have a data-i18n key');
 
 // --- 4. English default unchanged ----------------------------------------
@@ -592,6 +653,8 @@ if (existsSync(distIndex)) {
     statSync(join(SRC, 'pages', 'goal-savings-calculator.astro')).mtimeMs,
     statSync(join(SRC, 'pages', 'solar-size-payback-calculator.astro')).mtimeMs,
     statSync(join(SRC, 'pages', 'pension-eobi-calculator.astro')).mtimeMs,
+    statSync(join(SRC, 'pages', 'currency-converter.astro')).mtimeMs,
+    statSync(join(SRC, 'pages', 'gold-price-calculator.astro')).mtimeMs,
     statSync(join(ROOT, 'public', 'js', 'i18n.js')).mtimeMs,
   );
   if (distTime >= srcTime) {
@@ -604,7 +667,7 @@ if (existsSync(distIndex)) {
     check(built.includes('id="lang-toggle"'), 'built homepage must contain the toggle button');
     check(built.includes('/js/i18n.js'), 'built homepage must load /js/i18n.js');
     check(built.includes('lang="en"'), 'built homepage must default to lang="en"');
-    check(built.includes('Tax, loans, Zakat/savings, bills, converters and solar/pension calculators are now available in Urdu'), 'built homepage note must say the tax, loans, Zakat/savings, bills, converters and solar/pension calculators are in Urdu');
+    check(built.includes('All 26 calculators are now available in Urdu'), 'built homepage note must say all 26 calculators are now available in Urdu');
     // Built tax pages: English default intact, Urdu keys wired.
     const builtTax: Array<[string, string, string]> = [
       ['salary-income-tax-calculator', 'Salary / Income Tax Calculator Pakistan 2026-27', 'sal.h1'],
@@ -618,7 +681,7 @@ if (existsSync(distIndex)) {
       check(pageBuilt.includes(h1), `built ${slug} page must keep the English H1`);
       check(pageBuilt.includes(`data-i18n="${key}"`), `built ${slug} page must carry data-i18n="${key}"`);
       check(pageBuilt.includes('id="lang-toggle"'), `built ${slug} page must contain the toggle button`);
-      check(pageBuilt.includes('id="lang-note"'), `built ${slug} page must contain the other-tools note`);
+      check(!pageBuilt.includes('id="lang-note"'), `built ${slug} page must not contain the removed other-tools note`);
     }
     // Built loans pages: English default intact, Urdu keys wired.
     const builtLoans: Array<[string, string, string]> = [
@@ -635,7 +698,7 @@ if (existsSync(distIndex)) {
       check(pageBuilt.includes(h1), `built ${slug} page must keep the English H1`);
       check(pageBuilt.includes(`data-i18n="${key}"`), `built ${slug} page must carry data-i18n="${key}"`);
       check(pageBuilt.includes('id="lang-toggle"'), `built ${slug} page must contain the toggle button`);
-      check(pageBuilt.includes('id="lang-note"'), `built ${slug} page must contain the other-tools note`);
+      check(!pageBuilt.includes('id="lang-note"'), `built ${slug} page must not contain the removed other-tools note`);
     }
     // Built Zakat/savings pages: English default intact, Urdu keys wired.
     const builtSavings: Array<[string, string, string]> = [
@@ -650,7 +713,7 @@ if (existsSync(distIndex)) {
       check(pageBuilt.includes(h1), `built ${slug} page must keep the English H1`);
       check(pageBuilt.includes(`data-i18n="${key}"`), `built ${slug} page must carry data-i18n="${key}"`);
       check(pageBuilt.includes('id="lang-toggle"'), `built ${slug} page must contain the toggle button`);
-      check(pageBuilt.includes('id="lang-note"'), `built ${slug} page must contain the other-tools note`);
+      check(!pageBuilt.includes('id="lang-note"'), `built ${slug} page must not contain the removed other-tools note`);
     }
     // Built bills pages: English default intact, Urdu keys wired.
     const builtBills: Array<[string, string, string]> = [
@@ -664,7 +727,7 @@ if (existsSync(distIndex)) {
       check(pageBuilt.includes(h1), `built ${slug} page must keep the English H1`);
       check(pageBuilt.includes(`data-i18n="${key}"`), `built ${slug} page must carry data-i18n="${key}"`);
       check(pageBuilt.includes('id="lang-toggle"'), `built ${slug} page must contain the toggle button`);
-      check(pageBuilt.includes('id="lang-note"'), `built ${slug} page must contain the other-tools note`);
+      check(!pageBuilt.includes('id="lang-note"'), `built ${slug} page must not contain the removed other-tools note`);
     }
     // Built solar/pension pages: English default intact, Urdu keys wired.
     const builtSolarPension: Array<[string, string, string]> = [
@@ -678,7 +741,22 @@ if (existsSync(distIndex)) {
       check(pageBuilt.includes(h1), `built ${slug} page must keep the English H1`);
       check(pageBuilt.includes(`data-i18n="${key}"`), `built ${slug} page must carry data-i18n="${key}"`);
       check(pageBuilt.includes('id="lang-toggle"'), `built ${slug} page must contain the toggle button`);
-      check(pageBuilt.includes('id="lang-note"'), `built ${slug} page must contain the other-tools note`);
+      check(!pageBuilt.includes('id="lang-note"'), `built ${slug} page must not contain the removed other-tools note`);
+    }
+    // Built currency/gold pages: English default intact, Urdu keys wired,
+    // and no stale other-tools note.
+    const builtCurrencyGold: Array<[string, string, string]> = [
+      ['currency-converter', 'Currency Converter PKR', 'cur.h1'],
+      ['gold-price-calculator', 'Gold Price Calculator Pakistan', 'gold.h1'],
+    ];
+    for (const [slug, h1, key] of builtCurrencyGold) {
+      const pagePath = join(ROOT, 'dist', slug, 'index.html');
+      check(existsSync(pagePath), `built ${slug} page must exist`);
+      const pageBuilt = readFileSync(pagePath, 'utf8');
+      check(pageBuilt.includes(h1), `built ${slug} page must keep the English H1`);
+      check(pageBuilt.includes(`data-i18n="${key}"`), `built ${slug} page must carry data-i18n="${key}"`);
+      check(pageBuilt.includes('id="lang-toggle"'), `built ${slug} page must contain the toggle button`);
+      check(!pageBuilt.includes('id="lang-note"'), `built ${slug} page must not contain the removed other-tools note`);
     }
     // Built converters pages: English default intact, Urdu keys wired.
     const builtConverters: Array<[string, string, string]> = [
@@ -699,9 +777,9 @@ if (existsSync(distIndex)) {
       check(pageBuilt.includes(h1), `built ${slug} page must keep the English H1`);
       check(pageBuilt.includes(`data-i18n="${key}"`), `built ${slug} page must carry data-i18n="${key}"`);
       check(pageBuilt.includes('id="lang-toggle"'), `built ${slug} page must contain the toggle button`);
-      check(pageBuilt.includes('id="lang-note"'), `built ${slug} page must contain the other-tools note`);
+      check(!pageBuilt.includes('id="lang-note"'), `built ${slug} page must not contain the removed other-tools note`);
     }
   }
 }
 
-console.log(`i18n: ${checks} checks — ${used.size} data-i18n keys covered, 26/26 tool labels + card names + descriptions translated, tax cluster (Salary 58 + Freelancer 73 + GST 99 keys) + loans cluster (EMI 71 + Eligibility 61 + Comparison 63 + Car 108 + Home 113 keys) + Zakat/savings cluster (Zakat 96 + National Savings 141 + Fixed Deposit 61 keys) + bills cluster (Electricity 63 + Gas 92 keys) + converters cluster (Percentage 44 + Age 43 + Unit/Marla 43 + Fuel 53 + Compound Interest 62 + Inflation 47 + Budget 52 + Debt 51 + Goal 53 keys) + solar/pension cluster (Solar 102 + Pension 144 keys) translated, font ${fontBytes} bytes.`);
+console.log(`i18n: ${checks} checks — ${used.size} data-i18n keys covered, 26/26 tool labels + card names + descriptions translated, tax cluster (Salary 58 + Freelancer 73 + GST 99 keys) + loans cluster (EMI 71 + Eligibility 61 + Comparison 63 + Car 108 + Home 113 keys) + Zakat/savings cluster (Zakat 96 + National Savings 141 + Fixed Deposit 61 keys) + bills cluster (Electricity 63 + Gas 92 keys) + converters cluster (Percentage 44 + Age 43 + Unit/Marla 43 + Fuel 53 + Compound Interest 62 + Inflation 47 + Budget 52 + Debt 51 + Goal 53 keys) + solar/pension cluster (Solar 102 + Pension 144 keys) + currency/gold cluster (Currency 44 + Gold 55 keys) translated, stale other-tools note removed from all 26 tool pages, font ${fontBytes} bytes.`);

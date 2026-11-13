@@ -91,11 +91,11 @@ const schema = JSON.stringify({
 
   <div class="container" style="padding-top:32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb" style="font-size:14px; margin-bottom:12px;">
-      <a href="/">Home</a> / Currency Converter
+      <a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="cur.crumb">Currency Converter</span>
     </nav>
-    <p class="badge badge-info" style="margin-bottom:12px;">Rates &amp; Gold</p>
-    <h1 style="font-size:clamp(1.75rem,4.5vw,2.25rem);">Currency Converter PKR</h1>
-    <p class="prose-narrow" style="font-size:clamp(1.0625rem,2vw,1.1875rem); margin-top:12px;">
+    <p class="badge badge-info" style="margin-bottom:12px;" data-i18n="cur.badge">Rates &amp; Gold</p>
+    <h1 style="font-size:clamp(1.75rem,4.5vw,2.25rem);" data-i18n="cur.h1">Currency Converter PKR</h1>
+    <p class="prose-narrow" style="font-size:clamp(1.0625rem,2vw,1.1875rem); margin-top:12px;" data-i18n="cur.intro">
       Convert between PKR and major currencies at the latest indicative rate, with the
       source and last-updated time shown on every result. This is not a buy or sell
       rate, and fees are not included.
@@ -113,46 +113,46 @@ const schema = JSON.stringify({
           <div id="error-summary" class="error-box" role="alert" hidden></div>
 
           <div class="field">
-            <label for="amount">Amount *</label>
+            <label for="amount"><span data-i18n="cur.amount-label">Amount</span> *</label>
             <div class="amount-wrap">
               <input type="text" inputmode="decimal" autocomplete="off" id="amount" aria-required="true" aria-describedby="hint-amount" />
               <span class="amount-suffix" id="amount-suffix" aria-hidden="true">PKR</span>
             </div>
-            <p class="hint" id="hint-amount">Enter the amount in the From currency. Decimals are allowed.</p>
+            <p class="hint" id="hint-amount" data-i18n="cur.amount-hint">Enter the amount in the From currency. Decimals are allowed.</p>
             <p class="field-error" id="err-amount" hidden></p>
           </div>
 
           <div class="field">
-            <label for="from-currency">From *</label>
+            <label for="from-currency"><span data-i18n="cur.from-label">From</span> *</label>
             <select id="from-currency" aria-required="true" aria-describedby="hint-from">
               {CURRENCIES.map((c) => (
                 <option value={c.code} selected={c.code === 'PKR'}>{c.code} — {c.name}</option>
               ))}
             </select>
-            <p class="hint" id="hint-from">The currency you are converting from.</p>
+            <p class="hint" id="hint-from" data-i18n="cur.from-hint">The currency you are converting from.</p>
             <p class="field-error" id="err-from-currency" hidden></p>
           </div>
 
           <div class="swap-row no-print">
             <button type="button" class="btn-secondary" id="swap-btn" aria-label="Swap currencies">
-              <span aria-hidden="true">⇄</span> Swap
+              <span aria-hidden="true">⇄</span> <span data-i18n="cur.swap">Swap</span>
             </button>
           </div>
 
           <div class="field">
-            <label for="to-currency">To *</label>
+            <label for="to-currency"><span data-i18n="cur.to-label">To</span> *</label>
             <select id="to-currency" aria-required="true" aria-describedby="hint-to">
               {CURRENCIES.map((c) => (
                 <option value={c.code} selected={c.code === 'USD'}>{c.code} — {c.name}</option>
               ))}
             </select>
-            <p class="hint" id="hint-to">The currency you are converting to.</p>
+            <p class="hint" id="hint-to" data-i18n="cur.to-hint">The currency you are converting to.</p>
             <p class="field-error" id="err-to-currency" hidden></p>
           </div>
 
           <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
-            <button type="submit" class="btn-primary" style="flex:1;">Calculate</button>
-            <button type="button" class="btn-secondary" id="clear-btn">Clear</button>
+            <button type="submit" class="btn-primary" style="flex:1;" data-i18n="ui.calculate">Calculate</button>
+            <button type="button" class="btn-secondary" id="clear-btn" data-i18n="ui.clear">Clear</button>
           </div>
           <p class="hint" style="font-size:14px; color:var(--ink-muted); margin-top:8px;" role="status" id="form-status"></p>
           <p role="status" aria-live="polite" id="announcer" style="font-size:14px; color:var(--ink-muted);"></p>
@@ -167,10 +167,10 @@ const schema = JSON.stringify({
           <p style="font-size:13px; color:var(--ink-muted);">Estimates only — indicative rates. Read the full disclaimer below.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;" class="no-print">
-          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-          <button type="button" class="btn-secondary" data-share-result disabled>Share</button>
-          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
-          <button type="button" class="btn-secondary" id="refresh-btn">Refresh rate</button>
+          <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-share-result data-i18n="cur.share" disabled>Share</button>
+          <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
+          <button type="button" class="btn-secondary" id="refresh-btn" data-i18n="cur.refresh">Refresh rate</button>
         </div>
         <p data-copy-status role="status" style="font-size:14px; margin-top:8px;"></p>
         <p role="status" style="font-size:14px; margin-top:4px;" id="refresh-status"></p>
@@ -179,45 +179,45 @@ const schema = JSON.stringify({
   </div>
 
   <div id="sticky-bar" class="no-print" hidden>
-    <p style="margin:0;"><strong>Converted amount</strong><br /><span id="sticky-text"></span></p>
+    <p style="margin:0;"><strong data-i18n="cur.sticky-amount">Converted amount</strong><br /><span id="sticky-text"></span></p>
     <div style="display:flex; gap:8px; align-items:center;">
-      <button type="button" class="btn-secondary" id="sticky-details">Details</button>
+      <button type="button" class="btn-secondary" id="sticky-details" data-i18n="cur.details">Details</button>
       <button type="button" class="btn-secondary" id="sticky-dismiss" aria-label="Dismiss summary">×</button>
     </div>
   </div>
 
   <div class="container prose-narrow" style="margin-top:48px;">
-    <h2>How it works</h2>
+    <h2 data-i18n="cur.how-h">How it works</h2>
     <ol>
-      <li>Converted amount = amount × rate, where the rate is the number of units of the To currency equal to one unit of the From currency.</li>
-      <li>Cross rates are derived through PKR: the rate from one currency to another is the PKR value of the first currency divided by the PKR value of the second. One route is used for every pair — direct and cross rates are never mixed for the same pair.</li>
-      <li>The inverse rate is 1 divided by the rate used. Converting back at the inverse rate returns the original amount within display rounding.</li>
-      <li>Only the latest rate is used. There is no historical lookup, and no rate can be typed in by hand.</li>
+      <li data-i18n="cur.how1">Converted amount = amount × rate, where the rate is the number of units of the To currency equal to one unit of the From currency.</li>
+      <li data-i18n="cur.how2">Cross rates are derived through PKR: the rate from one currency to another is the PKR value of the first currency divided by the PKR value of the second. One route is used for every pair — direct and cross rates are never mixed for the same pair.</li>
+      <li data-i18n="cur.how3">The inverse rate is 1 divided by the rate used. Converting back at the inverse rate returns the original amount within display rounding.</li>
+      <li data-i18n="cur.how4">Only the latest rate is used. There is no historical lookup, and no rate can be typed in by hand.</li>
     </ol>
 
-    <h2>Worked example</h2>
+    <h2 data-i18n="cur.example-h">Worked example</h2>
     <p>
-      Example in words only — not your result, and no rate figure is stated here.
+      <span data-i18n="cur.ex-pre">Example in words only — not your result, and no rate figure is stated here.
       Converting an amount in US dollars to Pakistani rupees multiplies the amount by the
       current rate for one US dollar in rupees. Converting the resulting rupees back to
       US dollars uses the inverse rate, and returns the starting amount within display rounding.
-      Gold is priced in US dollars, and the{' '}
-      <a href="/gold-price-calculator/">Gold Price Calculator</a> converts that price into rupees per tola.
+      Gold is priced in US dollars, and the</span>{' '}
+      <a href="/gold-price-calculator/" data-i18n="card.gold.name">Gold Price Calculator</a>{' '}<span data-i18n="cur.ex-post">converts that price into rupees per tola.</span>
     </p>
 
-    <h2>Frequently asked questions</h2>
+    <h2 data-i18n="cur.faq-h">Frequently asked questions</h2>
     <div class="faq">
-      {faqs.map((f) => (
+      {faqs.map((f, i) => (
         <details>
-          <summary><h3 style="display:inline; font-size:18px;">{f.q}</h3></summary>
-          <p>{f.a}</p>
+          <summary><h3 style="display:inline; font-size:18px;" data-i18n={`cur.faq${i + 1}q`}>{f.q}</h3></summary>
+          <p data-i18n={`cur.faq${i + 1}a`}>{f.a}</p>
         </details>
       ))}
     </div>
 
-    <h2>Important — please read</h2>
+    <h2 data-i18n="cur.disc-h">Important — please read</h2>
     <div class="notice-warning">
-      <p>
+      <p data-i18n="cur.disc">
         The rate shown is indicative only. It is not a buy/sell rate. Banks, exchangers,
         and payment services may offer different rates, and fees or charges are not
         included in the converted amount. Rates change frequently — always check the
@@ -225,16 +225,16 @@ const schema = JSON.stringify({
         estimates for information only, not financial advice.
       </p>
       <ul>
-        <li>The rate’s source and “as of” time are shown on the result and must be checked before relying on it.</li>
-        <li>A stale rate is labelled as stale and may no longer reflect the market.</li>
-        <li>This tool does not buy or sell currency and does not include any charge.</li>
+        <li data-i18n="cur.disc-b1">The rate’s source and “as of” time are shown on the result and must be checked before relying on it.</li>
+        <li data-i18n="cur.disc-b2">A stale rate is labelled as stale and may no longer reflect the market.</li>
+        <li data-i18n="cur.disc-b3">This tool does not buy or sell currency and does not include any charge.</li>
       </ul>
     </div>
 
-    <h2>Related tools</h2>
+    <h2 data-i18n="cur.related-h">Related tools</h2>
     <div style="display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
-      <article class="card"><h3 style="font-size:18px;"><a href="/gold-price-calculator/">Gold Price Calculator</a></h3><p style="color:var(--ink-muted);">Value of gold per tola and per gram, with a live or your own price.</p></article>
-      <article class="card"><h3 style="font-size:18px;"><a href="/emi-loan-calculator/">EMI / Loan Calculator</a></h3><p style="color:var(--ink-muted);">Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan.</p></article>
+      <article class="card"><h3 style="font-size:18px;"><a href="/gold-price-calculator/" data-i18n="cur.rel1">Gold Price Calculator</a></h3><p style="color:var(--ink-muted);" data-i18n="cur.rel1-desc">Value of gold per tola and per gram, with a live or your own price.</p></article>
+      <article class="card"><h3 style="font-size:18px;"><a href="/emi-loan-calculator/" data-i18n="cur.rel2">EMI / Loan Calculator</a></h3><p style="color:var(--ink-muted);" data-i18n="cur.rel2-desc">Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan.</p></article>
     </div>
   </div>
 
@@ -704,12 +704,18 @@ const schema = JSON.stringify({
       $('err-amount').hidden = true;
       errorSummary.hidden = true;
       errorSummary.textContent = '';
-      $('form-status').textContent = 'Form cleared.';
+      $('form-status').textContent = document.documentElement.lang === 'ur' ? 'فارم صاف کر دیا گیا۔' : 'Form cleared.';
       $('refresh-status').textContent = '';
       $('announcer').textContent = '';
       renderOptions();
       renderEmpty();
     });
+    // Refresh the script-managed "Form cleared." status when the language toggles.
+    window.__pfcAfterLang = function (lang) {
+      if ($('form-status').textContent === 'Form cleared.' || $('form-status').textContent === 'فارم صاف کر دیا گیا۔') {
+        $('form-status').textContent = lang === 'ur' ? 'فارم صاف کر دیا گیا۔' : 'Form cleared.';
+      }
+    };
 
     $('refresh-btn').addEventListener('click', () => refreshRates(true));
 

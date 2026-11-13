@@ -92,11 +92,11 @@ const related = [
 <Layout title={title} description={description} slug={slug} schema={schema}>
   <div class="container" style="padding-top: 32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Gold Price Calculator</p>
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="gold.crumb">Gold Price Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;">Rates &amp; Gold</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Gold Price Calculator Pakistan</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="gold.badge">Rates &amp; Gold</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;" data-i18n="gold.h1">Gold Price Calculator Pakistan</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;" data-i18n="gold.intro">
       Work out what your gold is worth in Pakistan, per tola and per gram, for 24K, 22K, 21K, or 18K.
       Use the live price, shown with its source and time, or enter a price of your own. The result is
       the indicative melt value only — making charges, wastage, taxes, and dealer buy/sell spreads are
@@ -122,7 +122,7 @@ const related = [
       <div class="card">
         <form id="goldForm" novalidate>
           <div class="field">
-            <label for="goldWeight">Weight of gold <span aria-hidden="true">*</span></label>
+            <label for="goldWeight"><span data-i18n="gold.weight-label">Weight of gold</span> <span aria-hidden="true">*</span></label>
             <input
               id="goldWeight"
               type="text"
@@ -131,22 +131,22 @@ const related = [
               aria-required="true"
               aria-describedby="goldWeightHint goldWeightError"
             />
-            <p class="hint" id="goldWeightHint">
+            <p class="hint" id="goldWeightHint" data-i18n="gold.weight-hint">
               Enter the weight in tola or grams — switch units below. Commas are accepted.
             </p>
             <p class="field-error" id="goldWeightError" hidden></p>
           </div>
 
           <fieldset class="radiogroup">
-            <legend>Weight unit</legend>
+            <legend data-i18n="gold.unit-label">Weight unit</legend>
             <div class="seg">
-              <label><input type="radio" name="goldUnit" value="tola" checked /> <span>Tola</span></label>
-              <label><input type="radio" name="goldUnit" value="grams" /> <span>Grams</span></label>
+              <label><input type="radio" name="goldUnit" value="tola" checked /> <span data-i18n="gold.unit-tola">Tola</span></label>
+              <label><input type="radio" name="goldUnit" value="grams" /> <span data-i18n="gold.unit-grams">Grams</span></label>
             </div>
           </fieldset>
 
           <fieldset class="radiogroup">
-            <legend>Karat <span aria-hidden="true">*</span></legend>
+            <legend><span data-i18n="gold.karat-label">Karat</span> <span aria-hidden="true">*</span></legend>
             <div class="seg">
               {
                 KARATS.map((karat) => (
@@ -159,21 +159,21 @@ const related = [
                 ))
               }
             </div>
-            <p class="hint" style="margin-top: 6px;">
+            <p class="hint" style="margin-top: 6px;" data-i18n="gold.purity-hint">
               Purity is karat ÷ 24. 24K is pure gold; lower karats contain other metals.
             </p>
           </fieldset>
 
           <fieldset class="radiogroup">
-            <legend>Price</legend>
+            <legend data-i18n="gold.price-label">Price</legend>
             <div class="seg">
-              <label><input type="radio" name="goldMode" value="live" checked /> <span>Live price</span></label>
-              <label><input type="radio" name="goldMode" value="manual" /> <span>Your own price</span></label>
+              <label><input type="radio" name="goldMode" value="live" checked /> <span data-i18n="gold.mode-live">Live price</span></label>
+              <label><input type="radio" name="goldMode" value="manual" /> <span data-i18n="gold.mode-manual">Your own price</span></label>
             </div>
           </fieldset>
 
           <div class="field" id="goldManualField" hidden>
-            <label for="goldManualPrice">Your price (PKR per tola) <span aria-hidden="true">*</span></label>
+            <label for="goldManualPrice"><span data-i18n="gold.manual-label">Your price (PKR per tola)</span> <span aria-hidden="true">*</span></label>
             <input
               id="goldManualPrice"
               type="text"
@@ -182,7 +182,7 @@ const related = [
               aria-required="true"
               aria-describedby="goldManualHint goldManualError"
             />
-            <p class="hint" id="goldManualHint">
+            <p class="hint" id="goldManualHint" data-i18n="gold.manual-hint">
               Price entered by you, not a market rate. Enter the price per tola you were quoted.
             </p>
             <p class="field-error" id="goldManualError" hidden></p>
@@ -191,8 +191,8 @@ const related = [
           <div id="goldErrors" class="error-box" role="alert" hidden></div>
 
           <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
-            <button id="goldCalculate" class="btn-primary" type="submit">Calculate</button>
-            <button id="goldClear" class="btn-secondary" type="button">Clear</button>
+            <button id="goldCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
+            <button id="goldClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
           <p id="goldFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
         </form>
@@ -200,9 +200,9 @@ const related = [
 
       <div class="result-card" id="goldResultCard" tabindex="-1">
         <div id="goldEmpty">
-          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
           <p id="goldEmptyText">Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);">
+          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="gold.empty-note">
             You’ll see the purity-adjusted value, the pure-gold (24K) value, and the price per gram
             and per tola used.
           </p>
@@ -253,8 +253,8 @@ const related = [
         </div>
 
         <div class="actions-row no-print">
-          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
         <p data-copy-status role="status" style="font-size: 14px;"></p>
       </div>
@@ -263,7 +263,7 @@ const related = [
 
   <section class="container" id="silverSection" aria-labelledby="silverHeading" style="margin-top: 32px;">
     <div class="card">
-      <h2 id="silverHeading" style="font-size: 20px;">Silver price per tola</h2>
+      <h2 id="silverHeading" style="font-size: 20px;" data-i18n="gold.silver-h">Silver price per tola</h2>
       <div id="silverStrip" class="notice-info">
         <p>
           <span id="silverStripText">Fetching the latest price…</span>
@@ -272,8 +272,8 @@ const related = [
       </div>
       <p id="silverPerGramLine" style="font-size: 15px;" hidden></p>
       <p style="font-size: 15px; color: var(--ink-muted);">
-        Silver is priced per tola from the same live source as the gold price above
-        (goldprice.dev), converted from the per-gram price — 1 tola is {TOLA_GRAMS} grams —
+        <span data-i18n="gold.silver-pre">Silver is priced per tola from the same live source as the gold price above
+        (goldprice.dev), converted from the per-gram price — 1 tola is </span>{TOLA_GRAMS}<span data-i18n="gold.silver-post"> grams —
         and shown with the same source and time. How silver differs from gold: silver is
         quoted as fine silver, with no karat system like gold’s 24K / 22K / 21K / 18K, so
         there is a single per-tola figure and no purity adjustment. Silver is also an
@@ -281,7 +281,7 @@ const related = [
         demand, and it is far cheaper per tola than gold. The price here is the
         international spot price in PKR, 15 minutes delayed on the free plan, not a local
         Sarafa jeweller rate — making charges, wastage, taxes, and dealer spreads are not
-        included. Silver also sets the lower Zakat nisab; see the <a href="/zakat-calculator/">Zakat Calculator</a>.
+        included. Silver also sets the lower Zakat nisab; see the </span><a href="/zakat-calculator/" data-i18n="card.zakat.name">Zakat Calculator</a>.
       </p>
       <p id="silverCredit" hidden style="font-size: 14px; color: var(--ink-muted);">
         Live silver prices by <a href="https://goldprice.dev" rel="noopener nofollow" target="_blank">goldprice.dev</a>.
@@ -291,8 +291,8 @@ const related = [
 
   <section class="container" id="tvGoldSection" aria-labelledby="tvGoldHeading" style="margin-top: 32px;">
     <div class="card">
-      <h2 id="tvGoldHeading" style="font-size: 20px;">Live gold price (USD) — for reference only</h2>
-      <p style="font-size: 15px; color: var(--ink-muted);">
+      <h2 id="tvGoldHeading" style="font-size: 20px;" data-i18n="gold.tv-h">Live gold price (USD) — for reference only</h2>
+      <p style="font-size: 15px; color: var(--ink-muted);" data-i18n="gold.tv-text">
         The widget below is from TradingView and shows the XAUUSD price in US dollars per troy
         ounce. It is display-only: it does not feed this calculator, and its price is never copied
         into any field. Your result still uses the live API price in PKR per tola, or the price you
@@ -331,49 +331,48 @@ const related = [
   </section>
 
   <div class="container prose-narrow" style="margin-top: 40px;">
-    <h2>How it works</h2>
+    <h2 data-i18n="gold.how-h">How it works</h2>
     <ol>
-      <li>Enter the weight of your gold, in tola or grams.</li>
-      <li>
+      <li data-i18n="gold.how1">Enter the weight of your gold, in tola or grams.</li>
+      <li data-i18n="gold.how2">
         Choose the karat — 24K is pure gold; 22K, 21K, and 18K contain other metals, so they are
         worth a fraction of the pure-gold price.
       </li>
-      <li>
+      <li data-i18n="gold.how3">
         Use the live price, or enter a price per tola you were quoted. The result is the
         purity-adjusted value, before making charges and taxes.
       </li>
     </ol>
     <p>
-      Weight in grams × price per gram × (karat ÷ 24). Price per gram is the price per tola ÷
-      {TOLA_GRAMS}, because 1 tola = {TOLA_GRAMS} grams. Gold held for a full lunar year may
-      be liable for Zakat — the <a href="/zakat-calculator/">Zakat Calculator</a> applies
-      the 2.5% rate to the nisab value.
+      <span data-i18n="gold.formula-pre">Weight in grams × price per gram × (karat ÷ 24). Price per gram is the price per tola ÷ </span>{TOLA_GRAMS}<span data-i18n="gold.formula-mid">, because 1 tola = </span>{TOLA_GRAMS}<span data-i18n="gold.formula-post"> grams. Gold held for a full lunar year may
+      be liable for Zakat — the </span><a href="/zakat-calculator/" data-i18n="card.zakat.name">Zakat Calculator</a><span data-i18n="gold.formula-post2"> applies
+      the 2.5% rate to the nisab value.</span>
     </p>
 
-    <h2>Worked example</h2>
+    <h2 data-i18n="gold.example-h">Worked example</h2>
     <p>
-      <strong>Example, in symbols only — no price is shown here.</strong> One tola of 24K gold is
+      <strong data-i18n="gold.ex-strong">Example, in symbols only — no price is shown here.</strong> <span data-i18n="gold.ex-rest">One tola of 24K gold is
       worth the price per tola. Two tola of 22K gold is worth twice the price per tola × 22/24,
       because 22K gold is 22/24 pure. The result is the melt value only — making charges, wastage,
-      taxes, and dealer spreads are not included.
+      taxes, and dealer spreads are not included.</span>
     </p>
 
-    <h2>Frequently asked questions</h2>
+    <h2 data-i18n="gold.faq-h">Frequently asked questions</h2>
     <div class="faq">
       {
-        faqs.map((f) => (
+        faqs.map((f, i) => (
           <details>
-            <summary>{f.q}</summary>
-            <p>{f.a}</p>
+            <summary data-i18n={`gold.faq${i + 1}q`}>{f.q}</summary>
+            <p data-i18n={`gold.faq${i + 1}a`}>{f.a}</p>
           </details>
         ))
       }
     </div>
-    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+    <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
     <section id="goldDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;">Important — please read</h2>
-      <p>
+      <h2 style="font-size: 20px;" data-i18n="gold.disc-h">Important — please read</h2>
+      <p data-i18n="gold.disc">
         This calculator gives an indicative melt value only, based on the weight, karat, and price
         you use. It is not financial advice, and it is not a buying or selling price. Making
         charges, wastage, taxes, and dealer buy/sell spreads are not included, and a jeweller’s
@@ -381,20 +380,20 @@ const related = [
         shown. Confirm any transaction with the dealer and, where relevant, a qualified
         professional before acting.
       </p>
-      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+      <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;">Related tools</h2>
+    <h2 style="margin-top: 32px;" data-i18n="gold.related-h">Related tools</h2>
     <div class="related-grid">
       {
-        related.map((tool) => (
+        related.map((tool, i) => (
           <article class="card">
             <h3 style="font-size: 18px;">
-              <a href={tool.href}>{tool.name}</a>
+              <a href={tool.href} data-i18n={`gold.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p style="color: var(--ink-muted);" data-i18n={`gold.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
-              <a href={tool.href}>Use the calculator →</a>
+              <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
           </article>
         ))
@@ -994,10 +993,16 @@ const related = [
       setFieldError(manualInput, manualError, null);
       errorsBox.textContent = '';
       errorsBox.hidden = true;
-      formStatus.textContent = 'Form cleared.';
+      formStatus.textContent = document.documentElement.lang === 'ur' ? 'فارم صاف کر دیا گیا۔' : 'Form cleared.';
       updateStrip();
       showEmpty('Enter your details to see your result.');
     });
+    // Refresh the script-managed "Form cleared." status when the language toggles.
+    window.__pfcAfterLang = function (lang) {
+      if (formStatus.textContent === 'Form cleared.' || formStatus.textContent === 'فارم صاف کر دیا گیا۔') {
+        formStatus.textContent = lang === 'ur' ? 'فارم صاف کر دیا گیا۔' : 'Form cleared.';
+      }
+    };
 
     document.getElementById('goldRetryBtn').addEventListener('click', () => {
       loadPrice();
