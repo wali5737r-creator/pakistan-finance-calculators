@@ -1,0 +1,72 @@
+/* pension-eobi-calculator.css — moved from the inline <style> block in
+   src/pages/pension-eobi-calculator.astro (2026-11-13, CSP style-src work). Every
+   selector is prefixed with .pg-pension-eobi-calculator, which is added to the page's
+   top-level containers, so these rules keep the page scope they
+   had as Astro scoped styles. Do not drop the prefix: without it
+   these rules would apply site-wide and collide with other
+   pages' copies (see /tmp/style-src-audit.md section 3). */
+
+.pg-pension-eobi-calculator [hidden] {
+  display: none !important;
+}
+
+.pg-pension-eobi-calculator .field-error {
+  font-size: 14px;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.pg-pension-eobi-calculator .stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin: 12px 0;
+}
+
+.pg-pension-eobi-calculator .stat-grid p {
+  margin: 0;
+}
+
+.pg-pension-eobi-calculator .stat-label {
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.pg-pension-eobi-calculator .stat-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.pg-pension-eobi-calculator .actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pg-pension-eobi-calculator .related-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.pg-pension-eobi-calculator .breakdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 15px;
+}
+
+.pg-pension-eobi-calculator .breakdown-table th, .pg-pension-eobi-calculator .breakdown-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.pg-pension-eobi-calculator .breakdown-table td:last-child, .pg-pension-eobi-calculator .breakdown-table th:last-child {
+  text-align: right;
+}
+
+.pg-pension-eobi-calculator .breakdown-table tr.total-row td {
+  font-weight: 700;
+}

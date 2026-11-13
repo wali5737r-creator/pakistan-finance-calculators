@@ -1,0 +1,46 @@
+/* compound-interest-calculator.astro — page styles moved from the inline <style> block (2026-11-13, CSP style-src). */
+/* Scoped to this page with .pg-compound-interest-calculator (replaces Astro's scoped-style scoping). */
+
+.pg-compound-interest-calculator [hidden] {
+  display: none !important;
+}
+
+.pg-compound-interest-calculator .field-error {
+  font-size: 14px;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.pg-compound-interest-calculator .stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin: 12px 0;
+}
+
+.pg-compound-interest-calculator .stat-grid p {
+  margin: 0;
+}
+
+.pg-compound-interest-calculator .stat-label {
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.pg-compound-interest-calculator .stat-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.pg-compound-interest-calculator .actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pg-compound-interest-calculator .related-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}

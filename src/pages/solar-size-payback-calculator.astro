@@ -1,5 +1,6 @@
 ---
 import Layout from '../components/Layout.astro';
+import '../styles/pages/solar-size-payback-calculator.css';
 
 const title = "Solar Size & Payback Calculator Pakistan | Net Billing 2026 | Pakistan Finance Calculators";
 const description = "Work out the right solar size for your home in Pakistan and how fast it pays back under NEPRA net billing 2026 — cost, monthly saving and payback.";
@@ -81,19 +82,19 @@ const related = [
 ];
 ---
 <Layout title={title} description={description} slug={slug} schema={schema}>
-  <div class="container" style="padding-top: 32px;">
+  <div class="container u-pt-32 pg-solar-size-payback-calculator">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="sol.crumb">Solar Size &amp; Payback Calculator</span></p>
+      <p class="u-muted-14"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="sol.crumb">Solar Size &amp; Payback Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="sol.badge">Utility Bills</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;" data-i18n="sol.h1">Solar Size &amp; Payback Calculator</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;" data-i18n="sol.intro">
+    <p class="badge badge-info u-mt-8" data-i18n="sol.badge">Utility Bills</p>
+    <h1 class="u-hero-title" data-i18n="sol.h1">Solar Size &amp; Payback Calculator</h1>
+    <p class="prose-narrow u-lede" data-i18n="sol.intro">
       A 5 kW system in Lahore costs about Rs 650,000, generates about 585 units a month,
       and at 60% self-use saves about Rs 19,200 a month — so it pays for itself in about
       34 months (2.8 years). Enter your own bill and city below to work out the right
       size for your home and your payback under NEPRA net billing 2026.
     </p>
-    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+    <p class="notice-info prose-narrow u-mt-16">
       <strong data-i18n="sol.notice-label">Estimate only.</strong> <span data-i18n="sol.notice-text">This uses NEPRA's (Prosumer) Regulations 2026
       (SRO 251(I)/2026) and 2026 market prices, checked 13 November 2026. The export
       rate is a planning figure — the SRO prints no rupee figure and NEPRA may revise
@@ -102,7 +103,7 @@ const related = [
     </p>
   </div>
 
-  <div class="container" style="margin-top: 20px;">
+  <div class="container u-mt-20 pg-solar-size-payback-calculator">
     <div class="tool-grid">
       <div class="card">
         <form id="solarForm" novalidate>
@@ -172,8 +173,8 @@ const related = [
           </div>
 
           <div class="field">
-            <label style="display: flex; gap: 8px; align-items: flex-start; font-weight: 400;">
-              <input id="solarLegacy" type="checkbox" style="margin-top: 4px;" />
+            <label class="u-flex-start-8">
+              <input id="solarLegacy" type="checkbox" class="u-mt-4" />
               <span data-i18n="sol.legacy-label">My net-metering agreement is from before 9 February 2026 (legacy — old 1:1 treatment)</span>
             </label>
             <p class="hint" data-i18n="sol.legacy-hint">Reported amendment SRO 547(I)/2026 says pre-9-Feb-2026 agreements keep the old rate until expiry — we have not read its text directly, so this is labelled as reported. Exports are then credited at the import rate.</p>
@@ -181,25 +182,25 @@ const related = [
 
           <div id="solarErrors" class="error-box" role="alert" hidden></div>
 
-          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+          <p class="u-actions">
             <button id="solarCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
             <button id="solarClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
-          <p id="solarFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="solarFormStatus" role="status" class="u-muted-14"></p>
         </form>
       </div>
 
       <div class="result-card" id="solarResultCard" tabindex="-1">
         <div id="solarEmpty">
-          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p class="u-fw-700" data-i18n="ui.empty-title">Your result will appear here.</p>
           <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
+          <p class="u-muted-14" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
 
         <div id="solarResult" data-result-text hidden>
-          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" data-i18n="sol.result-label">Simple payback</p>
+          <p class="u-muted-14-bold" data-i18n="sol.result-label">Simple payback</p>
           <div aria-live="polite" aria-atomic="true">
             <p class="result-value" id="solarHeadline"></p>
           </div>
@@ -224,10 +225,10 @@ const related = [
           <div class="table-wrap">
           <table class="breakdown-table" id="solarBreakdown" aria-label="Solar payback breakdown"></table>
           </div>
-          <p id="solarEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
-          <p id="solarFormula" style="font-size: 16px;"></p>
-          <p id="solarRoofNote" style="font-size: 14px; color: var(--ink-muted);"></p>
-          <p style="font-size: 13px; color: var(--ink-muted);">
+          <p id="solarEcho" class="u-muted-14"></p>
+          <p id="solarFormula" class="u-fs-16"></p>
+          <p id="solarRoofNote" class="u-muted-14"></p>
+          <p class="u-muted-13">
             <span data-i18n="sol.estimate">Estimate only — check important figures before acting.</span> <a href="#solarDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
@@ -236,12 +237,12 @@ const related = [
           <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
           <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
-        <p data-copy-status role="status" style="font-size: 14px;"></p>
+        <p data-copy-status role="status" class="u-fs-14"></p>
       </div>
     </div>
   </div>
 
-  <div class="container prose-narrow" style="margin-top: 40px;">
+  <div class="container prose-narrow u-mt-40 pg-solar-size-payback-calculator">
     <h2 data-i18n="sol.how-h">How it works</h2>
     <ol>
       <li data-i18n="sol.how1">Enter your city and your monthly units (or your monthly bill, which is converted to units at the flat Rs 48 per unit). If you leave the system size blank, the calculator sizes it from your usage, rounded up to the nearest 0.5 kW.</li>
@@ -260,7 +261,7 @@ const related = [
     <h2 data-i18n="sol.example-h">Worked example</h2>
     <p><strong><span data-i18n="sol.exA-label">Example A — 5 kW, Lahore,</span> Rs 650,000:</strong><span data-i18n="sol.exA-1"> generation is 5 x 3.85 x 365/12 = </span><span>585.52</span><span data-i18n="sol.exA-2"> units a month. At 60% self-use, </span><span>351.31</span><span data-i18n="sol.exA-3"> units are used at home at Rs 48 = </span><span>Rs 16,862.88</span><span data-i18n="sol.exA-4">, and </span><span>234.21</span><span data-i18n="sol.exA-5"> units are exported at Rs 10 = </span><span>Rs 2,342.10</span><span data-i18n="sol.exA-6">, so the monthly saving is </span><span>Rs 19,204.98</span><span data-i18n="sol.exA-7">. Simple payback is </span><span>650,000</span><span> / </span><span>19,204.98</span><span> = </span><span>33.85</span><span data-i18n="sol.exA-8"> months, about 2.8 years. At 50% self-use the payback is </span><span>38.28</span><span data-i18n="sol.exA-9"> months; at 70% it is </span><span>30.33</span><span data-i18n="sol.exA-10"> months. Over 25 years at 0.5% degradation a year, the gross saving is </span><span>Rs 5,428,698.91</span><span data-i18n="sol.exA-11"> and the net saving after the system cost is </span><span>Rs 4,778,698.91</span><span data-i18n="sol.exA-12">.</span></p>
     <p><strong><span data-i18n="sol.exB-label">Example B — 10 kW, Karachi,</span> Rs 1,300,000:</strong><span data-i18n="sol.exB-1"> generation is 10 x 4.38 x 365/12 = </span><span>1,332.25</span><span data-i18n="sol.exB-2"> units a month. At 60% self-use, </span><span>799.35</span><span data-i18n="sol.exB-3"> units at Rs 48 = </span><span>Rs 38,368.80</span><span data-i18n="sol.exB-4">, and </span><span>532.90</span><span data-i18n="sol.exB-5"> units exported at Rs 10 = </span><span>Rs 5,329.00</span><span data-i18n="sol.exB-6">, so the monthly saving is </span><span>Rs 43,697.80</span><span data-i18n="sol.exB-7">. Simple payback is </span><span>1,300,000</span><span> / </span><span>43,697.80</span><span> = </span><span>29.75</span><span data-i18n="sol.exB-8"> months, about 2.5 years.</span></p>
-    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="sol.ex-note">Both examples use the default Rs 130,000 per kW and exclude the net-metering fee (Rs 60,000-80,000, installer-reported) and any inverter replacement.</p>
+    <p class="u-muted-14" data-i18n="sol.ex-note">Both examples use the default Rs 130,000 per kW and exclude the net-metering fee (Rs 60,000-80,000, installer-reported) and any inverter replacement.</p>
 
     <h2 data-i18n="sol.yields-h">City yields and system cost (2026)</h2>
     <div class="table-wrap">
@@ -276,7 +277,7 @@ const related = [
       </tbody>
     </table>
     </div>
-    <p style="font-size: 14px; color: var(--ink-muted);">Yield source: SolarGuide (NASA POWER climatology, 78% system efficiency), corroborated by PVGIS Lahore 4.3 kWh/kW/day and a peer-reviewed Lahore case study 3.85 kWh/kW/day. System cost: Rs 105,000-160,000 per kW installed (on-grid residential, excluding batteries), convergent range from five sources August-November 2026; default Rs 130,000 per kW. So a 5 kW system is about Rs 650,000 and a 10 kW system about Rs 1,300,000, before the net-metering fee.</p>
+    <p class="u-muted-14">Yield source: SolarGuide (NASA POWER climatology, 78% system efficiency), corroborated by PVGIS Lahore 4.3 kWh/kW/day and a peer-reviewed Lahore case study 3.85 kWh/kW/day. System cost: Rs 105,000-160,000 per kW installed (on-grid residential, excluding batteries), convergent range from five sources August-November 2026; default Rs 130,000 per kW. So a 5 kW system is about Rs 650,000 and a 10 kW system about Rs 1,300,000, before the net-metering fee.</p>
 
     <h2 data-i18n="sol.faq-h">Frequently asked questions</h2>
     <div class="faq">
@@ -291,8 +292,8 @@ const related = [
     </div>
     <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
-    <section id="solarDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;" data-i18n="sol.disc-h">Important — please read</h2>
+    <section id="solarDisclaimer" class="notice-info u-mt-32">
+      <h2 class="u-fs-20" data-i18n="sol.disc-h">Important — please read</h2>
       <p data-i18n="sol.disc">
         Results are planning estimates, not a promise. Actual yield depends on
         your location, roof direction, shading, panel quality and cleaning.
@@ -312,15 +313,15 @@ const related = [
       <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;" data-i18n="sol.related-h">Related tools</h2>
+    <h2 class="u-mt-32" data-i18n="sol.related-h">Related tools</h2>
     <div class="related-grid">
       {
         related.map((tool, i) => (
           <article class="card">
-            <h3 style="font-size: 18px;">
+            <h3 class="u-fs-18">
               <a href={tool.href} data-i18n={`sol.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);" data-i18n={`sol.rel${i + 1}-desc`}>{tool.desc}</p>
+            <p class="u-txt-muted" data-i18n={`sol.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
               <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
@@ -329,64 +330,6 @@ const related = [
       }
     </div>
   </div>
-
-  <style>
-    [hidden] {
-      display: none !important;
-    }
-    .field-error {
-      font-size: 14px;
-      color: var(--danger);
-      font-weight: 600;
-    }
-    .stat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 16px;
-      margin: 12px 0;
-    }
-    .stat-grid p {
-      margin: 0;
-    }
-    .stat-label {
-      font-size: 14px;
-      color: var(--ink-muted);
-    }
-    .stat-value {
-      font-size: 20px;
-      font-weight: 700;
-    }
-    .actions-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
-    }
-    .related-grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    }
-    .breakdown-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 12px 0;
-      font-size: 15px;
-    }
-    .breakdown-table th,
-    .breakdown-table td {
-      text-align: left;
-      padding: 8px 10px;
-      border-bottom: 1px solid var(--border, #e5e7eb);
-    }
-    .breakdown-table td:last-child,
-    .breakdown-table th:last-child {
-      text-align: right;
-    }
-    .breakdown-table tr.total-row td {
-      font-weight: 700;
-    }
-  </style>
 
   <script>
     import { calcMonthlyGeneration, calcSolarPayback, parseDecimal, formatPKR, formatNumber, recommendedSystemKw, solarRoofAreaSqft, solarSlabBaseRate, solarYieldForCity, unitsFromBill } from '../lib/calc.ts';

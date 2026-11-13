@@ -1,5 +1,6 @@
 ---
 import Layout from '../components/Layout.astro';
+import '../styles/pages/zakat-calculator.css';
 import { ZAKAT_RATE, NISAB_GOLD_GRAMS, NISAB_SILVER_GRAMS, TOLA_GRAMS } from '../config/zakat.ts';
 
 const title = 'Zakat Calculator Pakistan | Gold & Silver Nisab 2.5% | Pakistan Finance Calculators';
@@ -62,59 +63,28 @@ const schema = JSON.stringify({
 ---
 
 <Layout title={title} description={description} slug={slug} schema={schema}>
-  <style is:global>
-    .field-error { color: var(--danger); font-size: 14px; font-weight: 600; margin: 0; }
-    .segmented { display: flex; gap: 8px; flex-wrap: wrap; }
-    .segmented label {
-      border: 1px solid var(--border-strong); border-radius: 999px;
-      padding: 8px 16px; cursor: pointer; font-weight: 600; font-size: 15px;
-      background: var(--surface);
-    }
-    .segmented input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-    .segmented label:has(input:checked) { background: var(--brand-700); color: #fff; border-color: var(--brand-700); }
-    .segmented label:has(input:focus-visible) { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
-    .group-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-muted); margin: 20px 0 4px; }
-    .group-divider { border: 0; border-top: 1px solid var(--border); margin: 4px 0 12px; }
-    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
-    .stat-grid .stat-label { font-size: 14px; color: var(--ink-muted); margin: 0; }
-    .stat-grid .stat-value { font-size: 20px; font-weight: 700; margin: 2px 0 0; }
-    .bar { display: flex; height: 20px; border-radius: 999px; overflow: hidden; background: var(--surface-tint); margin: 12px 0 4px; }
-    .bar span { display: block; height: 100%; }
-    .bar-debts { height: 10px; }
-    #sticky-bar {
-      position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
-      background: var(--surface-raised); border-top: 1px solid var(--border-strong);
-      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-      display: flex; gap: 12px; align-items: center; justify-content: space-between;
-      box-shadow: 0 -4px 16px rgba(15, 27, 22, 0.08);
-    }
-    /* Without this, display:flex above overrides the hidden attribute and
-       the bar is rendered permanently — even before any calculation and
-       after Dismiss — covering the footer. */
-    #sticky-bar[hidden] { display: none; }
-  </style>
 
-  <div class="container" style="padding-top:32px;">
-    <nav class="breadcrumb" aria-label="Breadcrumb" style="font-size:14px; margin-bottom:12px;">
+  <div class="container u-pt-32 pg-zakat-calculator">
+    <nav class="breadcrumb u-mb-12 u-fs-14" aria-label="Breadcrumb">
       <a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="zak.crumb">Zakat Calculator</span>
     </nav>
-    <p class="badge badge-info" style="margin-bottom:12px;" data-i18n="zak.badge">Islamic Finance</p>
-    <h1 data-i18n="zak.h1" style="font-size:clamp(1.75rem,4.5vw,2.25rem);">Zakat Calculator</h1>
-    <p class="prose-narrow" style="font-size:clamp(1.0625rem,2vw,1.1875rem); margin-top:12px;">
+    <p class="badge badge-info u-mb-12" data-i18n="zak.badge">Islamic Finance</p>
+    <h1 data-i18n="zak.h1" class="u-hero-title-bare">Zakat Calculator</h1>
+    <p class="prose-narrow u-lede">
       <span data-i18n="zak.intro-pre">Add up zakatable wealth, deduct debts due, and work out </span>{ZAKAT_RATE * 100}%<span data-i18n="zak.intro-post"> Zakat on the stated nisab basis. This is an arithmetic estimate only, not a ruling — how long wealth has been owned (hawl) is not computed here.</span>
     </p>
   </div>
 
-  <div class="container" style="margin-top:20px;">
+  <div class="container u-mt-20 pg-zakat-calculator">
     <div id="price-strip" class="notice-info" role="status">
       No live price loaded. Enter gold and silver prices below, or use the latest prices button in the form.
     </div>
-    <div id="price-notice" class="notice-warning" role="status" hidden style="margin-top:12px;">
+    <div id="price-notice" class="notice-warning u-mt-12" role="status" hidden>
       Latest prices are unavailable. You can still type gold and silver prices yourself below, clearly labelled as prices entered by you, or try again later.
     </div>
   </div>
 
-  <div class="container" style="margin-top:20px;">
+  <div class="container u-mt-20 pg-zakat-calculator">
     <div class="tool-grid">
       <div class="card">
         <form id="zakat-form" novalidate>
@@ -122,7 +92,7 @@ const schema = JSON.stringify({
 
           <p class="group-label" data-i18n="zak.group-cash">Cash and other assets</p>
           <hr class="group-divider" />
-          <p class="hint" style="font-size:14px; color:var(--ink-muted); margin-bottom:12px;" data-i18n="zak.cash-note">
+          <p class="hint u-muted-14 u-mb-12" data-i18n="zak.cash-note">
             All fields are optional. Leave a field blank if it does not apply — blank means zero.
           </p>
 
@@ -135,7 +105,7 @@ const schema = JSON.stringify({
 
           <p class="group-label" data-i18n="zak.group-gold">Gold owned</p>
           <hr class="group-divider" />
-          <fieldset class="field" style="border:0; padding:0; margin-bottom:12px;">
+          <fieldset class="field u-fieldset-mb12">
             <legend data-i18n="zak.gold-legend">Gold — how do you want to enter it?</legend>
             <div class="segmented" role="radiogroup" aria-label="Gold entry mode">
               <label><input type="radio" name="gold-mode" value="value" checked /> <span data-i18n="zak.mode-value">Value</span></label>
@@ -168,7 +138,7 @@ const schema = JSON.stringify({
               <p class="hint"><span data-i18n="zak.gold-unit-hint-pre">1 tola = </span>{TOLA_GRAMS}<span data-i18n="zak.gold-unit-hint-post"> g.</span></p>
             </div>
           </div>
-          <p class="hint" id="gold-retained" style="font-size:14px; color:var(--ink-muted);"></p>
+          <p class="hint u-muted-14" id="gold-retained"></p>
           <div class="field">
             <label for="gold-price" data-i18n="zak.gold-price-label">Gold price (PKR per tola) (optional)</label>
             <input type="text" inputmode="decimal" autocomplete="off" id="gold-price" />
@@ -179,7 +149,7 @@ const schema = JSON.stringify({
 
           <p class="group-label" data-i18n="zak.group-silver">Silver owned</p>
           <hr class="group-divider" />
-          <fieldset class="field" style="border:0; padding:0; margin-bottom:12px;">
+          <fieldset class="field u-fieldset-mb12">
             <legend data-i18n="zak.silver-legend">Silver — how do you want to enter it?</legend>
             <div class="segmented" role="radiogroup" aria-label="Silver entry mode">
               <label><input type="radio" name="silver-mode" value="value" checked /> <span data-i18n="zak.mode-value">Value</span></label>
@@ -212,7 +182,7 @@ const schema = JSON.stringify({
               <p class="hint"><span data-i18n="zak.silver-unit-hint-pre">1 tola = </span>{TOLA_GRAMS}<span data-i18n="zak.silver-unit-hint-post"> g.</span></p>
             </div>
           </div>
-          <p class="hint" id="silver-retained" style="font-size:14px; color:var(--ink-muted);"></p>
+          <p class="hint u-muted-14" id="silver-retained"></p>
           <div class="field">
             <label for="silver-price" data-i18n="zak.silver-price-label">Silver price (PKR per tola) (optional)</label>
             <input type="text" inputmode="decimal" autocomplete="off" id="silver-price" />
@@ -224,9 +194,9 @@ const schema = JSON.stringify({
             <p class="field-error" id="err-silver-price" hidden></p>
           </div>
 
-          <div style="margin-top:8px;">
+          <div class="u-mt-8">
             <button type="button" class="btn-secondary" id="use-prices" data-i18n="zak.use-prices">Use latest prices</button>
-            <p class="hint" style="font-size:14px; color:var(--ink-muted); margin-top:8px;" data-i18n="zak.use-prices-hint">
+            <p class="hint u-muted-14 u-mt-8" data-i18n="zak.use-prices-hint">
               Fetches the latest gold and silver prices. If the prices cannot be loaded, type them yourself.
             </p>
           </div>
@@ -252,13 +222,13 @@ const schema = JSON.stringify({
             <p class="field-error" id="err-debts" hidden></p>
           </div>
 
-          <p style="font-size:14px; color:var(--ink-muted);" data-i18n="zak.personal-note">
+          <p class="u-muted-14" data-i18n="zak.personal-note">
             Personal-use items (for example, items you use yourself and do not hold for trade) are excluded.
             This tool cannot decide whether an item is zakatable — if you are unsure, confirm with a
             qualified scholar before paying.
           </p>
 
-          <fieldset class="field" style="border:0; padding:0; margin-top:16px;">
+          <fieldset class="field u-fieldset-mt16">
             <legend data-i18n="zak.nisab-legend">Nisab basis</legend>
             <div class="segmented" role="radiogroup" aria-label="Nisab basis">
               <label><input type="radio" name="nisab-basis" value="gold" /> <span data-i18n="zak.nisab-gold">Gold</span></label>
@@ -272,40 +242,40 @@ const schema = JSON.stringify({
             </p>
           </fieldset>
 
-          <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
-            <button type="submit" class="btn-primary" style="flex:1;" data-i18n="ui.calculate">Calculate</button>
+          <div class="u-row-12-mt8">
+            <button type="submit" class="btn-primary u-flex-1" data-i18n="ui.calculate">Calculate</button>
             <button type="button" class="btn-secondary" id="clear-btn" data-i18n="ui.clear">Clear</button>
           </div>
-          <p class="hint" style="font-size:14px; color:var(--ink-muted); margin-top:8px;" role="status" id="form-status"></p>
+          <p class="hint u-muted-14 u-mt-8" role="status" id="form-status"></p>
         </form>
       </div>
 
       <section class="result-card" id="result-card" tabindex="-1" aria-label="Zakat result">
         <div id="result-content" data-result-text aria-live="polite" aria-atomic="true">
-          <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:0;">Zakat due</p>
+          <p class="u-muted-14-bold-m0">Zakat due</p>
           <p>Enter your details to see your result.</p>
           <p>Enter at least one asset to see your result. You will see your Zakat due, net wealth, and whether nisab is met on the basis stated.</p>
-          <p style="font-size:13px; color:var(--ink-muted);">Estimates only — not a religious ruling. Confirm with a qualified scholar. Read the full disclaimer below.</p>
+          <p class="u-muted-13">Estimates only — not a religious ruling. Confirm with a qualified scholar. Read the full disclaimer below.</p>
         </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;" class="no-print">
+        <div class="no-print u-row-8-mt16">
           <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
           <button type="button" class="btn-secondary" data-share-result data-i18n="zak.share" disabled>Share</button>
           <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
-        <p data-copy-status role="status" style="font-size:14px; margin-top:8px;"></p>
+        <p data-copy-status role="status" class="u-mt-8 u-fs-14"></p>
       </section>
     </div>
   </div>
 
   <div id="sticky-bar" class="no-print" hidden>
-    <p style="margin:0;"><strong data-i18n="zak.sticky-due">Zakat due</strong><br /><span id="sticky-text"></span></p>
-    <div style="display:flex; gap:8px; align-items:center;">
+    <p class="u-m-0"><strong data-i18n="zak.sticky-due">Zakat due</strong><br /><span id="sticky-text"></span></p>
+    <div class="u-row-8">
       <button type="button" class="btn-secondary" id="sticky-details" data-i18n="zak.sticky-details">Details</button>
       <button type="button" class="btn-secondary" id="sticky-dismiss" aria-label="Dismiss summary">×</button>
     </div>
   </div>
 
-  <div class="container prose-narrow" style="margin-top:48px;">
+  <div class="container prose-narrow u-mt-48 pg-zakat-calculator">
     <h2 data-i18n="zak.how-h">How it works</h2>
     <ol>
       <li data-i18n="zak.how1">Add up cash, gold, silver, trade goods, and other zakatable assets to get gross wealth.</li>
@@ -324,7 +294,7 @@ const schema = JSON.stringify({
     <div class="faq">
       {faqs.map((f, i) => (
         <details>
-          <summary><h3 style="display:inline; font-size:18px;" data-i18n={`zak.faq${i + 1}q`}>{f.q}</h3></summary>
+          <summary><h3 class="u-inline-18" data-i18n={`zak.faq${i + 1}q`}>{f.q}</h3></summary>
           <p data-i18n={`zak.faq${i + 1}a`}>{f.a}</p>
         </details>
       ))}
@@ -346,9 +316,9 @@ const schema = JSON.stringify({
     </div>
 
     <h2 data-i18n="zak.related-h">Related tools</h2>
-    <div style="display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
-      <article class="card"><h3 style="font-size:18px;"><a href="/gold-price-calculator/" data-i18n="zak.rel1">Gold Price Calculator</a></h3><p style="color:var(--ink-muted);" data-i18n="zak.rel1-desc">Value of gold per tola and per gram, with a live or your own price.</p></article>
-      <article class="card"><h3 style="font-size:18px;"><a href="/currency-converter/" data-i18n="zak.rel2">Currency Converter</a></h3><p style="color:var(--ink-muted);" data-i18n="zak.rel2-desc">Convert between PKR and major currencies at the latest rate.</p></article>
+    <div class="u-grid-cards">
+      <article class="card"><h3 class="u-fs-18"><a href="/gold-price-calculator/" data-i18n="zak.rel1">Gold Price Calculator</a></h3><p class="u-txt-muted" data-i18n="zak.rel1-desc">Value of gold per tola and per gram, with a live or your own price.</p></article>
+      <article class="card"><h3 class="u-fs-18"><a href="/currency-converter/" data-i18n="zak.rel2">Currency Converter</a></h3><p class="u-txt-muted" data-i18n="zak.rel2-desc">Convert between PKR and major currencies at the latest rate.</p></article>
     </div>
   </div>
 
@@ -383,6 +353,11 @@ const schema = JSON.stringify({
     let userChoseBasis = false;
     let lastValidHTML = '';
     let lastValidHeadline = '';
+    // Bar sizing for the JS-built result bars (see renderResult): the shares
+    // and debts width of the last rendered result, re-applied by
+    // applyBarStyles() after every innerHTML write that (re)creates the bars.
+    let lastBarShares = [];
+    let lastDebtsWidth = null;
     let stickyDismissed = false;
     let debounceTimer = null;
 
@@ -657,6 +632,23 @@ const schema = JSON.stringify({
       if (!stickyBar.hidden) syncStickyPadding();
     });
 
+    // Sizes the JS-built result bars. Widths/colours are runtime values, so
+    // they live in CSS custom properties (--bar-w / --bar-bg) set here via
+    // CSSOM setProperty — CSP style-src blocks inline style attributes but
+    // does not block CSSOM. The matching rules are in
+    // src/styles/pages/zakat-calculator.css under .pg-zakat-calculator.
+    function applyBarStyles() {
+      resultContent.querySelectorAll('.bar:not(.bar-debts) > span').forEach((span, i) => {
+        if (!lastBarShares[i]) return;
+        span.style.setProperty('--bar-w', lastBarShares[i].share + '%');
+        span.style.setProperty('--bar-bg', lastBarShares[i].color);
+      });
+      const debtsSpan = resultContent.querySelector('.bar-debts > span');
+      if (debtsSpan && lastDebtsWidth !== null) {
+        debtsSpan.style.setProperty('--bar-w', lastDebtsWidth + '%');
+      }
+    }
+
     function renderResult(values, parsed) {
       const selection = checkedValue('nisab-basis');
       const effectiveBasis = selection === 'both' ? deriveBasis(values) : selection;
@@ -716,23 +708,36 @@ const schema = JSON.stringify({
         const share = result.gross > 0 ? (c.amount / result.gross) * 100 : 0;
         return `<tr><td>${c.label}</td><td>${formatPKR(round2(c.amount))}</td><td>${formatNumber(share, 2)}%</td></tr>`;
       }).join('');
+      // Bar segment widths/colours are runtime values, so they cannot be a
+      // static class — and an inline style attribute (even inside an innerHTML
+      // string) is blocked once style-src drops unsafe-inline. CSSOM
+      // setProperty is not blocked, so the spans are emitted bare here and
+      // sized by applyBarStyles() after every innerHTML write (below, and
+      // on the previous-result restore in recalculate()).
+      const barShares = [];
       const barSegments = categories.map((c, i) => {
         const share = result.gross > 0 ? (c.amount / result.gross) * 100 : 0;
         const colors = ['var(--brand-600)', 'var(--gold-500)', 'var(--info)', 'var(--brand-400)', 'var(--gold-600)'];
-        return share > 0 ? `<span style="width:${share}%;background:${colors[i]};"></span>` : '';
+        if (share > 0) { barShares.push({ share, color: colors[i] }); return `<span></span>`; }
+        return '';
       }).join('');
+      lastBarShares = barShares;
       const barLabel = result.gross > 0
         ? categories.filter((c) => c.amount > 0).map((c) => `${c.label} ${formatNumber(result.gross > 0 ? (c.amount / result.gross) * 100 : 0, 2)}%`).join(', ') + ` of gross wealth ${formatPKR(result.gross)}`
         : 'No zakatable wealth entered';
+      const debtsWidth = result.gross > 0 && values.debts > 0
+        ? Math.min(100, (values.debts / result.gross) * 100)
+        : null;
+      lastDebtsWidth = debtsWidth;
       const debtsBar = result.gross > 0 && values.debts > 0
-        ? `<div class="bar bar-debts" aria-hidden="true"><span style="width:${Math.min(100, (values.debts / result.gross) * 100)}%;background:repeating-linear-gradient(45deg, var(--gold-600) 0 6px, transparent 6px 12px);"></span></div><p style="font-size:14px;">Less: debts due ${formatPKR(values.debts)}${values.debts > result.gross ? ' — debts exceed the total entered' : ''}.</p>`
+        ? `<div class="bar bar-debts" aria-hidden="true"><span></span></div><p class="u-fs-14">Less: debts due ${formatPKR(values.debts)}${values.debts > result.gross ? ' — debts exceed the total entered' : ''}.</p>`
         : '';
 
       const html = `
         ${banner}
         ${staleNote}
-        <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:16px 0 0;">Zakat due</p>
-        <p class="result-value" style="margin:0;">${escapeHtml(headline)}</p>
+        <p class="u-muted-14-bold-mt16">Zakat due</p>
+        <p class="result-value u-m-0">${escapeHtml(headline)}</p>
         ${conditional}
         ${subRupeeNote}
         ${debtsNote}
@@ -744,13 +749,13 @@ const schema = JSON.stringify({
           ${belowLine}
         </div>
         <p><strong>Based on:</strong> ${escapeHtml(echoText(values, parsed)) || 'No assets entered.'}</p>
-        <p style="font-size:14px;">Zakat rate ${ZAKAT_RATE * 100}% · Nisab: ${NISAB_GOLD_GRAMS} g gold / ${NISAB_SILVER_GRAMS} g silver · Basis used: ${basisLabel} (${basisReason}) · Gold price: ${escapeHtml(values.goldPrice !== null ? priceDisplay('gold', values.goldPrice) : 'not available')} · Silver price: ${escapeHtml(values.silverPrice !== null ? priceDisplay('silver', values.silverPrice) : 'not available')}</p>
-        <h3 style="font-size:18px; margin-top:20px;">Breakdown</h3>
+        <p class="u-fs-14">Zakat rate ${ZAKAT_RATE * 100}% · Nisab: ${NISAB_GOLD_GRAMS} g gold / ${NISAB_SILVER_GRAMS} g silver · Basis used: ${basisLabel} (${basisReason}) · Gold price: ${escapeHtml(values.goldPrice !== null ? priceDisplay('gold', values.goldPrice) : 'not available')} · Silver price: ${escapeHtml(values.silverPrice !== null ? priceDisplay('silver', values.silverPrice) : 'not available')}</p>
+        <h3 class="u-mt-20 u-fs-18">Breakdown</h3>
         ${result.gross > 0 ? `<div class="bar" role="img" aria-label="${escapeHtml(barLabel)}">${barSegments}</div>` : '<p>No zakatable wealth entered.</p>'}
         ${debtsBar}
         <div class="table-wrap">
           <table class="data">
-            <caption style="text-align:left; font-weight:700; padding:10px 12px;">Breakdown by category</caption>
+            <caption class="u-caption">Breakdown by category</caption>
             <thead><tr><th scope="col">Category</th><th scope="col">Amount (PKR)</th><th scope="col">Share of gross</th></tr></thead>
             <tbody>${rows}</tbody>
             <tfoot>
@@ -760,12 +765,13 @@ const schema = JSON.stringify({
             </tfoot>
           </table>
         </div>
-        <h3 style="font-size:18px; margin-top:20px;">Nisab thresholds</h3>
-        <p>${escapeHtml(goldNisabLine)} <span class="badge ${effectiveBasis === 'gold' ? 'badge-info' : 'badge-success'}" style="margin-left:6px;">${effectiveBasis === 'gold' ? 'Basis used' : 'For reference'}</span></p>
-        <p>${escapeHtml(silverNisabLine)} <span class="badge ${effectiveBasis === 'silver' ? 'badge-info' : 'badge-success'}" style="margin-left:6px;">${effectiveBasis === 'silver' ? 'Basis used' : 'For reference'}</span></p>
-        <p style="font-size:13px; color:var(--ink-muted);">Estimates only — not a religious ruling. Confirm with a qualified scholar. Read the full disclaimer below.</p>
+        <h3 class="u-mt-20 u-fs-18">Nisab thresholds</h3>
+        <p>${escapeHtml(goldNisabLine)} <span class="badge ${effectiveBasis === 'gold' ? 'badge-info' : 'badge-success'} u-ml-6">${effectiveBasis === 'gold' ? 'Basis used' : 'For reference'}</span></p>
+        <p>${escapeHtml(silverNisabLine)} <span class="badge ${effectiveBasis === 'silver' ? 'badge-info' : 'badge-success'} u-ml-6">${effectiveBasis === 'silver' ? 'Basis used' : 'For reference'}</span></p>
+        <p class="u-muted-13">Estimates only — not a religious ruling. Confirm with a qualified scholar. Read the full disclaimer below.</p>
       `;
       resultContent.innerHTML = html;
+      applyBarStyles();
       lastValidHTML = html;
       lastValidHeadline = headline;
       setActionsEnabled(true);
@@ -785,14 +791,14 @@ const schema = JSON.stringify({
     function renderEmpty() {
       const urdu = document.documentElement.lang === 'ur';
       resultContent.innerHTML = urdu ? `
-        <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:0;">زکوٰۃ واجب</p>
+        <p class="u-muted-14-bold-m0">زکوٰۃ واجب</p>
         <p>اپنی تفصیل درج کریں تاکہ آپ کو نتیجہ نظر آئے۔</p>
         <p>کم از کم ایک اثاثہ درج کریں تاکہ آپ کو نتیجہ نظر آئے۔ آپ کو اپنی واجب زکوٰۃ، خالص دولت، اور یہ نظر آئے گا کہ بیان کردہ بنیاد پر نصاب پورا ہوا یا نہیں۔</p>
-        <p style="font-size:13px; color:var(--ink-muted);">صرف اندازے ہیں — کوئی مذہبی فتویٰ نہیں۔ کسی مستند عالم سے تصدیق کریں۔ نیچے مکمل ڈسکلیمر پڑھیں۔</p>` : `
-        <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:0;">Zakat due</p>
+        <p class="u-muted-13">صرف اندازے ہیں — کوئی مذہبی فتویٰ نہیں۔ کسی مستند عالم سے تصدیق کریں۔ نیچے مکمل ڈسکلیمر پڑھیں۔</p>` : `
+        <p class="u-muted-14-bold-m0">Zakat due</p>
         <p>Enter your details to see your result.</p>
         <p>Enter at least one asset to see your result. You will see your Zakat due, net wealth, and whether nisab is met on the basis stated.</p>
-        <p style="font-size:13px; color:var(--ink-muted);">Estimates only — not a religious ruling. Confirm with a qualified scholar. Read the full disclaimer below.</p>`;
+        <p class="u-muted-13">Estimates only — not a religious ruling. Confirm with a qualified scholar. Read the full disclaimer below.</p>`;
       setActionsEnabled(false);
       hideSticky();
     }
@@ -824,6 +830,7 @@ const schema = JSON.stringify({
         errorSummary.hidden = false;
         if (lastValidHTML) {
           resultContent.innerHTML = `<div class="notice-warning" role="status"><strong>Previous result</strong> — based on earlier inputs. Update the highlighted field to recalculate.</div>` + lastValidHTML;
+          applyBarStyles();
           setActionsEnabled(false);
         } else {
           renderEmpty();

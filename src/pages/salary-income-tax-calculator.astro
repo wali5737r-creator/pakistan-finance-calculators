@@ -73,35 +73,35 @@ const slabCaption = `Income exactly at a band boundary is taxed in the lower ban
 ---
 
 <Layout title={title} description={description} slug={slug} schema={schema}>
-  <div class="container" style="padding-top:32px;">
-    <nav class="breadcrumb" aria-label="Breadcrumb" style="font-size:14px; margin-bottom:12px;">
+  <div class="container u-pt-32">
+    <nav class="breadcrumb u-mb-12 u-fs-14" aria-label="Breadcrumb">
       <a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="sal.crumb">Salary / Income Tax Calculator</span>
     </nav>
     <p><span class="badge badge-info" data-i18n="tax.badge">Tax</span></p>
-    <h1 data-i18n="sal.h1" style="font-size:clamp(1.75rem, 4.5vw, 2.25rem); max-width:720px;">{h1}</h1>
-    <p class="prose-narrow" data-i18n="sal.intro" style="font-size:clamp(1.0625rem, 2vw, 1.1875rem); margin-top:12px;">
+    <h1 data-i18n="sal.h1" class="u-hero-title">{h1}</h1>
+    <p class="prose-narrow u-lede" data-i18n="sal.intro">
       Work out income tax on a monthly or annual salary using the Federal Board of Revenue (FBR)
       2026-27 slabs for salaried individuals. Enter your taxable income to see your annual tax,
       monthly tax, take-home pay, and effective and marginal rates. This tool applies salaried
       slabs only.
     </p>
-    <p class="notice-warning prose-narrow" style="margin-top:16px;">
+    <p class="notice-warning prose-narrow u-mt-16">
       <strong>FBR slabs {TAX_YEAR}, salaried individuals.</strong> Source: {SOURCE_STATUS}. {SOURCE_CITATION}. <a href={GAZETTE_URL} rel="noopener" target="_blank">Read the Gazette PDF</a>.
     </p>
   </div>
 
-  <div class="container" style="padding-top:24px;">
+  <div class="container u-pt-24">
     <div class="tool-grid">
       <section class="card" aria-label="Calculator">
         <form id="tax-form" novalidate>
           <div id="tax-error-box" role="alert" class="error-box" hidden></div>
-          <fieldset class="field" style="border:0; padding:0; margin:0 0 16px;">
+          <fieldset class="field u-fieldset">
             <legend data-i18n="sal.period">Period</legend>
-            <div style="display:flex; flex-wrap:wrap; gap:8px 20px;">
-              <label style="font-size:16px; font-weight:600;">
+            <div class="u-row-8-20">
+              <label class="u-fs-16-sb">
                 <input type="radio" name="tax-period" value="monthly" checked /> <span data-i18n="sal.monthly">Monthly</span>
               </label>
-              <label style="font-size:16px; font-weight:600;">
+              <label class="u-fs-16-sb">
                 <input type="radio" name="tax-period" value="annual" /> <span data-i18n="sal.annual">Annual</span>
               </label>
             </div>
@@ -126,18 +126,18 @@ const slabCaption = `Income exactly at a band boundary is taxed in the lower ban
             <p class="hint" data-i18n="sal.hint2">
               Salaried slabs only, before any surcharge, rebate or withholding adjustment.
             </p>
-            <p id="tax-amount-error" style="color:var(--danger); font-size:14px; font-weight:600;" hidden></p>
+            <p id="tax-amount-error" class="u-danger-14" hidden></p>
           </div>
-          <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
+          <div class="u-row-12">
             <button type="submit" class="btn-primary" data-i18n="ui.calculate">Calculate</button>
             <button type="button" class="btn-secondary" id="tax-clear" data-i18n="ui.clear">Clear</button>
           </div>
-          <p id="tax-status" role="status" class="hint" style="margin-top:8px;"></p>
+          <p id="tax-status" role="status" class="hint u-mt-8"></p>
         </form>
       </section>
 
       <section class="result-card" aria-labelledby="tax-result-heading">
-        <h2 id="tax-result-heading" tabindex="-1" data-i18n="sal.result-heading" style="font-size:18px;">Your result</h2>
+        <h2 id="tax-result-heading" tabindex="-1" data-i18n="sal.result-heading" class="u-fs-18">Your result</h2>
         <div id="tax-stale" hidden>
           <p><span class="badge badge-warning" data-i18n="sal.stale-badge">May be out of date</span></p>
           <p class="hint" data-i18n="sal.stale-hint">
@@ -150,51 +150,51 @@ const slabCaption = `Income exactly at a band boundary is taxed in the lower ban
           <p class="hint" data-i18n="sal.empty2">You'll see your annual tax, monthly tax, and take-home pay.</p>
         </div>
         <div id="tax-result" data-result-text hidden>
-          <p data-i18n="sal.annual-tax-label" style="font-size:14px; font-weight:700; color:var(--ink-muted);">Your annual income tax</p>
+          <p data-i18n="sal.annual-tax-label" class="u-muted-14-bold">Your annual income tax</p>
           <p class="result-value" id="tax-headline"></p>
           <p id="tax-subrupee" class="hint" data-i18n="sal.subrupee" hidden>Unrounded tax is below Rs 1.</p>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;">
+          <div class="u-grid-2-mt16">
             <div>
               <p class="hint" data-i18n="sal.lbl-annual-income">Annual taxable income</p>
-              <p style="font-size:20px; font-weight:700;" id="tax-annual-income"></p>
+              <p class="u-fs-20-bold" id="tax-annual-income"></p>
             </div>
             <div>
               <p class="hint" data-i18n="sal.lbl-monthly-tax">Monthly tax</p>
-              <p style="font-size:20px; font-weight:700;" id="tax-monthly-tax"></p>
+              <p class="u-fs-20-bold" id="tax-monthly-tax"></p>
             </div>
             <div>
               <p class="hint" id="tax-takehome-label">Monthly take-home</p>
-              <p style="font-size:20px; font-weight:700;" id="tax-takehome"></p>
+              <p class="u-fs-20-bold" id="tax-takehome"></p>
             </div>
             <div>
               <p class="hint" data-i18n="sal.lbl-effective">Effective tax rate</p>
-              <p style="font-size:20px; font-weight:700;" id="tax-effective"></p>
+              <p class="u-fs-20-bold" id="tax-effective"></p>
             </div>
             <div>
               <p class="hint" data-i18n="sal.lbl-marginal">Marginal tax rate</p>
-              <p style="font-size:20px; font-weight:700;" id="tax-marginal"></p>
+              <p class="u-fs-20-bold" id="tax-marginal"></p>
               <p class="hint" id="tax-bracket"></p>
             </div>
           </div>
-          <p class="hint" id="tax-echo" style="margin-top:16px;"></p>
+          <p class="hint u-mt-16" id="tax-echo"></p>
           <p class="hint" id="tax-worked"></p>
           <p class="hint">FBR slabs {TAX_YEAR} · Salaried individuals</p>
           <p><span class="badge badge-warning">Source: {SOURCE_STATUS}</span></p>
         </div>
-        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;">
+        <div class="u-row-8-mt16">
           <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
           <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
         <p data-copy-status role="status" class="hint"></p>
         <p id="tax-actions-hint" class="hint" data-i18n="sal.actions-hint">Calculate first to copy or print your result.</p>
-        <p class="hint" style="margin-top:8px;">
+        <p class="hint u-mt-8">
           <span data-i18n="sal.estimates">Estimates only — not tax advice.</span> <a href="#disclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
         </p>
       </section>
     </div>
   </div>
 
-  <section id="tax-slab-section" class="container" style="padding-top:32px;" hidden>
+  <section id="tax-slab-section" class="container u-pt-32" hidden>
     <h2 data-i18n="sal.slab-h">Salary tax slabs {TAX_YEAR}</h2>
     <p class="hint">FBR slabs {TAX_YEAR} — salaried individuals. Source: {SOURCE_STATUS}.</p>
     <div class="table-wrap">
@@ -235,7 +235,7 @@ const slabCaption = `Income exactly at a band boundary is taxed in the lower ban
     <p class="hint">{slabCaption}</p>
   </section>
 
-  <div class="container prose-narrow" style="padding-top:32px;">
+  <div class="container prose-narrow u-pt-32">
     <h2 data-i18n="sal.how-h">How it works</h2>
     <ol>
       <li data-i18n="sal.how1">
@@ -279,7 +279,7 @@ const slabCaption = `Income exactly at a band boundary is taxed in the lower ban
       }
     </section>
 
-    <section id="disclaimer" class="notice-warning" style="margin-top:32px;">
+    <section id="disclaimer" class="notice-warning u-mt-32">
       <h2 data-i18n="sal.disc-h">Important — please read</h2>
       <p data-i18n="sal.disc">
         Results are estimates for information only and are not tax advice. This calculator
@@ -289,15 +289,15 @@ const slabCaption = `Income exactly at a band boundary is taxed in the lower ban
       </p>
     </section>
 
-    <section style="margin-top:32px;">
+    <section class="u-mt-32">
       <h2 data-i18n="sal.related-h">Related tools</h2>
-      <div style="display:grid; gap:16px; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));">
+      <div class="u-grid-cards">
         <article class="card">
-          <h3 style="font-size:18px;"><a href="/emi-loan-calculator/" data-i18n="tool.emi">EMI / Loan Calculator</a></h3>
+          <h3 class="u-fs-18"><a href="/emi-loan-calculator/" data-i18n="tool.emi">EMI / Loan Calculator</a></h3>
           <p data-i18n="sal.rel-emi-desc">Monthly instalment, total interest, and the full schedule for a reducing-balance loan.</p>
         </article>
         <article class="card">
-          <h3 style="font-size:18px;"><a href="/zakat-calculator/" data-i18n="tool.zakat">Zakat Calculator</a></h3>
+          <h3 class="u-fs-18"><a href="/zakat-calculator/" data-i18n="tool.zakat">Zakat Calculator</a></h3>
           <p data-i18n="sal.rel-zakat-desc">Zakat at 2.5% on cash, gold, silver, and trade goods, with gold and silver nisab shown.</p>
         </article>
       </div>

@@ -1,0 +1,51 @@
+/* goal-savings-calculator.css — moved from the inline <style> block in
+   src/pages/goal-savings-calculator.astro (2026-11-13, CSP style-src work). Every
+   selector is prefixed with .pg-goal-savings-calculator, which is added to the page's
+   top-level containers, so these rules keep the page scope they
+   had as Astro scoped styles. Do not drop the prefix: without it
+   these rules would apply site-wide and collide with other
+   pages' copies (see /tmp/style-src-audit.md section 3). */
+
+.pg-goal-savings-calculator [hidden] {
+  display: none !important;
+}
+
+.pg-goal-savings-calculator .field-error {
+  font-size: 14px;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.pg-goal-savings-calculator .stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin: 12px 0;
+}
+
+.pg-goal-savings-calculator .stat-grid p {
+  margin: 0;
+}
+
+.pg-goal-savings-calculator .stat-label {
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.pg-goal-savings-calculator .stat-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.pg-goal-savings-calculator .actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pg-goal-savings-calculator .related-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}

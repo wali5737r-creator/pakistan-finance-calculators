@@ -6,6 +6,7 @@ import {
   PSEB_NEW_REGISTRATION_FEE,
   PSEB_RENEWAL_FEE,
 } from '../config/freelancer-tax';
+import '../styles/pages/freelancer-tax-calculator.css';
 
 const title = "Freelancer Tax Calculator Pakistan | PSEB 0.25% & Non-Salaried Slabs | Pakistan Finance Calculators";
 const description = "Work out freelancer tax in Pakistan: PSEB 0.25% export tax or 1% without it, plus non-salaried slabs on local income, with the 10% surcharge above Rs 10m.";
@@ -108,16 +109,16 @@ const related = [
 ];
 ---
 <Layout title={title} description={description} slug={slug} schema={schema}>
-  <div class="container" style="padding-top: 32px;">
+  <div class="container u-pt-32 pg-freelancer-tax-calculator">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="fr.crumb">Freelancer Tax Calculator</span></p>
+      <p class="u-muted-14"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="fr.crumb">Freelancer Tax Calculator</span></p>
     </nav>
-    <p class="badge badge-info" data-i18n="tax.badge" style="margin-top: 8px;">Tax</p>
-    <h1 data-i18n="fr.h1" style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Freelancer Tax Calculator</h1>
-    <p class="prose-narrow" data-i18n="fr.intro" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info u-mt-8" data-i18n="tax.badge">Tax</p>
+    <h1 class="u-hero-title" data-i18n="fr.h1">Freelancer Tax Calculator</h1>
+    <p class="prose-narrow u-lede" data-i18n="fr.intro">
       Work out the tax on your freelance income in Pakistan. Export income from IT and ITeS services is taxed at 0.25% if you are PSEB-registered, or 1% if you are not — a final tax on the gross amount. Your local income is taxed separately under the non-salaried slabs. Enter both below and you will see each part, the surcharge if it applies, and the total.
     </p>
-    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+    <p class="notice-info prose-narrow u-mt-16">
       <strong data-i18n="fr.notice-strong">For individual freelancers and sole proprietors only.</strong> This
       uses the non-salaried slabs in clause (1), Division I, Part I, First
       Schedule to the Income Tax Ordinance, 2001 (Finance Act 2024 table,
@@ -129,7 +130,7 @@ const related = [
     </p>
   </div>
 
-  <div class="container" style="margin-top: 20px;">
+  <div class="container u-mt-20 pg-freelancer-tax-calculator">
     <div class="tool-grid">
       <div class="card">
         <form id="freelancerForm" novalidate>
@@ -165,25 +166,25 @@ const related = [
 
           <div id="freelancerErrors" class="error-box" role="alert" hidden></div>
 
-          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+          <p class="u-actions">
             <button id="freelancerCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
             <button id="freelancerClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
-          <p id="freelancerFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p class="u-muted-14" id="freelancerFormStatus" role="status"></p>
         </form>
       </div>
 
       <div class="result-card" id="freelancerResultCard" tabindex="-1">
         <div id="freelancerEmpty">
-          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p class="u-fw-700" data-i18n="ui.empty-title">Your result will appear here.</p>
           <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
+          <p class="u-muted-14" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
 
         <div id="freelancerResult" data-result-text hidden>
-          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" data-i18n="fr.total-label">Total tax payable</p>
+          <p class="u-muted-14-bold" data-i18n="fr.total-label">Total tax payable</p>
           <div aria-live="polite" aria-atomic="true">
             <p class="result-value" id="freelancerHeadline"></p>
           </div>
@@ -205,9 +206,9 @@ const related = [
           <table class="breakdown-table" id="freelancerBreakdown" aria-label="Tax breakdown"></table>
           </div>
           <p id="freelancerWarning" class="error-box" role="alert" hidden></p>
-          <p id="freelancerEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
-          <p id="freelancerFormula" style="font-size: 16px;"></p>
-          <p style="font-size: 13px; color: var(--ink-muted);">
+          <p class="u-muted-14" id="freelancerEcho"></p>
+          <p class="u-fs-16" id="freelancerFormula"></p>
+          <p class="u-muted-13">
             <span data-i18n="fr.estimate">Estimate only — check important figures before acting.</span> <a href="#freelancerDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
@@ -216,12 +217,12 @@ const related = [
           <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
           <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
-        <p data-copy-status role="status" style="font-size: 14px;"></p>
+        <p class="u-fs-14" data-copy-status role="status"></p>
       </div>
     </div>
   </div>
 
-  <div class="container prose-narrow" style="margin-top: 40px;">
+  <div class="container prose-narrow u-mt-40 pg-freelancer-tax-calculator">
     <h2 data-i18n="fr.how-h">How it works</h2>
     <ol>
       <li data-i18n="fr.how1">Enter your gross annual export income from IT / ITeS services and whether you are PSEB-registered. The export tax is 0.25% of the gross amount if you are registered, 1% if you are not — your bank deducts it when the payment arrives.</li>
@@ -264,7 +265,7 @@ const related = [
       </tbody>
     </table>
     </div>
-    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="fr.slabs-source">Source: clause (1), Division I, Part I, First Schedule to the Income Tax Ordinance, 2001, as substituted by the Finance Act 2024 — unchanged by the Finance Act 2026, which substituted only the salaried clause (2) table. Surcharge under section 4AB: 10% of the tax where taxable income exceeds Rs 10,000,000; no surcharge at exactly Rs 10,000,000. Checked 13 November 2026. Re-verify by 1 May 2027, before Tax Year 2026-27 ends on 30 June 2027.</p>
+    <p class="u-muted-14" data-i18n="fr.slabs-source">Source: clause (1), Division I, Part I, First Schedule to the Income Tax Ordinance, 2001, as substituted by the Finance Act 2024 — unchanged by the Finance Act 2026, which substituted only the salaried clause (2) table. Surcharge under section 4AB: 10% of the tax where taxable income exceeds Rs 10,000,000; no surcharge at exactly Rs 10,000,000. Checked 13 November 2026. Re-verify by 1 May 2027, before Tax Year 2026-27 ends on 30 June 2027.</p>
 
     <h2 data-i18n="fr.faq-h">Frequently asked questions</h2>
     <div class="faq">
@@ -279,8 +280,8 @@ const related = [
     </div>
     <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
-    <section id="freelancerDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;" data-i18n="fr.disc-h">Important — please read</h2>
+    <section id="freelancerDisclaimer" class="notice-info u-mt-32">
+      <h2 class="u-fs-20" data-i18n="fr.disc-h">Important — please read</h2>
       <p data-i18n="fr.disc1">
         Results are estimates, not tax advice. This calculator covers
         individual freelancers and sole proprietors only. Associations of
@@ -298,15 +299,15 @@ const related = [
       <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;" data-i18n="fr.related-h">Related tools</h2>
+    <h2 class="u-mt-32" data-i18n="fr.related-h">Related tools</h2>
     <div class="related-grid">
       {
         related.map((tool, i) => (
           <article class="card">
-            <h3 style="font-size: 18px;">
+            <h3 class="u-fs-18">
               <a href={tool.href} data-i18n={`fr.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);" data-i18n={`fr.rel${i + 1}-desc`}>{tool.desc}</p>
+            <p class="u-txt-muted" data-i18n={`fr.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
               <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
@@ -315,64 +316,6 @@ const related = [
       }
     </div>
   </div>
-
-  <style>
-    [hidden] {
-      display: none !important;
-    }
-    .field-error {
-      font-size: 14px;
-      color: var(--danger);
-      font-weight: 600;
-    }
-    .stat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 16px;
-      margin: 12px 0;
-    }
-    .stat-grid p {
-      margin: 0;
-    }
-    .stat-label {
-      font-size: 14px;
-      color: var(--ink-muted);
-    }
-    .stat-value {
-      font-size: 20px;
-      font-weight: 700;
-    }
-    .actions-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
-    }
-    .related-grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    }
-    .breakdown-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 12px 0;
-      font-size: 15px;
-    }
-    .breakdown-table th,
-    .breakdown-table td {
-      text-align: left;
-      padding: 8px 10px;
-      border-bottom: 1px solid var(--border, #e5e7eb);
-    }
-    .breakdown-table td:last-child,
-    .breakdown-table th:last-child {
-      text-align: right;
-    }
-    .breakdown-table tr.total-row td {
-      font-weight: 700;
-    }
-  </style>
 
   <script>
     import { calcFreelancerTax, parseDecimal, formatPKR } from '../lib/calc.ts';

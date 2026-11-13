@@ -535,10 +535,15 @@ function regionHasNoI18n(src: string, start: string, end: string, label: string)
   check(to > from, `${label} region must end at its marker`);
   check(!src.slice(from, to).includes('data-i18n'), `${label} must carry no data-i18n — it is JS-rewritten`);
 }
-regionHasNoI18n(currencyPage, '<div id="result-content"', '<div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;" class="no-print">', 'currency result card');
+// (CSP style-src work 2026-11-13: the two region end markers below used
+// to be inline style="..." attributes — the currency actions div is now
+// class="no-print u-row-8-mt16" and the gold container is now
+// class="container u-mt-20 pg-gold-price-calculator". Same regions, same
+// intent: no data-i18n inside JS-rewritten markup.)
+regionHasNoI18n(currencyPage, '<div id="result-content"', '<div class="no-print u-row-8-mt16">', 'currency result card');
 regionHasNoI18n(currencyPage, '<div id="rate-strip"', '</div>', 'currency rate strip');
 regionHasNoI18n(goldPage, '<div id="goldResult"', '<div class="actions-row no-print">', 'gold result card');
-regionHasNoI18n(goldPage, '<div id="goldStrip"', '<div class="container" style="margin-top: 20px;">\n    <div class="tool-grid">', 'gold strip');
+regionHasNoI18n(goldPage, '<div id="goldStrip"', '<div class="container u-mt-20 pg-gold-price-calculator">\n    <div class="tool-grid">', 'gold strip');
 regionHasNoI18n(goldPage, '<div id="silverStrip"', '<p id="silverPerGramLine"', 'silver strip');
 // The solar yields source paragraph and the pension sources paragraph
 // are source/citation lines, so they stay English (bills pattern).

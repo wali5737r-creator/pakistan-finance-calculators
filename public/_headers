@@ -33,7 +33,7 @@
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://s3.tradingview.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://s3.tradingview.com https://*.tradingview.com; connect-src 'self' https://*.tradingview.com; frame-src https://www.tradingview.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://s3.tradingview.com; style-src 'self'; img-src 'self' data: https://s3.tradingview.com https://*.tradingview.com; connect-src 'self' https://*.tradingview.com; frame-src https://www.tradingview.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'
   # NOTE (2026-11-13): 'unsafe-inline' was removed from script-src. Every
   # executable script is now an external file: tool calculators are bundled
   # by Astro into /_astro/*.js, the shared copy/print handler lives in
@@ -43,9 +43,17 @@
   # application/ld+json schema blocks). The TradingView widget on the Gold
   # page is still allowed: it is loaded by creating a <script> element with
   # src https://s3.tradingview.com/..., which the host source permits.
-  # style-src KEEPS 'unsafe-inline' deliberately: 727 inline style="..."
-  # attributes exist across src/ (plus style attributes built by JS at
-  # runtime, e.g. the currency converter). Removing it would need every
-  # one moved to CSS classes — a full visual refactor, not a safe header
-  # change. That is a separate follow-up, not forced here.
+  # style-src 'unsafe-inline' was REMOVED 2026-11-13 (second half of the
+  # CSP audit item): all 729 inline style attributes across src/
+  # became .u-* utility classes in src/styles/global.css (91 canonical
+  # values, 80 classes; the 2 dynamic zakat bar widths and the 1
+  # conditional currency headline use CSSOM setProperty / class toggles,
+  # which style-src does not block), and the 22 inline <style> blocks
+  # (Astro inlines scoped component styles) became external
+  # src/styles/pages/<slug>.css files, each rule prefixed with a
+  # page-unique .pg-<slug> class so today's scoping is preserved.
+  # Known visible change: JS-generated `tr.total-row` rows in breakdown
+  # tables now match their page rule and render bold, where the old
+  # scoped rule never matched them — that is the intended look.
+  # Guarded by tests/csp.test.ts: a future inline style fails CI.
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload

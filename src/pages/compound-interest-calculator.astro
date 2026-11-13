@@ -1,5 +1,6 @@
 ---
 import Layout from '../components/Layout.astro';
+import '../styles/pages/compound-interest-calculator.css';
 
 const title = "Compound Interest Calculator | Growth & Returns | Pakistan Finance Calculators";
 const description = "See how savings grow with compound interest: final amount, total contributions and interest earned, with a year-by-year table, from the figures you enter.";
@@ -81,23 +82,23 @@ const related = [
 ];
 ---
 <Layout title={title} description={description} slug={slug} schema={schema}>
-  <div class="container" style="padding-top: 32px;">
+  <div class="container u-pt-32 pg-compound-interest-calculator">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="cint.crumb">Compound Interest Calculator</span></p>
+      <p class="u-muted-14"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="cint.crumb">Compound Interest Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="cint.badge">Savings & Growth</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;" data-i18n="cint.h1">Compound Interest Calculator</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;" data-i18n="cint.intro">
+    <p class="badge badge-info u-mt-8" data-i18n="cint.badge">Savings & Growth</p>
+    <h1 class="u-hero-title" data-i18n="cint.h1">Compound Interest Calculator</h1>
+    <p class="prose-narrow u-lede" data-i18n="cint.intro">
       See how money grows when the return itself earns a return. Enter a starting amount, what you add each month, and the annual return you assume, and this calculator shows the final amount, how much you put in, how much is growth, and the balance at the end of every year.
     </p>
-    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+    <p class="notice-info prose-narrow u-mt-16">
       <strong data-i18n="cint.notice-label">No live data.</strong> <span data-i18n="cint.notice-text">Every rate, price, and percentage on this page is entered by
       you. Nothing is fetched from a bank, a market, or a government source, and no figure here
       is presented as a live or official rate.</span>
     </p>
   </div>
 
-  <div class="container" style="margin-top: 20px;">
+  <div class="container u-mt-20 pg-compound-interest-calculator">
     <div class="tool-grid">
       <div class="card">
         <form id="compoundForm" novalidate>
@@ -138,25 +139,25 @@ const related = [
 
           <div id="compoundErrors" class="error-box" role="alert" hidden></div>
 
-          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+          <p class="u-actions">
             <button id="compoundCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
             <button id="compoundClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
-          <p id="compoundFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p class="u-muted-14" id="compoundFormStatus" role="status"></p>
         </form>
       </div>
 
       <div class="result-card" id="compoundResultCard" tabindex="-1">
         <div id="compoundEmpty">
-          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p class="u-fw-700" data-i18n="ui.empty-title">Your result will appear here.</p>
           <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
+          <p class="u-muted-14" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
 
         <div id="compoundResult" data-result-text hidden>
-          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" data-i18n="cint.result-label">Result</p>
+          <p class="u-muted-14-bold" data-i18n="cint.result-label">Result</p>
           <div aria-live="polite" aria-atomic="true">
             <p class="result-value" id="compoundHeadline"></p>
           </div>
@@ -170,16 +171,16 @@ const related = [
               <p class="stat-value" id="compoundStat2"></p>
             </div>
           </div>
-          <div class="table-wrap" id="compoundTableWrap" hidden style="margin-top: 12px; max-height: 360px; overflow-y: auto;">
+          <div class="table-wrap u-scroll-360" id="compoundTableWrap" hidden>
             <table class="data">
               <caption data-i18n="cint.table-caption">Year-by-year balance</caption>
               <thead><tr><th scope="col" data-i18n="cint.th-year">Year</th><th scope="col" data-i18n="cint.th-balance">Balance</th><th scope="col" data-i18n="cint.th-putin">Total put in</th><th scope="col" data-i18n="cint.th-interest">Interest earned</th></tr></thead>
               <tbody id="compoundTableBody"></tbody>
             </table>
           </div>
-          <p id="compoundEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
-          <p id="compoundFormula" style="font-size: 16px;"></p>
-          <p style="font-size: 13px; color: var(--ink-muted);">
+          <p class="u-muted-14" id="compoundEcho"></p>
+          <p class="u-fs-16" id="compoundFormula"></p>
+          <p class="u-muted-13">
             <span data-i18n="cint.estimate">Estimate only — check important figures before acting.</span> <a href="#compoundDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
@@ -188,12 +189,12 @@ const related = [
           <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
           <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
-        <p data-copy-status role="status" style="font-size: 14px;"></p>
+        <p class="u-fs-14" data-copy-status role="status"></p>
       </div>
     </div>
   </div>
 
-  <div class="container prose-narrow" style="margin-top: 40px;">
+  <div class="container prose-narrow u-mt-40 pg-compound-interest-calculator">
     <h2 data-i18n="cint.how-h">How it works</h2>
     <ol>
       <li data-i18n="cint.how1">Enter the amount you start with (0 is fine), the amount you add each month, and the annual return you assume.</li>
@@ -223,23 +224,23 @@ const related = [
     </div>
     <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
-    <section id="compoundDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;" data-i18n="cint.disc-h">Important — please read</h2>
+    <section id="compoundDisclaimer" class="notice-info u-mt-32">
+      <h2 class="u-fs-20" data-i18n="cint.disc-h">Important — please read</h2>
       <p data-i18n="cint.disc">
         Results are illustrations based on the return and contributions you enter. The return is your assumption, not a forecast and not a promise from any bank or fund. Real returns vary, charges and tax are not included, and past growth does not guarantee future growth. This is not investment advice.
       </p>
       <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;" data-i18n="cint.related-h">Related tools</h2>
+    <h2 class="u-mt-32" data-i18n="cint.related-h">Related tools</h2>
     <div class="related-grid">
       {
         related.map((tool, i) => (
           <article class="card">
-            <h3 style="font-size: 18px;">
+            <h3 class="u-fs-18">
               <a href={tool.href} data-i18n={`cint.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);" data-i18n={`cint.rel${i + 1}-desc`}>{tool.desc}</p>
+            <p class="u-txt-muted" data-i18n={`cint.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
               <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
@@ -248,45 +249,6 @@ const related = [
       }
     </div>
   </div>
-
-  <style>
-    [hidden] {
-      display: none !important;
-    }
-    .field-error {
-      font-size: 14px;
-      color: var(--danger);
-      font-weight: 600;
-    }
-    .stat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 16px;
-      margin: 12px 0;
-    }
-    .stat-grid p {
-      margin: 0;
-    }
-    .stat-label {
-      font-size: 14px;
-      color: var(--ink-muted);
-    }
-    .stat-value {
-      font-size: 20px;
-      font-weight: 700;
-    }
-    .actions-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
-    }
-    .related-grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    }
-  </style>
 
   <script>
     import { calcCompound, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';

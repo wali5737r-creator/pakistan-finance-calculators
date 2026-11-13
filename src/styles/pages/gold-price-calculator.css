@@ -1,0 +1,107 @@
+/* gold-price-calculator.css — moved from the inline <style> block in
+   src/pages/gold-price-calculator.astro (2026-11-13, CSP style-src work). Every
+   selector is prefixed with .pg-gold-price-calculator, which is added to the page's
+   top-level containers, so these rules keep the page scope they
+   had as Astro scoped styles. Do not drop the prefix: without it
+   these rules would apply site-wide and collide with other
+   pages' copies (see /tmp/style-src-audit.md section 3). */
+
+.pg-gold-price-calculator [hidden] {
+  display: none !important;
+}
+
+.pg-gold-price-calculator .radiogroup {
+  border: 0;
+  padding: 0;
+  margin: 0 0 var(--space-4);
+  display: grid;
+  gap: 6px;
+}
+
+.pg-gold-price-calculator .radiogroup legend {
+  font-size: 17px;
+  font-weight: 600;
+  padding: 0;
+}
+
+.pg-gold-price-calculator .seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pg-gold-price-calculator .seg label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  padding: 10px 16px;
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 600;
+  background: var(--surface);
+}
+
+.pg-gold-price-calculator .seg label:has(input:checked) {
+  background: var(--brand-700);
+  color: #fff;
+  border-color: var(--brand-700);
+}
+
+.pg-gold-price-calculator .seg label:focus-within {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.pg-gold-price-calculator .field-error {
+  font-size: 14px;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.pg-gold-price-calculator .stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin: 12px 0;
+}
+
+.pg-gold-price-calculator .stat-grid p {
+  margin: 0;
+}
+
+.pg-gold-price-calculator .stat-label {
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.pg-gold-price-calculator .stat-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.pg-gold-price-calculator .actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pg-gold-price-calculator .related-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.pg-gold-price-calculator .tradingview-widget-container {
+  width: 100%;
+}
+
+.pg-gold-price-calculator .tradingview-widget-container iframe {
+  width: 100%;
+}
+
+.pg-gold-price-calculator .tradingview-widget-copyright {
+  font-size: 13px;
+}

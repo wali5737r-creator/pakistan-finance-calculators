@@ -1,0 +1,46 @@
+/* budget-planner-calculator.astro — page styles moved from the inline <style> block (2026-11-13, CSP style-src). */
+/* Scoped to this page with .pg-budget-planner-calculator (replaces Astro's scoped-style scoping). */
+
+.pg-budget-planner-calculator [hidden] {
+  display: none !important;
+}
+
+.pg-budget-planner-calculator .field-error {
+  font-size: 14px;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.pg-budget-planner-calculator .stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin: 12px 0;
+}
+
+.pg-budget-planner-calculator .stat-grid p {
+  margin: 0;
+}
+
+.pg-budget-planner-calculator .stat-label {
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.pg-budget-planner-calculator .stat-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.pg-budget-planner-calculator .actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pg-budget-planner-calculator .related-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}

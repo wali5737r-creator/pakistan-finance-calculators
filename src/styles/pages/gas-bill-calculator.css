@@ -1,0 +1,76 @@
+/* gas-bill-calculator.astro — page styles moved from the inline <style> block (2026-11-13, CSP style-src). */
+/* Scoped to this page with .pg-gas-bill-calculator (replaces Astro's scoped-style scoping). */
+
+.pg-gas-bill-calculator [hidden] {
+  display: none !important;
+}
+
+.pg-gas-bill-calculator .field-error {
+  font-size: 14px;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.pg-gas-bill-calculator .stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin: 12px 0;
+}
+
+.pg-gas-bill-calculator .stat-grid p {
+  margin: 0;
+}
+
+.pg-gas-bill-calculator .stat-label {
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.pg-gas-bill-calculator .stat-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.pg-gas-bill-calculator .actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pg-gas-bill-calculator .related-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.pg-gas-bill-calculator .breakdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 15px;
+}
+
+.pg-gas-bill-calculator .breakdown-table th,
+.pg-gas-bill-calculator .breakdown-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.pg-gas-bill-calculator .breakdown-table td:last-child,
+.pg-gas-bill-calculator .breakdown-table th:last-child {
+  text-align: right;
+}
+
+/* Rowspan cells hold one fixed charge for a whole slab group; top-align
+       them so the amount sits on the group's first row instead of floating
+       on a middle row where it looks attached to that one slab. */
+.pg-gas-bill-calculator .breakdown-table td[rowspan] {
+  vertical-align: top;
+}
+
+.pg-gas-bill-calculator .breakdown-table tr.total-row td {
+  font-weight: 700;
+}

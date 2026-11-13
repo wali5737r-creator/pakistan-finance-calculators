@@ -1,0 +1,72 @@
+/* national-savings-calculator.css — moved from the inline <style> block in
+   src/pages/national-savings-calculator.astro (2026-11-13, CSP style-src work). Every
+   selector is prefixed with .pg-national-savings-calculator, which is added to the page's
+   top-level containers, so these rules keep the page scope they
+   had as Astro scoped styles. Do not drop the prefix: without it
+   these rules would apply site-wide and collide with other
+   pages' copies (see /tmp/style-src-audit.md section 3). */
+
+.pg-national-savings-calculator [hidden] {
+  display: none !important;
+}
+
+.pg-national-savings-calculator .field-error {
+  font-size: 14px;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.pg-national-savings-calculator .stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin: 12px 0;
+}
+
+.pg-national-savings-calculator .stat-grid p {
+  margin: 0;
+}
+
+.pg-national-savings-calculator .stat-label {
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.pg-national-savings-calculator .stat-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.pg-national-savings-calculator .actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pg-national-savings-calculator .related-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.pg-national-savings-calculator .breakdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 15px;
+}
+
+.pg-national-savings-calculator .breakdown-table th, .pg-national-savings-calculator .breakdown-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.pg-national-savings-calculator .breakdown-table td:last-child, .pg-national-savings-calculator .breakdown-table th:last-child {
+  text-align: right;
+}
+
+.pg-national-savings-calculator .breakdown-table tr.total-row td {
+  font-weight: 700;
+}

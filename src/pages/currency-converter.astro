@@ -1,6 +1,7 @@
 ---
 import Layout from '../components/Layout.astro';
 import { CURRENCIES } from '../config/currencies.ts';
+import '../styles/pages/currency-converter.css';
 
 const title = 'Currency Converter PKR | USD to PKR & Live Rates | Pakistan Finance Calculators';
 const description = 'Convert PKR to USD, GBP, EUR, SAR, AED, AUD and CAD with the latest rate and last-updated time. Free converter — stale rates are clearly labelled.';
@@ -62,51 +63,25 @@ const schema = JSON.stringify({
 ---
 
 <Layout title={title} description={description} slug={slug} schema={schema}>
-  <style is:global>
-    .field-error { color: var(--danger); font-size: 14px; font-weight: 600; margin: 0; }
-    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
-    .stat-grid .stat-label { font-size: 14px; color: var(--ink-muted); margin: 0; }
-    .stat-grid .stat-value { font-size: 20px; font-weight: 700; margin: 2px 0 0; overflow-wrap: normal; }
-    .nowrap { white-space: nowrap; }
-    @media (max-width: 520px) { .stat-grid { grid-template-columns: 1fr; } }
-    .amount-wrap { display: flex; gap: 8px; align-items: center; }
-    .amount-wrap input { flex: 1; min-width: 0; }
-    .amount-suffix { font-weight: 700; white-space: nowrap; }
-    .swap-row { display: flex; justify-content: center; margin: 4px 0 12px; }
-    #swap-btn { min-width: 48px; min-height: 48px; padding: 10px 18px; font-size: 16px; }
-    #sticky-bar {
-      position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
-      background: var(--surface-raised); border-top: 1px solid var(--border-strong);
-      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-      display: flex; gap: 12px; align-items: center; justify-content: space-between;
-      box-shadow: 0 -4px 16px rgba(15, 27, 22, 0.08);
-    }
-    /* Without this, display:flex above overrides the hidden attribute and
-       the bar is rendered permanently — even before any conversion and
-       after Dismiss — covering the footer. */
-    #sticky-bar[hidden] { display: none; }
-    #sticky-bar p { min-width: 0; }
-    #sticky-text { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
-  </style>
 
-  <div class="container" style="padding-top:32px;">
-    <nav class="breadcrumb" aria-label="Breadcrumb" style="font-size:14px; margin-bottom:12px;">
+  <div class="container u-pt-32">
+    <nav class="breadcrumb u-fs-14 u-mb-12" aria-label="Breadcrumb">
       <a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="cur.crumb">Currency Converter</span>
     </nav>
-    <p class="badge badge-info" style="margin-bottom:12px;" data-i18n="cur.badge">Rates &amp; Gold</p>
-    <h1 style="font-size:clamp(1.75rem,4.5vw,2.25rem);" data-i18n="cur.h1">Currency Converter PKR</h1>
-    <p class="prose-narrow" style="font-size:clamp(1.0625rem,2vw,1.1875rem); margin-top:12px;" data-i18n="cur.intro">
+    <p class="badge badge-info u-mb-12" data-i18n="cur.badge">Rates &amp; Gold</p>
+    <h1 class="u-hero-title-bare" data-i18n="cur.h1">Currency Converter PKR</h1>
+    <p class="prose-narrow u-lede" data-i18n="cur.intro">
       Convert between PKR and major currencies at the latest indicative rate, with the
       source and last-updated time shown on every result. This is not a buy or sell
       rate, and fees are not included.
     </p>
   </div>
 
-  <div class="container" style="margin-top:20px;">
+  <div class="container u-mt-20">
     <div id="rate-strip" class="notice-info" role="status">Fetching the latest rate…</div>
   </div>
 
-  <div class="container" style="margin-top:20px;">
+  <div class="container u-mt-20">
     <div class="tool-grid">
       <div class="card">
         <form id="currency-form" novalidate>
@@ -150,43 +125,43 @@ const schema = JSON.stringify({
             <p class="field-error" id="err-to-currency" hidden></p>
           </div>
 
-          <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
-            <button type="submit" class="btn-primary" style="flex:1;" data-i18n="ui.calculate">Calculate</button>
+          <div class="u-row-12-mt8">
+            <button type="submit" class="btn-primary u-flex-1" data-i18n="ui.calculate">Calculate</button>
             <button type="button" class="btn-secondary" id="clear-btn" data-i18n="ui.clear">Clear</button>
           </div>
-          <p class="hint" style="font-size:14px; color:var(--ink-muted); margin-top:8px;" role="status" id="form-status"></p>
-          <p role="status" aria-live="polite" id="announcer" style="font-size:14px; color:var(--ink-muted);"></p>
+          <p class="hint u-muted-14 u-mt-8" role="status" id="form-status"></p>
+          <p class="u-muted-14" role="status" aria-live="polite" id="announcer"></p>
         </form>
       </div>
 
       <section class="result-card" id="result-card" tabindex="-1" aria-label="Conversion result">
         <div id="result-content" data-result-text aria-live="polite" aria-atomic="true">
-          <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:0;">Converted amount</p>
+          <p class="u-muted-14-bold-m0">Converted amount</p>
           <p>Enter your details to see your result.</p>
           <p>You will see the converted amount, the rate used, and the inverse rate, with the rate’s source and date.</p>
-          <p style="font-size:13px; color:var(--ink-muted);">Estimates only — indicative rates. Read the full disclaimer below.</p>
+          <p class="u-muted-13">Estimates only — indicative rates. Read the full disclaimer below.</p>
         </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;" class="no-print">
+        <div class="no-print u-row-8-mt16">
           <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
           <button type="button" class="btn-secondary" data-share-result data-i18n="cur.share" disabled>Share</button>
           <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
           <button type="button" class="btn-secondary" id="refresh-btn" data-i18n="cur.refresh">Refresh rate</button>
         </div>
-        <p data-copy-status role="status" style="font-size:14px; margin-top:8px;"></p>
-        <p role="status" style="font-size:14px; margin-top:4px;" id="refresh-status"></p>
+        <p class="u-fs-14 u-mt-8" data-copy-status role="status"></p>
+        <p class="u-fs-14 u-mt-4" role="status" id="refresh-status"></p>
       </section>
     </div>
   </div>
 
   <div id="sticky-bar" class="no-print" hidden>
-    <p style="margin:0;"><strong data-i18n="cur.sticky-amount">Converted amount</strong><br /><span id="sticky-text"></span></p>
-    <div style="display:flex; gap:8px; align-items:center;">
+    <p class="u-m-0"><strong data-i18n="cur.sticky-amount">Converted amount</strong><br /><span id="sticky-text"></span></p>
+    <div class="u-row-8">
       <button type="button" class="btn-secondary" id="sticky-details" data-i18n="cur.details">Details</button>
       <button type="button" class="btn-secondary" id="sticky-dismiss" aria-label="Dismiss summary">×</button>
     </div>
   </div>
 
-  <div class="container prose-narrow" style="margin-top:48px;">
+  <div class="container prose-narrow u-mt-48">
     <h2 data-i18n="cur.how-h">How it works</h2>
     <ol>
       <li data-i18n="cur.how1">Converted amount = amount × rate, where the rate is the number of units of the To currency equal to one unit of the From currency.</li>
@@ -209,7 +184,7 @@ const schema = JSON.stringify({
     <div class="faq">
       {faqs.map((f, i) => (
         <details>
-          <summary><h3 style="display:inline; font-size:18px;" data-i18n={`cur.faq${i + 1}q`}>{f.q}</h3></summary>
+          <summary><h3 class="u-inline-18" data-i18n={`cur.faq${i + 1}q`}>{f.q}</h3></summary>
           <p data-i18n={`cur.faq${i + 1}a`}>{f.a}</p>
         </details>
       ))}
@@ -232,9 +207,9 @@ const schema = JSON.stringify({
     </div>
 
     <h2 data-i18n="cur.related-h">Related tools</h2>
-    <div style="display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
-      <article class="card"><h3 style="font-size:18px;"><a href="/gold-price-calculator/" data-i18n="cur.rel1">Gold Price Calculator</a></h3><p style="color:var(--ink-muted);" data-i18n="cur.rel1-desc">Value of gold per tola and per gram, with a live or your own price.</p></article>
-      <article class="card"><h3 style="font-size:18px;"><a href="/emi-loan-calculator/" data-i18n="cur.rel2">EMI / Loan Calculator</a></h3><p style="color:var(--ink-muted);" data-i18n="cur.rel2-desc">Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan.</p></article>
+    <div class="u-grid-cards">
+      <article class="card"><h3 class="u-fs-18"><a href="/gold-price-calculator/" data-i18n="cur.rel1">Gold Price Calculator</a></h3><p class="u-txt-muted" data-i18n="cur.rel1-desc">Value of gold per tola and per gram, with a live or your own price.</p></article>
+      <article class="card"><h3 class="u-fs-18"><a href="/emi-loan-calculator/" data-i18n="cur.rel2">EMI / Loan Calculator</a></h3><p class="u-txt-muted" data-i18n="cur.rel2-desc">Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan.</p></article>
     </div>
   </div>
 
@@ -316,7 +291,7 @@ const schema = JSON.stringify({
         return;
       }
       if (!table) {
-        rateStrip.innerHTML = 'Rate unavailable. The latest rate could not be loaded. Your amount and currencies are saved in this form — <button type="button" class="btn-secondary" data-action="retry" style="min-height:36px; padding:6px 14px;">Retry</button>';
+        rateStrip.innerHTML = 'Rate unavailable. The latest rate could not be loaded. Your amount and currencies are saved in this form — <button type="button" class="btn-secondary u-btn-pad" data-action="retry">Retry</button>';
         rateStrip.className = 'notice-warning';
         return;
       }
@@ -392,10 +367,10 @@ const schema = JSON.stringify({
 
     function emptyHTML() {
       return `
-        <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:0;">Converted amount</p>
+        <p class="u-muted-14-bold-m0">Converted amount</p>
         <p>Enter your details to see your result.</p>
         <p>You will see the converted amount, the rate used, and the inverse rate, with the rate’s source and date.</p>
-        <p style="font-size:13px; color:var(--ink-muted);">Estimates only — indicative rates. Read the full disclaimer below.</p>`;
+        <p class="u-muted-13">Estimates only — indicative rates. Read the full disclaimer below.</p>`;
     }
 
     function renderEmpty() {
@@ -429,7 +404,7 @@ const schema = JSON.stringify({
       // span, so a wrap can only happen at the "=" — never leaving a lone
       // "PKR" or "USD" on its own line.
       const rateStat = d.sameCurrency
-        ? `1 ${escapeHtml(d.from)} = <span class="nowrap">1.0000 ${escapeHtml(d.to)}</span> <span style="font-size:14px; font-weight:400;">(same currency — no exchange rate needed)</span>`
+        ? `1 ${escapeHtml(d.from)} = <span class="nowrap">1.0000 ${escapeHtml(d.to)}</span> <span class="u-fs-14 u-fw-400">(same currency — no exchange rate needed)</span>`
         : `1 ${escapeHtml(d.from)} = <span class="nowrap">${escapeHtml(formatRate(d.rate))} ${escapeHtml(d.to)}</span>`;
       const inverseStat = d.sameCurrency
         ? `1 ${escapeHtml(d.to)} = <span class="nowrap">1.0000 ${escapeHtml(d.from)}</span>`
@@ -440,8 +415,8 @@ const schema = JSON.stringify({
       const html = `
         ${staleBanner}
         ${newNotice}
-        <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:16px 0 0;">Converted amount</p>
-        <p class="result-value" style="margin:0;${longHeadline ? ' font-size:clamp(1.5rem,5vw,1.875rem);' : ''}">${escapeHtml(headline)}${staleWord ? ` <span style="font-size:16px;">${escapeHtml(staleWord)}</span>` : ''}</p>
+        <p class="u-muted-14-bold-mt16">Converted amount</p>
+        <p class="result-value u-m-0${longHeadline ? ' u-headline-long' : ''}">${escapeHtml(headline)}${staleWord ? ` <span class="u-fs-16">${escapeHtml(staleWord)}</span>` : ''}</p>
         ${needsPrecision ? precisionLine(d.convertedFull, d.to) : ''}
         <div class="stat-grid">
           <div><p class="stat-label">Exchange rate used</p><p class="stat-value">${rateStat}</p></div>
@@ -449,9 +424,9 @@ const schema = JSON.stringify({
           <div><p class="stat-label">Amount entered</p><p class="stat-value">${amountStat}</p></div>
         </div>
         <p><strong>Based on:</strong> <span class="nowrap">${escapeHtml(d.amountRaw)} ${escapeHtml(d.from)}</span> (${escapeHtml(currencyName(d.from))}) → ${escapeHtml(d.to)} (${escapeHtml(currencyName(d.to))})</p>
-        <p style="font-size:14px;">${escapeHtml(rateLineText(d.table, freshness))}</p>
-        <p style="font-size:14px;">Indicative rate — not a buy/sell rate. Banks and exchangers may differ, and fees/charges are not included.</p>
-        <p style="font-size:13px; color:var(--ink-muted);">Estimates only — indicative rates. Read the full disclaimer below.</p>
+        <p class="u-fs-14">${escapeHtml(rateLineText(d.table, freshness))}</p>
+        <p class="u-fs-14">Indicative rate — not a buy/sell rate. Banks and exchangers may differ, and fees/charges are not included.</p>
+        <p class="u-muted-13">Estimates only — indicative rates. Read the full disclaimer below.</p>
       `;
       resultContent.innerHTML = html;
       lastValidHTML = html;
@@ -462,10 +437,10 @@ const schema = JSON.stringify({
 
     function renderUnavailable(message, showRetry) {
       resultContent.innerHTML = `
-        <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:0;">Converted amount</p>
-        <div class="error-box" role="alert" style="margin-top:12px;">${escapeHtml(message)}</div>
-        ${showRetry ? '<p style="margin-top:12px;"><button type="button" class="btn-secondary" data-action="retry">Retry</button></p>' : ''}
-        <p style="font-size:13px; color:var(--ink-muted);">Estimates only — indicative rates. Read the full disclaimer below.</p>`;
+        <p class="u-muted-14-bold-m0">Converted amount</p>
+        <div class="error-box u-mt-12" role="alert">${escapeHtml(message)}</div>
+        ${showRetry ? '<p class="u-mt-12"><button type="button" class="btn-secondary" data-action="retry">Retry</button></p>' : ''}
+        <p class="u-muted-13">Estimates only — indicative rates. Read the full disclaimer below.</p>`;
       setActionsEnabled(false);
       hideSticky();
     }

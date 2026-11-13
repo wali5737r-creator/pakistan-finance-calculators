@@ -1,0 +1,46 @@
+/* debt-payoff-calculator.astro — page styles moved from the inline <style> block (2026-11-13, CSP style-src). */
+/* Scoped to this page with .pg-debt-payoff-calculator (replaces Astro's scoped-style scoping). */
+
+.pg-debt-payoff-calculator [hidden] {
+  display: none !important;
+}
+
+.pg-debt-payoff-calculator .field-error {
+  font-size: 14px;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.pg-debt-payoff-calculator .stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin: 12px 0;
+}
+
+.pg-debt-payoff-calculator .stat-grid p {
+  margin: 0;
+}
+
+.pg-debt-payoff-calculator .stat-label {
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.pg-debt-payoff-calculator .stat-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.pg-debt-payoff-calculator .actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pg-debt-payoff-calculator .related-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}

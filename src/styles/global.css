@@ -574,3 +574,105 @@ nav.breadcrumb a { font-weight: 600; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition: none !important; transform: none !important; }
 }
+
+/* CSP style-src utilities — replacements for inline style="..." (2026-11-13) */
+/* Audit: /tmp/style-src-audit.md — 91 canonical style=" values, 729 occurrences. */
+/* All classes use the `u-` prefix on purpose: bare names such as `.mt-32` would */
+/* collide with Tailwind v4 utilities (Tailwind's mt-32 is margin-top: 8rem, not */
+/* 32px). No `u-*` class existed anywhere in src/ before this block. Each rule */
+/* below is an exact copy of the inline declarations it replaces — no value was */
+/* changed, rounded, or "improved". The two dynamic zakat bar widths and the one */
+/* conditional currency headline size are NOT covered here on purpose: they need */
+/* CSSOM setProperty / a class toggle (see the audit doc, section 4). */
+
+/* --- atoms: single property --- */
+.u-fs-14 { font-size: 14px; }
+.u-fs-15 { font-size: 15px; }
+.u-fs-16 { font-size: 16px; }
+.u-fs-17 { font-size: 17px; }
+.u-fs-18 { font-size: 18px; }
+.u-fs-20 { font-size: 20px; }
+.u-fs-28 { font-size: 28px; }
+.u-txt-muted { color: var(--ink-muted); }
+.u-fw-400 { font-weight: 400; }
+.u-fw-600 { font-weight: 600; }
+.u-fw-700 { font-weight: 700; }
+.u-m-0 { margin: 0; }
+.u-mt-4 { margin-top: 4px; }
+.u-mt-6 { margin-top: 6px; }
+.u-mt-8 { margin-top: 8px; }
+.u-mt-12 { margin-top: 12px; }
+.u-mt-16 { margin-top: 16px; }
+.u-mt-20 { margin-top: 20px; }
+.u-mt-24 { margin-top: 24px; }
+.u-mt-32 { margin-top: 32px; }
+.u-mt-40 { margin-top: 40px; }
+.u-mt-48 { margin-top: 48px; }
+.u-mb-8 { margin-bottom: 8px; }
+.u-mb-12 { margin-bottom: 12px; }
+.u-mb-16 { margin-bottom: 16px; }
+.u-ml-6 { margin-left: 6px; }
+.u-pt-24 { padding-top: 24px; }
+.u-pt-32 { padding-top: 32px; }
+.u-pt-40 { padding-top: 40px; }
+.u-pt-48 { padding-top: 48px; }
+.u-pb-48 { padding-bottom: 48px; }
+.u-flex-1 { flex: 1; }
+
+/* --- combos: frequent multi-property values, verbatim --- */
+.u-muted-14 { font-size: 14px; color: var(--ink-muted); }
+.u-muted-13 { font-size: 13px; color: var(--ink-muted); }
+.u-muted-14-bold { font-size: 14px; font-weight: 700; color: var(--ink-muted); }
+.u-muted-14-bold-m0 { font-size: 14px; font-weight: 700; color: var(--ink-muted); margin: 0; }
+.u-muted-14-bold-mt16 { font-size: 14px; font-weight: 700; color: var(--ink-muted); margin: 16px 0 0; }
+.u-danger-14 { color: var(--danger); font-size: 14px; font-weight: 600; }
+.u-hero-title { font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px; }
+.u-hero-title-bare { font-size: clamp(1.75rem, 4.5vw, 2.25rem); }
+.u-lede { font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px; }
+.u-lede-rem { font-size: 1.0625rem; margin-top: 12px; }
+.u-fs-20-bold { font-size: 20px; font-weight: 700; }
+.u-fs-16-sb { font-size: 16px; font-weight: 600; }
+.u-sticky-top { position: sticky; top: 0; }
+.u-footer-note { font-size: 14px; max-width: 480px; margin: 0; }
+.u-caption { text-align: left; font-weight: 700; padding: 10px 12px; }
+.u-divider { border-top: 1px solid var(--border, #e5e7eb); margin-top: 24px; padding-top: 16px; }
+.u-txt-center-m { text-align: center; margin: 4px 0 16px; }
+.u-minh-48 { min-height: 48px; }
+.u-block-center { display: block; margin-inline: auto; }
+.u-inline-18 { display: inline; font-size: 18px; }
+
+/* --- combos: flex / grid rows (verbatim) --- */
+.u-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
+.u-row-8 { display: flex; gap: 8px; align-items: center; }
+.u-row-12 { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.u-row-8-mt16 { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.u-row-8-mt8 { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+.u-row-8-wrap-mt12 { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.u-row-12-mt8 { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.u-row-wrap-12-mt16 { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+.u-row-wrap-12-mt20 { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+.u-row-8-20 { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.u-flex-center-8 { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.u-flex-start-8 { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; }
+.u-flex-start-8-sb { display: flex; gap: 8px; align-items: flex-start; font-weight: 600; }
+.u-flex-start-8-mt12 { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; margin-top: 12px; }
+.u-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.u-grid-2-mt16 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.u-grid-2-wide-mt20 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+.u-grid-cards { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+/* --- combos: fieldset resets, swatches, scroll areas, JS-only bits --- */
+.u-fieldset { border: 0; padding: 0; margin: 0 0 16px; }
+.u-fieldset-mb12 { border: 0; padding: 0; margin-bottom: 12px; }
+.u-fieldset-mt16 { border: 0; padding: 0; margin-top: 16px; }
+.u-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+.u-swatch-brand { background: var(--brand-600); }
+.u-swatch-gold { background: var(--gold-500); }
+.u-scroll-360 { margin-top: 12px; max-height: 360px; overflow-y: auto; }
+.u-scroll-480 { max-height: 480px; overflow-y: auto; margin-top: 12px; }
+.u-btn-pad { min-height: 36px; padding: 6px 14px; }
+
+/* --- conditional (class toggle, NOT a static replacement) --- */
+/* Currency converter only: add/remove this class on the <p class="result-value"> */
+/* when headline.length > 16 (longHeadline). Do NOT put it on statically. */
+.u-headline-long { font-size: clamp(1.5rem, 5vw, 1.875rem); }

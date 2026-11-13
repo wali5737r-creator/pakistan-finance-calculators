@@ -1,5 +1,6 @@
 ---
 import Layout from '../components/Layout.astro';
+import '../styles/pages/national-savings-calculator.css';
 import {
   DSC_ENCASHMENT_TABLE_PCT,
   NATIONAL_SAVINGS_RATES_EFFECTIVE,
@@ -100,16 +101,16 @@ const maxDisplay: Record<string, string> = {
 const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES).replace(/</g, '\\u003c');
 ---
 <Layout title={title} description={description} slug={slug} schema={schema}>
-  <div class="container" style="padding-top: 32px;">
+  <div class="container u-pt-32 pg-national-savings-calculator">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="nss.crumb">National Savings Calculator</span></p>
+      <p class="u-muted-14"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="nss.crumb">National Savings Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="nss.badge">Savings</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;" data-i18n="nss.h1">National Savings Calculator</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info u-mt-8" data-i18n="nss.badge">Savings</p>
+    <h1 class="u-hero-title" data-i18n="nss.h1">National Savings Calculator</h1>
+    <p class="prose-narrow u-lede">
       <span data-i18n="nss.intro-pre1">On Rs 100,000, a Behbood, Pensioners' or Shuhada account pays </span>Rs 1,080<span data-i18n="nss.intro-pre2"> a month, a Regular Income Certificate pays </span>Rs 1,010<span data-i18n="nss.intro-pre3"> a month, and a Defence Savings Certificate held for 10 years returns </span>Rs 315,000<span data-i18n="nss.intro-pre4"> before tax — at the CDNS rates in force from 21 October 2026. Pick your scheme and amount below to work out your monthly, half-yearly or maturity profit, before and after withholding tax.</span>
     </p>
-    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+    <p class="notice-info prose-narrow u-mt-16">
       <strong>Rates checked 13 November 2026.</strong> CDNS revises
       profit rates frequently — the last revision was 21 October 2026
       (the Savings Account is unchanged at 10.00% since 26 May 2026).
@@ -119,7 +120,7 @@ const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES).replace(/</g, '\\u00
     </p>
   </div>
 
-  <div class="container" style="margin-top: 20px;">
+  <div class="container u-mt-20 pg-national-savings-calculator">
     <div class="tool-grid">
       <div class="card">
         <form id="nssForm" novalidate>
@@ -168,25 +169,25 @@ const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES).replace(/</g, '\\u00
 
           <div id="nssErrors" class="error-box" role="alert" hidden></div>
 
-          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+          <p class="u-actions">
             <button id="nssCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
             <button id="nssClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
-          <p id="nssFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="nssFormStatus" role="status" class="u-muted-14"></p>
         </form>
       </div>
 
       <div class="result-card" id="nssResultCard" tabindex="-1">
         <div id="nssEmpty">
-          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p class="u-fw-700" data-i18n="ui.empty-title">Your result will appear here.</p>
           <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
+          <p class="u-muted-14" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
 
         <div id="nssResult" data-result-text hidden>
-          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" id="nssHeadlineLabel">Monthly profit</p>
+          <p class="u-muted-14-bold" id="nssHeadlineLabel">Monthly profit</p>
           <div aria-live="polite" aria-atomic="true">
             <p class="result-value" id="nssHeadline"></p>
           </div>
@@ -211,10 +212,10 @@ const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES).replace(/</g, '\\u00
           <div class="table-wrap">
           <table class="breakdown-table" id="nssBreakdown" aria-label="National Savings breakdown"></table>
           </div>
-          <p id="nssEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
-          <p id="nssFormula" style="font-size: 16px;"></p>
-          <p id="nssNote" style="font-size: 14px; color: var(--ink-muted);"></p>
-          <p style="font-size: 13px; color: var(--ink-muted);">
+          <p id="nssEcho" class="u-muted-14"></p>
+          <p id="nssFormula" class="u-fs-16"></p>
+          <p id="nssNote" class="u-muted-14"></p>
+          <p class="u-muted-13">
             <span data-i18n="nss.estimate">Estimate only — check important figures before acting.</span> <a href="#nssDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
@@ -223,12 +224,12 @@ const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES).replace(/</g, '\\u00
           <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
           <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
-        <p data-copy-status role="status" style="font-size: 14px;"></p>
+        <p data-copy-status role="status" class="u-fs-14"></p>
       </div>
     </div>
   </div>
 
-  <div class="container prose-narrow" style="margin-top: 40px;">
+  <div class="container prose-narrow u-mt-40 pg-national-savings-calculator">
     <h2 data-i18n="nss.how-h">How it works</h2>
     <ol>
       <li data-i18n="nss.how1">Pick a scheme. Four pay monthly — Regular Income Certificates, Behbood, Pensioners' and Shuhada — one pays half-yearly (Special Savings), one pays annually (Savings Account), and the Defence Savings Certificate pays only on maturity or encashment.</li>
@@ -252,7 +253,7 @@ const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES).replace(/</g, '\\u00
     <p><strong data-i18n="nss.exe-label">Example E — Defence Savings Certificate, 10 years:</strong> <span data-i18n="nss.exe-pre1">the CDNS table pays </span>215%<span data-i18n="nss.exe-pre2"> profit, so </span>Rs 100,000<span data-i18n="nss.exe-pre3"> becomes </span>Rs 315,000<span data-i18n="nss.exe-pre4"> before tax. A filer pays tax on the </span>Rs 215,000<span data-i18n="nss.exe-pre5"> profit at </span>15%<span data-i18n="nss.exe-pre6"> (</span>Rs 32,250<span data-i18n="nss.exe-pre7">), so </span>Rs 282,750<span data-i18n="nss.exe-pre8"> after tax; a non-filer pays </span>30%<span data-i18n="nss.exe-pre9"> (</span>Rs 64,500<span data-i18n="nss.exe-pre10">), so </span>Rs 250,500<span data-i18n="nss.exe-pre11"> after tax. Encash after 5 years instead and the table pays </span>67%<span data-i18n="nss.exe-pre12"> — </span>Rs 167,000<span data-i18n="nss.exe-post"> before tax. Encash before 1 year and there is no profit at all.</span></p>
     <p><strong data-i18n="nss.exf-label">Example F — Special Savings Certificate, 3 years:</strong> <span data-i18n="nss.exf-pre1">five half-years at </span>6.00%<span data-i18n="nss.exf-pre2"> (</span>Rs 6,000<span data-i18n="nss.exf-pre3"> each) plus the final half-year at </span>6.40%<span data-i18n="nss.exf-pre4"> (</span>Rs 6,400) = Rs 36,400<span data-i18n="nss.exf-pre5"> profit on </span>Rs 100,000<span data-i18n="nss.exf-pre6">, so </span>Rs 136,400<span data-i18n="nss.exf-pre7"> before tax. A filer pays </span>15%<span data-i18n="nss.exf-pre8"> tax (</span>Rs 5,460<span data-i18n="nss.exf-pre9">), so </span>Rs 130,940<span data-i18n="nss.exf-post"> after tax. Encash before 6 months and there is no profit at all.</span></p>
     <p><strong data-i18n="nss.exg-label">Example G — Savings Account, 1 year:</strong> 100,000 × 10.00%<span data-i18n="nss.exg-pre1"> = </span>Rs 10,000<span data-i18n="nss.exg-pre2"> a year before tax, credited on 30 June. A filer pays </span>15%<span data-i18n="nss.exg-pre3"> tax (</span>Rs 1,500<span data-i18n="nss.exg-pre4">), so </span>Rs 8,500<span data-i18n="nss.exg-pre5"> a year after tax; over 3 years that is </span>Rs 25,500<span data-i18n="nss.exg-post"> after tax.</span></p>
-    <p style="font-size: 14px; color: var(--ink-muted);">All examples use the CDNS rates in force from 21 October 2026 (Savings Account 10.00% since 26 May 2026), checked 13 November 2026.</p>
+    <p class="u-muted-14">All examples use the CDNS rates in force from 21 October 2026 (Savings Account 10.00% since 26 May 2026), checked 13 November 2026.</p>
 
     <h2><span data-i18n="nss.rates-h-pre">National Savings profit rates — w.e.f. </span>{NATIONAL_SAVINGS_RATES_EFFECTIVE}<span data-i18n="nss.rates-h-post">.</span></h2>
     <div class="table-wrap">
@@ -276,9 +277,9 @@ const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES).replace(/</g, '\\u00
       </tbody>
     </table>
     </div>
-    <p style="font-size: 14px; color: var(--ink-muted);">Rates: CDNS, "Summary of NSS Profit Rates (in %age and amount), w.e.f. 21-Oct-2026". The Savings Account rate is unchanged at 10.00% since 26 May 2026. The DSC rate of 11.94% is the CDNS-stated rate — the amount a DSC actually pays comes from the per-year table below. The SSC rate of 12.00% is the rate for the first five half-year periods; the 6th period is 12.80% p.a.</p>
-    <p style="font-size: 14px; color: var(--ink-muted);"><strong data-i18n="nss.behbood-label">Behbood maximum — stale FAQ.</strong> <span data-i18n="nss.behbood-note">The CDNS FAQ still says the Behbood maximum is Rs 5 million single / Rs 10 million joint. That is stale: the Behbood product page and rate card say Rs 7.5 million single / Rs 15 million joint, and those are the figures used here.</span></p>
-    <p style="font-size: 14px; color: var(--ink-muted);"><strong data-i18n="nss.shuhada-label">Shuhada maximum — the official page conflicts with itself.</strong> <span data-i18n="nss.shuhada-note">The Shuhada Family Welfare Account page's highlights say the maximum is Rs 5,000,000, while its body says Rs 7,500,000. This page does not pick one — both figures are stated here, and the calculator does not enforce a Shuhada maximum.</span></p>
+    <p class="u-muted-14">Rates: CDNS, "Summary of NSS Profit Rates (in %age and amount), w.e.f. 21-Oct-2026". The Savings Account rate is unchanged at 10.00% since 26 May 2026. The DSC rate of 11.94% is the CDNS-stated rate — the amount a DSC actually pays comes from the per-year table below. The SSC rate of 12.00% is the rate for the first five half-year periods; the 6th period is 12.80% p.a.</p>
+    <p class="u-muted-14"><strong data-i18n="nss.behbood-label">Behbood maximum — stale FAQ.</strong> <span data-i18n="nss.behbood-note">The CDNS FAQ still says the Behbood maximum is Rs 5 million single / Rs 10 million joint. That is stale: the Behbood product page and rate card say Rs 7.5 million single / Rs 15 million joint, and those are the figures used here.</span></p>
+    <p class="u-muted-14"><strong data-i18n="nss.shuhada-label">Shuhada maximum — the official page conflicts with itself.</strong> <span data-i18n="nss.shuhada-note">The Shuhada Family Welfare Account page's highlights say the maximum is Rs 5,000,000, while its body says Rs 7,500,000. This page does not pick one — both figures are stated here, and the calculator does not enforce a Shuhada maximum.</span></p>
 
     <h2 data-i18n="nss.dsc-h">Defence Savings Certificate — encashment table (Rs 100,000)</h2>
     <div class="table-wrap">
@@ -298,7 +299,7 @@ const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES).replace(/</g, '\\u00
       </tbody>
     </table>
     </div>
-    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="nss.dsc-note">CDNS schedule, w.e.f. 21 October 2026. No profit if encashed before 1 full year. The table is the amount CDNS pays — do not work a DSC out by compounding 11.94% a year, which gives a different (wrong) figure. Withholding tax of 15% (filer) or 30% (non-filer) applies to the profit shown.</p>
+    <p class="u-muted-14" data-i18n="nss.dsc-note">CDNS schedule, w.e.f. 21 October 2026. No profit if encashed before 1 full year. The table is the amount CDNS pays — do not work a DSC out by compounding 11.94% a year, which gives a different (wrong) figure. Withholding tax of 15% (filer) or 30% (non-filer) applies to the profit shown.</p>
 
     <h2 data-i18n="nss.who-h">Who can invest — and the tax and Zakat position</h2>
     <div class="table-wrap">
@@ -332,8 +333,8 @@ const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES).replace(/</g, '\\u00
     </div>
     <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
-    <section id="nssDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;" data-i18n="nss.disc-h">Important — please read</h2>
+    <section id="nssDisclaimer" class="notice-info u-mt-32">
+      <h2 class="u-fs-20" data-i18n="nss.disc-h">Important — please read</h2>
       <p data-i18n="nss.disc">
         Results are estimates from the CDNS profit rates in force from
         21 October 2026 (Savings Account 10.00% since 26 May 2026) —
@@ -358,15 +359,15 @@ const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES).replace(/</g, '\\u00
       <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;" data-i18n="nss.related-h">Related tools</h2>
+    <h2 class="u-mt-32" data-i18n="nss.related-h">Related tools</h2>
     <div class="related-grid">
       {
         related.map((tool, i) => (
           <article class="card">
-            <h3 style="font-size: 18px;">
+            <h3 class="u-fs-18">
               <a href={tool.href} data-i18n={`nss.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);" data-i18n={`nss.rel${i + 1}-desc`}>{tool.desc}</p>
+            <p class="u-txt-muted" data-i18n={`nss.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
               <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
@@ -375,64 +376,6 @@ const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES).replace(/</g, '\\u00
       }
     </div>
   </div>
-
-  <style>
-    [hidden] {
-      display: none !important;
-    }
-    .field-error {
-      font-size: 14px;
-      color: var(--danger);
-      font-weight: 600;
-    }
-    .stat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 16px;
-      margin: 12px 0;
-    }
-    .stat-grid p {
-      margin: 0;
-    }
-    .stat-label {
-      font-size: 14px;
-      color: var(--ink-muted);
-    }
-    .stat-value {
-      font-size: 20px;
-      font-weight: 700;
-    }
-    .actions-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
-    }
-    .related-grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    }
-    .breakdown-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 12px 0;
-      font-size: 15px;
-    }
-    .breakdown-table th,
-    .breakdown-table td {
-      text-align: left;
-      padding: 8px 10px;
-      border-bottom: 1px solid var(--border, #e5e7eb);
-    }
-    .breakdown-table td:last-child,
-    .breakdown-table th:last-child {
-      text-align: right;
-    }
-    .breakdown-table tr.total-row td {
-      font-weight: 700;
-    }
-  </style>
 
   <!-- Scheme data as a JSON data block (CSP data block, not executed), so the
        calculator script below can be bundled externally and script-src needs no 'unsafe-inline'. -->

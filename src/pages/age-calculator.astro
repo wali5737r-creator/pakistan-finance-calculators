@@ -71,19 +71,19 @@ const schema = JSON.stringify({
 ---
 
 <Layout title={title} description={description} slug="/age-calculator/" schema={schema}>
-  <div class="container" style="padding-top: 32px;">
-    <nav class="breadcrumb" aria-label="Breadcrumb" style="font-size: 14px; margin-bottom: 12px;">
+  <div class="container u-pt-32">
+    <nav class="breadcrumb u-fs-14 u-mb-12" aria-label="Breadcrumb">
       <a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="age.crumb">Age Calculator</span>
     </nav>
     <h1 data-i18n="age.h1">Age Calculator</h1>
-    <p class="prose-narrow" style="font-size: 1.0625rem; margin-top: 12px;" data-i18n="age.intro">
+    <p class="prose-narrow u-lede-rem" data-i18n="age.intro">
       Work out your exact age in years, months and days from your date of birth,
       on today’s date or on any date you choose — plus your total days, total
       weeks, and days until your next birthday. Your dates stay in your browser:
       your date of birth is not stored.
     </p>
 
-    <div class="tool-grid" style="margin-top: 24px;">
+    <div class="tool-grid u-mt-24">
       <section class="card" aria-label="Age calculator form">
         <div class="field">
           <label for="dob"><span data-i18n="age.dob-label">Date of birth</span> <span aria-hidden="true">*</span></label>
@@ -108,7 +108,7 @@ const schema = JSON.stringify({
           <p><button type="button" class="btn-secondary" id="reset-today" data-i18n="age.reset-today">Reset to today</button></p>
         </div>
         <div id="dob-error" role="alert" class="error-box" hidden></div>
-        <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px;">
+        <div class="u-row-wrap-12-mt16">
           <button type="button" class="btn-primary" id="calculate" data-i18n="ui.calculate">Calculate</button>
           <button type="button" class="btn-secondary" id="clear" data-i18n="ui.clear">Clear</button>
         </div>
@@ -125,53 +125,53 @@ const schema = JSON.stringify({
         <div id="result-content" hidden>
           <div data-result-text>
             <div id="result-heading" tabindex="-1" aria-live="polite" aria-atomic="true">
-              <p id="result-eyebrow" style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Your age</p>
+              <p class="u-muted-14-bold" id="result-eyebrow">Your age</p>
               <p class="result-value" id="headline"></p>
             </div>
             <p id="age-warning" class="notice-warning" role="note" hidden data-i18n="age.warning">
               This age is over 150 years. Please check the date of birth — the result is shown, but it may be a typing mistake.
             </p>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px;">
+            <div class="u-grid-2-wide-mt20">
               <div>
-                <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="age.lbl-days">Total days lived</p>
-                <p id="total-days" style="font-weight: 700; font-size: 20px;"></p>
+                <p class="u-muted-14" data-i18n="age.lbl-days">Total days lived</p>
+                <p class="u-fs-20-bold" id="total-days"></p>
               </div>
               <div>
-                <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="age.lbl-weeks">Total weeks</p>
-                <p id="total-weeks" style="font-weight: 700; font-size: 20px;"></p>
+                <p class="u-muted-14" data-i18n="age.lbl-weeks">Total weeks</p>
+                <p class="u-fs-20-bold" id="total-weeks"></p>
               </div>
               <div>
-                <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="age.lbl-months">Total complete months</p>
-                <p id="total-months" style="font-weight: 700; font-size: 20px;"></p>
+                <p class="u-muted-14" data-i18n="age.lbl-months">Total complete months</p>
+                <p class="u-fs-20-bold" id="total-months"></p>
               </div>
               <div>
-                <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="age.lbl-next">Next birthday</p>
-                <p id="next-birthday" style="font-weight: 700; font-size: 20px;"></p>
+                <p class="u-muted-14" data-i18n="age.lbl-next">Next birthday</p>
+                <p class="u-fs-20-bold" id="next-birthday"></p>
               </div>
               <div>
-                <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="age.lbl-born">Born</p>
-                <p id="born" style="font-weight: 700; font-size: 20px;"></p>
+                <p class="u-muted-14" data-i18n="age.lbl-born">Born</p>
+                <p class="u-fs-20-bold" id="born"></p>
               </div>
             </div>
-            <p id="echo" style="margin-top: 20px; font-size: 14px; color: var(--ink-muted);"></p>
-            <p class="notice-info" style="margin-top: 12px;" data-i18n="age.cal-note">
+            <p class="u-muted-14 u-mt-20" id="echo"></p>
+            <p class="notice-info u-mt-12" data-i18n="age.cal-note">
               Gregorian calendar. “Today” is the date in Asia/Karachi. 29 February
               birthdays count from 1 March in non-leap years.
             </p>
-            <p style="margin-top: 12px; font-size: 14px;" data-i18n="age.not-stored">
+            <p class="u-fs-14 u-mt-12" data-i18n="age.not-stored">
               Your date of birth is not stored.
             </p>
           </div>
-          <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px;">
+          <div class="no-print u-row-wrap-12-mt20">
             <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
             <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
           </div>
-          <p data-copy-status role="status" style="font-size: 14px; margin-top: 8px;"></p>
+          <p class="u-fs-14 u-mt-8" data-copy-status role="status"></p>
         </div>
       </section>
     </div>
 
-    <section class="prose-narrow" style="margin-top: 48px;">
+    <section class="prose-narrow u-mt-48">
       <h2 data-i18n="age.how-h">How it works</h2>
       <ol>
         <li data-i18n="age.how1">Enter your date of birth as day / month / year — 03/04/2000 always means 3 April 2000.</li>
@@ -195,7 +195,7 @@ const schema = JSON.stringify({
       </p>
     </section>
 
-    <section class="prose-narrow" style="margin-top: 40px;">
+    <section class="prose-narrow u-mt-40">
       <h2 data-i18n="age.example-h">Worked example</h2>
       <p>
         <span data-i18n="age.ex-pre">Born</span> <strong>15 March 1995</strong><span data-i18n="age.ex-mid1">, age at</span> <strong>28 October 2026</strong><span data-i18n="age.ex-mid2">:</span>
@@ -203,7 +203,7 @@ const schema = JSON.stringify({
       </p>
     </section>
 
-    <section class="prose-narrow faq" style="margin-top: 40px;">
+    <section class="prose-narrow faq u-mt-40">
       <h2 data-i18n="age.faq-h">Frequently asked questions</h2>
       {faqs.map((faq, i) => (
         <details>
@@ -214,7 +214,7 @@ const schema = JSON.stringify({
       <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
     </section>
 
-    <section style="margin-top: 40px;">
+    <section class="u-mt-40">
       <p><a href="/" data-i18n="age.see-all">See all calculators →</a></p>
     </section>
   </div>

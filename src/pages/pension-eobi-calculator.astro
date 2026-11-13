@@ -1,5 +1,6 @@
 ---
 import Layout from '../components/Layout.astro';
+import '../styles/pages/pension-eobi-calculator.css';
 
 const title = "Pension / EOBI Calculator Pakistan | Old-Age Pension & Contributions | Pakistan Finance Calculators";
 const description = "Work out your EOBI pension in Pakistan: monthly old-age pension from your wage and service years, plus contributions, reduced and survivor pension.";
@@ -81,20 +82,20 @@ const related = [
 ];
 ---
 <Layout title={title} description={description} slug={slug} schema={schema}>
-  <div class="container" style="padding-top: 32px;">
+  <div class="container u-pt-32 pg-pension-eobi-calculator">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="pen.crumb">Pension / EOBI Calculator</span></p>
+      <p class="u-muted-14"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="pen.crumb">Pension / EOBI Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="pen.badge">Retirement</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;" data-i18n="pen.h1">Pension / EOBI Calculator</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;" data-i18n="pen.intro">
+    <p class="badge badge-info u-mt-8" data-i18n="pen.badge">Retirement</p>
+    <h1 class="u-hero-title" data-i18n="pen.h1">Pension / EOBI Calculator</h1>
+    <p class="prose-narrow u-lede" data-i18n="pen.intro">
       On a contribution wage of Rs 40,700 with 25 years of service, the EOBI old-age
       pension is Rs 20,350 a month — and never less than the notified minimum of
       Rs 11,500. Enter your contribution wage and years of service below to work
       out your pension, your contributions, a reduced pension, a survivor's
       pension, or the old-age grant.
     </p>
-    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+    <p class="notice-info prose-narrow u-mt-16">
       <strong data-i18n="pen.notice-label">EOBI only.</strong> <span data-i18n="pen.notice-text">This calculator covers the Employees' Old-Age Benefits
       Institution only. It does <strong>not</strong> cover government-servant pension
       (GP Fund / commutation) — that is a different scheme and is not included here.
@@ -104,7 +105,7 @@ const related = [
     </p>
   </div>
 
-  <div class="container" style="margin-top: 20px;">
+  <div class="container u-mt-20 pg-pension-eobi-calculator">
     <div class="tool-grid">
       <div class="card">
         <form id="pensionForm" novalidate>
@@ -158,13 +159,13 @@ const related = [
           </div>
 
           <div class="field" id="pensionSurvivorFields" hidden>
-            <label style="display: flex; gap: 8px; align-items: flex-start; font-weight: 400;">
-              <input id="pensionInService" type="checkbox" style="margin-top: 4px;" checked />
+            <label class="u-flex-start-8">
+              <input id="pensionInService" type="checkbox" class="u-mt-4" checked />
               <span data-i18n="pen.surv-inservice">The insured person died while in insurable employment (untick if they had left employment)</span>
             </label>
             <p class="hint" data-i18n="pen.surv-inservice-hint">Death in service needs 36 months of contributions; death out of employment needs 5 years.</p>
-            <label style="display: flex; gap: 8px; align-items: flex-start; font-weight: 400; margin-top: 12px;">
-              <input id="pensionWasPensioner" type="checkbox" style="margin-top: 4px;" />
+            <label class="u-flex-start-8-mt12">
+              <input id="pensionWasPensioner" type="checkbox" class="u-mt-4" />
               <span data-i18n="pen.surv-pensioner">The deceased was already receiving an old-age or invalidity pension</span>
             </label>
             <p class="hint" data-i18n="pen.surv-pensioner-hint">If so, the surviving spouse gets a life pension equal to the pensioner's pension — enter it below.</p>
@@ -178,25 +179,25 @@ const related = [
 
           <div id="pensionErrors" class="error-box" role="alert" hidden></div>
 
-          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+          <p class="u-actions">
             <button id="pensionCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
             <button id="pensionClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
-          <p id="pensionFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="pensionFormStatus" role="status" class="u-muted-14"></p>
         </form>
       </div>
 
       <div class="result-card" id="pensionResultCard" tabindex="-1">
         <div id="pensionEmpty">
-          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p class="u-fw-700" data-i18n="ui.empty-title">Your result will appear here.</p>
           <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
+          <p class="u-muted-14" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
 
         <div id="pensionResult" data-result-text hidden>
-          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" id="pensionHeadlineLabel">Monthly pension</p>
+          <p class="u-muted-14-bold" id="pensionHeadlineLabel">Monthly pension</p>
           <div aria-live="polite" aria-atomic="true">
             <p class="result-value" id="pensionHeadline"></p>
           </div>
@@ -221,10 +222,10 @@ const related = [
           <div class="table-wrap">
           <table class="breakdown-table" id="pensionBreakdown" aria-label="Pension breakdown"></table>
           </div>
-          <p id="pensionEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
-          <p id="pensionFormula" style="font-size: 16px;"></p>
-          <p id="pensionNote" style="font-size: 14px; color: var(--ink-muted);"></p>
-          <p style="font-size: 13px; color: var(--ink-muted);">
+          <p id="pensionEcho" class="u-muted-14"></p>
+          <p id="pensionFormula" class="u-fs-16"></p>
+          <p id="pensionNote" class="u-muted-14"></p>
+          <p class="u-muted-13">
             <span data-i18n="pen.estimate">Estimate only — check important figures before acting.</span> <a href="#pensionDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
@@ -233,12 +234,12 @@ const related = [
           <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
           <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
-        <p data-copy-status role="status" style="font-size: 14px;"></p>
+        <p data-copy-status role="status" class="u-fs-14"></p>
       </div>
     </div>
   </div>
 
-  <div class="container prose-narrow" style="margin-top: 40px;">
+  <div class="container prose-narrow u-mt-40 pg-pension-eobi-calculator">
     <h2 data-i18n="pen.how-h">How it works</h2>
     <ol>
       <li data-i18n="pen.how1">Pick the wage your EOBI contributions were paid on — the notified minimum wage for your area, not your actual salary — and your years of insurable employment. Part-years count: 6 months or more is a full year.</li>
@@ -261,7 +262,7 @@ const related = [
     <p><strong><span data-i18n="pen.exd-label-pre">Example D — retiring </span>36<span data-i18n="pen.exd-label-mid"> months early, </span>25<span data-i18n="pen.exd-label-mid2"> years at </span>Rs 40,700<span data-i18n="pen.exd-label-post">:</span></strong><span data-i18n="pen.exd-pre1"> the full pension is </span>Rs 20,350<span data-i18n="pen.exd-pre2">, cut by </span>0.5% x 36<span data-i18n="pen.exd-pre3"> months = </span>18%<span data-i18n="pen.exd-pre4">, so the reduced pension is </span>20,350 x 0.82 = Rs 16,687<span data-i18n="pen.exd-post"> a month, for life.</span></p>
     <p><strong><span data-i18n="pen.exe-label-pre">Example E — old-age grant, </span>8<span data-i18n="pen.exe-label-mid"> years at </span>Rs 40,700<span data-i18n="pen.exe-label-post">:</span></strong><span data-i18n="pen.exe-pre1"> with under </span>15<span data-i18n="pen.exe-pre2"> years there is no monthly pension, but at pension age the lump-sum grant is </span>40,700 x 8 = Rs 325,600<span data-i18n="pen.exe-post"> once.</span></p>
     <p><strong><span data-i18n="pen.exf-label-pre">Example F — survivor's pension, </span>20<span data-i18n="pen.exf-label-mid"> years at </span>Rs 40,700<span data-i18n="pen.exf-label-post">:</span></strong><span data-i18n="pen.exf-pre1"> the spouse's pension by the Schedule formula is </span>40,700 x 20 / 50 = Rs 16,280<span data-i18n="pen.exf-pre2"> a month for life. With only </span>5<span data-i18n="pen.exf-pre3"> years of service the formula gives </span>Rs 4,070<span data-i18n="pen.exf-pre4">, so the notified minimum of </span>Rs 11,500<span data-i18n="pen.exf-pre5"> applies instead. If the deceased was already a pensioner on </span>Rs 18,000<span data-i18n="pen.exf-pre6">, the spouse gets </span>Rs 18,000<span data-i18n="pen.exf-post"> a month.</span></p>
-    <p style="font-size: 14px; color: var(--ink-muted);"><span data-i18n="pen.ex-note-pre">The minimum pension of </span>Rs 11,500<span data-i18n="pen.ex-note-mid"> applies from 1 January 2025. The old figure of </span>Rs 10,000<span data-i18n="pen.ex-note-post"> is superseded — do not use it.</span></p>
+    <p class="u-muted-14"><span data-i18n="pen.ex-note-pre">The minimum pension of </span>Rs 11,500<span data-i18n="pen.ex-note-mid"> applies from 1 January 2025. The old figure of </span>Rs 10,000<span data-i18n="pen.ex-note-post"> is superseded — do not use it.</span></p>
 
     <h2 data-i18n="pen.table1-h">Pension by years of service (wage Rs 40,700)</h2>
     <div class="table-wrap">
@@ -295,7 +296,7 @@ const related = [
       </tbody>
     </table>
     </div>
-    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="pen.table2-note">Each wage is labelled with the date it took effect. The EOBI circular for the ICT wage (Circular No. 01/2026-27, 20 August 2026) was only seen second-hand. Whether EOBI bills provincially or on the ICT rate nationally is not settled — use the wage your contributions were actually paid on.</p>
+    <p class="u-muted-14" data-i18n="pen.table2-note">Each wage is labelled with the date it took effect. The EOBI circular for the ICT wage (Circular No. 01/2026-27, 20 August 2026) was only seen second-hand. Whether EOBI bills provincially or on the ICT rate nationally is not settled — use the wage your contributions were actually paid on.</p>
 
     <h2 data-i18n="pen.faq-h">Frequently asked questions</h2>
     <div class="faq">
@@ -310,8 +311,8 @@ const related = [
     </div>
     <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
-    <section id="pensionDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;" data-i18n="pen.disc-h">Important — please read</h2>
+    <section id="pensionDisclaimer" class="notice-info u-mt-32">
+      <h2 class="u-fs-20" data-i18n="pen.disc-h">Important — please read</h2>
       <p data-i18n="pen.disc">
         Results are estimates from the Employees' Old-Age Benefits Act, 1976
         and the notified minimum pension — they are not a promise of what EOBI
@@ -334,15 +335,15 @@ const related = [
       <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;" data-i18n="pen.related-h">Related tools</h2>
+    <h2 class="u-mt-32" data-i18n="pen.related-h">Related tools</h2>
     <div class="related-grid">
       {
         related.map((tool, i) => (
           <article class="card">
-            <h3 style="font-size: 18px;">
+            <h3 class="u-fs-18">
               <a href={tool.href} data-i18n={`pen.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);" data-i18n={`pen.rel${i + 1}-desc`}>{tool.desc}</p>
+            <p class="u-txt-muted" data-i18n={`pen.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
               <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
@@ -351,64 +352,6 @@ const related = [
       }
     </div>
   </div>
-
-  <style>
-    [hidden] {
-      display: none !important;
-    }
-    .field-error {
-      font-size: 14px;
-      color: var(--danger);
-      font-weight: 600;
-    }
-    .stat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 16px;
-      margin: 12px 0;
-    }
-    .stat-grid p {
-      margin: 0;
-    }
-    .stat-label {
-      font-size: 14px;
-      color: var(--ink-muted);
-    }
-    .stat-value {
-      font-size: 20px;
-      font-weight: 700;
-    }
-    .actions-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
-    }
-    .related-grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    }
-    .breakdown-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 12px 0;
-      font-size: 15px;
-    }
-    .breakdown-table th,
-    .breakdown-table td {
-      text-align: left;
-      padding: 8px 10px;
-      border-bottom: 1px solid var(--border, #e5e7eb);
-    }
-    .breakdown-table td:last-child,
-    .breakdown-table th:last-child {
-      text-align: right;
-    }
-    .breakdown-table tr.total-row td {
-      font-weight: 700;
-    }
-  </style>
 
   <script>
     import { calcEobiContributions, calcEobiPension, calcInvalidityPension, calcOldAgeGrant, calcReducedPension, calcSurvivorPension, parseDecimal, pensionWageForPreset, formatPKR, formatNumber } from '../lib/calc.ts';

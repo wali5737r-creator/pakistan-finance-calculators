@@ -1,0 +1,46 @@
+/* fixed-deposit-calculator.astro — page styles moved from the inline <style> block (2026-11-13, CSP style-src). */
+/* Scoped to this page with .pg-fixed-deposit-calculator (replaces Astro's scoped-style scoping). */
+
+.pg-fixed-deposit-calculator [hidden] {
+  display: none !important;
+}
+
+.pg-fixed-deposit-calculator .field-error {
+  font-size: 14px;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.pg-fixed-deposit-calculator .stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin: 12px 0;
+}
+
+.pg-fixed-deposit-calculator .stat-grid p {
+  margin: 0;
+}
+
+.pg-fixed-deposit-calculator .stat-label {
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.pg-fixed-deposit-calculator .stat-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.pg-fixed-deposit-calculator .actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pg-fixed-deposit-calculator .related-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}

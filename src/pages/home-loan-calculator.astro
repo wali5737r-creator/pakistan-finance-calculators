@@ -1,5 +1,6 @@
 ---
 import Layout from '../components/Layout.astro';
+import '../styles/pages/home-loan-calculator.css';
 import {
   APNA_GHAR_HOMES_FY2025_26,
   APNA_GHAR_MAX_FLAT_SQFT,
@@ -105,19 +106,19 @@ const related = [
 ];
 ---
 <Layout title={title} description={description} slug={slug} schema={schema}>
-  <div class="container" style="padding-top: 32px;">
+  <div class="container u-pt-32 pg-home-loan-calculator">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="home.crumb">Home Loan Calculator</span></p>
+      <p class="u-muted-14"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="home.crumb">Home Loan Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="loans.badge">Loans</p>
-    <h1 data-i18n="home.h1" style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Home Loan Calculator Pakistan</h1>
-    <p class="prose-narrow" data-i18n="home.intro" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info u-mt-8" data-i18n="loans.badge">Loans</p>
+    <h1 data-i18n="home.h1" class="u-hero-title">Home Loan Calculator Pakistan</h1>
+    <p class="prose-narrow u-lede" data-i18n="home.intro">
       Work out the monthly EMI on a home loan in Pakistan — as a commercial loan at a
       floating KIBOR-linked rate, or under the Apna Ghar scheme at 5% fixed for the
       first 10 years and then KIBOR +3%. Apna Ghar mode shows both phases' EMIs, so
       the subsidy is never hidden inside a single rate.
     </p>
-    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+    <p class="notice-info prose-narrow u-mt-16">
       <strong data-i18n="home.notice-strong">Terms checked 13 November 2026.</strong><span data-i18n="home.notice-pre1"> Commercial home-loan rates are
       floating (KIBOR + a bank spread of about 2–4.25%) and change — the all-in band in
       November 2026 was about </span>14.9–17.2%<span data-i18n="home.notice-post"> per year. The rate on your bank's Key Fact
@@ -125,7 +126,7 @@ const related = [
     </p>
   </div>
 
-  <div class="container" style="margin-top: 20px;">
+  <div class="container u-mt-20 pg-home-loan-calculator">
     <div class="tool-grid">
       <div class="card">
         <form id="homeForm" novalidate>
@@ -176,31 +177,31 @@ const related = [
 
           <div id="homeErrors" class="error-box" role="alert" hidden></div>
 
-          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+          <p class="u-actions">
             <button id="homeCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
             <button id="homeClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
-          <p id="homeFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="homeFormStatus" role="status" class="u-muted-14"></p>
         </form>
       </div>
 
       <div class="result-card" id="homeResultCard" tabindex="-1">
         <div id="homeEmpty">
-          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p class="u-fw-700" data-i18n="ui.empty-title">Your result will appear here.</p>
           <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="home.empty-note">
+          <p class="u-muted-14" data-i18n="home.empty-note">
             You will see your monthly EMI — both phases in Apna Ghar mode — the financed amount, total interest, and the total cost.
           </p>
         </div>
 
         <div id="homeResult" data-result-text hidden>
-          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" id="homeHeadlineLabel">Your monthly EMI</p>
+          <p class="u-muted-14-bold" id="homeHeadlineLabel">Your monthly EMI</p>
           <div aria-live="polite" aria-atomic="true">
             <p class="result-value" id="homeHeadline"></p>
           </div>
           <div id="homePhase2Box" hidden>
-            <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" data-i18n="home.phase2-label">EMI from year 11 (phase 2)</p>
-            <p class="result-value" id="homePhase2" style="font-size: 28px;"></p>
+            <p class="u-muted-14-bold" data-i18n="home.phase2-label">EMI from year 11 (phase 2)</p>
+            <p class="result-value u-fs-28" id="homePhase2"></p>
           </div>
           <div class="stat-grid">
             <div>
@@ -224,9 +225,9 @@ const related = [
           <table class="breakdown-table" id="homeBreakdown" aria-label="Home loan breakdown"></table>
           </div>
           <p id="homeCapWarning" class="notice-warning" hidden></p>
-          <p id="homeEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
-          <p id="homeFormula" style="font-size: 16px;"></p>
-          <p style="font-size: 13px; color: var(--ink-muted);">
+          <p id="homeEcho" class="u-muted-14"></p>
+          <p id="homeFormula" class="u-fs-16"></p>
+          <p class="u-muted-13">
             <span data-i18n="home.estimate">Estimate only — check important figures before acting.</span> <a href="#homeDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
@@ -235,12 +236,12 @@ const related = [
           <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
           <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
-        <p data-copy-status role="status" style="font-size: 14px;"></p>
+        <p data-copy-status role="status" class="u-fs-14"></p>
       </div>
     </div>
   </div>
 
-  <div class="container prose-narrow" style="margin-top: 40px;">
+  <div class="container prose-narrow u-mt-40 pg-home-loan-calculator">
     <h2 data-i18n="home.how-h">How it works</h2>
     <ol>
       <li data-i18n="home.how1">Pick the loan type: commercial (one floating rate) or Apna Ghar (5% for 10 years, then KIBOR +3%). The equity, tenure and fee fields change to match the mode you pick.</li>
@@ -258,7 +259,7 @@ const related = [
     <h2 data-i18n="home.example-h">Worked examples</h2>
     <p><strong data-i18n="home.exa-label">Example A — Commercial:</strong> Rs 10,000,000<span data-i18n="home.exa-pre2"> property, </span>25%<span data-i18n="home.exa-pre3"> equity (</span>Rs 2,500,000<span data-i18n="home.exa-pre4">), so </span>Rs 7,500,000<span data-i18n="home.exa-pre5"> financed. At </span>16%<span data-i18n="home.exa-pre6"> per year for 20 years (240 months) the EMI is </span>Rs 104,344.20<span data-i18n="home.exa-pre7">, total interest is </span>Rs 17,542,600.13<span data-i18n="home.exa-pre8"> and the total paid on the loan is </span>Rs 25,042,600.13<span data-i18n="home.exa-pre9">. Add the equity and a </span>Rs 10,000<span data-i18n="home.exa-pre10"> processing fee and the total cost is </span>Rs 27,552,600.13<span data-i18n="home.exa-post">.</span></p>
     <p><strong data-i18n="home.exb-label">Example B — Apna Ghar:</strong><span data-i18n="home.exb-pre1"> the same </span>Rs 10,000,000<span data-i18n="home.exb-pre2"> property with </span>10%<span data-i18n="home.exb-pre3"> equity (</span>Rs 1,000,000<span data-i18n="home.exb-pre4">), so </span>Rs 9,000,000<span data-i18n="home.exb-pre5"> financed, over 20 years. Years 1–10 at </span>5%<span data-i18n="home.exb-pre6">: EMI </span>Rs 59,396.02<span data-i18n="home.exb-pre7">. After 10 years </span>Rs 5,599,936.10<span data-i18n="home.exb-pre8"> is still owed; years 11–20 at </span>16%<span data-i18n="home.exb-pre9">: EMI </span>Rs 93,806.28<span data-i18n="home.exb-pre10">. Total paid on the loan is </span>Rs 18,384,275.33<span data-i18n="home.exb-pre11"> and total interest is </span>Rs 9,384,275.33<span data-i18n="home.exb-pre12"> — with no processing fee. A single rate would be wrong: at </span>16%<span data-i18n="home.exb-pre13"> for the whole 20 years the total would be </span>Rs 30,051,135.38<span data-i18n="home.exb-pre14">, and at </span>5%<span data-i18n="home.exb-pre15"> for the whole 20 years it would be </span>Rs 14,255,043.39<span data-i18n="home.exb-post">. The two-phase total sits between them, which is exactly what the subsidy does.</span></p>
-    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="home.ex-verified">All examples use the figures verified 13 November 2026.</p>
+    <p class="u-muted-14" data-i18n="home.ex-verified">All examples use the figures verified 13 November 2026.</p>
 
     <h2 data-i18n="home.rates-h">Commercial markup by bank — November 2026</h2>
     <p data-i18n="home.rates-intro">All commercial rates are 1-year KIBOR (6-month KIBOR at MCB) plus the bank's spread, repriced yearly — so no single rate on this page is "the" home loan rate. The all-in commercial band in November 2026 was about 14.9–17.2% per year.</p>
@@ -278,7 +279,7 @@ const related = [
       </tbody>
     </table>
     </div>
-    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="home.ceilings-note">SBP ceilings (August 2026, SH&amp;SFD Circular No. 04/2026): maximum tenure 30 years, maximum financing 90% of the property value, and total consumer instalments within 65% of net disposable income. These are ceilings, not bank terms — banks are stricter, which is why this calculator caps commercial tenure at 25 years. UBL Address tenure is not stated on its product page (its Ameen FAQ says 3–20 years). Commercial age limits could not be verified from any named bank page, so none are stated here.</p>
+    <p class="u-muted-14" data-i18n="home.ceilings-note">SBP ceilings (August 2026, SH&amp;SFD Circular No. 04/2026): maximum tenure 30 years, maximum financing 90% of the property value, and total consumer instalments within 65% of net disposable income. These are ceilings, not bank terms — banks are stricter, which is why this calculator caps commercial tenure at 25 years. UBL Address tenure is not stated on its product page (its Ameen FAQ says 3–20 years). Commercial age limits could not be verified from any named bank page, so none are stated here.</p>
 
     <h2 data-i18n="home.apna-h">Apna Ghar scheme — the live subsidy</h2>
     <p data-i18n="home.apna-intro">The Wazir-e-Azam Apna Ghar Program – Ghar Ho Tu Apna is the live subsidised scheme (SBP SH&amp;SFD Circular No. 3/2025, 24 September 2025; renamed by the Ministry of Housing &amp; Works notification of 26 March 2026, SBP circular 1 April 2026; launched by the Prime Minister on 30 April 2026). Its terms:</p>
@@ -291,7 +292,7 @@ const related = [
       <li>{APNA_GHAR_HOMES_FY2025_26.toLocaleString('en-PK')}<span data-i18n="home.apna6-post"> homes in FY2025-26.</span></li>
     </ul>
     <p data-i18n="home.apna-tiers">The scheme was first launched as Mera Ghar Mera Ashiana with two tiers — 5% up to Rs 2m and 8% from Rs 2m to Rs 3.5m. Those tiers were replaced in March 2026 (ECC, February 2026) by a uniform 5% up to Rs 10m — pages still showing an 8% tier are out of date. The older Mera Pakistan Mera Ghar scheme (2020–2022, concluded) and its 2%/5%/7% tiers are obsolete and are not shown as live anywhere on this page.</p>
-    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="home.apna-punjab">Punjab's Apni Chhat Apna Ghar (interest-free, up to Rs 1.5m, 7 years) is mentioned here only as a weak, single-secondary-source, provincial-only note — it is not built into this calculator.</p>
+    <p class="u-muted-14" data-i18n="home.apna-punjab">Punjab's Apni Chhat Apna Ghar (interest-free, up to Rs 1.5m, 7 years) is mentioned here only as a weak, single-secondary-source, provincial-only note — it is not built into this calculator.</p>
 
     <h2 data-i18n="home.unsettled-h">What this page does not settle</h2>
     <p data-i18n="home.unsettled-intro">These points are stated plainly rather than filled in with a guess:</p>
@@ -315,8 +316,8 @@ const related = [
     </div>
     <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
-    <section id="homeDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;" data-i18n="home.disc-h">Important — please read</h2>
+    <section id="homeDisclaimer" class="notice-info u-mt-32">
+      <h2 class="u-fs-20" data-i18n="home.disc-h">Important — please read</h2>
       <p data-i18n="home.disc">
         Results are estimates for information only and are not financial advice.
         Home-loan rates are floating (KIBOR-linked) and change, and the
@@ -332,15 +333,15 @@ const related = [
       <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;" data-i18n="home.related-h">Related tools</h2>
+    <h2 class="u-mt-32" data-i18n="home.related-h">Related tools</h2>
     <div class="related-grid">
       {
         related.map((tool, i) => (
           <article class="card">
-            <h3 style="font-size: 18px;">
+            <h3 class="u-fs-18">
               <a href={tool.href} data-i18n={`home.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);" data-i18n={`home.rel${i + 1}-desc`}>{tool.desc}</p>
+            <p class="u-txt-muted" data-i18n={`home.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
               <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
@@ -349,59 +350,6 @@ const related = [
       }
     </div>
   </div>
-
-  <style>
-    [hidden] {
-      display: none !important;
-    }
-    .stat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 16px;
-      margin: 12px 0;
-    }
-    .stat-grid p {
-      margin: 0;
-    }
-    .stat-label {
-      font-size: 14px;
-      color: var(--ink-muted);
-    }
-    .stat-value {
-      font-size: 20px;
-      font-weight: 700;
-    }
-    .actions-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
-    }
-    .related-grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    }
-    .breakdown-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 12px 0;
-      font-size: 15px;
-    }
-    .breakdown-table th,
-    .breakdown-table td {
-      text-align: left;
-      padding: 8px 10px;
-      border-bottom: 1px solid var(--border, #e5e7eb);
-    }
-    .breakdown-table td:last-child,
-    .breakdown-table th:last-child {
-      text-align: right;
-    }
-    .breakdown-table tr.total-row td {
-      font-weight: 700;
-    }
-  </style>
 
   <script>
     import { calcHomeLoan, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';

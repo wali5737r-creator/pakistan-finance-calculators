@@ -7,7 +7,7 @@
 // on a new line after text (or text that starts on a new line after a link)
 // must instead sit on the same line with an explicit space.
 import assert from 'node:assert/strict';
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -51,8 +51,12 @@ assert.deepEqual(violations, [], `Glued text/link lines found:\n${violations.joi
 
 // Gas tariff table: rowspan fixed-charge cells must be top-aligned to their
 // slab group, not vertically centred on a middle row.
+// (CSP style-src work 2026-11-13: the rule moved from the page's <style>
+// block to src/styles/pages/gas-bill-calculator.css, prefixed with the
+// page class — the guard reads the stylesheet now, same intent.)
+const gasCss = readFileSync(join(SRC_DIR, 'styles', 'pages', 'gas-bill-calculator.css'), 'utf8');
+assert.match(gasCss, /\.pg-gas-bill-calculator \.breakdown-table td\[rowspan\]\s*\{\s*vertical-align:\s*top;/);
 const gasPage = readFileSync(join(SRC_DIR, 'pages', 'gas-bill-calculator.astro'), 'utf8');
-assert.match(gasPage, /\.breakdown-table td\[rowspan\]\s*\{\s*vertical-align:\s*top;/);
 assert.match(gasPage, /Sources: <a href="https:\/\/www\.ssgc\.com\.pk\/web\/\?page_id=103">SSGC domestic rates<\/a>, <a href="https:\/\/www\.ogra\.org\.pk\/consumer-gas-prices">OGRA consumer gas prices<\/a>, and the <a href="https:\/\/www\.sngpl\.com\.pk\/billcalc\.jsp\?mdids=92">SNGPL bill estimator<\/a>\./);
 // (Urdu Phase 5: the fixed-charge cells carry a data-i18n attribute,
 // so the match allows attributes between the rowspan and the text.)
@@ -106,10 +110,15 @@ assert.ok(cardHrefs.includes('/home-loan-calculator/'), 'homepage is missing the
 // display:flex used to override the hidden attribute, so it was rendered
 // permanently and covered the footer) and must stay out of the footer's way.
 const currencyPage = readFileSync(join(SRC_DIR, 'pages', 'currency-converter.astro'), 'utf8');
-assert.ok(currencyPage.includes('.nowrap { white-space: nowrap; }'), 'currency page needs a .nowrap rule');
+// (CSP style-src work 2026-11-13: the .nowrap and #sticky-bar[hidden]
+// rules moved from the page's <style is:global> block to
+// src/styles/pages/currency-converter.css — the guard reads the
+// stylesheet now, same intent.)
+const currencyCss = readFileSync(join(SRC_DIR, 'styles', 'pages', 'currency-converter.css'), 'utf8');
+assert.ok(currencyCss.includes('.nowrap { white-space: nowrap; }'), 'currency page needs a .nowrap rule');
 assert.ok(currencyPage.includes('<span class="nowrap">${escapeHtml(formatRate(d.rate))} ${escapeHtml(d.to)}</span>'), 'rate value and code must be in one nowrap span');
 assert.ok(currencyPage.includes('<span class="nowrap">${escapeHtml(formatRate(d.inverseRate))} ${escapeHtml(d.from)}</span>'), 'inverse rate value and code must be in one nowrap span');
-assert.ok(currencyPage.includes('#sticky-bar[hidden] { display: none; }'), 'sticky bar hidden attribute must actually hide it');
+assert.ok(currencyCss.includes('#sticky-bar[hidden] { display: none; }'), 'sticky bar hidden attribute must actually hide it');
 assert.ok(currencyPage.includes('IntersectionObserver'), 'sticky bar must hide when the footer is in view');
 assert.ok(currencyPage.includes('syncStickyPadding'), 'body padding must match the measured bar height');
 assert.ok(!currencyPage.includes('overflow-wrap: anywhere'), 'stat values must not break anywhere');
@@ -122,7 +131,15 @@ const stickyPages = astroFiles(SRC_DIR)
   .filter(({ src }) => src.includes('id="sticky-bar"'));
 assert.ok(stickyPages.length >= 2, `expected at least 2 sticky-bar pages, found ${stickyPages.length}`);
 for (const { file, src } of stickyPages) {
-  assert.ok(src.includes('#sticky-bar[hidden] { display: none; }'), `${file}: sticky bar hidden attribute must actually hide it`);
+  // (CSP style-src work 2026-11-13: the #sticky-bar[hidden] rule lives in
+  // the page's stylesheet now, not the .astro file — check both.)
+  const slug = file.replace(/\.astro$/, '').split('/').pop();
+  const pageCssPath = join(SRC_DIR, 'styles', 'pages', `${slug}.css`);
+  const css = existsSync(pageCssPath) ? readFileSync(pageCssPath, 'utf8') : '';
+  assert.ok(
+    src.includes('#sticky-bar[hidden] { display: none; }') || css.includes('#sticky-bar[hidden] { display: none; }'),
+    `${file}: sticky bar hidden attribute must actually hide it`,
+  );
   assert.ok(src.includes('IntersectionObserver'), `${file}: sticky bar must hide when the footer is in view`);
   assert.ok(src.includes('syncStickyPadding'), `${file}: body padding must match the measured bar height`);
   assert.ok(!src.includes("paddingBottom = '76px'"), `${file}: fixed 76px body padding must not come back`);
@@ -151,7 +168,10 @@ for (const file of astroFiles(join(SRC_DIR, 'pages'))) {
   for (let i = 0; i < lines.length; i++) {
     const s = lines[i].trim();
     for (const m of s.matchAll(/<div([^>]*)>/g)) {
-      stack.push(m[1].includes('class="table-wrap"') ? 'table-wrap' : 'div');
+      // (CSP style-src work 2026-11-13: a table-wrap div may also carry a
+      // .u-* utility class, e.g. class="table-wrap u-scroll-360" — match
+      // the class name by word boundary, not by exact attribute text.)
+      stack.push(/class="[^"]*\btable-wrap\b/.test(m[1]) ? 'table-wrap' : 'div');
     }
     if (/<table[\s>]/.test(s)) {
       assert.equal(

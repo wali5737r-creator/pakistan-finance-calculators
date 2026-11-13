@@ -1,0 +1,27 @@
+/* currency-converter.astro — moved verbatim from the <style is:global> block (2026-11-13, CSP style-src). */
+/* Global rules, loaded only on this page (imported by the page only). */
+
+.field-error { color: var(--danger); font-size: 14px; font-weight: 600; margin: 0; }
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.stat-grid .stat-label { font-size: 14px; color: var(--ink-muted); margin: 0; }
+.stat-grid .stat-value { font-size: 20px; font-weight: 700; margin: 2px 0 0; overflow-wrap: normal; }
+.nowrap { white-space: nowrap; }
+@media (max-width: 520px) { .stat-grid { grid-template-columns: 1fr; } }
+.amount-wrap { display: flex; gap: 8px; align-items: center; }
+.amount-wrap input { flex: 1; min-width: 0; }
+.amount-suffix { font-weight: 700; white-space: nowrap; }
+.swap-row { display: flex; justify-content: center; margin: 4px 0 12px; }
+#swap-btn { min-width: 48px; min-height: 48px; padding: 10px 18px; font-size: 16px; }
+#sticky-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  background: var(--surface-raised); border-top: 1px solid var(--border-strong);
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  display: flex; gap: 12px; align-items: center; justify-content: space-between;
+  box-shadow: 0 -4px 16px rgba(15, 27, 22, 0.08);
+}
+/* Without this, display:flex above overrides the hidden attribute and
+   the bar is rendered permanently — even before any conversion and
+   after Dismiss — covering the footer. */
+#sticky-bar[hidden] { display: none; }
+#sticky-bar p { min-width: 0; }
+#sticky-text { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }

@@ -1,5 +1,6 @@
 ---
 import Layout from '../components/Layout.astro';
+import '../styles/pages/gst-calculator.css';
 import {
   GST_EXEMPT_ITEMS,
   GST_FURTHER_TAX_RATE_PCT,
@@ -93,20 +94,20 @@ const related = [
 const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
 ---
 <Layout title={title} description={description} slug={slug} schema={schema}>
-  <div class="container" style="padding-top: 32px;">
+  <div class="container u-pt-32 pg-gst-calculator">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="gst.crumb">GST Calculator</span></p>
+      <p class="u-muted-14"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="gst.crumb">GST Calculator</span></p>
     </nav>
-    <p class="badge badge-info" data-i18n="tax.badge" style="margin-top: 8px;">Tax</p>
-    <h1 data-i18n="gst.h1" style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">GST Calculator Pakistan</h1>
-    <p class="prose-narrow" data-i18n="gst.intro" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info u-mt-8" data-i18n="tax.badge">Tax</p>
+    <h1 data-i18n="gst.h1" class="u-hero-title">GST Calculator Pakistan</h1>
+    <p class="prose-narrow u-lede" data-i18n="gst.intro">
       The standard GST rate in Pakistan is 18% under section 3(1) of the
       Sales Tax Act 1990 — unchanged by the Finance Act 2026. Add GST to a
       price before tax, or remove it from a price that already includes it,
       at 18% or at a verified reduced rate, and see the further tax for
       unregistered buyers.
     </p>
-    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+    <p class="notice-info prose-narrow u-mt-16">
       <strong data-i18n="gst.notice-strong">Rates checked 13 November 2026.</strong><span data-i18n="gst.notice-rest"> Not every item is
       charged 18% — some are zero-rated, some are exempt, and some carry a
       reduced rate. Pick the rate that applies to your item, and confirm it
@@ -114,7 +115,7 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
     </p>
   </div>
 
-  <div class="container" style="margin-top: 20px;">
+  <div class="container u-mt-20 pg-gst-calculator">
     <div class="tool-grid">
       <div class="card">
         <form id="gstForm" novalidate>
@@ -150,8 +151,8 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
           </div>
 
           <div class="field">
-            <label style="display: flex; gap: 8px; align-items: flex-start; font-weight: 600;">
-              <input id="gstFurtherTax" type="checkbox" style="margin-top: 4px;" />
+            <label class="u-flex-start-8-sb">
+              <input id="gstFurtherTax" type="checkbox" class="u-mt-4" />
               <span data-i18n="gst.further-label">Buyer is unregistered / not an active taxpayer — add 4% further tax (s.3(1A))</span>
             </label>
             <p class="hint" data-i18n="gst.further-hint">Further tax is charged on top of the GST rate, on the value excluding tax. On a standard-rate supply it makes the effective rate 22%.</p>
@@ -159,25 +160,25 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
 
           <div id="gstErrors" class="error-box" role="alert" hidden></div>
 
-          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+          <p class="u-actions">
             <button id="gstCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
             <button id="gstClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
-          <p id="gstFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="gstFormStatus" role="status" class="u-muted-14"></p>
         </form>
       </div>
 
       <div class="result-card" id="gstResultCard" tabindex="-1">
         <div id="gstEmpty">
-          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p class="u-fw-700" data-i18n="ui.empty-title">Your result will appear here.</p>
           <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
+          <p class="u-muted-14" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
 
         <div id="gstResult" data-result-text hidden>
-          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" id="gstHeadlineLabel">Total including GST</p>
+          <p class="u-muted-14-bold" id="gstHeadlineLabel">Total including GST</p>
           <div aria-live="polite" aria-atomic="true">
             <p class="result-value" id="gstHeadline"></p>
           </div>
@@ -202,10 +203,10 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
           <div class="table-wrap">
           <table class="breakdown-table" id="gstBreakdown" aria-label="GST breakdown"></table>
           </div>
-          <p id="gstEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
-          <p id="gstFormula" style="font-size: 16px;"></p>
-          <p id="gstNote" style="font-size: 14px; color: var(--ink-muted);"></p>
-          <p style="font-size: 13px; color: var(--ink-muted);">
+          <p id="gstEcho" class="u-muted-14"></p>
+          <p id="gstFormula" class="u-fs-16"></p>
+          <p id="gstNote" class="u-muted-14"></p>
+          <p class="u-muted-13">
             <span data-i18n="gst.estimate">Estimate only — check important figures before acting.</span> <a href="#gstDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
@@ -214,12 +215,12 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
           <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
           <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
-        <p data-copy-status role="status" style="font-size: 14px;"></p>
+        <p data-copy-status role="status" class="u-fs-14"></p>
       </div>
     </div>
   </div>
 
-  <div class="container prose-narrow" style="margin-top: 40px;">
+  <div class="container prose-narrow u-mt-40 pg-gst-calculator">
     <h2 data-i18n="gst.how-h">How it works</h2>
     <ol>
       <li data-i18n="gst.how1">Enter the amount. In "Add GST" mode this is the price before tax; in "Remove GST" mode it is the price that already includes GST.</li>
@@ -241,7 +242,7 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
     <p><strong data-i18n="gst.exd-label">Example D — 10% imported laptop:</strong><span data-i18n="gst.exd-rest"> Rs 100,000 x 10% = Rs 10,000 GST, total Rs 110,000.</span></p>
     <p><strong data-i18n="gst.exe-label">Example E — Further tax:</strong><span data-i18n="gst.exe-rest"> Rs 100,000 sold to an unregistered buyer: 18% GST (Rs 18,000) + 4% further tax (Rs 4,000) = Rs 22,000 tax, total Rs 122,000.</span></p>
     <p><strong data-i18n="gst.exf-label">Example F — Zero-rated export / exempt:</strong><span data-i18n="gst.exf-rest"> Rs 100,000 x 0% = Rs 0 GST, total Rs 100,000. For a zero-rated export the seller can still claim back input tax (section 10); for an exempt supply the seller cannot (section 8).</span></p>
-    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="gst.ex-note">All examples use the rates verified 13 November 2026 (Sales Tax Act 1990 as amended by the Finance Act 2026).</p>
+    <p class="u-muted-14" data-i18n="gst.ex-note">All examples use the rates verified 13 November 2026 (Sales Tax Act 1990 as amended by the Finance Act 2026).</p>
 
     <h2 data-i18n="gst.rates-h">GST rates — standard, reduced, zero-rated and exempt</h2>
     <div class="table-wrap">
@@ -260,8 +261,8 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
       </tbody>
     </table>
     </div>
-    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="gst.rates-source">Rates: Sales Tax Act 1990 — standard rate s.3(1); reduced rates s.3(2)(aa) + Eighth Schedule; zero-rated s.4 + Fifth Schedule; exempt s.13(1) + Sixth Schedule; mobile phones Ninth Schedule; commercial imports Twelfth Schedule. Finance Act 2026 (in force 1 July 2026) did not change the 18% standard rate. For Third Schedule goods the 18% is charged on the printed retail price, not the transaction value (s.3(2)(a)); Finance Act 2026 expanded the Third Schedule by about 20 new groups (serials 56–75). Commercial imports carry a separate 3% value-addition tax (Twelfth Schedule) — an effective 21% at import; manufacturers importing for their own use are excluded. A 2% withholding applies to digitally ordered goods (s.3(3)(c) + Eleventh Schedule serial 8; adjustable for sellers with turnover above Rs 200m since Finance Act 2026) — it is not built into this calculator.</p>
-    <p style="font-size: 14px; color: var(--ink-muted);">{GST_SERVICES_NOTE}</p>
+    <p class="u-muted-14" data-i18n="gst.rates-source">Rates: Sales Tax Act 1990 — standard rate s.3(1); reduced rates s.3(2)(aa) + Eighth Schedule; zero-rated s.4 + Fifth Schedule; exempt s.13(1) + Sixth Schedule; mobile phones Ninth Schedule; commercial imports Twelfth Schedule. Finance Act 2026 (in force 1 July 2026) did not change the 18% standard rate. For Third Schedule goods the 18% is charged on the printed retail price, not the transaction value (s.3(2)(a)); Finance Act 2026 expanded the Third Schedule by about 20 new groups (serials 56–75). Commercial imports carry a separate 3% value-addition tax (Twelfth Schedule) — an effective 21% at import; manufacturers importing for their own use are excluded. A 2% withholding applies to digitally ordered goods (s.3(3)(c) + Eleventh Schedule serial 8; adjustable for sellers with turnover above Rs 200m since Finance Act 2026) — it is not built into this calculator.</p>
+    <p class="u-muted-14">{GST_SERVICES_NOTE}</p>
 
     <h2 data-i18n="gst.zero-h">Zero-rated (0%) — s.4 + Fifth Schedule</h2>
     <p data-i18n="gst.zero-intro">Zero-rated means taxable at 0%, and the seller can claim back input tax (s.10). The main categories are:</p>
@@ -270,7 +271,7 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
         <li>{item}</li>
       ))}
     </ul>
-    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="gst.zero-warn">Warning: several older Fifth Schedule entries were omitted by the Finance Acts of 2021 and 2022, so older zero-rated lists found online are unreliable — use the current schedule.</p>
+    <p class="u-muted-14" data-i18n="gst.zero-warn">Warning: several older Fifth Schedule entries were omitted by the Finance Acts of 2021 and 2022, so older zero-rated lists found online are unreliable — use the current schedule.</p>
 
     <h2 data-i18n="gst.exempt-h">Exempt (no tax) — s.13(1) + Sixth Schedule</h2>
     <p data-i18n="gst.exempt-intro">Exempt means no tax is charged — and the seller cannot claim back input tax (s.8). The main categories are:</p>
@@ -306,8 +307,8 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
     </div>
     <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
-    <section id="gstDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;" data-i18n="gst.disc-h">Important — please read</h2>
+    <section id="gstDisclaimer" class="notice-info u-mt-32">
+      <h2 class="u-fs-20" data-i18n="gst.disc-h">Important — please read</h2>
       <p data-i18n="gst.disc1">
         Results are estimates from the Sales Tax Act 1990 rates as
         amended by the Finance Act 2026, checked 13 November 2026 —
@@ -326,15 +327,15 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
       <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;" data-i18n="gst.related-h">Related tools</h2>
+    <h2 class="u-mt-32" data-i18n="gst.related-h">Related tools</h2>
     <div class="related-grid">
       {
         related.map((tool, i) => (
           <article class="card">
-            <h3 style="font-size: 18px;">
+            <h3 class="u-fs-18">
               <a href={tool.href} data-i18n={`gst.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);" data-i18n={`gst.rel${i + 1}-desc`}>{tool.desc}</p>
+            <p class="u-txt-muted" data-i18n={`gst.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
               <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
@@ -343,64 +344,6 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
       }
     </div>
   </div>
-
-  <style>
-    [hidden] {
-      display: none !important;
-    }
-    .field-error {
-      font-size: 14px;
-      color: var(--danger);
-      font-weight: 600;
-    }
-    .stat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 16px;
-      margin: 12px 0;
-    }
-    .stat-grid p {
-      margin: 0;
-    }
-    .stat-label {
-      font-size: 14px;
-      color: var(--ink-muted);
-    }
-    .stat-value {
-      font-size: 20px;
-      font-weight: 700;
-    }
-    .actions-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
-    }
-    .related-grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    }
-    .breakdown-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 12px 0;
-      font-size: 15px;
-    }
-    .breakdown-table th,
-    .breakdown-table td {
-      text-align: left;
-      padding: 8px 10px;
-      border-bottom: 1px solid var(--border, #e5e7eb);
-    }
-    .breakdown-table td:last-child,
-    .breakdown-table th:last-child {
-      text-align: right;
-    }
-    .breakdown-table tr.total-row td {
-      font-weight: 700;
-    }
-  </style>
 
   <!-- GST preset data as a JSON data block (CSP data block, not executed), so the
        calculator script below can be bundled externally and script-src needs no 'unsafe-inline'. -->

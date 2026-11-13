@@ -23,9 +23,21 @@
 //   - script-src in _headers must not contain 'unsafe-inline'.
 //   - the TradingView host must stay allowed (Gold page loads it by
 //     creating a <script src="https://s3.tradingview.com/..."> element).
-// style-src DELIBERATELY keeps 'unsafe-inline': 727 inline style="..."
-// attributes exist across src/ (plus style attributes built by JS at
-// runtime). Removing it needs a full visual refactor, not a header change.
+// style-src tightening (2026-11-13, second half of the same audit item):
+// 729 inline style="..." attributes across 33 files were replaced with
+// .u-* utility classes in src/styles/global.css (audit: /tmp/style-src-audit.md
+// — 91 canonical values, 726 covered by 80 classes; the 2 dynamic zakat bar
+// widths and the 1 conditional currency headline use CSSOM setProperty /
+// class toggles, which style-src does not block). The 22 inline <style>
+// blocks (Astro inlines scoped component styles into dist HTML) became
+// external src/styles/pages/<slug>.css files imported by their pages —
+// each rule prefixed with a page-unique .pg-<slug> class so today's
+// scoping is preserved (Astro only adds data-astro-cid attributes when a
+// component has a <style> block). Known visible change: JS-generated
+// `tr.total-row` rows in breakdown tables now match their page rule and
+// render bold, where the old scoped rule never matched them — that is the
+// intended look. These tests guard the invariant at the source level, so
+// a future inline style fails CI instead of silently re-opening style-src.
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -53,12 +65,15 @@ assert.ok(
   scriptSrc.includes('https://s3.tradingview.com'),
   'script-src must still allow s3.tradingview.com (Gold page widget)',
 );
-// style-src keeps 'unsafe-inline' on purpose — see the header comment above.
+// style-src must NOT contain 'unsafe-inline' any more — every inline
+// style attribute and <style> block is gone (guarded in section 5 below).
 const styleSrc = directive('style-src');
-assert.ok(styleSrc.includes("'unsafe-inline'"), 'style-src is expected to keep unsafe-inline (727 inline style attributes)');
-assert.ok(
-  headers.includes("style-src KEEPS 'unsafe-inline' deliberately"),
-  'public/_headers must document why style-src keeps unsafe-inline',
+assert.doesNotMatch(styleSrc, /'unsafe-inline'/, `style-src must not contain 'unsafe-inline': ${styleSrc}`);
+assert.match(styleSrc, /(^|\s)'self'(\s|$)/, 'style-src must allow self (global.css + per-page stylesheets)');
+assert.doesNotMatch(
+  headers,
+  /style-src KEEPS 'unsafe-inline' deliberately/,
+  'public/_headers must no longer claim style-src keeps unsafe-inline',
 );
 
 // --- 2. No inline executable script can reach the browser ----------------
@@ -126,4 +141,54 @@ assert.ok(
   'National Savings script must read schemes from the data block',
 );
 
-console.log(`csp: ${checked} .astro files scanned — script-src has no 'unsafe-inline', no inline executable script remains.`);
+// --- 5. No inline style can reach the browser --------------------------
+// style-src 'self' blocks style="..." attributes and <style> elements,
+// whether in the initial HTML or added later by JS (setAttribute('style')
+// and innerHTML style attributes are blocked too). CSSOM assignments
+// (el.style.foo = ...) are NOT blocked — the 7 existing ones (sticky-bar
+// measured paddingBottom in currency + zakat, pill marginLeft in marla)
+// and the zakat bar setProperty calls stay legal.
+const globalCss = readFileSync(join(SRC_DIR, 'styles', 'global.css'), 'utf8');
+const definedUtils = new Set([...globalCss.matchAll(/\.u-[A-Za-z0-9-]+/g)].map((m) => m[0]));
+assert.ok(definedUtils.size >= 80, `global.css must define the .u-* utility classes (found ${definedUtils.size})`);
+let styleChecked = 0;
+for (const file of astroFiles(SRC_DIR)) {
+  const text = readFileSync(file, 'utf8');
+  const rel = file.slice(ROOT.length + 1);
+  assert.doesNotMatch(text, /style\s*=\s*"/, `${rel}: inline style="..." would be blocked by style-src — use a .u-* utility class instead`);
+  assert.doesNotMatch(text, /<style[\s>]/, `${rel}: inline <style> block would be blocked by style-src — move it to src/styles/pages/<slug>.css`);
+  assert.doesNotMatch(text, /setAttribute\(\s*['"]style['"]/, `${rel}: setAttribute('style') is blocked by style-src — use CSSOM setProperty or a class toggle`);
+  assert.doesNotMatch(text, /\.style\.cssText/, `${rel}: style.cssText is blocked by style-src — use CSSOM setProperty or a class toggle`);
+  // Every .u-* class used must exist in global.css.
+  for (const m of text.matchAll(/\.u-[A-Za-z0-9-]+/g)) {
+    assert.ok(definedUtils.has(m[0]), `${rel}: uses ${m[0]} but global.css does not define it`);
+  }
+  styleChecked += 1;
+}
+// Astro must never inline stylesheets: its default inlineStylesheets
+// 'auto' inlines per-page CSS into <style> tags in the HTML, which
+// style-src 'self' would block. 'never' forces external /_astro/*.css.
+const astroConfig = readFileSync(join(ROOT, 'astro.config.mjs'), 'utf8');
+assert.ok(
+  /inlineStylesheets\s*:\s*['"]never['"]/.test(astroConfig),
+  "astro.config.mjs must set build.inlineStylesheets: 'never' or per-page CSS is inlined and blocked by style-src",
+);
+
+// Every former <style> block lives on as an imported per-page stylesheet.
+const pageCssDir = join(SRC_DIR, 'styles', 'pages');
+const pageCssFiles = existsSync(pageCssDir) ? readdirSync(pageCssDir).filter((f) => f.endsWith('.css')) : [];
+assert.ok(pageCssFiles.length >= 22, `src/styles/pages/ must hold the 22 converted stylesheets (found ${pageCssFiles.length})`);
+for (const cssFile of pageCssFiles) {
+  const cssText = readFileSync(join(pageCssDir, cssFile), 'utf8');
+  const slug = cssFile.replace(/\.css$/, '');
+  const pageFile = slug === '_layout' ? join(SRC_DIR, 'components', 'Layout.astro') : join(SRC_DIR, 'pages', `${slug}.astro`);
+  assert.ok(existsSync(pageFile), `no page imports ${cssFile} — expected ${pageFile}`);
+  const pageText = readFileSync(pageFile, 'utf8');
+  assert.ok(
+    pageText.includes(`styles/pages/${cssFile}`),
+    `${slug}: page must import its stylesheet src/styles/pages/${cssFile}`,
+  );
+  assert.doesNotMatch(cssText, /\[data-astro-cid/, `${cssFile}: must not contain data-astro-cid selectors copied from dist/`);
+}
+
+console.log(`csp: ${checked} .astro files scanned — script-src and style-src have no 'unsafe-inline', no inline script or style remains.`);

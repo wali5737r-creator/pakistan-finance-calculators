@@ -1,5 +1,6 @@
 ---
 import Layout from '../components/Layout.astro';
+import '../styles/pages/gas-bill-calculator.css';
 
 const title = "Gas Bill Calculator Pakistan | SNGPL & SSGC Slabs 2025 | Pakistan Finance Calculators";
 const description = "Estimate your monthly gas bill in Pakistan from OGRA's 2025 domestic slabs: protected and non-protected rates, fixed charge, meter rent and 18% GST.";
@@ -81,16 +82,16 @@ const related = [
 ];
 ---
 <Layout title={title} description={description} slug={slug} schema={schema}>
-  <div class="container" style="padding-top: 32px;">
+  <div class="container u-pt-32 pg-gas-bill-calculator">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="gas.crumb">Gas Bill Calculator</span></p>
+      <p class="u-muted-14"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="gas.crumb">Gas Bill Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="gas.badge">Utility Bills</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;" data-i18n="gas.h1">Gas Bill Calculator</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;" data-i18n="gas.intro">
+    <p class="badge badge-info u-mt-8" data-i18n="gas.badge">Utility Bills</p>
+    <h1 class="u-hero-title" data-i18n="gas.h1">Gas Bill Calculator</h1>
+    <p class="prose-narrow u-lede" data-i18n="gas.intro">
       Estimate your monthly gas bill from OGRA's 2025 domestic sale price. Enter your consumption, your consumer category, and the GCV and PCF from your bill, and you will see the gas charge by slab, the fixed charge, meter rent, GST, and the estimated total.
     </p>
-    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+    <p class="notice-info prose-narrow u-mt-16">
       <strong data-i18n="gas.notice-label">Estimate only.</strong> <span data-i18n="gas.notice-text">This uses the OGRA Gas Sale Price Notification
       dated 29 June 2025 (effective 1 July 2025), checked 13 November 2026.
       GCV and PCF change from month to month, and withholding tax, TV fee,
@@ -99,7 +100,7 @@ const related = [
     </p>
   </div>
 
-  <div class="container" style="margin-top: 20px;">
+  <div class="container u-mt-20 pg-gas-bill-calculator">
     <div class="tool-grid">
       <div class="card">
         <form id="gasForm" novalidate>
@@ -149,16 +150,16 @@ const related = [
 
           <div id="gasErrors" class="error-box" role="alert" hidden></div>
 
-          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+          <p class="u-actions">
             <button id="gasCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
             <button id="gasClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
-          <p id="gasFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p class="u-muted-14" id="gasFormStatus" role="status"></p>
         </form>
 
-        <div style="border-top: 1px solid var(--border, #e5e7eb); margin-top: 24px; padding-top: 16px;">
-          <h2 style="font-size: 18px;" data-i18n="gas.helper-h">Am I protected? Winter-average helper</h2>
-          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="gas.helper-intro">Enter your usage for the last four winter months, in hm3, and the helper works out the average. 0.9 hm3 a month or less means protected.</p>
+        <div class="u-divider">
+          <h2 class="u-fs-18" data-i18n="gas.helper-h">Am I protected? Winter-average helper</h2>
+          <p class="u-muted-14" data-i18n="gas.helper-intro">Enter your usage for the last four winter months, in hm3, and the helper works out the average. 0.9 hm3 a month or less means protected.</p>
           <form id="gasHelperForm" novalidate>
             <div class="field">
               <label for="gasNov" data-i18n="gas.helper-nov">November (hm3)</label>
@@ -177,25 +178,25 @@ const related = [
               <input id="gasFeb" type="text" inputmode="decimal" autocomplete="off" />
             </div>
             <div id="gasHelperErrors" class="error-box" role="alert" hidden></div>
-            <p style="margin-top: 12px;">
+            <p class="u-mt-12">
               <button id="gasHelperCheck" class="btn-secondary" type="submit" data-i18n="gas.helper-btn">Check my category</button>
             </p>
-            <p id="gasHelperResult" role="status" style="font-size: 15px;"></p>
+            <p class="u-fs-15" id="gasHelperResult" role="status"></p>
           </form>
         </div>
       </div>
 
       <div class="result-card" id="gasResultCard" tabindex="-1">
         <div id="gasEmpty">
-          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p class="u-fw-700" data-i18n="ui.empty-title">Your result will appear here.</p>
           <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
+          <p class="u-muted-14" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
 
         <div id="gasResult" data-result-text hidden>
-          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" data-i18n="gas.result-label">Estimated bill</p>
+          <p class="u-muted-14-bold" data-i18n="gas.result-label">Estimated bill</p>
           <div aria-live="polite" aria-atomic="true">
             <p class="result-value" id="gasHeadline"></p>
           </div>
@@ -216,9 +217,9 @@ const related = [
           <div class="table-wrap">
           <table class="breakdown-table" id="gasBreakdown" aria-label="Bill breakdown"></table>
           </div>
-          <p id="gasEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
-          <p id="gasFormula" style="font-size: 16px;"></p>
-          <p style="font-size: 13px; color: var(--ink-muted);">
+          <p class="u-muted-14" id="gasEcho"></p>
+          <p class="u-fs-16" id="gasFormula"></p>
+          <p class="u-muted-13">
             <span data-i18n="gas.estimate">Estimate only — check important figures before acting.</span> <a href="#gasDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
@@ -227,12 +228,12 @@ const related = [
           <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
           <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
-        <p data-copy-status role="status" style="font-size: 14px;"></p>
+        <p class="u-fs-14" data-copy-status role="status"></p>
       </div>
     </div>
   </div>
 
-  <div class="container prose-narrow" style="margin-top: 40px;">
+  <div class="container prose-narrow u-mt-40 pg-gas-bill-calculator">
     <h2 data-i18n="gas.how-h">How it works</h2>
     <ol>
       <li data-i18n="gas.how1">Enter the gas used in the month, in hm3 or in m3 as your meter reads it (1 hm3 = 100 m3), and choose your category: protected (winter average 0.9 hm3 a month or less) or non-protected.</li>
@@ -251,7 +252,7 @@ const related = [
     <h2 data-i18n="gas.example-h">Worked example</h2>
     <p><strong data-i18n="gas.ex1-label">Example (protected):</strong><span data-i18n="gas.ex1-rest"> 0.9 hm3 as a protected consumer, using the rounded 3.5 MMBTU per hm3 factor. The first 0.6 hm3 is 2.10 MMBTU at Rs 300 = Rs 630.00, and the remaining 0.3 hm3 is 1.05 MMBTU at Rs 350 = Rs 367.50, so the gas charge is Rs 997.50. The fixed charge is Rs 600 and meter rent is Rs 40, giving a subtotal of Rs 1,637.50. GST at 18% is Rs 294.75, and the estimated total is Rs 1,932.25.</span></p>
     <p><strong data-i18n="gas.ex2-label">Example (non-protected):</strong><span data-i18n="gas.ex2-rest"> 2.0 hm3 as a non-protected consumer, using the same rounded factor. The first 1.5 hm3 is 5.25 MMBTU at Rs 1,450 = Rs 7,612.50, and the remaining 0.5 hm3 is 1.75 MMBTU at Rs 1,900 = Rs 3,325.00, so the gas charge is Rs 10,937.50. The fixed charge is Rs 3,000 and meter rent is Rs 40, giving a subtotal of Rs 13,977.50. GST at 18% is Rs 2,515.95, and the estimated total is Rs 16,493.45.</span></p>
-    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="gas.ex-note">The calculator above uses the exact conversion instead (3.5139 MMBTU per hm3 at GCV 990), so for the same 0.9 hm3 it gives Rs 1,936.92 and for the same 2.0 hm3 it gives Rs 16,544.70 — the small difference is the rounding in the 3.5 factor.</p>
+    <p class="u-muted-14" data-i18n="gas.ex-note">The calculator above uses the exact conversion instead (3.5139 MMBTU per hm3 at GCV 990), so for the same 0.9 hm3 it gives Rs 1,936.92 and for the same 2.0 hm3 it gives Rs 16,544.70 — the small difference is the rounding in the 3.5 factor.</p>
 
     <h2 data-i18n="gas.tariff-h">2025 domestic gas sale price (OGRA)</h2>
     <div class="table-wrap">
@@ -275,7 +276,7 @@ const related = [
       </tbody>
     </table>
     </div>
-    <p style="font-size: 14px; color: var(--ink-muted);">Meter rent is Rs 40 a month for a normal domestic meter. Source: OGRA Gas Sale Price Notification dated 29 June 2025, effective 1 July 2025. Checked 13 November 2026. Consumer tariffs are frozen for FY 2026-27. New domestic connections are RLNG-only on a monthly USD tariff and are not priced on these slabs.</p>
+    <p class="u-muted-14">Meter rent is Rs 40 a month for a normal domestic meter. Source: OGRA Gas Sale Price Notification dated 29 June 2025, effective 1 July 2025. Checked 13 November 2026. Consumer tariffs are frozen for FY 2026-27. New domestic connections are RLNG-only on a monthly USD tariff and are not priced on these slabs.</p>
 
     <h2 data-i18n="gas.faq-h">Frequently asked questions</h2>
     <div class="faq">
@@ -290,8 +291,8 @@ const related = [
     </div>
     <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
-    <section id="gasDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;" data-i18n="gas.disc-h">Important — please read</h2>
+    <section id="gasDisclaimer" class="notice-info u-mt-32">
+      <h2 class="u-fs-20" data-i18n="gas.disc-h">Important — please read</h2>
       <p data-i18n="gas.disc">
         Results are estimates from the notified base tariff only. Your real bill
         also carries withholding tax, TV fee, GIDC, and other charges, and its
@@ -307,15 +308,15 @@ const related = [
       <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;" data-i18n="gas.related-h">Related tools</h2>
+    <h2 class="u-mt-32" data-i18n="gas.related-h">Related tools</h2>
     <div class="related-grid">
       {
         related.map((tool, i) => (
           <article class="card">
-            <h3 style="font-size: 18px;">
+            <h3 class="u-fs-18">
               <a href={tool.href} data-i18n={`gas.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);" data-i18n={`gas.rel${i + 1}-desc`}>{tool.desc}</p>
+            <p class="u-txt-muted" data-i18n={`gas.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
               <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
@@ -324,70 +325,6 @@ const related = [
       }
     </div>
   </div>
-
-  <style>
-    [hidden] {
-      display: none !important;
-    }
-    .field-error {
-      font-size: 14px;
-      color: var(--danger);
-      font-weight: 600;
-    }
-    .stat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 16px;
-      margin: 12px 0;
-    }
-    .stat-grid p {
-      margin: 0;
-    }
-    .stat-label {
-      font-size: 14px;
-      color: var(--ink-muted);
-    }
-    .stat-value {
-      font-size: 20px;
-      font-weight: 700;
-    }
-    .actions-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
-    }
-    .related-grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    }
-    .breakdown-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 12px 0;
-      font-size: 15px;
-    }
-    .breakdown-table th,
-    .breakdown-table td {
-      text-align: left;
-      padding: 8px 10px;
-      border-bottom: 1px solid var(--border, #e5e7eb);
-    }
-    .breakdown-table td:last-child,
-    .breakdown-table th:last-child {
-      text-align: right;
-    }
-    /* Rowspan cells hold one fixed charge for a whole slab group; top-align
-       them so the amount sits on the group's first row instead of floating
-       on a middle row where it looks attached to that one slab. */
-    .breakdown-table td[rowspan] {
-      vertical-align: top;
-    }
-    .breakdown-table tr.total-row td {
-      font-weight: 700;
-    }
-  </style>
 
   <script>
     import { calcGasBill, checkProtectedStatus, cubicMetresToHm3, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';

@@ -1,0 +1,133 @@
+/* zakat-calculator.css — moved verbatim from the <style is:global>
+   block in src/pages/zakat-calculator.astro (2026-11-13, CSP style-src
+   work). No page prefix: the block was already global, so its rules
+   keep exactly the scope they had. The two .pg-zakat-calculator
+   rules at the end are new: they size the JS-built bars via the
+   --bar-w / --bar-bg custom properties set from script with CSSOM
+   setProperty (inline style attributes are blocked by style-src,
+   CSSOM is not). */
+
+.field-error {
+  color: var(--danger);
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.segmented {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.segmented label {
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  background: var(--surface);
+}
+
+.segmented input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.segmented label:has(input:checked) {
+  background: var(--brand-700);
+  color: #fff;
+  border-color: var(--brand-700);
+}
+
+.segmented label:has(input:focus-visible) {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.group-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+  margin: 20px 0 4px;
+}
+
+.group-divider {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 4px 0 12px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.stat-grid .stat-label {
+  font-size: 14px;
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+.stat-grid .stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 2px 0 0;
+}
+
+.bar {
+  display: flex;
+  height: 20px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-tint);
+  margin: 12px 0 4px;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+}
+
+.bar-debts {
+  height: 10px;
+}
+
+#sticky-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  background: var(--surface-raised);
+  border-top: 1px solid var(--border-strong);
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 -4px 16px rgba(15, 27, 22, 0.08);
+}
+
+/* Without this, display:flex above overrides the hidden attribute and
+the bar is rendered permanently — even before any calculation and
+after Dismiss — covering the footer. */
+#sticky-bar[hidden] { display: none; }
+
+/* Bar sizing (see applyBarStyles() in zakat-calculator.astro). */
+.pg-zakat-calculator .bar:not(.bar-debts) > span {
+  width: var(--bar-w);
+  background: var(--bar-bg);
+}
+
+.pg-zakat-calculator .bar-debts > span {
+  width: var(--bar-w);
+  background: repeating-linear-gradient(45deg, var(--gold-600) 0 6px, transparent 6px 12px);
+}
