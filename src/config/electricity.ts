@@ -24,6 +24,15 @@ export const IESCO_TARIFF_GUIDE_URL = 'https://iesco.com.pk/tariff-guide';
 export const ELECTRICITY_SOURCE_STATUS = 'Verified against the NEPRA decision of 11 February 2026 and the IESCO tariff guide';
 export const ELECTRICITY_LAST_CHECKED = '8 November 2026';
 
+// REVIEW TRIPWIRE — tariff last checked 8 November 2026. NEPRA revises
+// the uniform tariff roughly annually and issues interim adjustments
+// (fuel-price / quarterly adjustments) more often, so re-verify every
+// 3 months — hence 8 February 2027. On this date check the NEPRA site
+// and the IESCO tariff guide for a new determination or S.R.O., and if
+// anything changed update the slabs, fixed charges, GST rate,
+// ELECTRICITY_LAST_CHECKED and this date.
+export const ELECTRICITY_NEXT_REVIEW = '2027-02-08';
+
 /** General sales tax on electricity bills, applied to the subtotal of
  *  energy charge + fixed charge + fuel price adjustment. */
 export const ELECTRICITY_GST_RATE = 0.18;

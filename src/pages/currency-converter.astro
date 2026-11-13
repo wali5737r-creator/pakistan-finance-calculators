@@ -232,6 +232,7 @@ const schema = JSON.stringify({
 
   <script>
     import { convertCurrency, parseDecimal, formatNumber, MAX_AMOUNT } from '../lib/calc.ts';
+    import { freshnessOf } from '../lib/freshness.ts';
     import { CURRENCIES } from '../config/currencies.ts';
 
     const $ = (id) => document.getElementById(id);
@@ -240,8 +241,6 @@ const schema = JSON.stringify({
     const errorSummary = $('error-summary');
     const rateStrip = $('rate-strip');
     const stickyBar = $('sticky-bar');
-    const STALE_LIMIT_MS = 7 * 24 * 60 * 60 * 1000;
-    const DAY_MS = 24 * 60 * 60 * 1000;
 
     let table = null; // active table used for new calculations
     let tableState = 'loading'; // 'loading' | 'ready' | 'unavailable'
@@ -273,30 +272,6 @@ const schema = JSON.stringify({
     function currencyName(code) {
       const c = CURRENCIES.find((x) => x.code === code);
       return c ? c.name : code;
-    }
-
-    // Freshness is derived from the provider's next-update time when present,
-    // and from the endpoint's stale flag / 24-hour age otherwise. A snapshot is
-    // never shown as Current when any signal says it is stale. Past 7 days,
-    // or an untrustworthy timestamp, it is Unavailable.
-    function freshnessOf(t, nowMs) {
-      if (!t) return 'unavailable';
-      const asOf = t.asOf;
-      if (!asOf || !/(?:[zZ]|[+-]\d{2}:?\d{2})$/.test(String(asOf).trim())) return 'unavailable';
-      const asOfMs = Date.parse(asOf);
-      if (!Number.isFinite(asOfMs)) return 'unavailable';
-      const ageMs = nowMs - asOfMs;
-      if (ageMs < 0) return 'unavailable';
-      if (ageMs > STALE_LIMIT_MS) return 'unavailable';
-      if (t.stale === true) return 'stale';
-      if (t.nextUpdateAt) {
-        const nextMs = Date.parse(t.nextUpdateAt);
-        if (Number.isFinite(nextMs) && /(?:[zZ]|[+-]\d{2}:?\d{2})$/.test(String(t.nextUpdateAt).trim())) {
-          if (nowMs >= nextMs) return 'stale';
-        }
-      }
-      if (ageMs > DAY_MS) return 'stale';
-      return 'current';
     }
 
     function formatRate(v) {

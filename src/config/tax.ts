@@ -6,6 +6,16 @@ export const SOURCE_CITATION = 'Finance Act, 2026 (Act No. XLIII of 2026), Gazet
 export const GAZETTE_URL = 'http://na.gov.pk/uploads/documents/6a422720f05a0_626.pdf';
 export const SOURCE_STATUS = 'Verified against the Finance Act 2026 gazette';
 
+// REVIEW TRIPWIRE — the tax year 2026-27 ends 30 June 2027, and the next
+// Finance Act is normally passed in June, before the new tax year starts.
+// Re-verify by 1 May 2027 so the new Finance Act (expected June 2027) can
+// be read, the slabs re-checked row-by-row against the Gazette, and the
+// calculator updated BEFORE the old slabs expire on 30 June 2027. Do not
+// let this date pass unreviewed — stale slabs would silently give wrong
+// tax figures for the new tax year. On review, also update TAX_YEAR,
+// SOURCE_CITATION and this date.
+export const TAX_NEXT_REVIEW = '2027-05-01';
+
 export interface TaxSlab {
   /** Upper bound of the band (inclusive), in PKR. null = open-ended. */
   upTo: number | null;

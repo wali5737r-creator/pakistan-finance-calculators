@@ -459,12 +459,9 @@ const related = [
 
   <script>
     import { calcGold, parseDecimal, formatPKR, formatPct, MAX_AMOUNT } from '../lib/calc.ts';
+    import { goldFreshness } from '../lib/freshness.ts';
     import { KARATS } from '../config/currencies.ts';
     import { TOLA_GRAMS } from '../config/zakat.ts';
-
-    const FRESH_MS = 24 * 60 * 60 * 1000;
-    const STALE_MAX_MS = 7 * 24 * 60 * 60 * 1000;
-    const SKEW_MS = 5 * 60 * 1000;
 
     const form = document.getElementById('goldForm');
     const weightInput = document.getElementById('goldWeight');
@@ -530,16 +527,11 @@ const related = [
       return value.toLocaleString('en-PK', { maximumFractionDigits: 4 });
     }
 
+    // Thin wrapper: the page's loading/unavailable status wins; the
+    // timestamp logic lives in src/lib/freshness.ts (goldFreshness).
     function freshness() {
       if (priceState.status !== 'ready') return priceState.status;
-      const asOfMs = Date.parse(priceState.asOf);
-      const fetchedMs = Date.parse(priceState.fetchedAt);
-      if (!Number.isFinite(asOfMs) || !Number.isFinite(fetchedMs)) return 'unavailable';
-      const now = Date.now();
-      if (asOfMs - now > SKEW_MS || fetchedMs - now > SKEW_MS) return 'unavailable';
-      if (now - asOfMs < FRESH_MS && now - fetchedMs < FRESH_MS) return 'current';
-      if (now - asOfMs <= STALE_MAX_MS) return 'stale';
-      return 'unavailable';
+      return goldFreshness(Date.parse(priceState.asOf), Date.now(), Date.parse(priceState.fetchedAt));
     }
 
     function checkedValue(name) {
