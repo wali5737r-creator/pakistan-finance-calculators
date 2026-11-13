@@ -74,6 +74,25 @@ import {
   type NationalSavingsSchemeId,
 } from '../config/national-savings';
 import { GST_FURTHER_TAX_RATE } from '../config/gst';
+import {
+  APNA_GHAR_MAX_FINANCING,
+  APNA_GHAR_MAX_TENURE_YEARS,
+  APNA_GHAR_MIN_EQUITY_PCT,
+  APNA_GHAR_SUBSIDY_RATE_PCT,
+  APNA_GHAR_SUBSIDY_YEARS,
+  HOME_LOAN_EQUITY_PCT_MAX_COMMERCIAL,
+  HOME_LOAN_EQUITY_PCT_MIN_COMMERCIAL,
+  HOME_LOAN_TENURE_MAX_YEARS_COMMERCIAL,
+  HOME_LOAN_TENURE_MIN_YEARS,
+} from '../config/home-loan';
+import {
+  CAR_LOAN_AGGREGATE_CAP,
+  CAR_LOAN_DOWN_PCT_MAX,
+  CAR_LOAN_DOWN_PCT_MIN,
+  CAR_LOAN_MAX_TENURE_YEARS_ABOVE_1000CC,
+  CAR_LOAN_MAX_TENURE_YEARS_UPTO_1000CC,
+  CAR_LOAN_MIN_TENURE_YEARS,
+} from '../config/car-loan';
 
 export const MAX_AMOUNT = 999999999999;
 
@@ -2485,4 +2504,266 @@ export function calcGstAdd(amount: number, ratePct: number | null, furtherTax = 
 /** Remove GST from a price that includes it. Thin wrapper over calcGst. */
 export function calcGstRemove(inclusive: number, ratePct: number | null, furtherTax = false): GstResult {
   return calcGst({ amount: inclusive, ratePct, mode: 'remove', furtherTax });
+}
+
+// --- Car loan (SBP BPRD Circulars 29/2021 & 19/2022) ---
+export interface CarLoanInput {
+  /** Vehicle price, Rs. */
+  price: number;
+  /** Down payment, % of price (SBP floor 30%). */
+  downPct: number;
+  /** Tenure, whole years. Capped by engine size (see below). */
+  tenureYears: number;
+  /** Markup rate, % p.a. (floating: KIBOR + spread). */
+  annualRatePct: number;
+  /** Engine size band — sets the SBP tenure cap. */
+  engineCc: 'upto-1000' | 'above-1000';
+  /** Processing fee, Rs (flat amount, not a %). */
+  processingFee: number;
+  /** Insurance / Takaful, % of car value p.a. */
+  insurancePctPa: number;
+}
+
+export interface CarLoanResult {
+  price: number;
+  downPayment: number;
+  /** Amount financed (price − down payment). */
+  financed: number;
+  emi: number;
+  totalPayment: number;
+  totalInterest: number;
+  /** Insurance / Takaful over the whole tenure, Rs. */
+  totalInsurance: number;
+  processingFee: number;
+  /** Down payment + EMI total + processing fee + insurance. */
+  totalCost: number;
+  /** True when the financed amount exceeds the SBP Rs 3m aggregate cap. */
+  capWarning: boolean;
+  maxTenureYears: number;
+  tenureMonths: number;
+}
+
+/**
+ * Car loan: EMI on the financed amount (price − down payment),
+ * plus the flat processing fee and insurance over the tenure.
+ * Insurance is charged at the entered % of the ORIGINAL car
+ * value each year — an estimate; the actual premium may fall
+ * as the car's value falls, so the page says so. The SBP
+ * tenure cap is enforced by engine size (≤1000cc: 5 years;
+ * above 1000cc: 3 years) and the Rs 3m aggregate cap is
+ * reported as a warning flag, not a throw: a larger down
+ * payment can bring the financed amount under the cap.
+ */
+export function calcCarLoan(input: CarLoanInput): CarLoanResult {
+  if (!isFiniteNumber(input.price) || input.price <= 0 || input.price > MAX_AMOUNT) {
+    throw new Error('Car price must be a positive number.');
+  }
+  if (!isFiniteNumber(input.downPct) || input.downPct < CAR_LOAN_DOWN_PCT_MIN || input.downPct > CAR_LOAN_DOWN_PCT_MAX) {
+    throw new Error(`Down payment must be between ${CAR_LOAN_DOWN_PCT_MIN}% and ${CAR_LOAN_DOWN_PCT_MAX}% of the car price.`);
+  }
+  const maxTenureYears =
+    input.engineCc === 'upto-1000' ? CAR_LOAN_MAX_TENURE_YEARS_UPTO_1000CC : CAR_LOAN_MAX_TENURE_YEARS_ABOVE_1000CC;
+  if (input.engineCc !== 'upto-1000' && input.engineCc !== 'above-1000') {
+    throw new Error("Engine size must be 'upto-1000' or 'above-1000'.");
+  }
+  if (!Number.isInteger(input.tenureYears) || input.tenureYears < CAR_LOAN_MIN_TENURE_YEARS || input.tenureYears > maxTenureYears) {
+    throw new Error(
+      `Tenure must be ${CAR_LOAN_MIN_TENURE_YEARS}–${maxTenureYears} years for this engine size (SBP cap: ${maxTenureYears} years ${input.engineCc === 'upto-1000' ? 'up to 1000cc' : 'above 1000cc'}).`,
+    );
+  }
+  if (!isFiniteNumber(input.annualRatePct) || input.annualRatePct < 0 || input.annualRatePct > EMI_MAX_RATE) {
+    throw new Error(`Markup rate must be between 0 and ${EMI_MAX_RATE}%.`);
+  }
+  if (!isFiniteNumber(input.processingFee) || input.processingFee < 0 || input.processingFee > 100000) {
+    throw new Error('Processing fee must be between Rs 0 and Rs 100,000.');
+  }
+  if (!isFiniteNumber(input.insurancePctPa) || input.insurancePctPa < 0 || input.insurancePctPa > 10) {
+    throw new Error('Insurance / Takaful must be between 0% and 10% of the car value per year.');
+  }
+  const downPayment = round2((input.price * input.downPct) / 100);
+  const financed = round2(input.price - downPayment);
+  const tenureMonths = input.tenureYears * 12;
+  const emiResult = calcEMI(financed, input.annualRatePct, tenureMonths);
+  const totalInsurance = round2(((input.price * input.insurancePctPa) / 100) * input.tenureYears);
+  const totalCost = round2(downPayment + emiResult.totalPayment + input.processingFee + totalInsurance);
+  return {
+    price: input.price,
+    downPayment,
+    financed,
+    emi: emiResult.emi,
+    totalPayment: emiResult.totalPayment,
+    totalInterest: emiResult.totalInterest,
+    totalInsurance,
+    processingFee: input.processingFee,
+    totalCost,
+    capWarning: financed > CAR_LOAN_AGGREGATE_CAP,
+    maxTenureYears,
+    tenureMonths,
+  };
+}
+
+// --- Home loan: commercial (floating) and Apna Ghar (two-phase) ---
+export interface HomeLoanInput {
+  /** 'commercial': one floating KIBOR-linked rate. 'apna-ghar':
+   *  5% fixed for the first 10 years, then the post-subsidy rate. */
+  mode: 'commercial' | 'apna-ghar';
+  /** Property price, Rs. */
+  price: number;
+  /** Equity / down payment, % of price. */
+  equityPct: number;
+  /** Tenure, whole years. */
+  tenureYears: number;
+  /** Commercial markup rate, % p.a. (floating: KIBOR + spread). */
+  ratePct: number;
+  /** Post-subsidy rate, % p.a. — Apna Ghar mode only (default
+   *  KIBOR +3% ≈ 16%, editable on the page). */
+  postSubsidyRatePct?: number;
+  /** Processing fee, Rs (flat). Ignored in Apna Ghar mode: Rs 0. */
+  processingFee?: number;
+}
+
+export interface HomeLoanResult {
+  mode: 'commercial' | 'apna-ghar';
+  price: number;
+  downPayment: number;
+  /** Amount financed (price − equity). */
+  financed: number;
+  /** Headline EMI: the commercial EMI, or the Apna Ghar phase-1 EMI. */
+  emi: number;
+  /** Phase-1 EMI (years 1–10 at 5%) — Apna Ghar only, else null. */
+  phase1Emi: number | null;
+  /** Phase-2 EMI (remaining years at the post-subsidy rate) — null
+   *  in commercial mode, and null when the tenure is ≤10 years. */
+  phase2Emi: number | null;
+  phase1Months: number;
+  phase2Months: number;
+  /** Balance still owed when the subsidy ends — Apna Ghar only. */
+  balanceAfterPhase1: number | null;
+  totalPayment: number;
+  totalInterest: number;
+  processingFee: number;
+  /** Equity + EMI total + processing fee. */
+  totalCost: number;
+  /** True in Apna Ghar mode when the financed amount exceeds the
+   *  Rs 10m scheme cap. */
+  apnaCapExceeded: boolean;
+  tenureMonths: number;
+}
+
+/**
+ * Home loan. Commercial mode is a single reducing-balance EMI.
+ * Apna Ghar mode is TWO phases and must not be collapsed into
+ * one rate: the phase-1 EMI is the EMI that amortises the loan
+ * over the FULL tenure at the 5% subsidy rate; after the
+ * subsidy years the remaining balance is re-amortised over the
+ * remaining months at the post-subsidy rate, giving the
+ * phase-2 EMI. (If the post-subsidy rate equalled 5%, the
+ * phase-2 EMI would nearly equal the phase-1 EMI — within a
+ * few paisa, because the balance carried forward is rounded
+ * to 2 decimals; the test checks this identity.) Total payment
+ * paid in each phase, not a single-rate total.
+ */
+export function calcHomeLoan(input: HomeLoanInput): HomeLoanResult {
+  if (input.mode !== 'commercial' && input.mode !== 'apna-ghar') {
+    throw new Error("Mode must be 'commercial' or 'apna-ghar'.");
+  }
+  if (!isFiniteNumber(input.price) || input.price <= 0 || input.price > MAX_AMOUNT) {
+    throw new Error('Property price must be a positive number.');
+  }
+  const equityMin = input.mode === 'apna-ghar' ? APNA_GHAR_MIN_EQUITY_PCT : HOME_LOAN_EQUITY_PCT_MIN_COMMERCIAL;
+  const equityMax = HOME_LOAN_EQUITY_PCT_MAX_COMMERCIAL;
+  if (!isFiniteNumber(input.equityPct) || input.equityPct < equityMin || input.equityPct > equityMax) {
+    throw new Error(`Equity must be between ${equityMin}% and ${equityMax}% of the property price in ${input.mode === 'apna-ghar' ? 'Apna Ghar' : 'commercial'} mode.`);
+  }
+  const tenureMax = input.mode === 'apna-ghar' ? APNA_GHAR_MAX_TENURE_YEARS : HOME_LOAN_TENURE_MAX_YEARS_COMMERCIAL;
+  if (!Number.isInteger(input.tenureYears) || input.tenureYears < HOME_LOAN_TENURE_MIN_YEARS || input.tenureYears > tenureMax) {
+    throw new Error(
+      `Tenure must be ${HOME_LOAN_TENURE_MIN_YEARS}–${tenureMax} years in ${input.mode === 'apna-ghar' ? 'Apna Ghar' : 'commercial'} mode (banks cap at ${tenureMax} years; SBP allows 30).`,
+    );
+  }
+  if (!isFiniteNumber(input.ratePct) || input.ratePct < 0 || input.ratePct > EMI_MAX_RATE) {
+    throw new Error(`Markup rate must be between 0 and ${EMI_MAX_RATE}%.`);
+  }
+  const processingFee = input.mode === 'apna-ghar' ? 0 : (input.processingFee ?? 0);
+  if (!isFiniteNumber(processingFee) || processingFee < 0 || processingFee > 100000) {
+    throw new Error('Processing fee must be between Rs 0 and Rs 100,000.');
+  }
+
+  const downPayment = round2((input.price * input.equityPct) / 100);
+  const financed = round2(input.price - downPayment);
+  const tenureMonths = input.tenureYears * 12;
+
+  if (input.mode === 'commercial') {
+    const emiResult = calcEMI(financed, input.ratePct, tenureMonths);
+    return {
+      mode: 'commercial',
+      price: input.price,
+      downPayment,
+      financed,
+      emi: emiResult.emi,
+      phase1Emi: null,
+      phase2Emi: null,
+      phase1Months: 0,
+      phase2Months: 0,
+      balanceAfterPhase1: null,
+      totalPayment: emiResult.totalPayment,
+      totalInterest: emiResult.totalInterest,
+      processingFee,
+      totalCost: round2(downPayment + emiResult.totalPayment + processingFee),
+      apnaCapExceeded: false,
+      tenureMonths,
+    };
+  }
+
+  // Apna Ghar: two phases.
+  const postRate = input.postSubsidyRatePct ?? input.ratePct;
+  if (!isFiniteNumber(postRate) || postRate < 0 || postRate > EMI_MAX_RATE) {
+    throw new Error(`Post-subsidy rate must be between 0 and ${EMI_MAX_RATE}%.`);
+  }
+  const subsidyMonths = Math.min(APNA_GHAR_SUBSIDY_YEARS, input.tenureYears) * 12;
+  const full = calcEMI(financed, APNA_GHAR_SUBSIDY_RATE_PCT, tenureMonths);
+  const phase1Emi = full.emi;
+  if (subsidyMonths >= tenureMonths) {
+    // Tenure within the subsidy period: one phase at 5%.
+    return {
+      mode: 'apna-ghar',
+      price: input.price,
+      downPayment,
+      financed,
+      emi: phase1Emi,
+      phase1Emi,
+      phase2Emi: null,
+      phase1Months: tenureMonths,
+      phase2Months: 0,
+      balanceAfterPhase1: null,
+      totalPayment: full.totalPayment,
+      totalInterest: full.totalInterest,
+      processingFee: 0,
+      totalCost: round2(downPayment + full.totalPayment),
+      apnaCapExceeded: financed > APNA_GHAR_MAX_FINANCING,
+      tenureMonths,
+    };
+  }
+  const balanceAfterPhase1 = full.schedule[subsidyMonths - 1].balance;
+  const phase1Paid = round2(full.schedule.slice(0, subsidyMonths).reduce((sum, row) => sum + row.emi, 0));
+  const phase2 = calcEMI(balanceAfterPhase1, postRate, tenureMonths - subsidyMonths);
+  const totalPayment = round2(phase1Paid + phase2.totalPayment);
+  return {
+    mode: 'apna-ghar',
+    price: input.price,
+    downPayment,
+    financed,
+    emi: phase1Emi,
+    phase1Emi,
+    phase2Emi: phase2.emi,
+    phase1Months: subsidyMonths,
+    phase2Months: tenureMonths - subsidyMonths,
+    balanceAfterPhase1,
+    totalPayment,
+    totalInterest: round2(totalPayment - financed),
+    processingFee: 0,
+    totalCost: round2(downPayment + totalPayment),
+    apnaCapExceeded: financed > APNA_GHAR_MAX_FINANCING,
+    tenureMonths,
+  };
 }

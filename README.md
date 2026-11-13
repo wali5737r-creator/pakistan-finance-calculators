@@ -3,16 +3,16 @@
 [![CI](https://github.com/wali5737r-creator/pakistan-finance-calculators/actions/workflows/ci.yml/badge.svg)](https://github.com/wali5737r-creator/pakistan-finance-calculators/actions/workflows/ci.yml)
 
 Astro + TypeScript + Tailwind CSS, static output for Cloudflare Pages.
-Twenty-four free calculator tools, all calculations client-side, no accounts,
+Twenty-six free calculator tools, all calculations client-side, no accounts,
 no stored inputs. Built from the specs in
 `~/workspace/teams/pakistan-finance-calculators/` (SRS review, design
 system, per-tool frontend specs with QA fixes applied, rates design,
-SEO plan, content/security/launch handoff). The 24 tools: salary tax,
+SEO plan, content/security/launch handoff). The 26 tools: salary tax,
 EMI, Zakat, currency, gold, percentage, age, unit/marla, fuel cost,
 compound interest, loan eligibility, inflation, budget planner, debt
 payoff, fixed deposit, loan comparison, goal savings, electricity bill,
 gas bill, freelancer tax, solar size & payback, pension / EOBI, national
-savings, and GST.
+savings, GST, car loans, and home loans.
 
 ## Run locally
 
@@ -162,7 +162,7 @@ re-run, never a code rewrite:
 
 ## What was verified in this build
 
-- `npm test`: 204 checks pass (13 November 2026) — every SRS worked example and boundary
+- `npm test`: 221 checks pass (13 November 2026) — every SRS worked example and boundary
   case (tax E1–E6 + boundary sweep, EMI E1–E4 + stall guard +
   240-month schedule, Zakat, currency cross-rates with test-injected
   tables only, gold E1–E4 with an illustrative test price, percentage
@@ -170,12 +170,12 @@ re-run, never a code rewrite:
   plus the review-date tripwires, API/freshness behaviour, formatting
   guards, the config-driven electricity tariff table, and the
   SRS-consistency checks (SRS §1 salaried slabs, §5 Zakat constants,
-  and the Addendum headline figures for all 16 post-v1.0 tools).
-- `npm run build`: passes; 30 pages (29 routes + 404) for 24 tools.
-- Route smoke check (local server): all 29 routes return 200 with
+  and the Addendum headline figures for all 16 post-v1.0 tools), plus car-loan (tenure caps, Rs 3m cap, worked example) and home-loan (commercial + two-phase Apna Ghar) checks.
+- `npm run build`: passes; 32 pages (31 routes + 404) for 26 tools.
+- Route smoke check (local server): all 31 routes return 200 with
   the correct H1; every tool page carries one JSON-LD block and a
   self-canonical link; visible FAQ count equals schema question count
-  on all 24 tool pages.
+  on all 26 tool pages.
 - Grep: no hard-coded currency rate or gold price in `src/` or
   `functions/` outside config/test fixtures; no API key or secret
   anywhere in the repo; Functions files bundle cleanly with esbuild.

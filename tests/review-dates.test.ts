@@ -9,6 +9,8 @@ import { FREELANCER_LAST_CHECKED, FREELANCER_NEXT_REVIEW } from '../src/config/f
 import { PENSION_LAST_CHECKED, PENSION_NEXT_REVIEW } from '../src/config/pension';
 import { NATIONAL_SAVINGS_LAST_CHECKED, NATIONAL_SAVINGS_NEXT_REVIEW } from '../src/config/national-savings';
 import { GST_LAST_CHECKED, GST_NEXT_REVIEW } from '../src/config/gst';
+import { CAR_LOAN_LAST_CHECKED, CAR_LOAN_NEXT_REVIEW } from '../src/config/car-loan';
+import { HOME_LOAN_LAST_CHECKED, HOME_LOAN_NEXT_REVIEW } from '../src/config/home-loan';
 import { isReviewDue, isValidIsoDate, reviewStatuses } from '../src/lib/review-dates';
 
 let passed = 0;
@@ -39,6 +41,12 @@ check('NATIONAL_SAVINGS_NEXT_REVIEW is a valid ISO date', () => {
 });
 check('GST_NEXT_REVIEW is a valid ISO date', () => {
   assert.equal(isValidIsoDate(GST_NEXT_REVIEW), true);
+});
+check('CAR_LOAN_NEXT_REVIEW is a valid ISO date', () => {
+  assert.equal(isValidIsoDate(CAR_LOAN_NEXT_REVIEW), true);
+});
+check('HOME_LOAN_NEXT_REVIEW is a valid ISO date', () => {
+  assert.equal(isValidIsoDate(HOME_LOAN_NEXT_REVIEW), true);
 });
 check('isValidIsoDate rejects bad dates', () => {
   assert.equal(isValidIsoDate('2027-13-01'), false); // month 13
@@ -135,6 +143,26 @@ check('gst review date is the expected value', () => {
   assert.equal(GST_NEXT_REVIEW, '2027-05-01');
 });
 
+// --- Car-loan and home-loan reviews: 3 months after the last check
+// --- (13 Nov 2026) — rates move with KIBOR, so both re-verify by
+// --- 13 Feb 2027 ---
+check('car-loan review date is after CAR_LOAN_LAST_CHECKED', () => {
+  const lastChecked = new Date(CAR_LOAN_LAST_CHECKED);
+  const review = new Date(`${CAR_LOAN_NEXT_REVIEW}T00:00:00Z`);
+  assert.ok(review > lastChecked, `expected ${CAR_LOAN_NEXT_REVIEW} after ${CAR_LOAN_LAST_CHECKED}`);
+});
+check('car-loan review date is the expected value', () => {
+  assert.equal(CAR_LOAN_NEXT_REVIEW, '2027-02-13');
+});
+check('home-loan review date is after HOME_LOAN_LAST_CHECKED', () => {
+  const lastChecked = new Date(HOME_LOAN_LAST_CHECKED);
+  const review = new Date(`${HOME_LOAN_NEXT_REVIEW}T00:00:00Z`);
+  assert.ok(review > lastChecked, `expected ${HOME_LOAN_NEXT_REVIEW} after ${HOME_LOAN_LAST_CHECKED}`);
+});
+check('home-loan review date is the expected value', () => {
+  assert.equal(HOME_LOAN_NEXT_REVIEW, '2027-02-13');
+});
+
 // --- Due / not-yet-due flag logic, with injected "today" dates ---
 check('isReviewDue: day before review is not due', () => {
   assert.equal(isReviewDue('2027-05-01', '2027-04-30'), false);
@@ -159,6 +187,8 @@ check('reviewStatuses: nothing due before any review date', () => {
     { name: 'pension', reviewDate: '2027-02-01', due: false },
     { name: 'national-savings', reviewDate: '2027-01-13', due: false },
     { name: 'gst', reviewDate: '2027-05-01', due: false },
+    { name: 'car-loan', reviewDate: '2027-02-13', due: false },
+    { name: 'home-loan', reviewDate: '2027-02-13', due: false },
   ]);
 });
 check('reviewStatuses: electricity due, tax and gas not yet due', () => {
@@ -172,6 +202,8 @@ check('reviewStatuses: electricity due, tax and gas not yet due', () => {
     { name: 'pension', reviewDate: '2027-02-01', due: true },
     { name: 'national-savings', reviewDate: '2027-01-13', due: true },
     { name: 'gst', reviewDate: '2027-05-01', due: false },
+    { name: 'car-loan', reviewDate: '2027-02-13', due: false },
+    { name: 'home-loan', reviewDate: '2027-02-13', due: false },
   ]);
 });
 check('reviewStatuses: all due after the latest review date', () => {
@@ -185,6 +217,8 @@ check('reviewStatuses: all due after the latest review date', () => {
     { name: 'pension', reviewDate: '2027-02-01', due: true },
     { name: 'national-savings', reviewDate: '2027-01-13', due: true },
     { name: 'gst', reviewDate: '2027-05-01', due: true },
+    { name: 'car-loan', reviewDate: '2027-02-13', due: true },
+    { name: 'home-loan', reviewDate: '2027-02-13', due: true },
   ]);
 });
 

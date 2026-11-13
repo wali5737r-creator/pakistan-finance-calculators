@@ -64,7 +64,7 @@ function buildSitemap() {
   }
   const lines = [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    '<!-- All indexed pages are listed (SEO plan §1): home, 24 tool pages, About, Contact, Privacy, Terms. -->',
+    '<!-- All indexed pages are listed (SEO plan §1): home, 26 tool pages, About, Contact, Privacy, Terms. -->',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
   ];
   for (const url of order) {

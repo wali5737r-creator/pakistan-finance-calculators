@@ -1,0 +1,582 @@
+---
+import Layout from '../components/Layout.astro';
+import {
+  APNA_GHAR_HOMES_FY2025_26,
+  APNA_GHAR_MAX_FLAT_SQFT,
+  APNA_GHAR_MAX_FINANCING,
+  APNA_GHAR_MAX_HOUSE_MARLA,
+  APNA_GHAR_MIN_AGE_PRIMARY_APPLICANT,
+  APNA_GHAR_SUBSIDY_RATE_PCT,
+  APNA_GHAR_SUBSIDY_YEARS,
+  HOME_LOAN_BANK_SPREADS,
+  HOME_LOAN_DEFAULT_EQUITY_PCT,
+  HOME_LOAN_DEFAULT_PRICE,
+  HOME_LOAN_DEFAULT_PROCESSING_FEE,
+  HOME_LOAN_DEFAULT_RATE_PCT,
+  HOME_LOAN_DEFAULT_TENURE_YEARS,
+  HOME_LOAN_SOURCE_CITATION,
+  HOME_LOAN_SOURCE_URL_MCB,
+  HOME_LOAN_SOURCE_URL_MCB_FAQ,
+  HOME_LOAN_SOURCE_URL_SBP,
+} from '../config/home-loan';
+
+const title = "Home Loan Calculator Pakistan | Commercial & Apna Ghar EMI | Pakistan Finance Calculators";
+const description = "Work out your home loan EMI in Pakistan: commercial KIBOR-linked rates or the Apna Ghar 5% subsidy for 10 years, with both phases shown. Free and instant.";
+const slug = "/home-loan-calculator/";
+
+const faqs = [
+  {
+    q: "How much down payment do I need for a home loan in Pakistan?",
+    a: "On a commercial home loan, typically 15–30% of the property price — banks finance 70–85%. HBL finances up to 70% (30% equity), Meezan 70–75%, Bank Alfalah up to 80% (minimum 20% equity), NBP 85% up to Rs 25m and 75% above, and Bank AL Habib 75–85%. Under the Apna Ghar scheme the bank finances 90%, so you need only 10% equity. SBP allows up to 90% financing as a ceiling, but banks are stricter than the ceiling.",
+  },
+  {
+    q: "How long can a home loan run?",
+    a: "Most banks offer up to 25 years (minimum 1–3 years depending on the bank: HBL, Meezan and Bank Alfalah 3–25 years; MCB 2–25; JS 1–25; BankIslami 2–25). SBP allows up to 30 years as a ceiling, but no major bank product was found offering 30 years, so this calculator caps commercial tenure at 25 years. The Apna Ghar scheme caps at 20 years.",
+  },
+  {
+    q: "What is the Apna Ghar scheme, and is Mera Pakistan Mera Ghar still running?",
+    a: "Mera Pakistan Mera Ghar ended — it ran from October 2020 and was suspended on 30 June 2022, so its old 2%, 5% and 7% tier rates are obsolete and are not shown here. The live scheme is the Wazir-e-Azam Apna Ghar Program – Ghar Ho Tu Apna (SBP SH&SFD Circular No. 3/2025, 24 September 2025; launched 30 April 2026): up to Rs 10 million, fixed 5% for the first 10 years, then 1-year KIBOR +3%, maximum 20 years, 90% financing, no processing fee and no prepayment penalty — for first-time homeowners only, a house up to 10 marla or a flat up to 1,500 sq ft.",
+  },
+  {
+    q: "Why does the Apna Ghar EMI change after 10 years?",
+    a: "Because the 5% rate is a subsidy for the first 10 years only. After that the loan continues at the bank's rate — 1-year KIBOR +3% — on whatever balance is still owed. So the calculator shows two EMIs: the phase-1 EMI for years 1–10 at 5%, and the phase-2 EMI for the remaining years at the post-subsidy rate you enter (default 16%, about KIBOR +3% in November 2026). A single EMI worked out at 5% for the whole 20 years would understate what you pay, and a single EMI at 16% would hide the subsidy.",
+  },
+  {
+    q: "How is the home loan EMI calculated?",
+    a: "With the reducing-balance formula: EMI = P x R x (1+R)^N / ((1+R)^N − 1), where P is the financed amount (property price minus your equity), R is the monthly rate (annual markup divided by 100 and by 12), and N is the number of months. In Apna Ghar mode the phase-1 EMI is the EMI that would repay the loan over the full tenure at 5%; after 10 years the remaining balance is re-amortised over the remaining months at the post-subsidy rate, giving the phase-2 EMI.",
+  },
+  {
+    q: "What costs are not in the EMI?",
+    a: "Valuation, legal opinion, stamp duty and transfer/mortgage costs are extra and charged at actual cost — no bank publishes typical amounts, so they are not in the calculation. The processing fee (about Rs 10,000 + FED on a commercial loan; Rs 0 under Apna Ghar) is shown separately and added to the total cost. Insurance/Takaful is included in the monthly instalment itself, according to the MCB Apna Ghar FAQ. Total consumer instalments, including this loan, must stay within 65% of net disposable income under SBP rules.",
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://pakistan-finance-calculators.pages.dev/home-loan-calculator/#webapp',
+      name: "Home Loan Calculator",
+      url: 'https://pakistan-finance-calculators.pages.dev/home-loan-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://pakistan-finance-calculators.pages.dev/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: "Home Loan Calculator",
+          item: 'https://pakistan-finance-calculators.pages.dev/home-loan-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+
+const related = [
+  {
+    href: "/emi-loan-calculator/",
+    name: "EMI / Loan Calculator",
+    desc: "The monthly instalment, total interest and full amortisation schedule for any reducing-balance loan — the same formula this home loan EMI uses.",
+  },
+  {
+    href: "/loan-eligibility-calculator/",
+    name: "Loan Eligibility Calculator",
+    desc: "Check the largest loan your income can support first — SBP keeps total consumer instalments within 65% of net disposable income.",
+  },
+  {
+    href: "/loan-comparison-calculator/",
+    name: "Loan Comparison Calculator",
+    desc: "Compare two home-loan offers side by side: EMI, total interest and total payment for each, and which one costs less overall.",
+  },
+];
+---
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Home Loan Calculator</p>
+    </nav>
+    <p class="badge badge-info" style="margin-top: 8px;">Loans</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Home Loan Calculator Pakistan</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+      Work out the monthly EMI on a home loan in Pakistan — as a commercial loan at a
+      floating KIBOR-linked rate, or under the Apna Ghar scheme at 5% fixed for the
+      first 10 years and then KIBOR +3%. Apna Ghar mode shows both phases' EMIs, so
+      the subsidy is never hidden inside a single rate.
+    </p>
+    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+      <strong>Terms checked 13 November 2026.</strong> Commercial home-loan rates are
+      floating (KIBOR + a bank spread of about 2–4.25%) and change — the all-in band in
+      November 2026 was about 14.9–17.2% per year. The rate on your bank's Key Fact
+      Statement / offer letter governs, not this estimate.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="homeForm" novalidate>
+          <div class="field">
+            <label for="homeMode">Which home loan? <span aria-hidden="true">*</span></label>
+            <select id="homeMode" aria-required="true">
+              <option value="commercial" selected>Commercial — floating KIBOR-linked rate</option>
+              <option value="apna-ghar">Apna Ghar — 5% fixed for 10 years, then KIBOR +3%</option>
+            </select>
+            <p class="hint" id="homeModeHint">Commercial: one floating rate for the whole tenure. Apna Ghar: the government-subsidised scheme for first-time homeowners, up to Rs 10m, maximum 20 years.</p>
+          </div>
+
+          <div class="field">
+            <label for="homePrice">Property price (Rs) <span aria-hidden="true">*</span></label>
+            <input id="homePrice" type="text" inputmode="decimal" autocomplete="off" value={HOME_LOAN_DEFAULT_PRICE} />
+            <p class="hint">The price of the house or flat. In Apna Ghar mode the financed amount must be Rs 10,000,000 or less, the house at most 10 marla, or the flat at most 1,500 sq ft.</p>
+          </div>
+
+          <div class="field">
+            <label for="homeEquity">Equity / down payment (%) <span aria-hidden="true">*</span></label>
+            <input id="homeEquity" type="text" inputmode="decimal" autocomplete="off" value={HOME_LOAN_DEFAULT_EQUITY_PCT} />
+            <p class="hint" id="homeEquityHint">Commercial: 15–30% (banks finance 70–85%). SBP allows up to 90% financing as a ceiling, but banks are stricter.</p>
+          </div>
+
+          <div class="field">
+            <label for="homeTenure">Tenure (years) <span aria-hidden="true">*</span></label>
+            <input id="homeTenure" type="text" inputmode="numeric" autocomplete="off" value={HOME_LOAN_DEFAULT_TENURE_YEARS} />
+            <p class="hint" id="homeTenureHint">Whole years, 3–25 for a commercial loan (banks cap at 25; SBP allows 30). Apna Ghar caps at 20 years.</p>
+          </div>
+
+          <div class="field">
+            <label for="homeRate" id="homeRateLabel">Markup rate (% per year) <span aria-hidden="true">*</span></label>
+            <input id="homeRate" type="text" inputmode="decimal" autocomplete="off" value={HOME_LOAN_DEFAULT_RATE_PCT} />
+            <p class="hint" id="homeRateHint">Default 16% — inside the November 2026 commercial band of about 14.9–17.2% (KIBOR + about 3%). Enter the rate your bank quotes you.</p>
+          </div>
+
+          <div class="field" id="homePostRateField" hidden>
+            <label for="homePostRate">Post-subsidy rate, years 11 onwards (% per year) <span aria-hidden="true">*</span></label>
+            <input id="homePostRate" type="text" inputmode="decimal" autocomplete="off" value="16" />
+            <p class="hint">The rate after the 10-year subsidy ends: 1-year KIBOR +3% — about 16% in November 2026. Editable, because KIBOR moves and the rate in year 11 is not known today.</p>
+          </div>
+
+          <div class="field" id="homeFeeField">
+            <label for="homeFee">Processing fee (Rs, flat) <span aria-hidden="true">*</span></label>
+            <input id="homeFee" type="text" inputmode="decimal" autocomplete="off" value={HOME_LOAN_DEFAULT_PROCESSING_FEE} />
+            <p class="hint">Flat Rs 10,000 + FED is the well-evidenced figure (Meezan Easy Home Rs 10,000 + 16% FED; HBL Rs 10,000 second-hand). Valuation, legal opinion, stamp duty and transfer costs are extra, at actual.</p>
+          </div>
+
+          <div id="homeErrors" class="error-box" role="alert" hidden></div>
+
+          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+            <button id="homeCalculate" class="btn-primary" type="submit">Calculate</button>
+            <button id="homeClear" class="btn-secondary" type="button">Clear</button>
+          </p>
+          <p id="homeFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        </form>
+      </div>
+
+      <div class="result-card" id="homeResultCard" tabindex="-1">
+        <div id="homeEmpty">
+          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p>Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            You will see your monthly EMI — both phases in Apna Ghar mode — the financed amount, total interest, and the total cost.
+          </p>
+        </div>
+
+        <div id="homeResult" data-result-text hidden>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" id="homeHeadlineLabel">Your monthly EMI</p>
+          <div aria-live="polite" aria-atomic="true">
+            <p class="result-value" id="homeHeadline"></p>
+          </div>
+          <div id="homePhase2Box" hidden>
+            <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">EMI from year 11 (phase 2)</p>
+            <p class="result-value" id="homePhase2" style="font-size: 28px;"></p>
+          </div>
+          <div class="stat-grid">
+            <div>
+              <p class="stat-label">Amount financed</p>
+              <p class="stat-value" id="homeStat1"></p>
+            </div>
+            <div>
+              <p class="stat-label">Total interest</p>
+              <p class="stat-value" id="homeStat2"></p>
+            </div>
+            <div>
+              <p class="stat-label">Equity / down payment</p>
+              <p class="stat-value" id="homeStat3"></p>
+            </div>
+            <div>
+              <p class="stat-label">Total cost</p>
+              <p class="stat-value" id="homeStat4"></p>
+            </div>
+          </div>
+          <div class="table-wrap">
+          <table class="breakdown-table" id="homeBreakdown" aria-label="Home loan breakdown"></table>
+          </div>
+          <p id="homeCapWarning" class="notice-warning" hidden></p>
+          <p id="homeEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="homeFormula" style="font-size: 16px;"></p>
+          <p style="font-size: 13px; color: var(--ink-muted);">
+            Estimate only — check important figures before acting. <a href="#homeDisclaimer">Read the full disclaimer.</a>
+          </p>
+        </div>
+
+        <div class="actions-row no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size: 14px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top: 40px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Pick the loan type: commercial (one floating rate) or Apna Ghar (5% for 10 years, then KIBOR +3%). The equity, tenure and fee fields change to match the mode you pick.</li>
+      <li>Enter the property price and your equity. The financed amount is the price minus the equity — 70–85% on a commercial loan, 90% under Apna Ghar.</li>
+      <li>Enter the tenure in whole years (commercial: 3–25; Apna Ghar: 3–20) and the markup rate. In Apna Ghar mode also enter the post-subsidy rate for years 11 onwards — it is editable because KIBOR in year 11 is not known today.</li>
+      <li>The EMI is worked out with the reducing-balance formula. In Apna Ghar mode the phase-1 EMI repays the loan over the full tenure at 5%; after 10 years the remaining balance is re-amortised at the post-subsidy rate, giving the phase-2 EMI.</li>
+    </ol>
+
+    <h2>Formula</h2>
+    <p>Financed amount = property price − equity</p>
+    <p>EMI = P × R × (1+R)^N / ((1+R)^N − 1), where P is the financed amount, R is the monthly rate (annual markup ÷ 100 ÷ 12), and N is the number of months. If the rate is 0, EMI = P ÷ N.</p>
+    <p>Apna Ghar: phase-1 EMI is the EMI over the full tenure at 5%; phase-2 EMI is the EMI on the balance still owed after 10 years, over the remaining months at the post-subsidy rate.</p>
+    <p>Total cost = equity + total of all EMIs + processing fee</p>
+
+    <h2>Worked examples</h2>
+    <p><strong>Example A — Commercial:</strong> Rs 10,000,000 property, 25% equity (Rs 2,500,000), so Rs 7,500,000 financed. At 16% per year for 20 years (240 months) the EMI is Rs 104,344.20, total interest is Rs 17,542,600.13 and the total paid on the loan is Rs 25,042,600.13. Add the equity and a Rs 10,000 processing fee and the total cost is Rs 27,552,600.13.</p>
+    <p><strong>Example B — Apna Ghar:</strong> the same Rs 10,000,000 property with 10% equity (Rs 1,000,000), so Rs 9,000,000 financed, over 20 years. Years 1–10 at 5%: EMI Rs 59,396.02. After 10 years Rs 5,599,936.10 is still owed; years 11–20 at 16%: EMI Rs 93,806.28. Total paid on the loan is Rs 18,384,275.33 and total interest is Rs 9,384,275.33 — with no processing fee. A single rate would be wrong: at 16% for the whole 20 years the total would be Rs 30,051,135.38, and at 5% for the whole 20 years it would be Rs 14,255,043.39. The two-phase total sits between them, which is exactly what the subsidy does.</p>
+    <p style="font-size: 14px; color: var(--ink-muted);">All examples use the figures verified 13 November 2026.</p>
+
+    <h2>Commercial markup by bank — November 2026</h2>
+    <p>All commercial rates are 1-year KIBOR (6-month KIBOR at MCB) plus the bank's spread, repriced yearly — so no single rate on this page is "the" home loan rate. The all-in commercial band in November 2026 was about 14.9–17.2% per year.</p>
+    <div class="table-wrap">
+    <table class="breakdown-table" aria-label="Home loan markup by bank">
+      <thead>
+        <tr><th scope="col">Bank</th><th scope="col">Markup / spread</th><th scope="col">Note</th></tr>
+      </thead>
+      <tbody>
+        {HOME_LOAN_BANK_SPREADS.map((row) => (
+          <tr>
+            <td>{row.bank}</td>
+            <td>{row.spread}</td>
+            <td>{row.note}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    </div>
+    <p style="font-size: 14px; color: var(--ink-muted);">SBP ceilings (August 2026, SH&amp;SFD Circular No. 04/2026): maximum tenure 30 years, maximum financing 90% of the property value, and total consumer instalments within 65% of net disposable income. These are ceilings, not bank terms — banks are stricter, which is why this calculator caps commercial tenure at 25 years. UBL Address tenure is not stated on its product page (its Ameen FAQ says 3–20 years). Commercial age limits could not be verified from any named bank page, so none are stated here.</p>
+
+    <h2>Apna Ghar scheme — the live subsidy</h2>
+    <p>The Wazir-e-Azam Apna Ghar Program – Ghar Ho Tu Apna is the live subsidised scheme (SBP SH&amp;SFD Circular No. 3/2025, 24 September 2025; renamed by the Ministry of Housing &amp; Works notification of 26 March 2026, SBP circular 1 April 2026; launched by the Prime Minister on 30 April 2026). Its terms:</p>
+    <ul>
+      <li>Financing up to Rs {APNA_GHAR_MAX_FINANCING.toLocaleString('en-PK')} — 90% of the property value, so 10% equity.</li>
+      <li>Fixed {APNA_GHAR_SUBSIDY_RATE_PCT}% for the first {APNA_GHAR_SUBSIDY_YEARS} years, then 1-year KIBOR +3%.</li>
+      <li>Maximum tenure 20 years. No processing fee. No prepayment penalty.</li>
+      <li>First-time homeowners only — you must not already own a property. One subsidised loan per person, once only. Minimum age 25 for the primary applicant (MCB FAQ).</li>
+      <li>House up to {APNA_GHAR_MAX_HOUSE_MARLA} marla, or a flat up to {APNA_GHAR_MAX_FLAT_SQFT.toLocaleString('en-PK')} sq ft.</li>
+      <li>{APNA_GHAR_HOMES_FY2025_26.toLocaleString('en-PK')} homes in FY2025-26.</li>
+    </ul>
+    <p>The scheme was first launched as Mera Ghar Mera Ashiana with two tiers — 5% up to Rs 2m and 8% from Rs 2m to Rs 3.5m. Those tiers were replaced in March 2026 (ECC, February 2026) by a uniform 5% up to Rs 10m — pages still showing an 8% tier are out of date. The older Mera Pakistan Mera Ghar scheme (2020–2022, concluded) and its 2%/5%/7% tiers are obsolete and are not shown as live anywhere on this page.</p>
+    <p style="font-size: 14px; color: var(--ink-muted);">Punjab's Apni Chhat Apna Ghar (interest-free, up to Rs 1.5m, 7 years) is mentioned here only as a weak, single-secondary-source, provincial-only note — it is not built into this calculator.</p>
+
+    <h2>What this page does not settle</h2>
+    <p>These points are stated plainly rather than filled in with a guess:</p>
+    <ul>
+      <li>Commercial home-loan age limits (minimum/maximum age) could not be verified from any named bank page — none are stated.</li>
+      <li>"The property must be in the borrower's name" is not stated as a standalone rule — what the banks require is clear title, a valuation, a legal opinion, and a mortgage to the bank.</li>
+      <li>Typical valuation and legal-opinion fee amounts are not published by any bank — they are extra, at actual, and are not in the EMI.</li>
+      <li>Bank Alfalah, UBL and MCB commercial processing-fee amounts are not published; only the flat Rs 10,000 + FED figure (Meezan Schedule of Charges; HBL second-hand) is well evidenced.</li>
+    </ul>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+
+    <section id="homeDisclaimer" class="notice-info" style="margin-top: 32px;">
+      <h2 style="font-size: 20px;">Important — please read</h2>
+      <p>
+        Results are estimates for information only and are not financial advice.
+        Home-loan rates are floating (KIBOR-linked) and change, and the
+        post-subsidy rate in Apna Ghar mode is an assumption you enter — the
+        rate in year 11 is not known today. The rate, fees and conditions on
+        your bank's Key Fact Statement / offer letter govern, not this
+        estimate. Confirm the terms with your bank before borrowing.
+        Calculations run in your browser; nothing you enter is stored or sent
+        to a server.
+      </p>
+      <p>Sources: {HOME_LOAN_SOURCE_CITATION}</p>
+      <p><a href={HOME_LOAN_SOURCE_URL_SBP}>SBP SH&amp;SFD Circular No. 3/2025 (24 Sep 2025)</a>; <a href={HOME_LOAN_SOURCE_URL_MCB}>MCB Apna Ghar Program page</a>; <a href={HOME_LOAN_SOURCE_URL_MCB_FAQ}>MCB Apna Ghar FAQ (PDF, 8 April 2026)</a>. Checked 13 November 2026; next review 13 February 2027.</p>
+      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+    </section>
+
+    <h2 style="margin-top: 32px;">Related tools</h2>
+    <div class="related-grid">
+      {
+        related.map((tool) => (
+          <article class="card">
+            <h3 style="font-size: 18px;">
+              <a href={tool.href}>{tool.name}</a>
+            </h3>
+            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p>
+              <a href={tool.href}>Use the calculator →</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin: 12px 0;
+    }
+    .stat-grid p {
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .related-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 15px;
+    }
+    .breakdown-table th,
+    .breakdown-table td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border, #e5e7eb);
+    }
+    .breakdown-table td:last-child,
+    .breakdown-table th:last-child {
+      text-align: right;
+    }
+    .breakdown-table tr.total-row td {
+      font-weight: 700;
+    }
+  </style>
+
+  <script>
+    import { calcHomeLoan, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';
+    import { APNA_GHAR_MIN_EQUITY_PCT, APNA_GHAR_SUBSIDY_RATE_PCT, APNA_GHAR_SUBSIDY_YEARS, HOME_LOAN_EQUITY_PCT_MIN_COMMERCIAL, HOME_LOAN_EQUITY_PCT_MAX_COMMERCIAL, HOME_LOAN_TENURE_MAX_YEARS_COMMERCIAL, APNA_GHAR_MAX_TENURE_YEARS, HOME_LOAN_TENURE_MIN_YEARS } from '../config/home-loan.ts';
+
+    const form = document.getElementById('homeForm');
+    const errorsBox = document.getElementById('homeErrors');
+    const emptyBox = document.getElementById('homeEmpty');
+    const resultBox = document.getElementById('homeResult');
+    const resultCard = document.getElementById('homeResultCard');
+    const headlineLabel = document.getElementById('homeHeadlineLabel');
+    const headline = document.getElementById('homeHeadline');
+    const phase2Box = document.getElementById('homePhase2Box');
+    const phase2El = document.getElementById('homePhase2');
+    const stat1 = document.getElementById('homeStat1');
+    const stat2 = document.getElementById('homeStat2');
+    const stat3 = document.getElementById('homeStat3');
+    const stat4 = document.getElementById('homeStat4');
+    const breakdownEl = document.getElementById('homeBreakdown');
+    const capWarningEl = document.getElementById('homeCapWarning');
+    const echoEl = document.getElementById('homeEcho');
+    const formulaEl = document.getElementById('homeFormula');
+    const copyBtn = document.querySelector('[data-copy-result]');
+    const printBtn = document.querySelector('[data-print-result]');
+    const formStatus = document.getElementById('homeFormStatus');
+    const modeSelect = document.getElementById('homeMode');
+    const modeHint = document.getElementById('homeModeHint');
+    const equityInput = document.getElementById('homeEquity');
+    const equityHint = document.getElementById('homeEquityHint');
+    const tenureInput = document.getElementById('homeTenure');
+    const tenureHint = document.getElementById('homeTenureHint');
+    const rateLabel = document.getElementById('homeRateLabel');
+    const rateHint = document.getElementById('homeRateHint');
+    const postRateField = document.getElementById('homePostRateField');
+    const feeField = document.getElementById('homeFeeField');
+
+    function isApna() {
+      return modeSelect.value === 'apna-ghar';
+    }
+    function updateModeUI() {
+      if (isApna()) {
+        modeHint.textContent = 'Apna Ghar: 5% fixed for the first 10 years, then 1-year KIBOR +3%. First-time homeowners only, up to Rs 10m financed, maximum 20 years, no processing fee.';
+        equityHint.textContent = 'Apna Ghar: 10–30% equity (the scheme finances 90%, so 10% is the minimum).';
+        tenureHint.textContent = `Whole years, ${HOME_LOAN_TENURE_MIN_YEARS}–${APNA_GHAR_MAX_TENURE_YEARS} (Apna Ghar caps at 20 years).`;
+        rateLabel.innerHTML = 'Markup rate (% per year) <span aria-hidden="true">*</span>';
+        rateHint.textContent = 'In Apna Ghar mode this rate is not used for the first 10 years (those are fixed at 5%) — it is kept as the fallback post-subsidy rate. Enter the post-subsidy rate below.';
+        postRateField.hidden = false;
+        feeField.hidden = true;
+        if (parseDecimal(equityInput.value) === 25) equityInput.value = '10';
+        const t = parseDecimal(tenureInput.value);
+        if (t !== null && t > APNA_GHAR_MAX_TENURE_YEARS) tenureInput.value = String(APNA_GHAR_MAX_TENURE_YEARS);
+      } else {
+        modeHint.textContent = 'Commercial: one floating rate for the whole tenure. Apna Ghar: the government-subsidised scheme for first-time homeowners, up to Rs 10m, maximum 20 years.';
+        equityHint.textContent = `Commercial: ${HOME_LOAN_EQUITY_PCT_MIN_COMMERCIAL}–${HOME_LOAN_EQUITY_PCT_MAX_COMMERCIAL}% (banks finance 70–85%). SBP allows up to 90% financing as a ceiling, but banks are stricter.`;
+        tenureHint.textContent = `Whole years, ${HOME_LOAN_TENURE_MIN_YEARS}–${HOME_LOAN_TENURE_MAX_YEARS_COMMERCIAL} for a commercial loan (banks cap at 25; SBP allows 30). Apna Ghar caps at 20 years.`;
+        rateLabel.innerHTML = 'Markup rate (% per year) <span aria-hidden="true">*</span>';
+        rateHint.textContent = 'Default 16% — inside the November 2026 commercial band of about 14.9–17.2% (KIBOR + about 3%). Enter the rate your bank quotes you.';
+        postRateField.hidden = true;
+        feeField.hidden = false;
+        if (parseDecimal(equityInput.value) === 10) equityInput.value = '25';
+      }
+    }
+    modeSelect.addEventListener('change', updateModeUI);
+    updateModeUI();
+
+    function showEmpty() {
+      resultBox.hidden = true;
+      emptyBox.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+    function showResult() {
+      emptyBox.hidden = true;
+      resultBox.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        const price = parseDecimal(document.getElementById('homePrice').value);
+        if (price === null) throw new Error('Enter the property price in rupees, using digits and one decimal point only.');
+        const equityPct = parseDecimal(equityInput.value);
+        if (equityPct === null) throw new Error('Enter the equity as a percentage, using digits and one decimal point only.');
+        const tenureYears = parseDecimal(tenureInput.value);
+        if (tenureYears === null) throw new Error('Enter the tenure in whole years, using digits only.');
+        const rate = parseDecimal(document.getElementById('homeRate').value);
+        if (rate === null) throw new Error('Enter the markup rate as a percentage, using digits and one decimal point only.');
+        const postRate = parseDecimal(document.getElementById('homePostRate').value);
+        if (isApna() && postRate === null) throw new Error('Enter the post-subsidy rate as a percentage, using digits and one decimal point only.');
+        const fee = parseDecimal(document.getElementById('homeFee').value);
+        if (!isApna() && fee === null) throw new Error('Enter the processing fee in rupees, using digits and one decimal point only.');
+        const r = calcHomeLoan({
+          mode: modeSelect.value,
+          price,
+          equityPct,
+          tenureYears,
+          ratePct: rate,
+          postSubsidyRatePct: isApna() ? postRate : undefined,
+          processingFee: isApna() ? 0 : fee,
+        });
+
+        errorsBox.textContent = '';
+        errorsBox.hidden = true;
+        if (r.mode === 'apna-ghar') {
+          headlineLabel.textContent = r.phase2Emi === null ? 'Your monthly EMI (5% subsidy, whole tenure)' : 'Your monthly EMI — years 1–10 (phase 1, 5%)';
+          headline.textContent = formatPKR(r.emi, 2);
+          if (r.phase2Emi !== null) {
+            phase2El.textContent = formatPKR(r.phase2Emi, 2);
+            phase2Box.hidden = false;
+          } else {
+            phase2Box.hidden = true;
+          }
+        } else {
+          headlineLabel.textContent = 'Your monthly EMI';
+          headline.textContent = formatPKR(r.emi, 2);
+          phase2Box.hidden = true;
+        }
+        stat1.textContent = formatPKR(r.financed, 0);
+        stat2.textContent = formatPKR(r.totalInterest, 0);
+        stat3.textContent = formatPKR(r.downPayment, 0);
+        stat4.textContent = formatPKR(r.totalCost, 0);
+
+        let rows = '';
+        rows += '<tr><td>Property price</td><td>' + formatPKR(r.price, 0) + '</td></tr>';
+        rows += '<tr><td>Equity / down payment (' + formatNumber(equityPct, 2) + '%)</td><td>' + formatPKR(r.downPayment, 0) + '</td></tr>';
+        rows += '<tr><td>Amount financed</td><td>' + formatPKR(r.financed, 0) + '</td></tr>';
+        if (r.mode === 'apna-ghar') {
+          rows += '<tr><td>EMI, years 1–10 (' + APNA_GHAR_SUBSIDY_RATE_PCT + '% fixed)</td><td>' + formatPKR(r.phase1Emi, 2) + ' / month</td></tr>';
+          if (r.phase2Emi !== null) {
+            rows += '<tr><td>EMI, year 11 onwards (' + formatNumber(postRate, 2) + '%)</td><td>' + formatPKR(r.phase2Emi, 2) + ' / month</td></tr>';
+            rows += '<tr><td>Balance still owed after 10 years</td><td>' + formatPKR(r.balanceAfterPhase1, 0) + '</td></tr>';
+          }
+          rows += '<tr><td>Processing fee</td><td>Rs 0 (none under Apna Ghar)</td></tr>';
+        } else {
+          rows += '<tr><td>Monthly EMI (' + r.tenureMonths + ' months at ' + formatNumber(rate, 2) + '%)</td><td>' + formatPKR(r.emi, 2) + '</td></tr>';
+          rows += '<tr><td>Processing fee (flat)</td><td>' + formatPKR(r.processingFee, 0) + '</td></tr>';
+        }
+        rows += '<tr><td>Total interest</td><td>' + formatPKR(r.totalInterest, 0) + '</td></tr>';
+        rows += '<tr class="total-row"><td>Total cost</td><td>' + formatPKR(r.totalCost, 0) + '</td></tr>';
+        breakdownEl.innerHTML = '<tbody>' + rows + '</tbody>';
+
+        if (r.apnaCapExceeded) {
+          capWarningEl.textContent = 'Over the scheme cap: the financed amount ' + formatPKR(r.financed, 0) + ' is above the Apna Ghar limit of Rs 10,000,000. Raise the equity so the financed amount is Rs 10,000,000 or less, or use a commercial loan for the rest.';
+          capWarningEl.hidden = false;
+        } else {
+          capWarningEl.textContent = '';
+          capWarningEl.hidden = true;
+        }
+
+        if (r.mode === 'apna-ghar') {
+          echoEl.textContent = 'Based on: Apna Ghar, property price ' + formatPKR(price, 0) + ', equity ' + formatNumber(equityPct, 2) + '% (' + formatPKR(r.downPayment, 0) + '), tenure ' + tenureYears + ' years, 5% fixed for the first ' + APNA_GHAR_SUBSIDY_YEARS + ' years' + (r.phase2Emi !== null ? ', then ' + formatNumber(postRate, 2) + '% per year' : '') + ' (reducing balance).';
+          formulaEl.textContent = 'Phase-1 EMI = ' + formatPKR(r.phase1Emi, 2) + ' per month at 5% over ' + r.tenureMonths + ' months' + (r.phase2Emi !== null ? '; phase-2 EMI = ' + formatPKR(r.phase2Emi, 2) + ' per month on the balance of ' + formatPKR(r.balanceAfterPhase1, 0) + ' at ' + formatNumber(postRate, 2) + '% over ' + r.phase2Months + ' months.' : '.');
+        } else {
+          echoEl.textContent = 'Based on: commercial loan, property price ' + formatPKR(price, 0) + ', equity ' + formatNumber(equityPct, 2) + '% (' + formatPKR(r.downPayment, 0) + '), tenure ' + tenureYears + ' years, markup ' + formatNumber(rate, 2) + '% per year (reducing balance).';
+          formulaEl.textContent = 'EMI = P x R x (1+R)^N / ((1+R)^N - 1) = ' + formatPKR(r.financed, 0) + ' at ' + formatNumber(rate, 2) + '% per year over ' + r.tenureMonths + ' months = ' + formatPKR(r.emi, 2) + ' per month.';
+        }
+        showResult();
+        if (window.matchMedia('(max-width: 899px)').matches) resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorsBox.textContent = err.message;
+        errorsBox.hidden = false;
+        showEmpty();
+      }
+    });
+
+    document.getElementById('homeClear').addEventListener('click', () => {
+      form.reset();
+      errorsBox.textContent = '';
+      errorsBox.hidden = true;
+      formStatus.textContent = 'Form cleared.';
+      updateModeUI();
+      showEmpty();
+    });
+    showEmpty();
+  </script>
+</Layout>

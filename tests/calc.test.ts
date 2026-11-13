@@ -3,7 +3,7 @@
 // they are never a live rate and never appear in site copy (SRS §6.5/§7.5).
 import assert from 'node:assert/strict';
 import {
-  calcAge, calcDscEncashment, calcEMI, calcEobiContributions, calcEobiPension, calcExportTax, calcFreelancerTax, calcGold, calcGst, calcGstAdd, calcGstRemove, calcInvalidityPension, calcNationalSavings, calcNonSalariedTax, calcOldAgeGrant, calcPercentage, calcReducedPension, calcSaProfit, calcSilverPerGram, calcSilverPerTola, calcSscProfit, calcSurvivorPension, calcTax, calcZakat,
+  calcAge, calcCarLoan, calcDscEncashment, calcEMI, calcEobiContributions, calcEobiPension, calcExportTax, calcFreelancerTax, calcGold, calcGst, calcGstAdd, calcGstRemove, calcHomeLoan, calcInvalidityPension, calcNationalSavings, calcNonSalariedTax, calcOldAgeGrant, calcPercentage, calcReducedPension, calcSaProfit, calcSilverPerGram, calcSilverPerTola, calcSscProfit, calcSurvivorPension, calcTax, calcZakat,
   applyNssWht, calcNssMonthlyProfit, convertArea, convertAreaToAll, convertAreaWithUnits, convertAreaToAllWithUnits,
   convertCurrency, formatNumber,
   goldValueFromWeight, nssSchemeById, parseDecimal, pensionCreditedYears, pensionWageForPreset, round2, todayInKarachi,
@@ -1270,6 +1270,121 @@ check('gst: validation throws', () => {
   assert.throws(() => calcGst({ amount: 100, ratePct: 18, mode: 'sideways' as 'add' }), /'add' or 'remove'/);
   assert.throws(() => calcGstAdd(0, 18), /positive number/);
   assert.throws(() => calcGstRemove(-500, 18), /positive number/);
+});
+
+check('car loan: worked example — Rs 3,000,000 car, 30% down, 16.5%, 3 yrs, above 1000cc (financed Rs 2,100,000)', () => {
+  const r = calcCarLoan({ price: 3000000, downPct: 30, tenureYears: 3, annualRatePct: 16.5, engineCc: 'above-1000', processingFee: 10000, insurancePctPa: 2 });
+  assert.equal(r.downPayment, 900000);
+  assert.equal(r.financed, 2100000);
+  assert.equal(r.emi, 74349.2); // calcEMI(2,100,000, 16.5%, 36m)
+  assert.equal(r.totalPayment, 2676571.35);
+  assert.equal(r.totalInterest, 576571.35);
+  assert.equal(r.totalInsurance, 180000); // 2% of Rs 3,000,000 x 3 years
+  assert.equal(r.totalCost, 900000 + 2676571.35 + 10000 + 180000);
+  assert.equal(r.capWarning, false);
+});
+check('car loan: rate band ends — 13.5% EMI Rs 71,264.10, 18% EMI Rs 75,920.03 on the same Rs 2,100,000 / 36m', () => {
+  const base = { price: 3000000, downPct: 30, tenureYears: 3, engineCc: 'above-1000' as const, processingFee: 10000, insurancePctPa: 2 };
+  assert.equal(calcCarLoan({ ...base, annualRatePct: 13.5 }).emi, 71264.1);
+  assert.equal(calcCarLoan({ ...base, annualRatePct: 18 }).emi, 75920.03);
+});
+check('car loan: tenure cap enforced by engine size', () => {
+  // Above 1000cc: max 3 years — 4 years throws.
+  assert.throws(
+    () => calcCarLoan({ price: 3000000, downPct: 30, tenureYears: 4, annualRatePct: 16.5, engineCc: 'above-1000', processingFee: 10000, insurancePctPa: 2 }),
+    /Tenure must be 1–3 years/,
+  );
+  // Up to 1000cc: 5 years allowed, 6 years throws.
+  const r = calcCarLoan({ price: 1500000, downPct: 30, tenureYears: 5, annualRatePct: 16.5, engineCc: 'upto-1000', processingFee: 10000, insurancePctPa: 2 });
+  assert.equal(r.maxTenureYears, 5);
+  assert.equal(r.tenureMonths, 60);
+  assert.throws(
+    () => calcCarLoan({ price: 1500000, downPct: 30, tenureYears: 6, annualRatePct: 16.5, engineCc: 'upto-1000', processingFee: 10000, insurancePctPa: 2 }),
+    /Tenure must be 1–5 years/,
+  );
+});
+check('car loan: Rs 3m aggregate cap warning — Rs 5,000,000 car at 30% down finances Rs 3,500,000', () => {
+  const r = calcCarLoan({ price: 5000000, downPct: 30, tenureYears: 3, annualRatePct: 16.5, engineCc: 'above-1000', processingFee: 10000, insurancePctPa: 2 });
+  assert.equal(r.financed, 3500000);
+  assert.equal(r.capWarning, true);
+  // A bigger down payment brings it under the cap: 40% down finances Rs 3,000,000 exactly.
+  const ok = calcCarLoan({ price: 5000000, downPct: 40, tenureYears: 3, annualRatePct: 16.5, engineCc: 'above-1000', processingFee: 10000, insurancePctPa: 2 });
+  assert.equal(ok.financed, 3000000);
+  assert.equal(ok.capWarning, false);
+});
+check('car loan: validation throws', () => {
+  const base = { price: 3000000, downPct: 30, tenureYears: 3, annualRatePct: 16.5, engineCc: 'above-1000' as const, processingFee: 10000, insurancePctPa: 2 };
+  assert.throws(() => calcCarLoan({ ...base, downPct: 25 }), /Down payment must be between 30% and 50%/);
+  assert.throws(() => calcCarLoan({ ...base, downPct: 55 }), /Down payment must be between 30% and 50%/);
+  assert.throws(() => calcCarLoan({ ...base, price: 0 }), /positive number/);
+  assert.throws(() => calcCarLoan({ ...base, annualRatePct: -1 }), /between 0 and 100%/);
+  assert.throws(() => calcCarLoan({ ...base, tenureYears: 0 }), /Tenure must be 1–3 years/);
+  assert.throws(() => calcCarLoan({ ...base, insurancePctPa: 11 }), /between 0% and 10%/);
+});
+
+check('home loan commercial: worked example — Rs 10,000,000 property, 25% equity, 16%, 20 yrs (financed Rs 7,500,000)', () => {
+  const r = calcHomeLoan({ mode: 'commercial', price: 10000000, equityPct: 25, tenureYears: 20, ratePct: 16, processingFee: 10000 });
+  assert.equal(r.downPayment, 2500000);
+  assert.equal(r.financed, 7500000);
+  assert.equal(r.emi, 104344.2); // calcEMI(7,500,000, 16%, 240m)
+  assert.equal(r.totalPayment, 25042600.13);
+  assert.equal(r.totalInterest, 17542600.13);
+  assert.equal(r.totalCost, 2500000 + 25042600.13 + 10000);
+  assert.equal(r.phase2Emi, null);
+  assert.equal(r.apnaCapExceeded, false);
+});
+check('home loan commercial: equity and tenure boundaries', () => {
+  const base = { mode: 'commercial' as const, price: 10000000, equityPct: 25, tenureYears: 20, ratePct: 16, processingFee: 10000 };
+  assert.throws(() => calcHomeLoan({ ...base, equityPct: 10 }), /Equity must be between 15% and 30%/);
+  assert.throws(() => calcHomeLoan({ ...base, equityPct: 35 }), /Equity must be between 15% and 30%/);
+  assert.throws(() => calcHomeLoan({ ...base, tenureYears: 26 }), /Tenure must be 3–25 years/);
+  assert.throws(() => calcHomeLoan({ ...base, tenureYears: 2 }), /Tenure must be 3–25 years/);
+  // 25 years is allowed; 30 is not (SBP allows 30, banks cap at 25).
+  assert.equal(calcHomeLoan({ ...base, tenureYears: 25 }).tenureMonths, 300);
+});
+check('home loan Apna Ghar: two-phase worked example — Rs 10,000,000 property, 10% equity, 20 yrs, 5% then 16%', () => {
+  const r = calcHomeLoan({ mode: 'apna-ghar', price: 10000000, equityPct: 10, tenureYears: 20, ratePct: 16, postSubsidyRatePct: 16 });
+  assert.equal(r.downPayment, 1000000);
+  assert.equal(r.financed, 9000000);
+  assert.equal(r.phase1Emi, 59396.02); // calcEMI(9,000,000, 5%, 240m)
+  assert.equal(r.phase2Emi, 93806.28); // calcEMI(balance after 120m, 16%, 120m)
+  assert.equal(r.phase1Months, 120);
+  assert.equal(r.phase2Months, 120);
+  assert.equal(r.balanceAfterPhase1, 5599936.1);
+  assert.equal(r.processingFee, 0); // no processing fee under Apna Ghar
+  assert.equal(r.totalPayment, 18384275.33); // 120 x 59,396.02 + phase-2 total
+  assert.equal(r.totalInterest, 9384275.33);
+  assert.equal(r.apnaCapExceeded, false);
+});
+check('home loan Apna Ghar: a single rate would be wrong — neither 5% nor 16% alone matches the two-phase total', () => {
+  const twoPhase = calcHomeLoan({ mode: 'apna-ghar', price: 10000000, equityPct: 10, tenureYears: 20, ratePct: 16, postSubsidyRatePct: 16 });
+  const at5 = calcEMI(9000000, 5, 240);
+  const at16 = calcEMI(9000000, 16, 240);
+  assert.equal(at5.totalPayment, 14255043.39);
+  assert.equal(at16.totalPayment, 30051135.38);
+  assert.ok(twoPhase.totalPayment > at5.totalPayment && twoPhase.totalPayment < at16.totalPayment);
+  // Identity: if the post-subsidy rate equals 5%, phase-2 EMI equals phase-1 EMI
+  // (within 5 paisa — the balance carried into phase 2 is rounded to 2 decimals).
+  const same = calcHomeLoan({ mode: 'apna-ghar', price: 10000000, equityPct: 10, tenureYears: 20, ratePct: 5, postSubsidyRatePct: 5 });
+  assert.ok(same.phase2Emi !== null && Math.abs(same.phase2Emi - same.phase1Emi!) <= 0.05);
+  assert.ok(Math.abs(same.totalPayment - at5.totalPayment) <= 1);
+});
+check('home loan Apna Ghar: tenure within the subsidy period is one phase at 5%; cap and equity rules', () => {
+  const short = calcHomeLoan({ mode: 'apna-ghar', price: 5000000, equityPct: 10, tenureYears: 10, ratePct: 16, postSubsidyRatePct: 16 });
+  assert.equal(short.phase2Emi, null);
+  assert.equal(short.emi, calcEMI(4500000, 5, 120).emi);
+  assert.throws(
+    () => calcHomeLoan({ mode: 'apna-ghar', price: 10000000, equityPct: 10, tenureYears: 21, ratePct: 16, postSubsidyRatePct: 16 }),
+    /Tenure must be 3–20 years/,
+  );
+  assert.throws(
+    () => calcHomeLoan({ mode: 'apna-ghar', price: 10000000, equityPct: 5, tenureYears: 20, ratePct: 16, postSubsidyRatePct: 16 }),
+    /Equity must be between 10% and 30%/,
+  );
+  // Financed above the Rs 10m scheme cap is flagged, not thrown.
+  const over = calcHomeLoan({ mode: 'apna-ghar', price: 12000000, equityPct: 10, tenureYears: 20, ratePct: 16, postSubsidyRatePct: 16 });
+  assert.equal(over.financed, 10800000);
+  assert.equal(over.apnaCapExceeded, true);
 });
 
 console.log(`\n${passed} checks passed.`);

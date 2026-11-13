@@ -1,0 +1,526 @@
+---
+import Layout from '../components/Layout.astro';
+import {
+  CAR_LOAN_BANK_SPREADS,
+  CAR_LOAN_DEFAULT_DOWN_PCT,
+  CAR_LOAN_DEFAULT_INSURANCE_PCT,
+  CAR_LOAN_DEFAULT_PRICE,
+  CAR_LOAN_DEFAULT_PROCESSING_FEE,
+  CAR_LOAN_DEFAULT_RATE_PCT,
+  CAR_LOAN_DEFAULT_TENURE_YEARS,
+  CAR_LOAN_PROCESSING_FEES,
+  CAR_LOAN_SOURCE_CITATION,
+} from '../config/car-loan';
+
+const title = "Car Loan Calculator Pakistan | EMI, Down Payment & SBP Caps | Pakistan Finance Calculators";
+const description = "Work out your car loan EMI in Pakistan: down payment, SBP tenure caps and the Rs 3m finance cap, at the KIBOR-linked markup you enter. Free and instant.";
+const slug = "/car-loan-calculator/";
+
+const faqs = [
+  {
+    q: "How much down payment do I need for a car loan in Pakistan?",
+    a: "At least 30% of the car's value, under SBP rules (BPRD Circular Letters 29/2021 and 19/2022) — the bank finances at most 70%. Banks in practice all ask 30% minimum; Bank AL Habib asks 35% on used cars. The SBP text also contains a 15% floor for cars up to 1000cc, but bank tables follow the 30% floor, so this calculator enforces 30% as the minimum and lets you enter up to 50%.",
+  },
+  {
+    q: "How long can a car loan run?",
+    a: "SBP caps the tenure at 5 years for cars up to 1000cc and 3 years for cars above 1000cc. Seven years is not a standard car-loan tenure — it is only available under Roshan Apni Car for RDA holders (Meezan offers up to 7 years there). A May 2026 draft auto policy proposed 7 years for everyone, but it was still only a proposal in October 2026. This calculator enforces the cap for the engine size you pick.",
+  },
+  {
+    q: "What is the Rs 3,000,000 car loan cap?",
+    a: "SBP caps total car financing at Rs 3,000,000 per person across all banks and DFIs. So a car above about Rs 42.9 lakh needs more than the 30% minimum down payment — for example, a Rs 5,000,000 car at 30% down would finance Rs 3,500,000, which is over the cap, but at 40% down it finances exactly Rs 3,000,000. This calculator warns you when the financed amount is over the cap; no SBP rise had been found as of October 2026.",
+  },
+  {
+    q: "How is the car loan EMI calculated?",
+    a: "The EMI is calculated on the financed amount — the car price minus your down payment — with the reducing-balance formula: EMI = P x R x (1+R)^N / ((1+R)^N − 1), where P is the financed amount, R is the monthly rate (annual markup divided by 100 and by 12), and N is the number of months. The processing fee and insurance are shown separately and added to the total cost; they are not part of the EMI.",
+  },
+  {
+    q: "Is insurance included in the EMI?",
+    a: "No. Comprehensive insurance (or Takaful) is effectively mandatory for the whole tenure, with the bank named as loss payee, and the first year's premium is usually paid upfront — so this calculator shows it as a separate total: the rate you enter (default 2.0% of the car value per year) times the tenure. HBL charges 1.40% per year including a free tracker; Meezan Takaful is 1.5% per year for residents; guides quote 1.5–3% per year. A tracker is usually required, but its cost (other than HBL's free tracker) could not be verified, so it is not in the calculation.",
+  },
+  {
+    q: "Can I finance an imported or used car?",
+    a: "Imported cars cannot be financed by a bank under an SBP rule in force since September 2021 — only locally made cars, new or used. Used cars are financed with age limits that are only published second-hand (UBL up to 9 years; Bank AL Habib up to 7 years above 1000cc and 5 years up to 1000cc). The car is registered in your name but hypothecated to the bank, so it cannot be sold or transferred without the bank's NOC and full settlement of the loan.",
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://pakistan-finance-calculators.pages.dev/car-loan-calculator/#webapp',
+      name: "Car Loan Calculator",
+      url: 'https://pakistan-finance-calculators.pages.dev/car-loan-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://pakistan-finance-calculators.pages.dev/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: "Car Loan Calculator",
+          item: 'https://pakistan-finance-calculators.pages.dev/car-loan-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+
+const related = [
+  {
+    href: "/emi-loan-calculator/",
+    name: "EMI / Loan Calculator",
+    desc: "The monthly instalment, total interest and full amortisation schedule for any reducing-balance loan — the same formula this car loan EMI uses.",
+  },
+  {
+    href: "/loan-eligibility-calculator/",
+    name: "Loan Eligibility Calculator",
+    desc: "Check the largest loan your income can support first — SBP keeps all consumer instalments within 40% of net disposable income.",
+  },
+  {
+    href: "/loan-comparison-calculator/",
+    name: "Loan Comparison Calculator",
+    desc: "Compare two car-loan offers side by side: EMI, total interest and total payment for each, and which one costs less overall.",
+  },
+];
+---
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Car Loan Calculator</p>
+    </nav>
+    <p class="badge badge-info" style="margin-top: 8px;">Loans</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Car Loan Calculator Pakistan</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+      Work out the monthly EMI on a car loan in Pakistan from the car price, your down
+      payment, the engine size and the markup you enter — with the SBP tenure cap, the
+      Rs 3,000,000 finance cap, the processing fee and insurance shown separately, so
+      you see the full cost of the car, not just the EMI.
+    </p>
+    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+      <strong>Terms checked 13 November 2026.</strong> Car-loan rates are floating
+      (KIBOR-linked) and change — the SBP policy rate was 12% and 1-year KIBOR was
+      12.94% on 6 November 2026, so the November 2026 band below is roughly 13.5–18%.
+      The rate on your bank's Key Fact Statement / offer letter governs, not this
+      estimate.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="carForm" novalidate>
+          <div class="field">
+            <label for="carPrice">Car price (Rs) <span aria-hidden="true">*</span></label>
+            <input id="carPrice" type="text" inputmode="decimal" autocomplete="off" value={CAR_LOAN_DEFAULT_PRICE} />
+            <p class="hint" id="carPriceHint">The on-road price of the car you want to buy. Only locally made cars can be bank-financed — imported cars are not eligible.</p>
+          </div>
+
+          <div class="field">
+            <label for="carEngine">Engine size <span aria-hidden="true">*</span></label>
+            <select id="carEngine" aria-required="true">
+              <option value="upto-1000">Up to 1000cc — tenure up to 5 years</option>
+              <option value="above-1000" selected>Above 1000cc — tenure up to 3 years</option>
+            </select>
+            <p class="hint">SBP caps the tenure by engine size. Changing this updates the maximum tenure below.</p>
+          </div>
+
+          <div class="field">
+            <label for="carDown">Down payment (%) <span aria-hidden="true">*</span></label>
+            <input id="carDown" type="text" inputmode="decimal" autocomplete="off" value={CAR_LOAN_DEFAULT_DOWN_PCT} />
+            <p class="hint" id="carDownHint">SBP minimum 30% of the car price. Enter 30–50%. A car above about Rs 42.9 lakh needs more than 30% down because of the Rs 3,000,000 finance cap.</p>
+          </div>
+
+          <div class="field">
+            <label for="carTenure">Tenure (years) <span aria-hidden="true">*</span></label>
+            <input id="carTenure" type="text" inputmode="numeric" autocomplete="off" value={CAR_LOAN_DEFAULT_TENURE_YEARS} />
+            <p class="hint" id="carTenureHint">Whole years, 1–3 for cars above 1000cc.</p>
+          </div>
+
+          <div class="field">
+            <label for="carRate">Markup rate (% per year) <span aria-hidden="true">*</span></label>
+            <input id="carRate" type="text" inputmode="decimal" autocomplete="off" value={CAR_LOAN_DEFAULT_RATE_PCT} />
+            <p class="hint">Default 16.5% — inside the November 2026 band of about 13.5–18% (KIBOR + bank spread). Enter the rate your bank quotes you; it is not a live rate from this site.</p>
+          </div>
+
+          <div class="field">
+            <label for="carFee">Processing fee (Rs, flat) <span aria-hidden="true">*</span></label>
+            <input id="carFee" type="text" inputmode="decimal" autocomplete="off" value={CAR_LOAN_DEFAULT_PROCESSING_FEE} />
+            <p class="hint">A flat amount, not a percentage: Meezan Rs 3,800 + FED, MCB Rs 12,000, HBL Rs 13,000 + FED, UBL Rs 14,000 + FED. FED (federal excise duty) is charged on top where shown.</p>
+          </div>
+
+          <div class="field">
+            <label for="carInsurance">Insurance / Takaful (% of car value per year) <span aria-hidden="true">*</span></label>
+            <input id="carInsurance" type="text" inputmode="decimal" autocomplete="off" value={CAR_LOAN_DEFAULT_INSURANCE_PCT} />
+            <p class="hint">Default 2.0% per year (range 1.4–3.0%). Charged on the original car value each year in this estimate — the real premium may fall as the car's value falls.</p>
+          </div>
+
+          <div id="carErrors" class="error-box" role="alert" hidden></div>
+
+          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+            <button id="carCalculate" class="btn-primary" type="submit">Calculate</button>
+            <button id="carClear" class="btn-secondary" type="button">Clear</button>
+          </p>
+          <p id="carFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        </form>
+      </div>
+
+      <div class="result-card" id="carResultCard" tabindex="-1">
+        <div id="carEmpty">
+          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p>Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            You will see your monthly EMI, the financed amount, total interest, and the full cost including fee and insurance.
+          </p>
+        </div>
+
+        <div id="carResult" data-result-text hidden>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Your monthly EMI</p>
+          <div aria-live="polite" aria-atomic="true">
+            <p class="result-value" id="carHeadline"></p>
+          </div>
+          <div class="stat-grid">
+            <div>
+              <p class="stat-label">Amount financed</p>
+              <p class="stat-value" id="carStat1"></p>
+            </div>
+            <div>
+              <p class="stat-label">Total interest</p>
+              <p class="stat-value" id="carStat2"></p>
+            </div>
+            <div>
+              <p class="stat-label">Down payment</p>
+              <p class="stat-value" id="carStat3"></p>
+            </div>
+            <div>
+              <p class="stat-label">Total cost of the car</p>
+              <p class="stat-value" id="carStat4"></p>
+            </div>
+          </div>
+          <div class="table-wrap">
+          <table class="breakdown-table" id="carBreakdown" aria-label="Car loan breakdown"></table>
+          </div>
+          <p id="carCapWarning" class="notice-warning" hidden></p>
+          <p id="carEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="carFormula" style="font-size: 16px;"></p>
+          <p style="font-size: 13px; color: var(--ink-muted);">
+            Estimate only — check important figures before acting. <a href="#carDisclaimer">Read the full disclaimer.</a>
+          </p>
+        </div>
+
+        <div class="actions-row no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size: 14px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top: 40px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Enter the car price and your down payment (at least 30%). The financed amount is the price minus the down payment.</li>
+      <li>Pick the engine size: it sets the SBP tenure cap — 5 years up to 1000cc, 3 years above 1000cc. Enter the tenure in whole years.</li>
+      <li>Enter the annual markup rate your bank quotes (the default 16.5% sits inside the November 2026 band of about 13.5–18%). The EMI is worked out on the financed amount with the reducing-balance formula.</li>
+      <li>The processing fee (flat Rs) and insurance (a % of the car value per year, for the whole tenure) are added to the total cost — they are not part of the EMI.</li>
+    </ol>
+
+    <h2>Formula</h2>
+    <p>Financed amount = car price − down payment</p>
+    <p>EMI = P × R × (1+R)^N / ((1+R)^N − 1), where P is the financed amount, R is the monthly rate (annual markup ÷ 100 ÷ 12), and N is the number of months. If the rate is 0, EMI = P ÷ N.</p>
+    <p>Total cost = down payment + (EMI × months) + processing fee + insurance over the tenure</p>
+
+    <h2>Worked example</h2>
+    <p><strong>Example — Rs 3,000,000 car, above 1000cc:</strong> 30% down is Rs 900,000, so the financed amount is Rs 2,100,000. At 16.5% per year for 3 years (36 months) the EMI is Rs 74,349.20, total interest is Rs 576,571.35 and the total paid on the loan is Rs 2,676,571.35. Add the down payment (Rs 900,000), a Rs 10,000 processing fee and insurance at 2.0% per year for 3 years (Rs 180,000) and the full cost is Rs 3,766,571.35.</p>
+    <p><strong>Same car at the ends of the November 2026 band:</strong> at 13.5% the EMI is Rs 71,264.10; at 18% it is Rs 75,920.03. That is why the rate your bank actually offers matters more than any single figure on this page.</p>
+    <p><strong>The Rs 3m cap in practice:</strong> a Rs 5,000,000 car at 30% down finances Rs 3,500,000 — over the SBP cap of Rs 3,000,000 per person. At 40% down it finances exactly Rs 3,000,000, which is within the cap.</p>
+    <p style="font-size: 14px; color: var(--ink-muted);">All examples use the figures verified 13 November 2026.</p>
+
+    <h2>Markup rates by bank — November 2026 band</h2>
+    <p>All floating rates are 1-year KIBOR plus the bank's spread, repriced as KIBOR moves — so no single rate on this page is "the" car loan rate. The all-in band in November 2026 was about 13.5% to 18%, with a typical floating band of about 15.3–17.5%.</p>
+    <div class="table-wrap">
+    <table class="breakdown-table" aria-label="Car loan markup by bank">
+      <thead>
+        <tr><th scope="col">Bank</th><th scope="col">Markup / spread</th><th scope="col">Note</th></tr>
+      </thead>
+      <tbody>
+        {CAR_LOAN_BANK_SPREADS.map((row) => (
+          <tr>
+            <td>{row.bank}</td>
+            <td>{row.spread}</td>
+            <td>{row.note}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    </div>
+
+    <h2>Processing fees — flat amounts, not percentages</h2>
+    <div class="table-wrap">
+    <table class="breakdown-table" aria-label="Car loan processing fees">
+      <thead>
+        <tr><th scope="col">Bank</th><th scope="col">Processing fee</th></tr>
+      </thead>
+      <tbody>
+        {CAR_LOAN_PROCESSING_FEES.map((row) => (
+          <tr>
+            <td>{row.bank}</td>
+            <td>{row.fee}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    </div>
+    <p style="font-size: 14px; color: var(--ink-muted);">FED (federal excise duty) is charged on top of the fee where shown. Early settlement charges exist and differ by bank (for example HBL charges 5% of the outstanding amount) — no single figure is shown because there is no single figure. Minimum income: HBL/UBL Rs 35,000; Bank Alfalah Rs 30,000 salaried / Rs 50,000 self-employed; MCB Rs 40,000 net. SBP keeps all consumer instalments within 40% of net disposable income.</p>
+
+    <h2>What this page does not settle</h2>
+    <p>These points are stated plainly rather than filled in with a guess:</p>
+    <ul>
+      <li>The SBP down-payment floor is quoted in some places as 15% for cars up to 1000cc and 30% above — bank tables follow the 30%-for-all reading, so this page states 30% and notes the ≤1000cc exemption exists in the SBP text.</li>
+      <li>Bank AL Habib's spread comes from a single secondary source (an archived page, 19 May 2026) — confirm it with the bank.</li>
+      <li>UBL's spread is conflicted: one reading of the UBL page gives KIBOR +3.5% (existing) / +4.0% (new); another (6 September 2026) gives +4.25%/+4.75% (1–3 years) and +4.75%/+5.25% (4–5 years). This page shows the range +3.5% to +5.25%.</li>
+      <li>HBL's 11.99% fixed campaign ran 19 August–30 September 2026 and may be withdrawn — it is not presented as current.</li>
+      <li>The UBL processing fee (Rs 14,000 + FED) is second-hand from a Key Fact Statement; Bank Alfalah's processing fee is not published on its product page.</li>
+      <li>Used-car age limits (UBL up to 9 years; Bank AL Habib up to 7 years above 1000cc / 5 years up to 1000cc) are second-hand only.</li>
+      <li>The tracker cost is not verifiable (other than HBL's free tracker with its insurance), so it is not in the calculation.</li>
+    </ul>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+
+    <section id="carDisclaimer" class="notice-info" style="margin-top: 32px;">
+      <h2 style="font-size: 20px;">Important — please read</h2>
+      <p>
+        Results are estimates for information only and are not financial advice.
+        Car-loan rates are floating (KIBOR-linked) and change; the rate, fees and
+        insurance on your bank's Key Fact Statement / offer letter govern, not
+        this estimate. Confirm the terms with your bank before borrowing, and
+        check whether the car, tenure and your income meet that bank's own
+        conditions. Calculations run in your browser; nothing you enter is
+        stored or sent to a server.
+      </p>
+      <p>Sources: {CAR_LOAN_SOURCE_CITATION}</p>
+      <p>Checked 13 November 2026; next review 13 February 2027.</p>
+      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+    </section>
+
+    <h2 style="margin-top: 32px;">Related tools</h2>
+    <div class="related-grid">
+      {
+        related.map((tool) => (
+          <article class="card">
+            <h3 style="font-size: 18px;">
+              <a href={tool.href}>{tool.name}</a>
+            </h3>
+            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p>
+              <a href={tool.href}>Use the calculator →</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin: 12px 0;
+    }
+    .stat-grid p {
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .related-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 15px;
+    }
+    .breakdown-table th,
+    .breakdown-table td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border, #e5e7eb);
+    }
+    .breakdown-table td:last-child,
+    .breakdown-table th:last-child {
+      text-align: right;
+    }
+    .breakdown-table tr.total-row td {
+      font-weight: 700;
+    }
+  </style>
+
+  <script>
+    import { calcCarLoan, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';
+    import { CAR_LOAN_MAX_TENURE_YEARS_UPTO_1000CC, CAR_LOAN_MAX_TENURE_YEARS_ABOVE_1000CC, CAR_LOAN_MIN_TENURE_YEARS } from '../config/car-loan.ts';
+
+    const form = document.getElementById('carForm');
+    const errorsBox = document.getElementById('carErrors');
+    const emptyBox = document.getElementById('carEmpty');
+    const resultBox = document.getElementById('carResult');
+    const resultCard = document.getElementById('carResultCard');
+    const headline = document.getElementById('carHeadline');
+    const stat1 = document.getElementById('carStat1');
+    const stat2 = document.getElementById('carStat2');
+    const stat3 = document.getElementById('carStat3');
+    const stat4 = document.getElementById('carStat4');
+    const breakdownEl = document.getElementById('carBreakdown');
+    const capWarningEl = document.getElementById('carCapWarning');
+    const echoEl = document.getElementById('carEcho');
+    const formulaEl = document.getElementById('carFormula');
+    const copyBtn = document.querySelector('[data-copy-result]');
+    const printBtn = document.querySelector('[data-print-result]');
+    const formStatus = document.getElementById('carFormStatus');
+    const engineSelect = document.getElementById('carEngine');
+    const tenureHint = document.getElementById('carTenureHint');
+    const tenureInput = document.getElementById('carTenure');
+
+    function maxTenure() {
+      return engineSelect.value === 'upto-1000'
+        ? CAR_LOAN_MAX_TENURE_YEARS_UPTO_1000CC
+        : CAR_LOAN_MAX_TENURE_YEARS_ABOVE_1000CC;
+    }
+    function updateTenureHint() {
+      const max = maxTenure();
+      tenureHint.textContent = `Whole years, ${CAR_LOAN_MIN_TENURE_YEARS}–${max} for ${engineSelect.value === 'upto-1000' ? 'cars up to 1000cc' : 'cars above 1000cc'} (SBP cap).`;
+      const current = parseDecimal(tenureInput.value);
+      if (current !== null && current > max) tenureInput.value = String(max);
+    }
+    engineSelect.addEventListener('change', updateTenureHint);
+    updateTenureHint();
+
+    function showEmpty() {
+      resultBox.hidden = true;
+      emptyBox.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+    function showResult() {
+      emptyBox.hidden = true;
+      resultBox.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        const price = parseDecimal(document.getElementById('carPrice').value);
+        if (price === null) throw new Error('Enter the car price in rupees, using digits and one decimal point only.');
+        const downPct = parseDecimal(document.getElementById('carDown').value);
+        if (downPct === null) throw new Error('Enter the down payment as a percentage, using digits and one decimal point only.');
+        const tenureYears = parseDecimal(tenureInput.value);
+        if (tenureYears === null) throw new Error('Enter the tenure in whole years, using digits only.');
+        const rate = parseDecimal(document.getElementById('carRate').value);
+        if (rate === null) throw new Error('Enter the markup rate as a percentage, using digits and one decimal point only.');
+        const fee = parseDecimal(document.getElementById('carFee').value);
+        if (fee === null) throw new Error('Enter the processing fee in rupees, using digits and one decimal point only.');
+        const insurance = parseDecimal(document.getElementById('carInsurance').value);
+        if (insurance === null) throw new Error('Enter the insurance rate as a percentage, using digits and one decimal point only.');
+        const r = calcCarLoan({
+          price,
+          downPct,
+          tenureYears,
+          annualRatePct: rate,
+          engineCc: engineSelect.value,
+          processingFee: fee,
+          insurancePctPa: insurance,
+        });
+
+        errorsBox.textContent = '';
+        errorsBox.hidden = true;
+        headline.textContent = formatPKR(r.emi, 2);
+        stat1.textContent = formatPKR(r.financed, 0);
+        stat2.textContent = formatPKR(r.totalInterest, 0);
+        stat3.textContent = formatPKR(r.downPayment, 0);
+        stat4.textContent = formatPKR(r.totalCost, 0);
+
+        let rows = '';
+        rows += '<tr><td>Car price</td><td>' + formatPKR(r.price, 0) + '</td></tr>';
+        rows += '<tr><td>Down payment (' + formatNumber(downPct, 2) + '%)</td><td>' + formatPKR(r.downPayment, 0) + '</td></tr>';
+        rows += '<tr><td>Amount financed</td><td>' + formatPKR(r.financed, 0) + '</td></tr>';
+        rows += '<tr><td>Monthly EMI (' + r.tenureMonths + ' months)</td><td>' + formatPKR(r.emi, 2) + '</td></tr>';
+        rows += '<tr><td>Total interest</td><td>' + formatPKR(r.totalInterest, 0) + '</td></tr>';
+        rows += '<tr><td>Processing fee (flat)</td><td>' + formatPKR(r.processingFee, 0) + '</td></tr>';
+        rows += '<tr><td>Insurance / Takaful (' + formatNumber(insurance, 2) + '% p.a. x ' + tenureYears + ' yrs)</td><td>' + formatPKR(r.totalInsurance, 0) + '</td></tr>';
+        rows += '<tr class="total-row"><td>Total cost of the car</td><td>' + formatPKR(r.totalCost, 0) + '</td></tr>';
+        breakdownEl.innerHTML = '<tbody>' + rows + '</tbody>';
+
+        if (r.capWarning) {
+          capWarningEl.textContent = 'Over the SBP cap: the financed amount ' + formatPKR(r.financed, 0) + ' is above the Rs 3,000,000 aggregate car-finance cap per person across all banks. Raise the down payment so the financed amount is Rs 3,000,000 or less.';
+          capWarningEl.hidden = false;
+        } else {
+          capWarningEl.textContent = '';
+          capWarningEl.hidden = true;
+        }
+
+        echoEl.textContent = 'Based on: car price ' + formatPKR(price, 0) + ', down payment ' + formatNumber(downPct, 2) + '% (' + formatPKR(r.downPayment, 0) + '), ' + (engineSelect.value === 'upto-1000' ? 'up to 1000cc' : 'above 1000cc') + ', tenure ' + tenureYears + ' years, markup ' + formatNumber(rate, 2) + '% per year (reducing balance).';
+        formulaEl.textContent = 'EMI = P x R x (1+R)^N / ((1+R)^N - 1) = ' + formatPKR(r.financed, 0) + ' at ' + formatNumber(rate, 2) + '% per year over ' + r.tenureMonths + ' months = ' + formatPKR(r.emi, 2) + ' per month.';
+        showResult();
+        if (window.matchMedia('(max-width: 899px)').matches) resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorsBox.textContent = err.message;
+        errorsBox.hidden = false;
+        showEmpty();
+      }
+    });
+
+    document.getElementById('carClear').addEventListener('click', () => {
+      form.reset();
+      errorsBox.textContent = '';
+      errorsBox.hidden = true;
+      formStatus.textContent = 'Form cleared.';
+      updateTenureHint();
+      showEmpty();
+    });
+    showEmpty();
+  </script>
+</Layout>
