@@ -199,7 +199,9 @@ const presetsJson = JSON.stringify(GST_PRESETS);
               <p class="stat-value" id="gstStat4"></p>
             </div>
           </div>
+          <div class="table-wrap">
           <table class="breakdown-table" id="gstBreakdown" aria-label="GST breakdown"></table>
+          </div>
           <p id="gstEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p id="gstFormula" style="font-size: 16px;"></p>
           <p id="gstNote" style="font-size: 14px; color: var(--ink-muted);"></p>
@@ -242,6 +244,7 @@ const presetsJson = JSON.stringify(GST_PRESETS);
     <p style="font-size: 14px; color: var(--ink-muted);">All examples use the rates verified 13 November 2026 (Sales Tax Act 1990 as amended by the Finance Act 2026).</p>
 
     <h2>GST rates — standard, reduced, zero-rated and exempt</h2>
+    <div class="table-wrap">
     <table class="breakdown-table" aria-label="GST rates">
       <thead>
         <tr><th scope="col">Item</th><th scope="col">Rate</th><th scope="col">Basis</th></tr>
@@ -256,6 +259,7 @@ const presetsJson = JSON.stringify(GST_PRESETS);
         ))}
       </tbody>
     </table>
+    </div>
     <p style="font-size: 14px; color: var(--ink-muted);">Rates: Sales Tax Act 1990 — standard rate s.3(1); reduced rates s.3(2)(aa) + Eighth Schedule; zero-rated s.4 + Fifth Schedule; exempt s.13(1) + Sixth Schedule; mobile phones Ninth Schedule; commercial imports Twelfth Schedule. Finance Act 2026 (in force 1 July 2026) did not change the 18% standard rate. For Third Schedule goods the 18% is charged on the printed retail price, not the transaction value (s.3(2)(a)); Finance Act 2026 expanded the Third Schedule by about 20 new groups (serials 56–75). Commercial imports carry a separate 3% value-addition tax (Twelfth Schedule) — an effective 21% at import; manufacturers importing for their own use are excluded. A 2% withholding applies to digitally ordered goods (s.3(3)(c) + Eleventh Schedule serial 8; adjustable for sellers with turnover above Rs 200m since Finance Act 2026) — it is not built into this calculator.</p>
     <p style="font-size: 14px; color: var(--ink-muted);">{GST_SERVICES_NOTE}</p>
 

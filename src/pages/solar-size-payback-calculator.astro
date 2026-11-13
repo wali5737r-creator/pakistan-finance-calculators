@@ -221,7 +221,9 @@ const related = [
               <p class="stat-value" id="solarStat4"></p>
             </div>
           </div>
+          <div class="table-wrap">
           <table class="breakdown-table" id="solarBreakdown" aria-label="Solar payback breakdown"></table>
+          </div>
           <p id="solarEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p id="solarFormula" style="font-size: 16px;"></p>
           <p id="solarRoofNote" style="font-size: 14px; color: var(--ink-muted);"></p>
@@ -261,6 +263,7 @@ const related = [
     <p style="font-size: 14px; color: var(--ink-muted);">Both examples use the default Rs 130,000 per kW and exclude the net-metering fee (Rs 60,000-80,000, installer-reported) and any inverter replacement.</p>
 
     <h2>City yields and system cost (2026)</h2>
+    <div class="table-wrap">
     <table class="breakdown-table" aria-label="City yields and system cost 2026">
       <thead>
         <tr><th scope="col">City</th><th scope="col">Yield (kWh/kW/day)</th><th scope="col">Units per kW per month</th></tr>
@@ -272,6 +275,7 @@ const related = [
         <tr><td>Other cities (fallback)</td><td>4.0</td><td>about 122</td></tr>
       </tbody>
     </table>
+    </div>
     <p style="font-size: 14px; color: var(--ink-muted);">Yield source: SolarGuide (NASA POWER climatology, 78% system efficiency), corroborated by PVGIS Lahore 4.3 kWh/kW/day and a peer-reviewed Lahore case study 3.85 kWh/kW/day. System cost: Rs 105,000-160,000 per kW installed (on-grid residential, excluding batteries), convergent range from five sources August-November 2026; default Rs 130,000 per kW. So a 5 kW system is about Rs 650,000 and a 10 kW system about Rs 1,300,000, before the net-metering fee.</p>
 
     <h2>Frequently asked questions</h2>

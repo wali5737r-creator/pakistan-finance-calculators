@@ -131,6 +131,31 @@ assert.ok(!elecPage.includes('<tr><td>Up to 50 (lifeline)</td>'), 'electricity t
 assert.ok(!elecPage.includes('<tr><td>Above 700</td>'), 'electricity tariff table must not hard-code rows');
 assert.equal((elecPage.match(/<div class="table-wrap">/g) || []).length, 2, 'electricity page must wrap both tables in .table-wrap');
 
+// Table-wrap sweep (2026-11-13): every <table> in src/pages must sit inside
+// an open <div class="table-wrap"> (overflow-x: auto), so no table can push
+// the page wider than 360px. Gas, Freelancer, GST, National Savings,
+// Pension/EOBI and Solar were unwrapped before this fix; the check is
+// structural — a stack of open divs — not a raw count, so a stray table
+// outside a wrap fails even if the counts happen to match.
+for (const file of astroFiles(join(SRC_DIR, 'pages'))) {
+  const lines = stripScriptBlocks(readFileSync(file, 'utf8')).split('\n');
+  const stack: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const s = lines[i].trim();
+    for (const m of s.matchAll(/<div([^>]*)>/g)) {
+      stack.push(m[1].includes('class="table-wrap"') ? 'table-wrap' : 'div');
+    }
+    if (/<table[\s>]/.test(s)) {
+      assert.equal(
+        stack[stack.length - 1],
+        'table-wrap',
+        `${file}:${i + 1}: <table> is not inside a .table-wrap div`,
+      );
+    }
+    for (const _m of s.matchAll(/<\/div>/g)) stack.pop();
+  }
+}
+
 // 404 page: must link all 24 tools (it listed only 11 before the P1 fix).
 const notFoundPage = readFileSync(join(SRC_DIR, 'pages', '404.astro'), 'utf8');
 const notFoundHrefs = [...notFoundPage.matchAll(/href="(\/[^"]+\/)"/g)].map((m) => m[1]);

@@ -213,7 +213,9 @@ const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES);
               <p class="stat-value" id="nssStat4"></p>
             </div>
           </div>
+          <div class="table-wrap">
           <table class="breakdown-table" id="nssBreakdown" aria-label="National Savings breakdown"></table>
+          </div>
           <p id="nssEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p id="nssFormula" style="font-size: 16px;"></p>
           <p id="nssNote" style="font-size: 14px; color: var(--ink-muted);"></p>
@@ -258,6 +260,7 @@ const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES);
     <p style="font-size: 14px; color: var(--ink-muted);">All examples use the CDNS rates in force from 21 October 2026 (Savings Account 10.00% since 26 May 2026), checked 13 November 2026.</p>
 
     <h2>National Savings profit rates — w.e.f. {NATIONAL_SAVINGS_RATES_EFFECTIVE}</h2>
+    <div class="table-wrap">
     <table class="breakdown-table" aria-label="National Savings profit rates">
       <thead>
         <tr><th scope="col">Scheme</th><th scope="col">Rate % p.a.</th><th scope="col">Paid</th><th scope="col">Tenure</th><th scope="col">Min</th><th scope="col">Max</th><th scope="col">WHT at source</th><th scope="col">Zakat</th></tr>
@@ -277,11 +280,13 @@ const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES);
         ))}
       </tbody>
     </table>
+    </div>
     <p style="font-size: 14px; color: var(--ink-muted);">Rates: CDNS, "Summary of NSS Profit Rates (in %age and amount), w.e.f. 21-Oct-2026". The Savings Account rate is unchanged at 10.00% since 26 May 2026. The DSC rate of 11.94% is the CDNS-stated rate — the amount a DSC actually pays comes from the per-year table below. The SSC rate of 12.00% is the rate for the first five half-year periods; the 6th period is 12.80% p.a.</p>
     <p style="font-size: 14px; color: var(--ink-muted);"><strong>Behbood maximum — stale FAQ.</strong> The CDNS FAQ still says the Behbood maximum is Rs 5 million single / Rs 10 million joint. That is stale: the Behbood product page and rate card say Rs 7.5 million single / Rs 15 million joint, and those are the figures used here.</p>
     <p style="font-size: 14px; color: var(--ink-muted);"><strong>Shuhada maximum — the official page conflicts with itself.</strong> The Shuhada Family Welfare Account page's highlights say the maximum is Rs 5,000,000, while its body says Rs 7,500,000. This page does not pick one — both figures are stated here, and the calculator does not enforce a Shuhada maximum.</p>
 
     <h2>Defence Savings Certificate — encashment table (Rs 100,000)</h2>
+    <div class="table-wrap">
     <table class="breakdown-table" aria-label="Defence Savings Certificate encashment table on Rs 100,000">
       <thead>
         <tr><th scope="col">Completed years</th><th scope="col">Profit %</th><th scope="col">Profit (Rs)</th><th scope="col">Value (Rs)</th></tr>
@@ -297,9 +302,11 @@ const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES);
         ))}
       </tbody>
     </table>
+    </div>
     <p style="font-size: 14px; color: var(--ink-muted);">CDNS schedule, w.e.f. 21 October 2026. No profit if encashed before 1 full year. The table is the amount CDNS pays — do not work a DSC out by compounding 11.94% a year, which gives a different (wrong) figure. Withholding tax of 15% (filer) or 30% (non-filer) applies to the profit shown.</p>
 
     <h2>Who can invest — and the tax and Zakat position</h2>
+    <div class="table-wrap">
     <table class="breakdown-table" aria-label="National Savings eligibility, tax and Zakat">
       <thead>
         <tr><th scope="col">Scheme</th><th scope="col">Who can invest</th></tr>
@@ -313,6 +320,7 @@ const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES);
         ))}
       </tbody>
     </table>
+    </div>
     <p><strong>Withholding tax.</strong> 15% for filers, 30% for non-filers (Income Tax Ordinance 2001, s.151) on Defence, Regular Income, Special Savings and Savings Account profit. No tax is collected at source on Behbood, Pensioners' or Shuhada profit — but "exempt from withholding tax" does not mean tax-free: the profit must still be declared in your tax return. No tax cap figure is published for Behbood or Pensioners' profit.</p>
     <p><strong>Zakat.</strong> 2.5% where the scheme is liable, deducted on 1 Ramadan if the balance is at or above the notified nisab of Rs 503,529 (Zakat year 1446-47 AH / 2026, Administrator General Zakat via the State Bank, 27 September 2026). Liable: Defence, Special Savings and Savings Account. Exempt: Behbood, Pensioners', Shuhada (no Zakat deductible) and Regular Income Certificates. For Defence and Special Savings Certificates the deduction is "as per rules" — no deduction date is stated here.</p>
 
