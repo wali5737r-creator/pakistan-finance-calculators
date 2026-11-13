@@ -83,24 +83,25 @@ const related = [
 <Layout title={title} description={description} slug={slug} schema={schema}>
   <div class="container" style="padding-top: 32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Pension / EOBI Calculator</p>
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="pen.crumb">Pension / EOBI Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;">Retirement</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Pension / EOBI Calculator</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="pen.badge">Retirement</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;" data-i18n="pen.h1">Pension / EOBI Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;" data-i18n="pen.intro">
       On a contribution wage of Rs 40,700 with 25 years of service, the EOBI old-age
       pension is Rs 20,350 a month — and never less than the notified minimum of
       Rs 11,500. Enter your contribution wage and years of service below to work
       out your pension, your contributions, a reduced pension, a survivor's
       pension, or the old-age grant.
     </p>
+    <p id="lang-note" class="lang-note" data-i18n="tax.others-note" hidden>The other calculators on this site are still in English in this phase.</p>
     <p class="notice-info prose-narrow" style="margin-top: 16px;">
-      <strong>EOBI only.</strong> This calculator covers the Employees' Old-Age Benefits
+      <strong data-i18n="pen.notice-label">EOBI only.</strong> <span data-i18n="pen.notice-text">This calculator covers the Employees' Old-Age Benefits
       Institution only. It does <strong>not</strong> cover government-servant pension
       (GP Fund / commutation) — that is a different scheme and is not included here.
       Results are estimates: the pension is worked out from the Act's formula and
       the notified minimum of Rs 11,500 a month (from 1 January 2025, checked
-      13 November 2026). Confirm your own entitlement and amount with your EOBI office.
+      13 November 2026). Confirm your own entitlement and amount with your EOBI office.</span>
     </p>
   </div>
 
@@ -109,78 +110,78 @@ const related = [
       <div class="card">
         <form id="pensionForm" novalidate>
           <div class="field">
-            <label for="pensionType">What do you want to work out? <span aria-hidden="true">*</span></label>
+            <label for="pensionType"><span data-i18n="pen.type-label">What do you want to work out?</span> <span aria-hidden="true">*</span></label>
             <select id="pensionType" aria-required="true">
-              <option value="old-age">Old-age pension (monthly)</option>
-              <option value="reduced">Reduced / early pension (monthly)</option>
-              <option value="invalidity">Invalidity pension (monthly)</option>
-              <option value="survivor">Survivor's pension (monthly)</option>
-              <option value="grant">Old-age grant (one-off lump sum)</option>
+              <option value="old-age" data-i18n="pen.type-oldage">Old-age pension (monthly)</option>
+              <option value="reduced" data-i18n="pen.type-reduced">Reduced / early pension (monthly)</option>
+              <option value="invalidity" data-i18n="pen.type-invalidity">Invalidity pension (monthly)</option>
+              <option value="survivor" data-i18n="pen.type-survivor">Survivor's pension (monthly)</option>
+              <option value="grant" data-i18n="pen.type-grant">Old-age grant (one-off lump sum)</option>
             </select>
-            <p class="hint">Old-age pension needs 15 years of service. Under 15 years, the old-age grant may apply instead.</p>
+            <p class="hint" data-i18n="pen.type-hint">Old-age pension needs 15 years of service. Under 15 years, the old-age grant may apply instead.</p>
           </div>
 
           <div class="field">
-            <label for="pensionPreset">Contribution wage — which minimum wage were you paid on? <span aria-hidden="true">*</span></label>
+            <label for="pensionPreset"><span data-i18n="pen.preset-label">Contribution wage — which minimum wage were you paid on?</span> <span aria-hidden="true">*</span></label>
             <select id="pensionPreset" aria-required="true">
-              <option value="ICT / federal">ICT / federal — Rs 40,700/month (from 1 July 2026)</option>
-              <option value="Sindh">Sindh — Rs 43,000/month (from 1 July 2026)</option>
-              <option value="Punjab">Punjab — Rs 40,000/month (from 1 July 2025)</option>
-              <option value="Khyber Pakhtunkhwa">Khyber Pakhtunkhwa — Rs 40,000/month (2025-26)</option>
-              <option value="Balochistan">Balochistan — Rs 37,000/month (from July 2024)</option>
-              <option value="Custom">Custom — I will type my own wage</option>
+              <option value="ICT / federal" data-i18n="pen.preset-ict">ICT / federal — Rs 40,700/month (from 1 July 2026)</option>
+              <option value="Sindh" data-i18n="pen.preset-sindh">Sindh — Rs 43,000/month (from 1 July 2026)</option>
+              <option value="Punjab" data-i18n="pen.preset-punjab">Punjab — Rs 40,000/month (from 1 July 2025)</option>
+              <option value="Khyber Pakhtunkhwa" data-i18n="pen.preset-kp">Khyber Pakhtunkhwa — Rs 40,000/month (2025-26)</option>
+              <option value="Balochistan" data-i18n="pen.preset-balochistan">Balochistan — Rs 37,000/month (from July 2024)</option>
+              <option value="Custom" data-i18n="pen.preset-custom">Custom — I will type my own wage</option>
             </select>
-            <p class="hint">Contributions are paid on the notified minimum wage, not your actual salary. Whether EOBI bills provincially or on the ICT rate nationally is not settled — use the wage your contributions were actually paid on.</p>
+            <p class="hint" data-i18n="pen.preset-hint">Contributions are paid on the notified minimum wage, not your actual salary. Whether EOBI bills provincially or on the ICT rate nationally is not settled — use the wage your contributions were actually paid on.</p>
           </div>
 
           <div class="field">
-            <label for="pensionWage">Contribution wage (Rs per month)</label>
+            <label for="pensionWage"><span data-i18n="pen.wage-label">Contribution wage (Rs per month)</span></label>
             <input id="pensionWage" type="text" inputmode="decimal" autocomplete="off" placeholder="40700" />
-            <p class="hint">Defaults to your preset above. Type your own figure if your contributions were paid on a different wage.</p>
+            <p class="hint" data-i18n="pen.wage-hint">Defaults to your preset above. Type your own figure if your contributions were paid on a different wage.</p>
           </div>
 
           <div class="field">
-            <label for="pensionYears">Years of insurable employment</label>
+            <label for="pensionYears"><span data-i18n="pen.years-label">Years of insurable employment</span></label>
             <input id="pensionYears" type="text" inputmode="decimal" autocomplete="off" placeholder="e.g. 25" />
-            <p class="hint">Years contributions were paid for. You can enter part-years, e.g. 14.5 — a period of 6 months or more counts as a full year, so 14.5 counts as 15.</p>
+            <p class="hint" data-i18n="pen.years-hint">Years contributions were paid for. You can enter part-years, e.g. 14.5 — a period of 6 months or more counts as a full year, so 14.5 counts as 15.</p>
           </div>
 
           <div class="field" id="pensionMonthsShortField" hidden>
-            <label for="pensionMonthsShort">Months short of pension age</label>
+            <label for="pensionMonthsShort"><span data-i18n="pen.months-label">Months short of pension age</span></label>
             <input id="pensionMonthsShort" type="text" inputmode="decimal" autocomplete="off" placeholder="e.g. 36" />
-            <p class="hint">Completed months by which retirement age falls short of 60 (55 for women). 1 to 60 months. The pension is cut by 0.5% per month, for life.</p>
+            <p class="hint" data-i18n="pen.months-hint">Completed months by which retirement age falls short of 60 (55 for women). 1 to 60 months. The pension is cut by 0.5% per month, for life.</p>
           </div>
 
           <div class="field" id="pensionLastFiveField" hidden>
-            <label for="pensionLastFive">Years in the last 5 years before invalidity</label>
+            <label for="pensionLastFive"><span data-i18n="pen.lastfive-label">Years in the last 5 years before invalidity</span></label>
             <input id="pensionLastFive" type="text" inputmode="decimal" autocomplete="off" placeholder="e.g. 4" />
-            <p class="hint">Only needed if you have under 15 years: invalidity pension also qualifies with 5+ years since entry and 3+ years in the 5 years before invalidity.</p>
+            <p class="hint" data-i18n="pen.lastfive-hint">Only needed if you have under 15 years: invalidity pension also qualifies with 5+ years since entry and 3+ years in the 5 years before invalidity.</p>
           </div>
 
           <div class="field" id="pensionSurvivorFields" hidden>
             <label style="display: flex; gap: 8px; align-items: flex-start; font-weight: 400;">
               <input id="pensionInService" type="checkbox" style="margin-top: 4px;" checked />
-              <span>The insured person died while in insurable employment (untick if they had left employment)</span>
+              <span data-i18n="pen.surv-inservice">The insured person died while in insurable employment (untick if they had left employment)</span>
             </label>
-            <p class="hint">Death in service needs 36 months of contributions; death out of employment needs 5 years.</p>
+            <p class="hint" data-i18n="pen.surv-inservice-hint">Death in service needs 36 months of contributions; death out of employment needs 5 years.</p>
             <label style="display: flex; gap: 8px; align-items: flex-start; font-weight: 400; margin-top: 12px;">
               <input id="pensionWasPensioner" type="checkbox" style="margin-top: 4px;" />
-              <span>The deceased was already receiving an old-age or invalidity pension</span>
+              <span data-i18n="pen.surv-pensioner">The deceased was already receiving an old-age or invalidity pension</span>
             </label>
-            <p class="hint">If so, the surviving spouse gets a life pension equal to the pensioner's pension — enter it below.</p>
+            <p class="hint" data-i18n="pen.surv-pensioner-hint">If so, the surviving spouse gets a life pension equal to the pensioner's pension — enter it below.</p>
           </div>
 
           <div class="field" id="pensionPensionerField" hidden>
-            <label for="pensionPensionerPension">The pensioner's monthly pension (Rs)</label>
+            <label for="pensionPensionerPension"><span data-i18n="pen.pensioner-label">The pensioner's monthly pension (Rs)</span></label>
             <input id="pensionPensionerPension" type="text" inputmode="decimal" autocomplete="off" placeholder="e.g. 18000" />
-            <p class="hint">The surviving spouse receives this same amount for life (section 22B(2)).</p>
+            <p class="hint" data-i18n="pen.pensioner-hint">The surviving spouse receives this same amount for life (section 22B(2)).</p>
           </div>
 
           <div id="pensionErrors" class="error-box" role="alert" hidden></div>
 
           <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
-            <button id="pensionCalculate" class="btn-primary" type="submit">Calculate</button>
-            <button id="pensionClear" class="btn-secondary" type="button">Clear</button>
+            <button id="pensionCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
+            <button id="pensionClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
           <p id="pensionFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
         </form>
@@ -188,9 +189,9 @@ const related = [
 
       <div class="result-card" id="pensionResultCard" tabindex="-1">
         <div id="pensionEmpty">
-          <p style="font-weight: 700;">Your result will appear here.</p>
-          <p>Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);">
+          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
@@ -202,19 +203,19 @@ const related = [
           </div>
           <div class="stat-grid">
             <div>
-              <p class="stat-label">Formula amount</p>
+              <p class="stat-label" data-i18n="pen.stat1">Formula amount</p>
               <p class="stat-value" id="pensionStat1"></p>
             </div>
             <div>
-              <p class="stat-label">Credited years</p>
+              <p class="stat-label" data-i18n="pen.stat2">Credited years</p>
               <p class="stat-value" id="pensionStat2"></p>
             </div>
             <div>
-              <p class="stat-label">Employer + employee / month</p>
+              <p class="stat-label" data-i18n="pen.stat3">Employer + employee / month</p>
               <p class="stat-value" id="pensionStat3"></p>
             </div>
             <div>
-              <p class="stat-label">Annual pension</p>
+              <p class="stat-label" data-i18n="pen.stat4">Annual pension</p>
               <p class="stat-value" id="pensionStat4"></p>
             </div>
           </div>
@@ -225,13 +226,13 @@ const related = [
           <p id="pensionFormula" style="font-size: 16px;"></p>
           <p id="pensionNote" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p style="font-size: 13px; color: var(--ink-muted);">
-            Estimate only — check important figures before acting. <a href="#pensionDisclaimer">Read the full disclaimer.</a>
+            <span data-i18n="pen.estimate">Estimate only — check important figures before acting.</span> <a href="#pensionDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
 
         <div class="actions-row no-print">
-          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
         <p data-copy-status role="status" style="font-size: 14px;"></p>
       </div>
@@ -239,80 +240,80 @@ const related = [
   </div>
 
   <div class="container prose-narrow" style="margin-top: 40px;">
-    <h2>How it works</h2>
+    <h2 data-i18n="pen.how-h">How it works</h2>
     <ol>
-      <li>Pick the wage your EOBI contributions were paid on — the notified minimum wage for your area, not your actual salary — and your years of insurable employment. Part-years count: 6 months or more is a full year.</li>
-      <li>The monthly pension is your average monthly wage (last 12 months) x credited years / 50 — 2% of your wage per year of service. If that comes out below the notified minimum pension of Rs 11,500 a month, the minimum applies instead.</li>
-      <li>Contributions are 5% of the wage from the employer and 1% from the employee, 6% in total — Rs 2,442 a month on Rs 40,700.</li>
+      <li data-i18n="pen.how1">Pick the wage your EOBI contributions were paid on — the notified minimum wage for your area, not your actual salary — and your years of insurable employment. Part-years count: 6 months or more is a full year.</li>
+      <li data-i18n="pen.how2">The monthly pension is your average monthly wage (last 12 months) x credited years / 50 — 2% of your wage per year of service. If that comes out below the notified minimum pension of Rs 11,500 a month, the minimum applies instead.</li>
+      <li data-i18n="pen.how3">Contributions are 5% of the wage from the employer and 1% from the employee, 6% in total — Rs 2,442 a month on Rs 40,700.</li>
     </ol>
-    <p>There is no fixed maximum pension: EOBI lists the maximum as "As Per Formula". The 15% increase that took the minimum from Rs 10,000 to Rs 11,500 on 1 January 2025 applied to pensions already in payment — new awards are worked out from the formula above, not multiplied by 1.15.</p>
+    <p data-i18n="pen.how-note">There is no fixed maximum pension: EOBI lists the maximum as "As Per Formula". The 15% increase that took the minimum from Rs 10,000 to Rs 11,500 on 1 January 2025 applied to pensions already in payment — new awards are worked out from the formula above, not multiplied by 1.15.</p>
 
-    <h2>Formula</h2>
-    <p>Monthly pension = average monthly wage (last 12 months) x credited years of insurable employment / 50</p>
-    <p>Monthly pension is never less than Rs 11,500 (notified minimum, from 1 January 2025)</p>
-    <p>Monthly contributions = wage x 5% (employer) + wage x 1% (employee)</p>
-    <p>Reduced pension = monthly pension x (1 - 0.5% x months short of pension age), for life</p>
-    <p>Old-age grant (lump sum) = average monthly wage x credited years, for 2 to under 15 years of service</p>
+    <h2 data-i18n="pen.formula-h">Formula</h2>
+    <p data-i18n="pen.f1">Monthly pension = average monthly wage (last 12 months) x credited years of insurable employment / 50</p>
+    <p data-i18n="pen.f2">Monthly pension is never less than Rs 11,500 (notified minimum, from 1 January 2025)</p>
+    <p data-i18n="pen.f3">Monthly contributions = wage x 5% (employer) + wage x 1% (employee)</p>
+    <p data-i18n="pen.f4">Reduced pension = monthly pension x (1 - 0.5% x months short of pension age), for life</p>
+    <p data-i18n="pen.f5">Old-age grant (lump sum) = average monthly wage x credited years, for 2 to under 15 years of service</p>
 
-    <h2>Worked examples</h2>
-    <p><strong>Example A — 25 years at Rs 40,700:</strong> pension is 40,700 x 25 / 50 = Rs 20,350 a month (Rs 244,200 a year). Contributions were Rs 2,035 from the employer and Rs 407 from the employee each month, Rs 2,442 in total.</p>
-    <p><strong>Example B — 15 years at Rs 40,700:</strong> pension is 40,700 x 15 / 50 = Rs 12,210 a month. This is the smallest service that qualifies for a pension at all.</p>
-    <p><strong>Example C — 20 years at Rs 40,700:</strong> pension is 40,700 x 20 / 50 = Rs 16,280 a month. At 30 years it is Rs 24,420, and at 40 years Rs 32,560.</p>
-    <p><strong>Example D — retiring 36 months early, 25 years at Rs 40,700:</strong> the full pension is Rs 20,350, cut by 0.5% x 36 months = 18%, so the reduced pension is 20,350 x 0.82 = Rs 16,687 a month, for life.</p>
-    <p><strong>Example E — old-age grant, 8 years at Rs 40,700:</strong> with under 15 years there is no monthly pension, but at pension age the lump-sum grant is 40,700 x 8 = Rs 325,600 once.</p>
-    <p><strong>Example F — survivor's pension, 20 years at Rs 40,700:</strong> the spouse's pension by the Schedule formula is 40,700 x 20 / 50 = Rs 16,280 a month for life. With only 5 years of service the formula gives Rs 4,070, so the notified minimum of Rs 11,500 applies instead. If the deceased was already a pensioner on Rs 18,000, the spouse gets Rs 18,000 a month.</p>
-    <p style="font-size: 14px; color: var(--ink-muted);">The minimum pension of Rs 11,500 applies from 1 January 2025. The old figure of Rs 10,000 is superseded — do not use it.</p>
+    <h2 data-i18n="pen.example-h">Worked examples</h2>
+    <p><strong><span data-i18n="pen.exa-label-pre">Example A — </span>25<span data-i18n="pen.exa-label-mid"> years at </span>Rs 40,700<span data-i18n="pen.exa-label-post">:</span></strong><span data-i18n="pen.exa-pre1"> pension is </span>40,700 x 25 / 50 = Rs 20,350<span data-i18n="pen.exa-pre2"> a month (</span>Rs 244,200<span data-i18n="pen.exa-pre3"> a year). Contributions were </span>Rs 2,035<span data-i18n="pen.exa-pre4"> from the employer and </span>Rs 407<span data-i18n="pen.exa-pre5"> from the employee each month, </span>Rs 2,442<span data-i18n="pen.exa-post"> in total.</span></p>
+    <p><strong><span data-i18n="pen.exb-label-pre">Example B — </span>15<span data-i18n="pen.exb-label-mid"> years at </span>Rs 40,700<span data-i18n="pen.exb-label-post">:</span></strong><span data-i18n="pen.exb-pre1"> pension is </span>40,700 x 15 / 50 = Rs 12,210<span data-i18n="pen.exb-post"> a month. This is the smallest service that qualifies for a pension at all.</span></p>
+    <p><strong><span data-i18n="pen.exc-label-pre">Example C — </span>20<span data-i18n="pen.exc-label-mid"> years at </span>Rs 40,700<span data-i18n="pen.exc-label-post">:</span></strong><span data-i18n="pen.exc-pre1"> pension is </span>40,700 x 20 / 50 = Rs 16,280<span data-i18n="pen.exc-pre2"> a month. At </span>30<span data-i18n="pen.exc-pre3"> years it is </span>Rs 24,420<span data-i18n="pen.exc-pre4">, and at </span>40<span data-i18n="pen.exc-pre5"> years </span>Rs 32,560<span data-i18n="pen.exc-post">.</span></p>
+    <p><strong><span data-i18n="pen.exd-label-pre">Example D — retiring </span>36<span data-i18n="pen.exd-label-mid"> months early, </span>25<span data-i18n="pen.exd-label-mid2"> years at </span>Rs 40,700<span data-i18n="pen.exd-label-post">:</span></strong><span data-i18n="pen.exd-pre1"> the full pension is </span>Rs 20,350<span data-i18n="pen.exd-pre2">, cut by </span>0.5% x 36<span data-i18n="pen.exd-pre3"> months = </span>18%<span data-i18n="pen.exd-pre4">, so the reduced pension is </span>20,350 x 0.82 = Rs 16,687<span data-i18n="pen.exd-post"> a month, for life.</span></p>
+    <p><strong><span data-i18n="pen.exe-label-pre">Example E — old-age grant, </span>8<span data-i18n="pen.exe-label-mid"> years at </span>Rs 40,700<span data-i18n="pen.exe-label-post">:</span></strong><span data-i18n="pen.exe-pre1"> with under </span>15<span data-i18n="pen.exe-pre2"> years there is no monthly pension, but at pension age the lump-sum grant is </span>40,700 x 8 = Rs 325,600<span data-i18n="pen.exe-post"> once.</span></p>
+    <p><strong><span data-i18n="pen.exf-label-pre">Example F — survivor's pension, </span>20<span data-i18n="pen.exf-label-mid"> years at </span>Rs 40,700<span data-i18n="pen.exf-label-post">:</span></strong><span data-i18n="pen.exf-pre1"> the spouse's pension by the Schedule formula is </span>40,700 x 20 / 50 = Rs 16,280<span data-i18n="pen.exf-pre2"> a month for life. With only </span>5<span data-i18n="pen.exf-pre3"> years of service the formula gives </span>Rs 4,070<span data-i18n="pen.exf-pre4">, so the notified minimum of </span>Rs 11,500<span data-i18n="pen.exf-pre5"> applies instead. If the deceased was already a pensioner on </span>Rs 18,000<span data-i18n="pen.exf-pre6">, the spouse gets </span>Rs 18,000<span data-i18n="pen.exf-post"> a month.</span></p>
+    <p style="font-size: 14px; color: var(--ink-muted);"><span data-i18n="pen.ex-note-pre">The minimum pension of </span>Rs 11,500<span data-i18n="pen.ex-note-mid"> applies from 1 January 2025. The old figure of </span>Rs 10,000<span data-i18n="pen.ex-note-post"> is superseded — do not use it.</span></p>
 
-    <h2>Pension by years of service (wage Rs 40,700)</h2>
+    <h2 data-i18n="pen.table1-h">Pension by years of service (wage Rs 40,700)</h2>
     <div class="table-wrap">
     <table class="breakdown-table" aria-label="Pension by years of service at Rs 40,700">
       <thead>
-        <tr><th scope="col">Years of service</th><th scope="col">Monthly pension</th><th scope="col">Note</th></tr>
+        <tr><th scope="col" data-i18n="pen.th-years">Years of service</th><th scope="col" data-i18n="pen.th-pension">Monthly pension</th><th scope="col" data-i18n="pen.th-note">Note</th></tr>
       </thead>
       <tbody>
-        <tr><td>2 to under 15</td><td>No monthly pension</td><td>Old-age grant instead (one month's wage per year)</td></tr>
-        <tr><td>15</td><td>Rs 12,210</td><td>Minimum service to qualify</td></tr>
+        <tr><td data-i18n="pen.row1-years">2 to under 15</td><td data-i18n="pen.row1-pension">No monthly pension</td><td data-i18n="pen.row1-note">Old-age grant instead (one month's wage per year)</td></tr>
+        <tr><td>15</td><td>Rs 12,210</td><td data-i18n="pen.row2-note">Minimum service to qualify</td></tr>
         <tr><td>20</td><td>Rs 16,280</td><td></td></tr>
         <tr><td>25</td><td>Rs 20,350</td><td></td></tr>
         <tr><td>30</td><td>Rs 24,420</td><td></td></tr>
-        <tr><td>40</td><td>Rs 32,560</td><td>No fixed maximum — "As Per Formula"</td></tr>
+        <tr><td>40</td><td>Rs 32,560</td><td data-i18n="pen.row6-note">No fixed maximum — "As Per Formula"</td></tr>
       </tbody>
     </table>
     </div>
 
-    <h2>Contribution wages (notified minimum wage)</h2>
+    <h2 data-i18n="pen.table2-h">Contribution wages (notified minimum wage)</h2>
     <div class="table-wrap">
     <table class="breakdown-table" aria-label="Contribution wages by area">
       <thead>
-        <tr><th scope="col">Area</th><th scope="col">Monthly wage</th><th scope="col">Employer 5%</th><th scope="col">Employee 1%</th><th scope="col">Total / month</th></tr>
+        <tr><th scope="col" data-i18n="pen.th-area">Area</th><th scope="col" data-i18n="pen.th-wage">Monthly wage</th><th scope="col" data-i18n="pen.th-employer">Employer 5%</th><th scope="col" data-i18n="pen.th-employee">Employee 1%</th><th scope="col" data-i18n="pen.th-total">Total / month</th></tr>
       </thead>
       <tbody>
-        <tr><td>ICT / federal (from 1 July 2026)</td><td>Rs 40,700</td><td>Rs 2,035</td><td>Rs 407</td><td>Rs 2,442</td></tr>
-        <tr><td>Sindh (from 1 July 2026)</td><td>Rs 43,000</td><td>Rs 2,150</td><td>Rs 430</td><td>Rs 2,580</td></tr>
-        <tr><td>Punjab (from 1 July 2025)</td><td>Rs 40,000</td><td>Rs 2,000</td><td>Rs 400</td><td>Rs 2,400</td></tr>
-        <tr><td>Khyber Pakhtunkhwa (2025-26)</td><td>Rs 40,000</td><td>Rs 2,000</td><td>Rs 400</td><td>Rs 2,400</td></tr>
-        <tr><td>Balochistan (from July 2024)</td><td>Rs 37,000</td><td>Rs 1,850</td><td>Rs 370</td><td>Rs 2,220</td></tr>
+        <tr><td data-i18n="pen.area-ict">ICT / federal (from 1 July 2026)</td><td>Rs 40,700</td><td>Rs 2,035</td><td>Rs 407</td><td>Rs 2,442</td></tr>
+        <tr><td data-i18n="pen.area-sindh">Sindh (from 1 July 2026)</td><td>Rs 43,000</td><td>Rs 2,150</td><td>Rs 430</td><td>Rs 2,580</td></tr>
+        <tr><td data-i18n="pen.area-punjab">Punjab (from 1 July 2025)</td><td>Rs 40,000</td><td>Rs 2,000</td><td>Rs 400</td><td>Rs 2,400</td></tr>
+        <tr><td data-i18n="pen.area-kp">Khyber Pakhtunkhwa (2025-26)</td><td>Rs 40,000</td><td>Rs 2,000</td><td>Rs 400</td><td>Rs 2,400</td></tr>
+        <tr><td data-i18n="pen.area-balochistan">Balochistan (from July 2024)</td><td>Rs 37,000</td><td>Rs 1,850</td><td>Rs 370</td><td>Rs 2,220</td></tr>
       </tbody>
     </table>
     </div>
-    <p style="font-size: 14px; color: var(--ink-muted);">Each wage is labelled with the date it took effect. The EOBI circular for the ICT wage (Circular No. 01/2026-27, 20 August 2026) was only seen second-hand. Whether EOBI bills provincially or on the ICT rate nationally is not settled — use the wage your contributions were actually paid on.</p>
+    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="pen.table2-note">Each wage is labelled with the date it took effect. The EOBI circular for the ICT wage (Circular No. 01/2026-27, 20 August 2026) was only seen second-hand. Whether EOBI bills provincially or on the ICT rate nationally is not settled — use the wage your contributions were actually paid on.</p>
 
-    <h2>Frequently asked questions</h2>
+    <h2 data-i18n="pen.faq-h">Frequently asked questions</h2>
     <div class="faq">
       {
-        faqs.map((f) => (
+        faqs.map((f, i) => (
           <details>
-            <summary>{f.q}</summary>
-            <p>{f.a}</p>
+            <summary data-i18n={`pen.faq${i + 1}q`}>{f.q}</summary>
+            <p data-i18n={`pen.faq${i + 1}a`}>{f.a}</p>
           </details>
         ))
       }
     </div>
-    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+    <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
     <section id="pensionDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;">Important — please read</h2>
-      <p>
+      <h2 style="font-size: 20px;" data-i18n="pen.disc-h">Important — please read</h2>
+      <p data-i18n="pen.disc">
         Results are estimates from the Employees' Old-Age Benefits Act, 1976
         and the notified minimum pension — they are not a promise of what EOBI
         will pay. Your actual pension depends on your contribution record as
@@ -331,20 +332,20 @@ const related = [
       <p>
         Sources: <a href="http://www.eobi.gov.pk/">EOBI homepage — Pension Rates</a>, <a href="https://na.gov.pk/en/pressrelease_detail.php?id=7183">National Assembly Standing Committee press release, 28 August 2025</a> and <a href="https://pakistancode.gov.pk/pdffiles/administratorf3be1ec8d21dfebb9c5d1733f43cffe6.pdf">Employees' Old-Age Benefits Act, 1976 (Pakistan Code)</a>. Checked 13 November 2026; next review 1 February 2027.
       </p>
-      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+      <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;">Related tools</h2>
+    <h2 style="margin-top: 32px;" data-i18n="pen.related-h">Related tools</h2>
     <div class="related-grid">
       {
-        related.map((tool) => (
+        related.map((tool, i) => (
           <article class="card">
             <h3 style="font-size: 18px;">
-              <a href={tool.href}>{tool.name}</a>
+              <a href={tool.href} data-i18n={`pen.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p style="color: var(--ink-muted);" data-i18n={`pen.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
-              <a href={tool.href}>Use the calculator →</a>
+              <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
           </article>
         ))
@@ -638,10 +639,16 @@ const related = [
       wageInput.value = '';
       errorsBox.textContent = '';
       errorsBox.hidden = true;
-      formStatus.textContent = 'Form cleared.';
+      formStatus.textContent = document.documentElement.lang === 'ur' ? 'فارم صاف کر دیا گیا۔' : 'Form cleared.';
       updateConditionalFields();
       showEmpty();
     });
+    // Refresh the script-managed "Form cleared." status when the language toggles.
+    window.__pfcAfterLang = function (lang) {
+      if (formStatus.textContent === 'Form cleared.' || formStatus.textContent === 'فارم صاف کر دیا گیا۔') {
+        formStatus.textContent = lang === 'ur' ? 'فارم صاف کر دیا گیا۔' : 'Form cleared.';
+      }
+    };
     showEmpty();
 
   </script>

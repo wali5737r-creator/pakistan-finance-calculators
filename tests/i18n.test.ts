@@ -4,7 +4,8 @@
 // Zakat/savings cluster (Zakat, National Savings, Fixed Deposit), the
 // Phase 5 bills cluster (Electricity, Gas) and the Phase 6 converters
 // cluster (Percentage, Age, Unit/Marla, Fuel, Compound Interest,
-// Inflation, Budget, Debt, Goal).
+// Inflation, Budget, Debt, Goal) and the Phase 7 solar/pension
+// cluster (Solar Size & Payback, Pension / EOBI).
 // Run: npx tsx tests/i18n.test.ts
 //
 // Guards:
@@ -17,7 +18,8 @@
 //     108 car + 113 home + 96 zakat + 141 national-savings + 61
 //     fixed-deposit + 63 electricity + 92 gas + 44 percentage + 43 age
 //     + 43 unit/marla + 53 fuel + 62 compound interest + 47 inflation
-//     + 52 budget + 51 debt + 53 goal keys);
+//     + 52 budget + 51 debt + 53 goal keys) + the Phase 7
+//     solar/pension cluster (Solar 102 + Pension 144 keys);
 //   - the toggle exists, is a plain <button> (no inline handler — the
 //     CSP has no 'unsafe-inline' in script-src), and Layout loads the
 //     external /js/i18n.js with defer;
@@ -50,7 +52,7 @@ const dictBlock = i18nJs.match(/var UR = \{([\s\S]*?)\n  \};/);
 assert.ok(dictBlock, 'i18n.js must define a var UR = { ... } dictionary');
 const entries = [...dictBlock[1].matchAll(/'([^']+)':\s*'([^']*)'/g)];
 const UR = new Map(entries.map((m) => [m[1], m[2]]));
-check(UR.size >= 1667, `dictionary must hold 1667+ keys, found ${UR.size}`);
+check(UR.size >= 1913, `dictionary must hold 1913+ keys, found ${UR.size}`);
 for (const [key, value] of UR) {
   check(value.trim().length > 0, `dictionary entry ${key} must be non-empty`);
   // GST is a Latin acronym kept as-is in the short nav label (the card
@@ -101,6 +103,9 @@ const budPage = readFileSync(join(SRC, 'pages', 'budget-planner-calculator.astro
 const debtPage = readFileSync(join(SRC, 'pages', 'debt-payoff-calculator.astro'), 'utf8');
 const goalPage = readFileSync(join(SRC, 'pages', 'goal-savings-calculator.astro'), 'utf8');
 const convertersPages = [pctPage, agePage, marlaPage, fuelPage, cintPage, inflPage, budPage, debtPage, goalPage];
+const solarPage = readFileSync(join(SRC, 'pages', 'solar-size-payback-calculator.astro'), 'utf8');
+const pensionPage = readFileSync(join(SRC, 'pages', 'pension-eobi-calculator.astro'), 'utf8');
+const solarPensionPages = [solarPage, pensionPage];
 
 function staticKeys(src: string): string[] {
   return [...src.matchAll(/data-i18n="([^"]+)"/g)].map((m) => m[1]);
@@ -124,6 +129,7 @@ for (const page of loansPages) for (const k of staticKeys(page)) used.add(k);
 for (const page of savingsPages) for (const k of staticKeys(page)) used.add(k);
 for (const page of billsPages) for (const k of staticKeys(page)) used.add(k);
 for (const page of convertersPages) for (const k of staticKeys(page)) used.add(k);
+for (const page of solarPensionPages) for (const k of staticKeys(page)) used.add(k);
 // Dynamic keys: the FAQ maps use indexed sal/fr/gst.faq${i}q/a keys, the
 // GST preset options use gst.preset.${id} from src/config/gst.ts, and the
 // related-tool cards use fr/gst.rel${i}(-desc).
@@ -211,6 +217,20 @@ for (let i = 1; i <= 2; i++) {
 // have no related-tool cards. Unit/Marla FAQ 4's answer ends with the
 // full CDA source citation, so it stays English and has no marla.faq4a
 // key — only marla.faq1a/2a/3a/5a exist.
+// Dynamic keys: the FAQ maps use indexed sol/pen.faq${i}q/a keys, and
+// the related-tool cards use sol/pen.rel${i}(-desc).
+for (let i = 1; i <= 6; i++) {
+  used.add(`sol.faq${i}q`);
+  used.add(`sol.faq${i}a`);
+  used.add(`pen.faq${i}q`);
+  used.add(`pen.faq${i}a`);
+}
+for (let i = 1; i <= 2; i++) {
+  used.add(`sol.rel${i}`);
+  used.add(`sol.rel${i}-desc`);
+  used.add(`pen.rel${i}`);
+  used.add(`pen.rel${i}-desc`);
+}
 for (let i = 1; i <= 4; i++) {
   used.add(`pct.faq${i}q`);
   used.add(`pct.faq${i}a`);
@@ -291,6 +311,10 @@ check(inflPage.includes('infl.rel${i + 1}'), 'inflation related cards must use i
 check(budPage.includes('bud.rel${i + 1}'), 'budget related cards must use indexed bud.rel keys');
 check(debtPage.includes('debt.rel${i + 1}'), 'debt related cards must use indexed debt.rel keys');
 check(goalPage.includes('goal.rel${i + 1}'), 'goal related cards must use indexed goal.rel keys');
+check(solarPage.includes('sol.faq${i + 1}q'), 'solar FAQ summaries must use indexed sol.faq keys');
+check(pensionPage.includes('pen.faq${i + 1}q'), 'pension FAQ summaries must use indexed pen.faq keys');
+check(solarPage.includes('sol.rel${i + 1}'), 'solar related cards must use indexed sol.rel keys');
+check(pensionPage.includes('pen.rel${i + 1}'), 'pension related cards must use indexed pen.rel keys');
 // Unit/Marla FAQ 4's answer ends with the full CDA source citation, so
 // it stays English and has no marla.faq4a key.
 check(!marlaPage.includes('marla.faq4a'), 'unit/marla FAQ 4 answer must stay English (CDA citation) — no marla.faq4a key');
@@ -422,6 +446,37 @@ check(inflPage.includes('__pfcAfterLang'), 'inflation page must define the __pfc
 check(goalPage.includes('__pfcAfterLang'), 'goal page must define the __pfcAfterLang hook for its mode labels');
 check(!budPage.includes('__pfcAfterLang'), 'budget page must not define a __pfcAfterLang hook — it has no script-rewritten static labels');
 check(!debtPage.includes('__pfcAfterLang'), 'debt page must not define a __pfcAfterLang hook — it has no script-rewritten static labels');
+// The Urdu strings hard-code the solar figures (default Rs 130,000/kW,
+// export rate Rs 10, reported range Rs 8.13-11, 5 kW Lahore example
+// Rs 650,000 / 34 months): a figure change must update them too.
+const solarConfig = readFileSync(join(ROOT, 'src', 'config', 'solar.ts'), 'utf8');
+check(solarConfig.includes('SOLAR_DEFAULT_COST_PER_KW = 130000'), 'solar config must still set the default Rs 130,000/kW — the Urdu strings hard-code it');
+check(solarConfig.includes('SOLAR_DEFAULT_EXPORT_RATE = 10'), 'solar config must still set the default export rate Rs 10 — the Urdu strings hard-code it');
+check((UR.get('sol.cost-hint') ?? '').includes('Rs 130,000'), 'sol.cost-hint must keep the Rs 130,000 default cost — it is embedded in the Urdu string, not a separate literal');
+check((UR.get('sol.export-hint') ?? '').includes('Rs 8.13'), 'sol.export-hint must keep the Rs 8.13 reported range — it is embedded in the Urdu string, not a separate literal');
+check((UR.get('sol.faq3a') ?? '').includes('Rs 10'), 'sol.faq3a must keep the Rs 10 planning figure — it is embedded in the Urdu string, not a separate literal');
+check((UR.get('sol.faq4a') ?? '').includes('Rs 650,000'), 'sol.faq4a must keep the Rs 650,000 example cost — it is embedded in the Urdu string, not a separate literal');
+// The Urdu strings hard-code the pension figures (minimum Rs 11,500
+// from 1 Jan 2025, ICT wage Rs 40,700, 25 years -> Rs 20,350): a
+// figure change must update them too.
+const pensionConfig = readFileSync(join(ROOT, 'src', 'config', 'pension.ts'), 'utf8');
+check(pensionConfig.includes('EOBI_MINIMUM_PENSION = 11500'), 'pension config must still set the Rs 11,500 minimum — the Urdu strings hard-code it');
+check(pensionConfig.includes('PENSION_DEFAULT_WAGE = 40700'), 'pension config must still set the ICT wage Rs 40,700 — the Urdu strings hard-code it');
+check((UR.get('pen.intro') ?? '').includes('Rs 20,350'), 'pen.intro must keep the Rs 20,350 example pension — it is embedded in the Urdu string, not a separate literal');
+check((UR.get('pen.intro') ?? '').includes('Rs 11,500'), 'pen.intro must keep the Rs 11,500 minimum — it is embedded in the Urdu string, not a separate literal');
+check((UR.get('pen.f2') ?? '').includes('Rs 11,500'), 'pen.f2 must keep the Rs 11,500 minimum — it is embedded in the Urdu string, not a separate literal');
+check((UR.get('pen.faq1a') ?? '').includes('Rs 12,210'), 'pen.faq1a must keep the Rs 12,210 15-year pension — it is embedded in the Urdu string, not a separate literal');
+check((UR.get('pen.faq6a') ?? '').includes('Rs 16,687'), 'pen.faq6a must keep the Rs 16,687 reduced pension — it is embedded in the Urdu string, not a separate literal');
+// Labels the solar/pension scripts rewrite ("Form cleared." status)
+// are translated in the page scripts and refreshed via the hook.
+check(solarPage.includes('__pfcAfterLang'), 'solar page must define the __pfcAfterLang hook for its Form cleared status');
+check(pensionPage.includes('__pfcAfterLang'), 'pension page must define the __pfcAfterLang hook for its Form cleared status');
+check(solarPage.includes('فارم صاف کر دیا گیا۔'), 'solar page script must carry the Urdu Form cleared status');
+check(pensionPage.includes('فارم صاف کر دیا گیا۔'), 'pension page script must carry the Urdu Form cleared status');
+// The solar yields source paragraph and the pension sources paragraph
+// are source/citation lines, so they stay English (bills pattern).
+check(!solarPage.includes('data-i18n="sol.yields-source"'), 'solar yields source paragraph must stay English — no sol.yields-source key');
+check(!pensionPage.includes('data-i18n="pen.sources"'), 'pension sources paragraph must stay English — no pen.sources key');
 // Each tax page carries the Urdu-only note that the other tools are
 // still English in this phase (same hidden-until-Urdu pattern as home).
 for (const [name, page] of [['salary', salaryPage], ['freelancer', freelancerPage], ['gst', gstPage]] as const) {
@@ -448,6 +503,11 @@ for (const [name, page] of [['percentage', pctPage], ['age', agePage], ['unit/ma
   check(page.includes('id="lang-note"'), `${name} page must contain the #lang-note element`);
   check(page.includes('data-i18n="tax.others-note"'), `${name} page note must use the tax.others-note key`);
 }
+// Each solar/pension page carries the same Urdu-only note.
+for (const [name, page] of [['solar', solarPage], ['pension', pensionPage]] as const) {
+  check(page.includes('id="lang-note"'), `${name} page must contain the #lang-note element`);
+  check(page.includes('data-i18n="tax.others-note"'), `${name} page note must use the tax.others-note key`);
+}
 for (const k of layoutTools) used.add(`tool.${k}`);
 for (const k of indexTools) {
   used.add(`card.${k}.name`);
@@ -471,7 +531,7 @@ check(layout.includes('aria-pressed="false"'), 'the toggle must expose aria-pres
 check(layout.includes('<script src="/js/i18n.js" defer>'), 'Layout must load /js/i18n.js with defer');
 check(layout.includes('id="lang-note"') === false, 'the Urdu-only tools note lives on the homepage, not in Layout');
 check(indexPage.includes('id="lang-note"'), 'homepage must contain the #lang-note element');
-check(indexPage.includes('hidden>Tax, loans, Zakat/savings, bills and converters calculators are now available in Urdu'), 'the tools note must say plainly (in English) that the tax, loans, Zakat/savings, bills and converters calculators are now in Urdu and the rest follow');
+check(indexPage.includes('hidden>Tax, loans, Zakat/savings, bills, converters and solar/pension calculators are now available in Urdu — only currency and gold are left'), 'the tools note must say plainly (in English) that the tax, loans, Zakat/savings, bills, converters and solar/pension calculators are now in Urdu and only currency and gold are left');
 check(indexPage.includes('data-i18n="home.tools-note"'), 'the tools note must have a data-i18n key');
 
 // --- 4. English default unchanged ----------------------------------------
@@ -530,6 +590,8 @@ if (existsSync(distIndex)) {
     statSync(join(SRC, 'pages', 'budget-planner-calculator.astro')).mtimeMs,
     statSync(join(SRC, 'pages', 'debt-payoff-calculator.astro')).mtimeMs,
     statSync(join(SRC, 'pages', 'goal-savings-calculator.astro')).mtimeMs,
+    statSync(join(SRC, 'pages', 'solar-size-payback-calculator.astro')).mtimeMs,
+    statSync(join(SRC, 'pages', 'pension-eobi-calculator.astro')).mtimeMs,
     statSync(join(ROOT, 'public', 'js', 'i18n.js')).mtimeMs,
   );
   if (distTime >= srcTime) {
@@ -542,7 +604,7 @@ if (existsSync(distIndex)) {
     check(built.includes('id="lang-toggle"'), 'built homepage must contain the toggle button');
     check(built.includes('/js/i18n.js'), 'built homepage must load /js/i18n.js');
     check(built.includes('lang="en"'), 'built homepage must default to lang="en"');
-    check(built.includes('Tax, loans, Zakat/savings, bills and converters calculators are now available in Urdu'), 'built homepage note must say the tax, loans, Zakat/savings, bills and converters calculators are in Urdu');
+    check(built.includes('Tax, loans, Zakat/savings, bills, converters and solar/pension calculators are now available in Urdu'), 'built homepage note must say the tax, loans, Zakat/savings, bills, converters and solar/pension calculators are in Urdu');
     // Built tax pages: English default intact, Urdu keys wired.
     const builtTax: Array<[string, string, string]> = [
       ['salary-income-tax-calculator', 'Salary / Income Tax Calculator Pakistan 2026-27', 'sal.h1'],
@@ -604,6 +666,20 @@ if (existsSync(distIndex)) {
       check(pageBuilt.includes('id="lang-toggle"'), `built ${slug} page must contain the toggle button`);
       check(pageBuilt.includes('id="lang-note"'), `built ${slug} page must contain the other-tools note`);
     }
+    // Built solar/pension pages: English default intact, Urdu keys wired.
+    const builtSolarPension: Array<[string, string, string]> = [
+      ['solar-size-payback-calculator', 'Solar Size &amp; Payback Calculator', 'sol.h1'],
+      ['pension-eobi-calculator', 'Pension / EOBI Calculator', 'pen.h1'],
+    ];
+    for (const [slug, h1, key] of builtSolarPension) {
+      const pagePath = join(ROOT, 'dist', slug, 'index.html');
+      check(existsSync(pagePath), `built ${slug} page must exist`);
+      const pageBuilt = readFileSync(pagePath, 'utf8');
+      check(pageBuilt.includes(h1), `built ${slug} page must keep the English H1`);
+      check(pageBuilt.includes(`data-i18n="${key}"`), `built ${slug} page must carry data-i18n="${key}"`);
+      check(pageBuilt.includes('id="lang-toggle"'), `built ${slug} page must contain the toggle button`);
+      check(pageBuilt.includes('id="lang-note"'), `built ${slug} page must contain the other-tools note`);
+    }
     // Built converters pages: English default intact, Urdu keys wired.
     const builtConverters: Array<[string, string, string]> = [
       ['percentage-calculator', 'Percentage Calculator', 'pct.h1'],
@@ -628,4 +704,4 @@ if (existsSync(distIndex)) {
   }
 }
 
-console.log(`i18n: ${checks} checks — ${used.size} data-i18n keys covered, 26/26 tool labels + card names + descriptions translated, tax cluster (Salary 58 + Freelancer 73 + GST 99 keys) + loans cluster (EMI 71 + Eligibility 61 + Comparison 63 + Car 108 + Home 113 keys) + Zakat/savings cluster (Zakat 96 + National Savings 141 + Fixed Deposit 61 keys) + bills cluster (Electricity 63 + Gas 92 keys) + converters cluster (Percentage 44 + Age 43 + Unit/Marla 43 + Fuel 53 + Compound Interest 62 + Inflation 47 + Budget 52 + Debt 51 + Goal 53 keys) translated, font ${fontBytes} bytes.`);
+console.log(`i18n: ${checks} checks — ${used.size} data-i18n keys covered, 26/26 tool labels + card names + descriptions translated, tax cluster (Salary 58 + Freelancer 73 + GST 99 keys) + loans cluster (EMI 71 + Eligibility 61 + Comparison 63 + Car 108 + Home 113 keys) + Zakat/savings cluster (Zakat 96 + National Savings 141 + Fixed Deposit 61 keys) + bills cluster (Electricity 63 + Gas 92 keys) + converters cluster (Percentage 44 + Age 43 + Unit/Marla 43 + Fuel 53 + Compound Interest 62 + Inflation 47 + Budget 52 + Debt 51 + Goal 53 keys) + solar/pension cluster (Solar 102 + Pension 144 keys) translated, font ${fontBytes} bytes.`);
