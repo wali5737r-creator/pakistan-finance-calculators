@@ -74,21 +74,23 @@ assert.match(css, /\.tool-nav-scroll a \{[^}]*scroll-snap-align:\s*start;/s);
 // even though their pages, homepage cards and sitemap entries existed.
 const layout = readFileSync(join(SRC_DIR, 'components', 'Layout.astro'), 'utf8');
 const navHrefs = [...layout.matchAll(/href:\s*'(\/[^']+\/)'/g)].map((m) => m[1]);
-assert.equal(new Set(navHrefs).size, 23, `top nav must list 23 unique tools, found ${new Set(navHrefs).size}`);
+assert.equal(new Set(navHrefs).size, 24, `top nav must list 24 unique tools, found ${new Set(navHrefs).size}`);
 for (const href of [
   '/gas-bill-calculator/',
   '/freelancer-tax-calculator/',
   '/solar-size-payback-calculator/',
   '/pension-eobi-calculator/',
   '/national-savings-calculator/',
+  '/gst-calculator/',
 ]) {
   assert.ok(navHrefs.includes(href), `top nav is missing ${href}`);
 }
 // The homepage card list must match the nav — Solar was missing here too
 // while the homepage copy already said "23 tools".
 const cardHrefs = [...indexPage.matchAll(/href:\s*'(\/[^']+\/)'/g)].map((m) => m[1]);
-assert.equal(new Set(cardHrefs).size, 23, `homepage must list 23 unique tool cards, found ${new Set(cardHrefs).size}`);
+assert.equal(new Set(cardHrefs).size, 24, `homepage must list 24 unique tool cards, found ${new Set(cardHrefs).size}`);
 assert.ok(cardHrefs.includes('/solar-size-payback-calculator/'), 'homepage is missing the Solar card');
+assert.ok(cardHrefs.includes('/gst-calculator/'), 'homepage is missing the GST card');
 
 // Currency converter: each rate keeps its number and currency code together
 // in one nowrap span, so a wrap can only happen at the "=" — never a lone

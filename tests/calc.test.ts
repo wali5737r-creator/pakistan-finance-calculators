@@ -3,7 +3,7 @@
 // they are never a live rate and never appear in site copy (SRS §6.5/§7.5).
 import assert from 'node:assert/strict';
 import {
-  calcAge, calcDscEncashment, calcEMI, calcEobiContributions, calcEobiPension, calcExportTax, calcFreelancerTax, calcGold, calcInvalidityPension, calcNationalSavings, calcNonSalariedTax, calcOldAgeGrant, calcPercentage, calcReducedPension, calcSaProfit, calcSscProfit, calcSurvivorPension, calcTax, calcZakat,
+  calcAge, calcDscEncashment, calcEMI, calcEobiContributions, calcEobiPension, calcExportTax, calcFreelancerTax, calcGold, calcGst, calcGstAdd, calcGstRemove, calcInvalidityPension, calcNationalSavings, calcNonSalariedTax, calcOldAgeGrant, calcPercentage, calcReducedPension, calcSaProfit, calcSscProfit, calcSurvivorPension, calcTax, calcZakat,
   applyNssWht, calcNssMonthlyProfit, convertArea, convertAreaToAll, convertAreaWithUnits, convertAreaToAllWithUnits,
   convertCurrency, formatNumber,
   goldValueFromWeight, nssSchemeById, parseDecimal, pensionCreditedYears, pensionWageForPreset, round2, todayInKarachi,
@@ -1174,6 +1174,89 @@ check('nss: validation throws', () => {
   assert.throws(() => calcSaProfit(100000, 31), /between 1 and 30/);
   assert.throws(() => calcNssMonthlyProfit(100000, 0), /between 0% and 100%/);
   assert.throws(() => applyNssWht(-5, true, 'filer'), /between Rs 0/);
+});
+
+
+// --- GST (Sales Tax Act 1990; standard rate 18%, s.3(1); verified 13 Nov 2026) ---
+check('gst: add 18% — worked example A (Rs 100,000 -> Rs 18,000 GST, total Rs 118,000)', () => {
+  const r = calcGst({ amount: 100000, ratePct: 18, mode: 'add' });
+  assert.equal(r.baseAmount, 100000);
+  assert.equal(r.gstAmount, 18000);
+  assert.equal(r.furtherTaxAmount, 0);
+  assert.equal(r.total, 118000);
+  assert.equal(r.ratePct, 18);
+  assert.equal(r.exempt, false);
+});
+check('gst: remove 18% — worked example B (Rs 118,000 -> base Rs 100,000, GST Rs 18,000)', () => {
+  const r = calcGst({ amount: 118000, ratePct: 18, mode: 'remove' });
+  assert.equal(r.baseAmount, 100000);
+  assert.equal(r.gstAmount, 18000);
+  assert.equal(r.total, 118000);
+});
+check('gst: remove — the wrong method is wrong (18% of the inclusive price is Rs 21,240, not the GST)', () => {
+  const r = calcGstRemove(118000, 18);
+  assert.equal(r.gstAmount, 18000);
+  assert.notEqual(118000 * 0.18, r.gstAmount);
+  assert.equal(118000 * 0.18, 21240);
+});
+check('gst: 1% registered drugs — worked example C (Rs 10,000 -> Rs 100 GST, total Rs 10,100)', () => {
+  const r = calcGstAdd(10000, 1);
+  assert.equal(r.gstAmount, 100);
+  assert.equal(r.total, 10100);
+});
+check('gst: 10% imported laptop — worked example D (Rs 100,000 -> Rs 10,000 GST, total Rs 110,000)', () => {
+  const r = calcGstAdd(100000, 10);
+  assert.equal(r.gstAmount, 10000);
+  assert.equal(r.total, 110000);
+});
+check('gst: further tax — worked example E (Rs 100,000 to an unregistered buyer: 18% + 4% = Rs 22,000, total Rs 122,000)', () => {
+  const r = calcGst({ amount: 100000, ratePct: 18, mode: 'add', furtherTax: true });
+  assert.equal(r.gstAmount, 18000);
+  assert.equal(r.furtherTaxAmount, 4000);
+  assert.equal(r.total, 122000);
+  assert.equal(r.furtherTax, true);
+});
+check('gst: further tax in remove mode divides by 1.22 (Rs 122,000 -> base Rs 100,000, GST Rs 18,000, further tax Rs 4,000)', () => {
+  const r = calcGst({ amount: 122000, ratePct: 18, mode: 'remove', furtherTax: true });
+  assert.equal(r.baseAmount, 100000);
+  assert.equal(r.gstAmount, 18000);
+  assert.equal(r.furtherTaxAmount, 4000);
+  assert.equal(r.total, 122000);
+});
+check('gst: zero-rated export / exempt — worked example F (Rs 100,000 -> Rs 0 GST)', () => {
+  const z = calcGstAdd(100000, 0);
+  assert.equal(z.gstAmount, 0);
+  assert.equal(z.total, 100000);
+  assert.equal(z.exempt, false);
+  const e = calcGstAdd(100000, null);
+  assert.equal(e.gstAmount, 0);
+  assert.equal(e.total, 100000);
+  assert.equal(e.exempt, true);
+  assert.equal(e.ratePct, 0);
+});
+check('gst: every reduced preset rate adds correctly on Rs 100,000', () => {
+  assert.equal(calcGstAdd(100000, 3).total, 103000); // gold jewellery (as listed)
+  assert.equal(calcGstAdd(100000, 5).total, 105000); // DAP / second-hand clothing
+  assert.equal(calcGstAdd(100000, 12).total, 112000); // former FATA/PATA transitional
+  assert.equal(calcGstAdd(100000, 25).total, 125000); // imported phone over US$500 / large local vehicle
+});
+check('gst: add and remove round-trip at 18% and at a custom rate', () => {
+  const added = calcGstAdd(54321, 18);
+  const removed = calcGstRemove(added.total, 18);
+  assert.equal(removed.baseAmount, 54321);
+  assert.equal(removed.gstAmount, added.gstAmount);
+  const custom = calcGst({ amount: 7777, ratePct: 7.5, mode: 'add' });
+  assert.equal(custom.gstAmount, 583.28);
+  assert.equal(custom.total, 8360.28);
+});
+check('gst: validation throws', () => {
+  assert.throws(() => calcGst({ amount: 0, ratePct: 18, mode: 'add' }), /positive number/);
+  assert.throws(() => calcGst({ amount: -100, ratePct: 18, mode: 'add' }), /positive number/);
+  assert.throws(() => calcGst({ amount: 100, ratePct: -1, mode: 'add' }), /between 0% and 100%/);
+  assert.throws(() => calcGst({ amount: 100, ratePct: 101, mode: 'add' }), /between 0% and 100%/);
+  assert.throws(() => calcGst({ amount: 100, ratePct: 18, mode: 'sideways' as 'add' }), /'add' or 'remove'/);
+  assert.throws(() => calcGstAdd(0, 18), /positive number/);
+  assert.throws(() => calcGstRemove(-500, 18), /positive number/);
 });
 
 console.log(`\n${passed} checks passed.`);

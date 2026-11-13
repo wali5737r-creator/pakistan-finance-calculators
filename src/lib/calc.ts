@@ -73,6 +73,7 @@ import {
   type NationalSavingsScheme,
   type NationalSavingsSchemeId,
 } from '../config/national-savings';
+import { GST_FURTHER_TAX_RATE } from '../config/gst';
 
 export const MAX_AMOUNT = 999999999999;
 
@@ -2330,4 +2331,89 @@ export function calcNationalSavings(
       ? `No withholding tax is collected at source on ${scheme.shortName} — but that does not mean tax-free: the profit must still be declared in your tax return. ${scheme.shortName} is Zakat-exempt${scheme.id === 'sfwa' ? ' (no Zakat deductible; Behbood rules apply)' : ''}.`
       : `Monthly profit is paid from the issue date. ${scheme.shortName} is Zakat-exempt.`,
   };
+}
+
+// --- GST (Sales Tax Act 1990; standard rate 18%, s.3(1)) ---
+export interface GstInput {
+  /** Amount in Rs: the price before tax in 'add' mode, the price
+   *  including tax in 'remove' mode. Must be a positive number. */
+  amount: number;
+  /** GST rate, % (0 = zero-rated). null = exempt (no tax at all). */
+  ratePct: number | null;
+  /** 'add': amount is before tax. 'remove': amount includes tax. */
+  mode: 'add' | 'remove';
+  /** True when the buyer is unregistered / a non-active taxpayer:
+   *  +4% further tax (s.3(1A)) on the value excluding tax. */
+  furtherTax?: boolean;
+}
+
+export interface GstResult {
+  /** Price excluding GST, Rs. */
+  baseAmount: number;
+  /** GST amount, Rs. */
+  gstAmount: number;
+  /** Further tax (4% of the base), Rs — 0 unless furtherTax is set. */
+  furtherTaxAmount: number;
+  /** Total payable, Rs. */
+  total: number;
+  /** GST rate used, % (0 for zero-rated and exempt). */
+  ratePct: number;
+  /** True when the rate was exempt (ratePct null). */
+  exempt: boolean;
+  /** True when further tax was applied. */
+  furtherTax: boolean;
+}
+
+function validateGstInput(input: GstInput): { ratePct: number; exempt: boolean; furtherTax: boolean } {
+  if (!Number.isFinite(input.amount) || input.amount <= 0) {
+    throw new Error('Enter a positive number for the amount.');
+  }
+  if (input.ratePct !== null && (!Number.isFinite(input.ratePct) || input.ratePct < 0 || input.ratePct > 100)) {
+    throw new Error('GST rate must be between 0% and 100%.');
+  }
+  if (input.mode !== 'add' && input.mode !== 'remove') {
+    throw new Error("Mode must be 'add' or 'remove'.");
+  }
+  return { ratePct: input.ratePct ?? 0, exempt: input.ratePct === null, furtherTax: input.furtherTax ?? false };
+}
+
+/**
+ * Add GST to a price, or remove GST from a price that includes it.
+ * Add: total = price x (1 + rate); GST = price x rate. Remove:
+ * base = inclusive / (1 + rate); GST = inclusive - base. Taking
+ * the rate % of the INCLUSIVE price is the common wrong method —
+ * e.g. Rs 118,000 x 18% = Rs 21,240 is wrong; the correct GST on
+ * Rs 118,000 inclusive is Rs 18,000. Further tax (4%, s.3(1A)) is
+ * charged on the base (excluding-tax) value, so in 'remove' mode
+ * the divisor is (1 + rate + 4%) when further tax applies.
+ */
+export function calcGst(input: GstInput): GstResult {
+  const { ratePct, exempt, furtherTax } = validateGstInput(input);
+  const rate = ratePct / 100;
+  const furtherRate = furtherTax ? GST_FURTHER_TAX_RATE : 0;
+
+  let baseAmount: number;
+  let gstAmount: number;
+  let furtherTaxAmount: number;
+  if (input.mode === 'add') {
+    baseAmount = round2(input.amount);
+    gstAmount = round2(baseAmount * rate);
+    furtherTaxAmount = round2(baseAmount * furtherRate);
+  } else {
+    baseAmount = round2(input.amount / (1 + rate + furtherRate));
+    gstAmount = round2(baseAmount * rate);
+    furtherTaxAmount = round2(baseAmount * furtherRate);
+  }
+  const total = round2(baseAmount + gstAmount + furtherTaxAmount);
+  return { baseAmount, gstAmount, furtherTaxAmount, total, ratePct, exempt, furtherTax };
+}
+
+/** Add GST to a price before tax. Thin wrapper over calcGst. */
+export function calcGstAdd(amount: number, ratePct: number | null, furtherTax = false): GstResult {
+  return calcGst({ amount, ratePct, mode: 'add', furtherTax });
+}
+
+/** Remove GST from a price that includes it. Thin wrapper over calcGst. */
+export function calcGstRemove(inclusive: number, ratePct: number | null, furtherTax = false): GstResult {
+  return calcGst({ amount: inclusive, ratePct, mode: 'remove', furtherTax });
 }

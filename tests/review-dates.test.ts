@@ -8,6 +8,7 @@ import { GAS_LAST_CHECKED, GAS_NEXT_REVIEW } from '../src/config/gas';
 import { FREELANCER_LAST_CHECKED, FREELANCER_NEXT_REVIEW } from '../src/config/freelancer-tax';
 import { PENSION_LAST_CHECKED, PENSION_NEXT_REVIEW } from '../src/config/pension';
 import { NATIONAL_SAVINGS_LAST_CHECKED, NATIONAL_SAVINGS_NEXT_REVIEW } from '../src/config/national-savings';
+import { GST_LAST_CHECKED, GST_NEXT_REVIEW } from '../src/config/gst';
 import { isReviewDue, isValidIsoDate, reviewStatuses } from '../src/lib/review-dates';
 
 let passed = 0;
@@ -35,6 +36,9 @@ check('PENSION_NEXT_REVIEW is a valid ISO date', () => {
 });
 check('NATIONAL_SAVINGS_NEXT_REVIEW is a valid ISO date', () => {
   assert.equal(isValidIsoDate(NATIONAL_SAVINGS_NEXT_REVIEW), true);
+});
+check('GST_NEXT_REVIEW is a valid ISO date', () => {
+  assert.equal(isValidIsoDate(GST_NEXT_REVIEW), true);
 });
 check('isValidIsoDate rejects bad dates', () => {
   assert.equal(isValidIsoDate('2027-13-01'), false); // month 13
@@ -117,6 +121,20 @@ check('national-savings review date is the expected value', () => {
   assert.equal(NATIONAL_SAVINGS_NEXT_REVIEW, '2027-01-13');
 });
 
+// --- GST review must fall after the last check (13 Nov 2026) and
+// --- before the tax year ends (30 Jun 2027), ahead of Finance Act 2027 ---
+check('gst review date is after GST_LAST_CHECKED', () => {
+  const lastChecked = new Date(GST_LAST_CHECKED);
+  const review = new Date(`${GST_NEXT_REVIEW}T00:00:00Z`);
+  assert.ok(review > lastChecked, `expected ${GST_NEXT_REVIEW} after ${GST_LAST_CHECKED}`);
+});
+check('gst review date is before 2027-06-30', () => {
+  assert.ok(GST_NEXT_REVIEW < '2027-06-30', `expected ${GST_NEXT_REVIEW} < 2027-06-30`);
+});
+check('gst review date is the expected value', () => {
+  assert.equal(GST_NEXT_REVIEW, '2027-05-01');
+});
+
 // --- Due / not-yet-due flag logic, with injected "today" dates ---
 check('isReviewDue: day before review is not due', () => {
   assert.equal(isReviewDue('2027-05-01', '2027-04-30'), false);
@@ -140,6 +158,7 @@ check('reviewStatuses: nothing due before any review date', () => {
     { name: 'solar', reviewDate: '2027-02-13', due: false },
     { name: 'pension', reviewDate: '2027-02-01', due: false },
     { name: 'national-savings', reviewDate: '2027-01-13', due: false },
+    { name: 'gst', reviewDate: '2027-05-01', due: false },
   ]);
 });
 check('reviewStatuses: electricity due, tax and gas not yet due', () => {
@@ -152,6 +171,7 @@ check('reviewStatuses: electricity due, tax and gas not yet due', () => {
     { name: 'solar', reviewDate: '2027-02-13', due: false },
     { name: 'pension', reviewDate: '2027-02-01', due: true },
     { name: 'national-savings', reviewDate: '2027-01-13', due: true },
+    { name: 'gst', reviewDate: '2027-05-01', due: false },
   ]);
 });
 check('reviewStatuses: all due after the latest review date', () => {
@@ -164,6 +184,7 @@ check('reviewStatuses: all due after the latest review date', () => {
     { name: 'solar', reviewDate: '2027-02-13', due: true },
     { name: 'pension', reviewDate: '2027-02-01', due: true },
     { name: 'national-savings', reviewDate: '2027-01-13', due: true },
+    { name: 'gst', reviewDate: '2027-05-01', due: true },
   ]);
 });
 
