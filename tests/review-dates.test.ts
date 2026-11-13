@@ -101,6 +101,7 @@ check('reviewStatuses: nothing due before any review date', () => {
     { name: 'electricity', reviewDate: '2027-02-08', due: false },
     { name: 'gas', reviewDate: '2027-10-01', due: false },
     { name: 'freelancer', reviewDate: '2027-05-01', due: false },
+    { name: 'solar', reviewDate: '2027-02-13', due: false },
   ]);
 });
 check('reviewStatuses: electricity due, tax and gas not yet due', () => {
@@ -110,6 +111,7 @@ check('reviewStatuses: electricity due, tax and gas not yet due', () => {
     { name: 'electricity', reviewDate: '2027-02-08', due: true },
     { name: 'gas', reviewDate: '2027-10-01', due: false },
     { name: 'freelancer', reviewDate: '2027-05-01', due: false },
+    { name: 'solar', reviewDate: '2027-02-13', due: false },
   ]);
 });
 check('reviewStatuses: all due after the latest review date', () => {
@@ -119,6 +121,7 @@ check('reviewStatuses: all due after the latest review date', () => {
     { name: 'electricity', reviewDate: '2027-02-08', due: true },
     { name: 'gas', reviewDate: '2027-10-01', due: true },
     { name: 'freelancer', reviewDate: '2027-05-01', due: true },
+    { name: 'solar', reviewDate: '2027-02-13', due: true },
   ]);
 });
 

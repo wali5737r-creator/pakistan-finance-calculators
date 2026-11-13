@@ -1,0 +1,519 @@
+---
+import Layout from '../components/Layout.astro';
+
+const title = "Solar Size & Payback Calculator Pakistan | Net Billing 2026 | Pakistan Finance Calculators";
+const description = "Work out the right solar size for your home in Pakistan and how fast it pays back under NEPRA net billing 2026 — cost, monthly saving and payback.";
+const slug = "/solar-size-payback-calculator/";
+
+const faqs = [
+  {
+    q: "How big a solar system do I need?",
+    a: "It depends on how many units you use in a month and how much sun your city gets. A 5 kW system in Lahore generates about 585 units a month (5 kW x 3.85 kWh per kW per day x 365/12 days). Enter your monthly units or your monthly bill and the calculator sizes the system for you, rounded up to the nearest 0.5 kW so it is not undersized. Your system must not be bigger than your sanctioned load — that is a NEPRA rule (Reg. 3(2) of the Prosumer Regulations 2026), so check your sanctioned load on your bill before ordering a bigger system.",
+  },
+  {
+    q: "How does net billing work under the 2026 rules?",
+    a: "Under NEPRA's (Prosumer) Regulations 2026 (SRO 251(I)/2026, 9 February 2026), the units you use from the grid are billed at your normal tariff, and the units you export are credited at the National Average Energy Purchase Price (NAEPP). Surplus credit carries to the next billing cycle or is paid quarterly — there is no annual banking and no indefinite carry-forward, so oversizing your system to bank units for winter does not work. The agreement runs for 5 years and can be renewed for 5 more.",
+  },
+  {
+    q: "Why is the export rate Rs 10 a unit, and can NEPRA change it?",
+    a: "Rs 10 is a planning figure, not a notified rate — the SRO itself prints no rupee export figure. Rs 8.13 is NEPRA's 2026 power-purchase forecast (also in an IESCO circular of 25 February 2026) and Rs 10-11 is how the press rounded it (Dawn / The News, 10 February 2026). NEPRA may revise the export rate by notification during your agreement (Reg. 14(3)), so the calculator lets you change it — try Rs 8.13 to see the pessimistic payback. Always confirm the current NAEPP with your DISCO before you buy.",
+  },
+  {
+    q: "What is self-use, and why does it change the payback?",
+    a: "Self-use is the share of your solar generation that your home uses directly, instead of exporting it. A unit you use yourself saves the full import rate (about Rs 48), while a unit you export earns only the export rate (about Rs 10) — so the more you use yourself, the faster the payback. For a 5 kW Lahore system costing Rs 650,000, payback is about 38 months at 50% self-use, about 34 months at 60%, and about 30 months at 70%. There is no verified average self-use figure for Pakistani homes, so the calculator shows all three and lets you enter your own.",
+  },
+  {
+    q: "What is not included in this payback?",
+    a: "Several things. The net-metering fee (Rs 60,000-80,000, installer-reported) is not in the per-kW cost, and neither are batteries — this is an on-grid system only. A string inverter lasts 10-15 years, so one replacement is expected in a 25-year life, but no verified Pakistan replacement price was found, so it is an optional cost you can add yourself. The simple payback also ignores tariff rises, inflation, financing cost and the time value of money, and it assumes your panels are unshaded and kept clean. Treat the result as a planning estimate, not a promise.",
+  },
+  {
+    q: "My net-metering agreement is from before February 2026 — do the old rules still apply?",
+    a: "Reported amendments (SRO 547(I)/2026, 2 April 2026) say agreements signed before 9 February 2026 keep the old rate and mechanism until they expire — but we have not read the SRO 547 text directly, so this is labelled as reported, not verified. Tick the 'pre-February 2026 agreement' box and the calculator credits your exports at the import rate instead (the old 1:1 treatment). Confirm with your DISCO whether your agreement is covered, and for how long.",
+  },
+];
+
+const schema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://pakistan-finance-calculators.pages.dev/solar-size-payback-calculator/#webapp',
+      name: "Solar Size & Payback Calculator",
+      url: 'https://pakistan-finance-calculators.pages.dev/solar-size-payback-calculator/',
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Any',
+      description,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://pakistan-finance-calculators.pages.dev/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: "Solar Size & Payback Calculator",
+          item: 'https://pakistan-finance-calculators.pages.dev/solar-size-payback-calculator/',
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+});
+
+const related = [
+  {
+    href: "/electricity-bill-calculator/",
+    name: "Electricity Bill Calculator",
+    desc: "Estimate your monthly electricity bill from NEPRA's 2026 domestic tariff — the import rate your solar savings are measured against.",
+  },
+  {
+    href: "/gas-bill-calculator/",
+    name: "Gas Bill Calculator",
+    desc: "Estimate your monthly gas bill from OGRA's 2025 domestic sale price — the other big utility bill solar does not replace.",
+  },
+];
+---
+<Layout title={title} description={description} slug={slug} schema={schema}>
+  <div class="container" style="padding-top: 32px;">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Solar Size &amp; Payback Calculator</p>
+    </nav>
+    <p class="badge badge-info" style="margin-top: 8px;">Utility Bills</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Solar Size &amp; Payback Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+      A 5 kW system in Lahore costs about Rs 650,000, generates about 585 units a month,
+      and at 60% self-use saves about Rs 19,200 a month — so it pays for itself in about
+      34 months (2.8 years). Enter your own bill and city below to work out the right
+      size for your home and your payback under NEPRA net billing 2026.
+    </p>
+    <p class="notice-info prose-narrow" style="margin-top: 16px;">
+      <strong>Estimate only.</strong> This uses NEPRA's (Prosumer) Regulations 2026
+      (SRO 251(I)/2026) and 2026 market prices, checked 13 November 2026. The export
+      rate is a planning figure — the SRO prints no rupee figure and NEPRA may revise
+      it — and actual yield depends on location, shading and panel quality. Confirm
+      the net-billing terms and the current NAEPP with your DISCO before you buy.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <div class="tool-grid">
+      <div class="card">
+        <form id="solarForm" novalidate>
+          <div class="field">
+            <label for="solarCity">City <span aria-hidden="true">*</span></label>
+            <select id="solarCity" aria-required="true">
+              <option value="Lahore">Lahore — 3.85 kWh/kW/day</option>
+              <option value="Karachi">Karachi — 4.38 kWh/kW/day</option>
+              <option value="Islamabad">Islamabad — 3.82 kWh/kW/day</option>
+              <option value="Other">Other city — 4.0 kWh/kW/day</option>
+            </select>
+            <p class="hint">Yield after system losses (78% system efficiency). Other cities use the 4.0 fallback; the range across Pakistan is about 3.8-4.4.</p>
+          </div>
+
+          <div class="field">
+            <label for="solarUnits">Monthly units used (kWh)</label>
+            <input id="solarUnits" type="text" inputmode="decimal" autocomplete="off" placeholder="e.g. 585" />
+            <p class="hint">From your electricity bill. If you leave this blank, enter your monthly bill below instead.</p>
+          </div>
+
+          <div class="field">
+            <label for="solarBill">Monthly electricity bill (Rs)</label>
+            <input id="solarBill" type="text" inputmode="decimal" autocomplete="off" placeholder="e.g. 28080" />
+            <p class="hint">Used only if units are blank — units are estimated at the flat Rs 48 per unit. A bill of Rs 28,080 implies about 585 units.</p>
+          </div>
+
+          <div class="field">
+            <label for="solarSize">System size (kW) — optional</label>
+            <input id="solarSize" type="text" inputmode="decimal" autocomplete="off" placeholder="Leave blank to auto-size" />
+            <p class="hint">Leave blank and the calculator sizes the system from your usage, rounded up to the nearest 0.5 kW. Your system must not exceed your sanctioned load (NEPRA Reg. 3(2)).</p>
+          </div>
+
+          <div class="field">
+            <label for="solarCostPerKw">System cost (Rs per kW)</label>
+            <input id="solarCostPerKw" type="text" inputmode="decimal" autocomplete="off" placeholder="130000" />
+            <p class="hint">Default Rs 130,000 (2026 market range Rs 105,000-160,000, installed, on-grid, excluding batteries). Get three itemised quotes — prices move weekly with the dollar.</p>
+          </div>
+
+          <div class="field">
+            <label for="solarImportRate">Import rate (Rs per unit)</label>
+            <input id="solarImportRate" type="text" inputmode="decimal" autocomplete="off" placeholder="48" />
+            <p class="hint">What a unit from the grid costs you. Default Rs 48 flat — the SRO 279(I)/2026 base rates run Rs 36.46-47.20 by slab, and FCA, quarterly adjustment and 18% GST push the effective rate higher.</p>
+          </div>
+
+          <div class="field">
+            <label for="solarExportRate">Export rate — NAEPP (Rs per unit)</label>
+            <input id="solarExportRate" type="text" inputmode="decimal" autocomplete="off" placeholder="10" />
+            <p class="hint">Planning figure only — the SRO prints no rupee figure (reported range Rs 8.13-11). NEPRA may revise it; confirm with your DISCO.</p>
+          </div>
+
+          <div class="field">
+            <label for="solarSelfUse">Self-use (%)</label>
+            <input id="solarSelfUse" type="text" inputmode="decimal" autocomplete="off" placeholder="60" />
+            <p class="hint">Share of solar generation your home uses directly. No verified average exists — 50-70% is a typical household planning range. The result also shows payback at 50% and 70%.</p>
+          </div>
+
+          <div class="field">
+            <label for="solarRoof">Roof area available (sq ft) — optional</label>
+            <input id="solarRoof" type="text" inputmode="decimal" autocomplete="off" placeholder="e.g. 500" />
+            <p class="hint">Rule of thumb: about 100 sq ft per kW, varying by panel and layout. The result tells you if your roof fits the system.</p>
+          </div>
+
+          <div class="field">
+            <label for="solarInverter">Inverter replacement cost (Rs) — optional</label>
+            <input id="solarInverter" type="text" inputmode="decimal" autocomplete="off" placeholder="Leave blank to exclude" />
+            <p class="hint">A string inverter lasts 10-15 years, so one replacement is expected in a 25-year life. No verified Pakistan price was found, so this is excluded unless you enter one.</p>
+          </div>
+
+          <div class="field">
+            <label style="display: flex; gap: 8px; align-items: flex-start; font-weight: 400;">
+              <input id="solarLegacy" type="checkbox" style="margin-top: 4px;" />
+              <span>My net-metering agreement is from before 9 February 2026 (legacy — old 1:1 treatment)</span>
+            </label>
+            <p class="hint">Reported amendment SRO 547(I)/2026 says pre-9-Feb-2026 agreements keep the old rate until expiry — we have not read its text directly, so this is labelled as reported. Exports are then credited at the import rate.</p>
+          </div>
+
+          <div id="solarErrors" class="error-box" role="alert" hidden></div>
+
+          <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
+            <button id="solarCalculate" class="btn-primary" type="submit">Calculate</button>
+            <button id="solarClear" class="btn-secondary" type="button">Clear</button>
+          </p>
+          <p id="solarFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
+        </form>
+      </div>
+
+      <div class="result-card" id="solarResultCard" tabindex="-1">
+        <div id="solarEmpty">
+          <p style="font-weight: 700;">Your result will appear here.</p>
+          <p>Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);">
+            You will see your answer with the figures shown, so you can check it.
+          </p>
+        </div>
+
+        <div id="solarResult" data-result-text hidden>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Simple payback</p>
+          <div aria-live="polite" aria-atomic="true">
+            <p class="result-value" id="solarHeadline"></p>
+          </div>
+          <div class="stat-grid">
+            <div>
+              <p class="stat-label">System size</p>
+              <p class="stat-value" id="solarStat1"></p>
+            </div>
+            <div>
+              <p class="stat-label">Monthly generation</p>
+              <p class="stat-value" id="solarStat2"></p>
+            </div>
+            <div>
+              <p class="stat-label">System cost</p>
+              <p class="stat-value" id="solarStat3"></p>
+            </div>
+            <div>
+              <p class="stat-label">Monthly saving</p>
+              <p class="stat-value" id="solarStat4"></p>
+            </div>
+          </div>
+          <table class="breakdown-table" id="solarBreakdown" aria-label="Solar payback breakdown"></table>
+          <p id="solarEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p id="solarFormula" style="font-size: 16px;"></p>
+          <p id="solarRoofNote" style="font-size: 14px; color: var(--ink-muted);"></p>
+          <p style="font-size: 13px; color: var(--ink-muted);">
+            Estimate only — check important figures before acting.
+            <a href="#solarDisclaimer">Read the full disclaimer.</a>
+          </p>
+        </div>
+
+        <div class="actions-row no-print">
+          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+        </div>
+        <p data-copy-status role="status" style="font-size: 14px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container prose-narrow" style="margin-top: 40px;">
+    <h2>How it works</h2>
+    <ol>
+      <li>Enter your city and your monthly units (or your monthly bill, which is converted to units at the flat Rs 48 per unit). If you leave the system size blank, the calculator sizes it from your usage, rounded up to the nearest 0.5 kW.</li>
+      <li>Monthly generation is system size x your city's daily yield x 365/12 days. A 5 kW system in Lahore makes about 585 units a month; the same system in Karachi makes about 667.</li>
+      <li>Your saving each month is the units you use yourself at the import rate, plus the units you export at the NAEPP export rate. Simple payback is the system cost divided by that monthly saving. The 25-year figure applies 0.5% degradation a year.</li>
+    </ol>
+    <p>Generation varies by season: in Lahore a 1 kW system makes about 167 units in May but only about 70 in December. The monthly figures here are yearly averages — your summer bills will fall more than your winter bills. And remember there is no annual banking: surplus credit carries only to the next billing cycle or is paid quarterly, so a system much bigger than your usage earns little extra.</p>
+
+    <h2>Formula</h2>
+    <p>Monthly generation (units) = system size (kW) x yield (kWh/kW/day) x 365/12</p>
+    <p>Monthly saving = self-used units x import rate + exported units x export rate</p>
+    <p>Simple payback (months) = system cost / monthly saving</p>
+    <p>25-year saving = monthly saving x 12 x (1 - 0.995^25) / 0.005, less system cost and any inverter replacement</p>
+    <p>Simple payback ignores tariff rises, inflation, financing cost and the time value of money. A <a href="/electricity-bill-calculator/">Electricity Bill Calculator</a> can show what your bill is today, before solar.</p>
+
+    <h2>Worked example</h2>
+    <p><strong>Example A — 5 kW, Lahore, Rs 650,000:</strong> generation is 5 x 3.85 x 365/12 = 585.52 units a month. At 60% self-use, 351.31 units are used at home at Rs 48 = Rs 16,862.88, and 234.21 units are exported at Rs 10 = Rs 2,342.10, so the monthly saving is Rs 19,204.98. Simple payback is 650,000 / 19,204.98 = 33.85 months, about 2.8 years. At 50% self-use the payback is 38.28 months; at 70% it is 30.33 months. Over 25 years at 0.5% degradation a year, the gross saving is Rs 5,428,698.91 and the net saving after the system cost is Rs 4,778,698.91.</p>
+    <p><strong>Example B — 10 kW, Karachi, Rs 1,300,000:</strong> generation is 10 x 4.38 x 365/12 = 1,332.25 units a month. At 60% self-use, 799.35 units at Rs 48 = Rs 38,368.80, and 532.90 units exported at Rs 10 = Rs 5,329.00, so the monthly saving is Rs 43,697.80. Simple payback is 1,300,000 / 43,697.80 = 29.75 months, about 2.5 years.</p>
+    <p style="font-size: 14px; color: var(--ink-muted);">Both examples use the default Rs 130,000 per kW and exclude the net-metering fee (Rs 60,000-80,000, installer-reported) and any inverter replacement.</p>
+
+    <h2>City yields and system cost (2026)</h2>
+    <table class="breakdown-table" aria-label="City yields and system cost 2026">
+      <thead>
+        <tr><th scope="col">City</th><th scope="col">Yield (kWh/kW/day)</th><th scope="col">Units per kW per month</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Lahore</td><td>3.85</td><td>about 117</td></tr>
+        <tr><td>Karachi</td><td>4.38</td><td>about 133</td></tr>
+        <tr><td>Islamabad</td><td>3.82</td><td>about 116</td></tr>
+        <tr><td>Other cities (fallback)</td><td>4.0</td><td>about 122</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size: 14px; color: var(--ink-muted);">Yield source: SolarGuide (NASA POWER climatology, 78% system efficiency), corroborated by PVGIS Lahore 4.3 kWh/kW/day and a peer-reviewed Lahore case study 3.85 kWh/kW/day. System cost: Rs 105,000-160,000 per kW installed (on-grid residential, excluding batteries), convergent range from five sources August-November 2026; default Rs 130,000 per kW. So a 5 kW system is about Rs 650,000 and a 10 kW system about Rs 1,300,000, before the net-metering fee.</p>
+
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      {
+        faqs.map((f) => (
+          <details>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+
+    <section id="solarDisclaimer" class="notice-info" style="margin-top: 32px;">
+      <h2 style="font-size: 20px;">Important — please read</h2>
+      <p>
+        Results are planning estimates, not a promise. Actual yield depends on
+        your location, roof direction, shading, panel quality and cleaning.
+        The export rate is a planning figure — the SRO prints no rupee
+        figure, NEPRA may revise NAEPP by notification, and there is no
+        annual banking of surplus units. The amendment figures (SRO 547,
+        SRO 709, SRO 1330) are reported, not read from the SRO texts
+        directly. No official LESCO, IESCO or K-Electric net-billing page
+        was found. Hybrid and battery systems, the net-metering fee and
+        inverter replacement are not in the default figures. Always confirm
+        the net-billing terms, the current NAEPP and your sanctioned load
+        with your DISCO, and get three itemised quotes before you buy.
+      </p>
+      <p>
+        Sources:
+        <a href="https://nepra.org.pk/Legislation/3-Reg/3.35%20NEPRA%20%20Prosumer%20Regulations%202026/NEPRA%20Prosumer%20Regulations%20(SRO%20251(I)2026)%2009-02-26.PDF">NEPRA (Prosumer) Regulations 2026, SRO 251(I)/2026</a>
+        and
+        <a href="https://solarguide.pk/calculators/solar-generation/">SolarGuide solar generation figures</a>.
+        Checked 13 November 2026; next review 13 February 2027.
+      </p>
+      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+    </section>
+
+    <h2 style="margin-top: 32px;">Related tools</h2>
+    <div class="related-grid">
+      {
+        related.map((tool) => (
+          <article class="card">
+            <h3 style="font-size: 18px;">
+              <a href={tool.href}>{tool.name}</a>
+            </h3>
+            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p>
+              <a href={tool.href}>Use the calculator →</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+    .field-error {
+      font-size: 14px;
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      margin: 12px 0;
+    }
+    .stat-grid p {
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .related-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 15px;
+    }
+    .breakdown-table th,
+    .breakdown-table td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border, #e5e7eb);
+    }
+    .breakdown-table td:last-child,
+    .breakdown-table th:last-child {
+      text-align: right;
+    }
+    .breakdown-table tr.total-row td {
+      font-weight: 700;
+    }
+  </style>
+
+  <script>
+    import { calcMonthlyGeneration, calcSolarPayback, parseDecimal, formatPKR, formatNumber, recommendedSystemKw, solarRoofAreaSqft, solarSlabBaseRate, solarYieldForCity, unitsFromBill } from '../lib/calc.ts';
+
+    const form = document.getElementById('solarForm');
+    const errorsBox = document.getElementById('solarErrors');
+    const emptyBox = document.getElementById('solarEmpty');
+    const resultBox = document.getElementById('solarResult');
+    const resultCard = document.getElementById('solarResultCard');
+    const headline = document.getElementById('solarHeadline');
+    const stat1 = document.getElementById('solarStat1');
+    const stat2 = document.getElementById('solarStat2');
+    const stat3 = document.getElementById('solarStat3');
+    const stat4 = document.getElementById('solarStat4');
+    const breakdownEl = document.getElementById('solarBreakdown');
+    const echoEl = document.getElementById('solarEcho');
+    const formulaEl = document.getElementById('solarFormula');
+    const roofNoteEl = document.getElementById('solarRoofNote');
+    const copyBtn = document.querySelector('[data-copy-result]');
+    const printBtn = document.querySelector('[data-print-result]');
+    const formStatus = document.getElementById('solarFormStatus');
+
+    function readOptionalNumber(id, label) {
+      const raw = document.getElementById(id).value;
+      if (raw.trim() === '') return undefined;
+      const value = parseDecimal(raw);
+      if (value === null) throw new Error(label + ' must be a number using digits and one decimal point only.');
+      return value;
+    }
+    function showEmpty() {
+      resultBox.hidden = true;
+      emptyBox.hidden = false;
+      copyBtn.disabled = true;
+      printBtn.disabled = true;
+    }
+    function showResult() {
+      emptyBox.hidden = true;
+      resultBox.hidden = false;
+      copyBtn.disabled = false;
+      printBtn.disabled = false;
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        const city = document.getElementById('solarCity').value;
+        const yieldPerKw = solarYieldForCity(city);
+        const units = readOptionalNumber('solarUnits', 'Monthly units');
+        const bill = readOptionalNumber('solarBill', 'Monthly bill');
+        const sizeInput = readOptionalNumber('solarSize', 'System size');
+        const costPerKw = readOptionalNumber('solarCostPerKw', 'System cost') ?? 130000;
+        const importRate = readOptionalNumber('solarImportRate', 'Import rate') ?? 48;
+        const exportRate = readOptionalNumber('solarExportRate', 'Export rate') ?? 10;
+        const selfUsePct = readOptionalNumber('solarSelfUse', 'Self-use') ?? 60;
+        const roofArea = readOptionalNumber('solarRoof', 'Roof area');
+        const inverterCost = readOptionalNumber('solarInverter', 'Inverter replacement cost') ?? 0;
+        const legacy = document.getElementById('solarLegacy').checked;
+
+        let monthlyUnits = units;
+        if (monthlyUnits === undefined) {
+          if (bill === undefined) throw new Error('Enter your monthly units or your monthly bill.');
+          monthlyUnits = unitsFromBill(bill);
+        }
+        let systemKw = sizeInput;
+        let autoSized = false;
+        if (systemKw === undefined) {
+          systemKw = recommendedSystemKw(monthlyUnits, yieldPerKw);
+          autoSized = true;
+        }
+        const generation = calcMonthlyGeneration(systemKw, yieldPerKw);
+        const systemCost = Math.round(systemKw * costPerKw);
+        const slabBase = solarSlabBaseRate(monthlyUnits);
+        const r = calcSolarPayback({
+          systemKw,
+          monthlyGeneration: generation,
+          systemCost,
+          importRatePerUnit: importRate,
+          exportRatePerUnit: exportRate,
+          selfUsePct,
+          legacyAgreement: legacy,
+          inverterReplacementCost: inverterCost,
+        });
+        errorsBox.textContent = '';
+        errorsBox.hidden = true;
+        const years = Math.floor(r.paybackMonths / 12);
+        const months = Math.round(r.paybackMonths - years * 12);
+        headline.textContent = r.paybackMonths.toFixed(0) + ' months' + (years > 0 ? ' (' + years + ' yr ' + months + ' mo)' : '');
+        stat1.textContent = formatNumber(systemKw, 1) + ' kW' + (autoSized ? ' (auto)' : '');
+        stat2.textContent = formatNumber(generation, 0) + ' units/mo';
+        stat3.textContent = formatPKR(systemCost, 0);
+        stat4.textContent = formatPKR(r.monthlySaving, 2) + '/mo';
+        let rows = '<tr><td>Self-used — ' + formatNumber(r.selfUsedUnits, 0) + ' units × ' + formatPKR(r.importRatePerUnit, 2) + '</td><td>' + formatPKR(r.selfUseSaving, 2) + '</td></tr>';
+        rows += '<tr><td>Exported — ' + formatNumber(r.exportedUnits, 0) + ' units × ' + formatPKR(r.exportRatePerUnit, 2) + (legacy ? ' (legacy 1:1)' : ' (NAEPP, planning figure)') + '</td><td>' + formatPKR(r.exportCredit, 2) + '</td></tr>';
+        rows += '<tr><td>Monthly saving</td><td>' + formatPKR(r.monthlySaving, 2) + '</td></tr>';
+        rows += '<tr><td>Payback at 50% self-use</td><td>' + formatNumber(r.paybackMonthsAt50Pct, 0) + ' months</td></tr>';
+        rows += '<tr><td>Payback at 70% self-use</td><td>' + formatNumber(r.paybackMonthsAt70Pct, 0) + ' months</td></tr>';
+        rows += '<tr><td>25-year gross saving (0.5% degradation/yr)</td><td>' + formatPKR(r.lifetimeGrossSaving, 0) + '</td></tr>';
+        rows += '<tr class="total-row"><td>25-year net saving after system cost' + (inverterCost > 0 ? ' and inverter replacement' : '') + '</td><td>' + formatPKR(r.lifetimeNetSaving, 0) + '</td></tr>';
+        breakdownEl.innerHTML = '<tbody>' + rows + '</tbody>';
+        echoEl.textContent = 'Based on: ' + city + ' (' + formatNumber(yieldPerKw, 2) + ' kWh/kW/day), ' + formatNumber(monthlyUnits, 0) + ' units/month, ' + formatNumber(systemKw, 1) + ' kW' + (autoSized ? ' auto-sized' : '') + ' at ' + formatPKR(costPerKw, 0) + '/kW, ' + formatNumber(r.selfUsePct, 0) + '% self-use. Base slab rate for your usage is ' + formatPKR(slabBase, 2) + '/unit (SRO 279(I)/2026); the import rate used is ' + formatPKR(r.importRatePerUnit, 2) + '/unit including FCA, quarterly adjustment and GST.';
+        formulaEl.textContent = 'Generation ' + formatNumber(generation, 0) + ' units = ' + formatNumber(systemKw, 1) + ' kW × ' + formatNumber(yieldPerKw, 2) + ' × 365/12. Saving ' + formatPKR(r.monthlySaving, 2) + ' = ' + formatPKR(r.selfUseSaving, 2) + ' + ' + formatPKR(r.exportCredit, 2) + '. Payback ' + formatNumber(r.paybackMonths, 1) + ' months = ' + formatPKR(systemCost, 0) + ' ÷ ' + formatPKR(r.monthlySaving, 2) + '.';
+        if (roofArea !== undefined) {
+          const needed = solarRoofAreaSqft(systemKw);
+          roofNoteEl.textContent = needed <= roofArea
+            ? 'Roof check: the system needs about ' + formatNumber(needed, 0) + ' sq ft and you have ' + formatNumber(roofArea, 0) + ' sq ft — it fits (rule of thumb, about 100 sq ft per kW).'
+            : 'Roof check: the system needs about ' + formatNumber(needed, 0) + ' sq ft but you entered ' + formatNumber(roofArea, 0) + ' sq ft — it may not fit; check the layout with your installer (rule of thumb, about 100 sq ft per kW).';
+        } else {
+          roofNoteEl.textContent = 'Roof check: a ' + formatNumber(systemKw, 1) + ' kW system needs about ' + formatNumber(solarRoofAreaSqft(systemKw), 0) + ' sq ft (rule of thumb, about 100 sq ft per kW).';
+        }
+        showResult();
+        if (window.matchMedia('(max-width: 899px)').matches) resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorsBox.textContent = err.message;
+        errorsBox.hidden = false;
+        showEmpty();
+      }
+    });
+
+    document.getElementById('solarClear').addEventListener('click', () => {
+      form.reset();
+      errorsBox.textContent = '';
+      errorsBox.hidden = true;
+      formStatus.textContent = 'Form cleared.';
+      showEmpty();
+    });
+    showEmpty();
+
+  </script>
+</Layout>

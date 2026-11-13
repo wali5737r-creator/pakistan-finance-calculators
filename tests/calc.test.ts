@@ -272,7 +272,9 @@ check('area society standard', () => {
 import {
   calcBudget, calcCompound, calcDebtPayoff, calcElectricityBill, calcFixedDeposit, calcFuel,
   calcGasBill, calcGoalDuration, calcGoalMonthly, calcInflation, calcLoanComparison,
-  calcLoanEligibility, checkProtectedStatus, cubicMetresToHm3, mmbtuPerHm3,
+  calcLoanEligibility, calcMonthlyGeneration, calcSolarPayback, checkProtectedStatus,
+  cubicMetresToHm3, mmbtuPerHm3, recommendedSystemKw, solarMonthlySaving, solarRoofAreaSqft,
+  solarSlabBaseRate, solarYieldForCity, unitsFromBill,
 } from '../src/lib/calc';
 
 check('fuel one-way and return trip', () => {
@@ -784,6 +786,108 @@ check('freelancer: validation throws', () => {
   assert.throws(() => calcNonSalariedTax(1e15), /zero or more/);
   assert.throws(() => calcExportTax(-100, true), /zero or more/);
   assert.throws(() => calcFreelancerTax({ exportIncome: 0, psebRegistered: true, localTaxableIncome: -5, returnFiled: true }), /zero or more/);
+});
+
+// --- Solar size & payback (NEPRA Prosumer Regulations 2026, SRO 251(I)/2026) ---
+check('solar city yields: Lahore 3.85, Karachi 4.38, Islamabad 3.82, other city 4.0', () => {
+  assert.equal(solarYieldForCity('Lahore'), 3.85);
+  assert.equal(solarYieldForCity('Karachi'), 4.38);
+  assert.equal(solarYieldForCity('Islamabad'), 3.82);
+  assert.equal(solarYieldForCity('Multan'), 4.0);
+  assert.equal(solarYieldForCity('lahore'), 3.85);
+});
+check('solar worked illustration: 5 kW Lahore, Rs 650,000', () => {
+  // 5 x 3.85 x 365/12 = 585.52 units/month; 60% self-use at Rs 48,
+  // 40% export at Rs 10 -> Rs 19,204.98/month; payback 33.85 months.
+  const gen = calcMonthlyGeneration(5, 3.85);
+  assert.equal(gen, 585.52);
+  const r = calcSolarPayback({ systemKw: 5, monthlyGeneration: gen, systemCost: 650000 });
+  assert.equal(r.selfUsedUnits, 351.31);
+  assert.equal(r.exportedUnits, 234.21);
+  assert.equal(r.selfUseSaving, 16862.88);
+  assert.equal(r.exportCredit, 2342.1);
+  assert.equal(r.monthlySaving, 19204.98);
+  assert.equal(r.paybackMonths, 33.85);
+  assert.equal(r.paybackYears, 2.82);
+  // Payback is ~34 months (~2.8 years), as stated on the page.
+  assert.ok(r.paybackMonths > 33 && r.paybackMonths < 35);
+  assert.equal(r.importRatePerUnit, 48);
+  assert.equal(r.exportRatePerUnit, 10);
+});
+check('solar worked illustration: 10 kW Karachi, Rs 1,300,000', () => {
+  // 10 x 4.38 x 365/12 = 1,332.25 units/month.
+  const gen = calcMonthlyGeneration(10, 4.38);
+  assert.equal(gen, 1332.25);
+  const r = calcSolarPayback({ systemKw: 10, monthlyGeneration: gen, systemCost: 1300000 });
+  assert.equal(r.monthlySaving, 43697.8);
+  assert.equal(r.paybackMonths, 29.75);
+});
+check('solar payback at 50% and 70% side by side (5 kW Lahore)', () => {
+  const r = calcSolarPayback({ systemKw: 5, monthlyGeneration: 585.52, systemCost: 650000 });
+  // 50%: more export at Rs 10, so slower payback; 70%: faster.
+  assert.equal(r.paybackMonthsAt50Pct, 38.28);
+  assert.equal(r.paybackMonthsAt70Pct, 30.33);
+  assert.ok(r.paybackMonthsAt50Pct > r.paybackMonths);
+  assert.ok(r.paybackMonthsAt70Pct < r.paybackMonths);
+});
+check('solar lifetime saving: 25 years at 0.5% degradation', () => {
+  const r = calcSolarPayback({ systemKw: 5, monthlyGeneration: 585.52, systemCost: 650000 });
+  // Year factors sum to (1 - 0.995^25) / 0.005 = 23.564...; gross =
+  // 19,204.98 x 12 x 23.564... = 5,428,698.91; net less Rs 650,000.
+  assert.equal(r.lifetimeGrossSaving, 5428698.91);
+  assert.equal(r.lifetimeNetSaving, 4778698.91);
+  // With a Rs 200,000 inverter replacement, net falls by exactly that.
+  const withInverter = calcSolarPayback({ systemKw: 5, monthlyGeneration: 585.52, systemCost: 650000, inverterReplacementCost: 200000 });
+  assert.equal(withInverter.lifetimeNetSaving, 4578698.91);
+  assert.equal(withInverter.paybackMonths, 33.85); // replacement does not change simple payback
+});
+check('solar legacy agreement: export credited at import rate (1:1)', () => {
+  const r = calcSolarPayback({ systemKw: 5, monthlyGeneration: 585.52, systemCost: 650000, legacyAgreement: true });
+  assert.equal(r.exportRatePerUnit, 48);
+  assert.equal(r.monthlySaving, 28104.96); // every unit worth Rs 48
+  assert.equal(r.paybackMonths, 23.13);
+  assert.equal(r.legacyAgreement, true);
+});
+check('solar recommended size rounds up to nearest 0.5 kW, minimum 1 kW', () => {
+  assert.equal(recommendedSystemKw(585, 3.85), 5);
+  assert.equal(recommendedSystemKw(300, 3.85), 3); // 2.56 -> 3.0
+  assert.equal(recommendedSystemKw(100, 3.85), 1); // 0.85 -> 1.0
+  assert.equal(recommendedSystemKw(585, 4.38), 4.5); // 4.39 -> 4.5
+  assert.equal(recommendedSystemKw(1332.25, 4.38), 10);
+});
+check('solar units from bill at flat Rs 48', () => {
+  assert.equal(unitsFromBill(28080), 585);
+  assert.equal(unitsFromBill(24000), 500);
+  assert.equal(unitsFromBill(19200, 48), 400);
+});
+check('solar slab base rate reuses SRO 279(I)/2026 unprotected slabs', () => {
+  assert.equal(solarSlabBaseRate(100), 22.44);
+  assert.equal(solarSlabBaseRate(350), 36.46);
+  assert.equal(solarSlabBaseRate(585), 40.22);
+  assert.equal(solarSlabBaseRate(701), 47.2);
+});
+check('solar roof area: 100 sq ft per kW rule of thumb', () => {
+  assert.equal(solarRoofAreaSqft(5), 500);
+  assert.equal(solarRoofAreaSqft(10), 1000);
+});
+check('solar monthly saving helper at the boundaries', () => {
+  // 100% self-use: every unit at Rs 48. 0% self-use: every unit at Rs 10.
+  assert.equal(solarMonthlySaving(585.52, 100, 48, 10), 28104.96);
+  assert.equal(solarMonthlySaving(585.52, 0, 48, 10), 5855.2);
+  assert.equal(solarMonthlySaving(100, 60, 48, 10), 3280);
+});
+check('solar: validation throws', () => {
+  assert.throws(() => calcMonthlyGeneration(0, 3.85), /between/);
+  assert.throws(() => calcMonthlyGeneration(101, 3.85), /between/);
+  assert.throws(() => calcMonthlyGeneration(5, 0), /Yield/);
+  assert.throws(() => recommendedSystemKw(0, 3.85), /between 1/);
+  assert.throws(() => unitsFromBill(0), /positive/);
+  assert.throws(() => solarSlabBaseRate(0), /between 1/);
+  assert.throws(() => calcSolarPayback({ systemKw: 5, monthlyGeneration: 585.52, systemCost: 650000, selfUsePct: 101 }), /0% and 100%/);
+  assert.throws(() => calcSolarPayback({ systemKw: 5, monthlyGeneration: 585.52, systemCost: 650000, exportRatePerUnit: -1 }), /Export rate/);
+  assert.throws(() => calcSolarPayback({ systemKw: 5, monthlyGeneration: 585.52, systemCost: 650000, importRatePerUnit: 0 }), /Import rate/);
+  assert.throws(() => calcSolarPayback({ systemKw: 5, monthlyGeneration: 585.52, systemCost: 0 }), /positive/);
+  assert.throws(() => calcSolarPayback({ systemKw: 5, monthlyGeneration: 585.52, systemCost: 650000, inverterReplacementCost: -1 }), /zero or more/);
 });
 
 console.log(`\n${passed} checks passed.`);

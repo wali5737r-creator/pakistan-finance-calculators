@@ -36,6 +36,18 @@ import {
   SURCHARGE_RATE,
   SURCHARGE_THRESHOLD,
 } from '../config/freelancer-tax';
+import {
+  DAYS_PER_MONTH,
+  SOLAR_CITY_YIELDS,
+  SOLAR_DEGRADATION_PER_YEAR,
+  SOLAR_DEFAULT_COST_PER_KW,
+  SOLAR_DEFAULT_EXPORT_RATE,
+  SOLAR_DEFAULT_IMPORT_RATE,
+  SOLAR_DEFAULT_SELF_USE_PCT,
+  SOLAR_DEFAULT_YIELD,
+  SOLAR_ROOF_SQFT_PER_KW,
+  SOLAR_SYSTEM_LIFE_YEARS,
+} from '../config/solar';
 
 export const MAX_AMOUNT = 999999999999;
 
@@ -1425,5 +1437,217 @@ export function calcFreelancerTax(input: FreelancerTaxInput): FreelancerTaxResul
     finalityLost: true,
     slabRows: combined.slabRows,
     slabIncome: input.exportIncome + input.localTaxableIncome,
+  };
+}
+
+// --- Solar size & payback (NEPRA Prosumer Regulations 2026, SRO 251(I)/2026) ---
+
+export const SOLAR_MAX_SYSTEM_KW = 100;
+export const SOLAR_MIN_SYSTEM_KW = 0.5;
+export const SOLAR_MAX_MONTHLY_UNITS = 100000;
+export const SOLAR_MAX_COST_PER_KW = 500000;
+export const SOLAR_MAX_EXPORT_RATE = 100;
+export const SOLAR_MAX_IMPORT_RATE = 200;
+export const SOLAR_MAX_INVERTER_COST = 10000000;
+
+/** Yield (kWh/kW/day) for a city, or the fallback 4.0 for other cities. */
+export function solarYieldForCity(city: string): number {
+  const found = SOLAR_CITY_YIELDS.find((c) => c.city.toLowerCase() === city.trim().toLowerCase());
+  return found ? found.yieldPerKwPerDay : SOLAR_DEFAULT_YIELD;
+}
+
+/** Monthly generation (units/kWh) of a system: kW x daily yield x 365/12. */
+export function calcMonthlyGeneration(systemKw: number, yieldPerKwPerDay: number): number {
+  if (!isFiniteNumber(systemKw) || systemKw <= 0 || systemKw > SOLAR_MAX_SYSTEM_KW) {
+    throw new Error(`System size must be between ${SOLAR_MIN_SYSTEM_KW} and ${SOLAR_MAX_SYSTEM_KW} kW.`);
+  }
+  if (!isFiniteNumber(yieldPerKwPerDay) || yieldPerKwPerDay <= 0 || yieldPerKwPerDay > 10) {
+    throw new Error('Yield must be between 0 and 10 kWh per kW per day.');
+  }
+  return round2(systemKw * yieldPerKwPerDay * DAYS_PER_MONTH);
+}
+
+/** System size (kW) needed to cover a monthly usage, rounded UP to the
+ *  nearest 0.5 kW so the system is not undersized. Minimum 1 kW. */
+export function recommendedSystemKw(monthlyUnits: number, yieldPerKwPerDay: number): number {
+  if (!isFiniteNumber(monthlyUnits) || monthlyUnits <= 0 || monthlyUnits > SOLAR_MAX_MONTHLY_UNITS) {
+    throw new Error(`Monthly units must be between 1 and ${SOLAR_MAX_MONTHLY_UNITS}.`);
+  }
+  if (!isFiniteNumber(yieldPerKwPerDay) || yieldPerKwPerDay <= 0 || yieldPerKwPerDay > 10) {
+    throw new Error('Yield must be between 0 and 10 kWh per kW per day.');
+  }
+  const raw = monthlyUnits / (yieldPerKwPerDay * DAYS_PER_MONTH);
+  return Math.max(1, Math.ceil(raw * 2) / 2);
+}
+
+/** Monthly units implied by a monthly bill at a flat per-unit rate. */
+export function unitsFromBill(monthlyBill: number, flatRatePerUnit = SOLAR_DEFAULT_IMPORT_RATE): number {
+  if (!isFiniteNumber(monthlyBill) || monthlyBill <= 0 || monthlyBill > MAX_AMOUNT) {
+    throw new Error('Monthly bill must be a positive amount.');
+  }
+  if (!isFiniteNumber(flatRatePerUnit) || flatRatePerUnit <= 0 || flatRatePerUnit > SOLAR_MAX_IMPORT_RATE) {
+    throw new Error(`Flat rate must be between Rs 1 and Rs ${SOLAR_MAX_IMPORT_RATE} per unit.`);
+  }
+  return round2(monthlyBill / flatRatePerUnit);
+}
+
+/** Base (energy-only) unprotected slab rate, Rs/unit, for a monthly
+ *  usage under SRO 279(I)/2026 — shown alongside the effective import
+ *  rate so the user can see what the Rs 48 default adds (FCA, quarterly
+ *  adjustment, GST). */
+export function solarSlabBaseRate(monthlyUnits: number): number {
+  if (!isFiniteNumber(monthlyUnits) || monthlyUnits <= 0 || monthlyUnits > SOLAR_MAX_MONTHLY_UNITS) {
+    throw new Error(`Monthly units must be between 1 and ${SOLAR_MAX_MONTHLY_UNITS}.`);
+  }
+  for (const slab of UNPROTECTED_SLABS) {
+    if (slab.upTo === null || monthlyUnits <= slab.upTo) return slab.ratePerUnit;
+  }
+  return UNPROTECTED_SLABS[UNPROTECTED_SLABS.length - 1].ratePerUnit;
+}
+
+/** Rough roof area needed, sq ft — planning rule of thumb only
+ *  (about 100 sq ft per kW, varies by panel and layout). */
+export function solarRoofAreaSqft(systemKw: number): number {
+  if (!isFiniteNumber(systemKw) || systemKw <= 0 || systemKw > SOLAR_MAX_SYSTEM_KW) {
+    throw new Error(`System size must be between ${SOLAR_MIN_SYSTEM_KW} and ${SOLAR_MAX_SYSTEM_KW} kW.`);
+  }
+  return round2(systemKw * SOLAR_ROOF_SQFT_PER_KW);
+}
+
+export interface SolarPaybackInput {
+  systemKw: number;
+  /** Monthly generation, units. */
+  monthlyGeneration: number;
+  /** System cost, Rs (usually systemKw x cost per kW). */
+  systemCost: number;
+  /** Effective import rate, Rs/unit (default Rs 48 flat fallback). */
+  importRatePerUnit?: number;
+  /** Export (NAEPP) rate, Rs/unit (default Rs 10 planning figure). */
+  exportRatePerUnit?: number;
+  /** Share of generation used at home, percent 0-100 (default 60). */
+  selfUsePct?: number;
+  /** Pre-9-Feb-2026 agreement: export credited at the import rate (1:1). */
+  legacyAgreement?: boolean;
+  /** Optional inverter-replacement cost, Rs — default 0 (excluded). */
+  inverterReplacementCost?: number;
+}
+
+export interface SolarPaybackResult {
+  systemKw: number;
+  monthlyGeneration: number;
+  systemCost: number;
+  importRatePerUnit: number;
+  exportRatePerUnit: number;
+  selfUsePct: number;
+  legacyAgreement: boolean;
+  inverterReplacementCost: number;
+  selfUsedUnits: number;
+  exportedUnits: number;
+  selfUseSaving: number;
+  exportCredit: number;
+  /** Monthly saving, Rs. */
+  monthlySaving: number;
+  /** Simple payback, months (system cost / monthly saving). */
+  paybackMonths: number;
+  /** Simple payback, years. */
+  paybackYears: number;
+  /** Payback in months at 50% self-use. */
+  paybackMonthsAt50Pct: number;
+  /** Payback in months at 70% self-use. */
+  paybackMonthsAt70Pct: number;
+  /** Gross 25-year saving with 0.5%/yr degradation, Rs. */
+  lifetimeGrossSaving: number;
+  /** Lifetime saving less system cost and inverter replacement, Rs. */
+  lifetimeNetSaving: number;
+}
+
+/** Monthly saving at a given self-use share: self-used units are
+ *  worth the import rate, exported units the export rate. */
+export function solarMonthlySaving(
+  monthlyGeneration: number,
+  selfUsePct: number,
+  importRatePerUnit: number,
+  exportRatePerUnit: number,
+): number {
+  const selfUsed = (monthlyGeneration * selfUsePct) / 100;
+  const exported = monthlyGeneration - selfUsed;
+  return round2(selfUsed * importRatePerUnit + exported * exportRatePerUnit);
+}
+
+/**
+ * Simple payback for a solar system under NEPRA net billing 2026.
+ * Self-used units save the import rate; exported units earn the
+ * NAEPP export rate (default Rs 10 — a planning figure, NOT a
+ * notified rate; the SRO prints no rupee figure). With a legacy
+ * pre-9-Feb-2026 agreement, export is credited at the import rate
+ * (old 1:1 treatment). Lifetime saving sums 25 years of monthly
+ * saving with 0.5% degradation a year (year 1 at full output).
+ * This is a SIMPLE payback: it ignores inflation, tariff rises,
+ * financing cost and the time value of money, and the page says so.
+ */
+export function calcSolarPayback(input: SolarPaybackInput): SolarPaybackResult {
+  const { systemKw, monthlyGeneration, systemCost } = input;
+  if (!isFiniteNumber(systemKw) || systemKw < SOLAR_MIN_SYSTEM_KW || systemKw > SOLAR_MAX_SYSTEM_KW) {
+    throw new Error(`System size must be between ${SOLAR_MIN_SYSTEM_KW} and ${SOLAR_MAX_SYSTEM_KW} kW.`);
+  }
+  if (!isFiniteNumber(monthlyGeneration) || monthlyGeneration <= 0 || monthlyGeneration > SOLAR_MAX_MONTHLY_UNITS) {
+    throw new Error(`Monthly generation must be between 1 and ${SOLAR_MAX_MONTHLY_UNITS} units.`);
+  }
+  if (!isFiniteNumber(systemCost) || systemCost <= 0 || systemCost > MAX_AMOUNT) {
+    throw new Error('System cost must be a positive amount.');
+  }
+  const importRate = input.importRatePerUnit ?? SOLAR_DEFAULT_IMPORT_RATE;
+  if (!isFiniteNumber(importRate) || importRate <= 0 || importRate > SOLAR_MAX_IMPORT_RATE) {
+    throw new Error(`Import rate must be between Rs 1 and Rs ${SOLAR_MAX_IMPORT_RATE} per unit.`);
+  }
+  const exportRateRaw = input.exportRatePerUnit ?? SOLAR_DEFAULT_EXPORT_RATE;
+  if (!isFiniteNumber(exportRateRaw) || exportRateRaw < 0 || exportRateRaw > SOLAR_MAX_EXPORT_RATE) {
+    throw new Error(`Export rate must be between Rs 0 and Rs ${SOLAR_MAX_EXPORT_RATE} per unit.`);
+  }
+  const selfUsePct = input.selfUsePct ?? SOLAR_DEFAULT_SELF_USE_PCT;
+  if (!isFiniteNumber(selfUsePct) || selfUsePct < 0 || selfUsePct > 100) {
+    throw new Error('Self-use must be between 0% and 100%.');
+  }
+  const inverterCost = input.inverterReplacementCost ?? 0;
+  if (!isFiniteNumber(inverterCost) || inverterCost < 0 || inverterCost > SOLAR_MAX_INVERTER_COST) {
+    throw new Error('Inverter replacement cost must be zero or more.');
+  }
+  const legacy = input.legacyAgreement === true;
+  const exportRate = legacy ? importRate : exportRateRaw;
+  const selfUsedUnits = round2((monthlyGeneration * selfUsePct) / 100);
+  const exportedUnits = round2(monthlyGeneration - selfUsedUnits);
+  const selfUseSaving = round2(selfUsedUnits * importRate);
+  const exportCredit = round2(exportedUnits * exportRate);
+  const monthlySaving = round2(selfUseSaving + exportCredit);
+  if (monthlySaving <= 0) {
+    throw new Error('Monthly saving is zero — check the import and export rates.');
+  }
+  const paybackMonths = round2(systemCost / monthlySaving);
+  const savingAt50 = solarMonthlySaving(monthlyGeneration, 50, importRate, exportRate);
+  const savingAt70 = solarMonthlySaving(monthlyGeneration, 70, importRate, exportRate);
+  // Lifetime: year t output factor (1 - 0.005)^(t-1), t = 1..25.
+  const degradationFactor = (1 - Math.pow(1 - SOLAR_DEGRADATION_PER_YEAR, SOLAR_SYSTEM_LIFE_YEARS)) / SOLAR_DEGRADATION_PER_YEAR;
+  const lifetimeGrossSaving = round2(monthlySaving * 12 * degradationFactor);
+  const lifetimeNetSaving = round2(lifetimeGrossSaving - systemCost - inverterCost);
+  return {
+    systemKw,
+    monthlyGeneration,
+    systemCost,
+    importRatePerUnit: importRate,
+    exportRatePerUnit: exportRate,
+    selfUsePct,
+    legacyAgreement: legacy,
+    inverterReplacementCost: inverterCost,
+    selfUsedUnits,
+    exportedUnits,
+    selfUseSaving,
+    exportCredit,
+    monthlySaving,
+    paybackMonths,
+    paybackYears: round2(paybackMonths / 12),
+    paybackMonthsAt50Pct: round2(systemCost / savingAt50),
+    paybackMonthsAt70Pct: round2(systemCost / savingAt70),
+    lifetimeGrossSaving,
+    lifetimeNetSaving,
   };
 }
