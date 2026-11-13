@@ -159,6 +159,15 @@ input[type="radio"], input[type="checkbox"] { accent-color: var(--brand-700); }
   scrollbar-width: none;
   padding-top: 7px;
   padding-bottom: 7px;
+  /* End padding so the last label can be scrolled fully into view with
+     space after it, instead of stopping cut off mid-label at the edge. */
+  padding-inline-end: 16px;
+  scroll-padding-inline: 16px;
+  /* Snap to whole labels when scrolling, and fade the right edge so a
+     partly visible label reads as "more to scroll", not a clipped label. */
+  scroll-snap-type: x proximity;
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%);
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%);
 }
 .tool-nav-scroll::-webkit-scrollbar { display: none; }
 .tool-nav-scroll a {
@@ -169,6 +178,7 @@ input[type="radio"], input[type="checkbox"] { accent-color: var(--brand-700); }
   padding: 6px 12px;
   border-radius: 999px;
   white-space: nowrap;
+  scroll-snap-align: start;
 }
 .tool-nav-scroll a:hover { background: rgba(255, 255, 255, 0.12); color: #fff; text-decoration: none; }
 

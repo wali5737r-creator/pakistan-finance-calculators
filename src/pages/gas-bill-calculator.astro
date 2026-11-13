@@ -217,8 +217,7 @@ const related = [
           <p id="gasEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p id="gasFormula" style="font-size: 16px;"></p>
           <p style="font-size: 13px; color: var(--ink-muted);">
-            Estimate only — check important figures before acting.
-            <a href="#gasDisclaimer">Read the full disclaimer.</a>
+            Estimate only — check important figures before acting. <a href="#gasDisclaimer">Read the full disclaimer.</a>
           </p>
         </div>
 
@@ -299,11 +298,7 @@ const related = [
         check the final amount on your official bill.
       </p>
       <p>
-        Sources:
-        <a href="https://www.ssgc.com.pk/web/?page_id=103">SSGC domestic rates</a>,
-        <a href="https://www.ogra.org.pk/consumer-gas-prices">OGRA consumer gas prices</a>,
-        and the
-        <a href="https://www.sngpl.com.pk/billcalc.jsp?mdids=92">SNGPL bill estimator</a>.
+        Sources: <a href="https://www.ssgc.com.pk/web/?page_id=103">SSGC domestic rates</a>, <a href="https://www.ogra.org.pk/consumer-gas-prices">OGRA consumer gas prices</a>, and the <a href="https://www.sngpl.com.pk/billcalc.jsp?mdids=92">SNGPL bill estimator</a>.
       </p>
       <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
@@ -378,6 +373,12 @@ const related = [
     .breakdown-table td:last-child,
     .breakdown-table th:last-child {
       text-align: right;
+    }
+    /* Rowspan cells hold one fixed charge for a whole slab group; top-align
+       them so the amount sits on the group's first row instead of floating
+       on a middle row where it looks attached to that one slab. */
+    .breakdown-table td[rowspan] {
+      vertical-align: top;
     }
     .breakdown-table tr.total-row td {
       font-weight: 700;
