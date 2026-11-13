@@ -3,7 +3,7 @@
 // they are never a live rate and never appear in site copy (SRS §6.5/§7.5).
 import assert from 'node:assert/strict';
 import {
-  calcAge, calcDscEncashment, calcEMI, calcEobiContributions, calcEobiPension, calcExportTax, calcFreelancerTax, calcGold, calcGst, calcGstAdd, calcGstRemove, calcInvalidityPension, calcNationalSavings, calcNonSalariedTax, calcOldAgeGrant, calcPercentage, calcReducedPension, calcSaProfit, calcSscProfit, calcSurvivorPension, calcTax, calcZakat,
+  calcAge, calcDscEncashment, calcEMI, calcEobiContributions, calcEobiPension, calcExportTax, calcFreelancerTax, calcGold, calcGst, calcGstAdd, calcGstRemove, calcInvalidityPension, calcNationalSavings, calcNonSalariedTax, calcOldAgeGrant, calcPercentage, calcReducedPension, calcSaProfit, calcSilverPerGram, calcSilverPerTola, calcSscProfit, calcSurvivorPension, calcTax, calcZakat,
   applyNssWht, calcNssMonthlyProfit, convertArea, convertAreaToAll, convertAreaWithUnits, convertAreaToAllWithUnits,
   convertCurrency, formatNumber,
   goldValueFromWeight, nssSchemeById, parseDecimal, pensionCreditedYears, pensionWageForPreset, round2, todayInKarachi,
@@ -174,6 +174,19 @@ check('gold E1-E4', () => {
   approx(calcGold(5, 'grams', 24, price).adjustedValue, 128600.82, 0.01);
   approx(calcGold(10, 'grams', 18, price).adjustedValue, 192901.23, 0.01);
   assert.equal(calcGold(1, 'tola', 24, price).grams, 11.664);
+});
+
+// --- Silver per tola (same tola as gold: 1 tola = 11.664 g) ---
+// Per-gram figures below are TEST INPUTS ONLY — never a live rate.
+check('silver per-tola conversion', () => {
+  approx(calcSilverPerTola(1000), 11664, 0.001);
+  approx(calcSilverPerTola(250.5), 2921.832, 0.001);
+  approx(calcSilverPerGram(11664), 1000, 0.001);
+  approx(calcSilverPerGram(calcSilverPerTola(987.65)), 987.65, 0.001);
+  assert.throws(() => calcSilverPerTola(0), /positive number/);
+  assert.throws(() => calcSilverPerTola(-5), /positive number/);
+  assert.throws(() => calcSilverPerTola(Number.NaN), /positive number/);
+  assert.throws(() => calcSilverPerGram(0), /positive number/);
 });
 
 // --- Percentage (SRS §8.5 E1-E7) ---

@@ -15,6 +15,10 @@ const faqs = [
     a: 'The live price is shown at the top of this page, with the source it came from and the date and time it was last updated. If the price is stale, it is labelled stale with its last-updated time. No fixed price is shown here, because the price changes. If no live price is available, you can enter a price of your own instead.',
   },
   {
+    q: 'What is the price of 1 tola of silver today?',
+    a: 'The live silver price per tola is shown in the Silver section on this page, from the same source as the gold price, with the source and time shown. Silver is quoted as fine silver — there is no karat system — and the price is the international spot price in PKR, not a local Sarafa jeweller rate. If no live price is available, the section says Unavailable rather than showing a guessed price.',
+  },
+  {
     q: 'How many grams are in 1 tola?',
     a: `One tola is ${TOLA_GRAMS} grams. Enter a weight in tola or grams — both units are shown in your result, so the conversion is transparent.`,
   },
@@ -256,6 +260,34 @@ const related = [
       </div>
     </div>
   </div>
+
+  <section class="container" id="silverSection" aria-labelledby="silverHeading" style="margin-top: 32px;">
+    <div class="card">
+      <h2 id="silverHeading" style="font-size: 20px;">Silver price per tola</h2>
+      <div id="silverStrip" class="notice-info">
+        <p>
+          <span id="silverStripText">Fetching the latest price…</span>
+          <span id="silverStripBadge" class="badge badge-info" hidden></span>
+        </p>
+      </div>
+      <p id="silverPerGramLine" style="font-size: 15px;" hidden></p>
+      <p style="font-size: 15px; color: var(--ink-muted);">
+        Silver is priced per tola from the same live source as the gold price above
+        (goldprice.dev), converted from the per-gram price — 1 tola is {TOLA_GRAMS} grams —
+        and shown with the same source and time. How silver differs from gold: silver is
+        quoted as fine silver, with no karat system like gold’s 24K / 22K / 21K / 18K, so
+        there is a single per-tola figure and no purity adjustment. Silver is also an
+        industrial metal, so its price moves with industrial demand as well as investment
+        demand, and it is far cheaper per tola than gold. The price here is the
+        international spot price in PKR, 15 minutes delayed on the free plan, not a local
+        Sarafa jeweller rate — making charges, wastage, taxes, and dealer spreads are not
+        included. Silver also sets the lower Zakat nisab; see the <a href="/zakat-calculator/">Zakat Calculator</a>.
+      </p>
+      <p id="silverCredit" hidden style="font-size: 14px; color: var(--ink-muted);">
+        Live silver prices by <a href="https://goldprice.dev" rel="noopener nofollow" target="_blank">goldprice.dev</a>.
+      </p>
+    </div>
+  </section>
 
   <section class="container" id="tvGoldSection" aria-labelledby="tvGoldHeading" style="margin-top: 32px;">
     <div class="card">
@@ -504,6 +536,9 @@ const related = [
       fetchedAt: null,
       quotationUnit: null,
     };
+    // Silver comes from the same /api/metals fetch as gold, so it shares
+    // the gold price's source and timestamps; only the price differs.
+    let silverState = { status: 'loading', price: null };
 
     function fmtTime(iso) {
       try {
@@ -531,6 +566,64 @@ const related = [
     function freshness() {
       if (priceState.status !== 'ready') return priceState.status;
       return goldFreshness(Date.parse(priceState.asOf), Date.now(), Date.parse(priceState.fetchedAt));
+    }
+
+    // Silver strip: same source, time, and freshness rules as the gold
+    // strip above. Unavailable is shown honestly — never a guessed price.
+    function updateSilver() {
+      const strip = document.getElementById('silverStrip');
+      const stripText = document.getElementById('silverStripText');
+      const stripBadge = document.getElementById('silverStripBadge');
+      const perGramLine = document.getElementById('silverPerGramLine');
+      const creditEl = document.getElementById('silverCredit');
+      if (!strip || !stripText) return;
+      stripBadge.hidden = true;
+      if (perGramLine) perGramLine.hidden = true;
+      if (creditEl) creditEl.hidden = true;
+      if (silverState.status === 'loading') {
+        strip.className = 'notice-info';
+        stripText.textContent = 'Fetching the latest price…';
+        return;
+      }
+      if (silverState.status === 'unavailable' || priceState.status === 'unavailable') {
+        strip.className = 'notice-warning';
+        stripText.textContent =
+          'Silver price unavailable. The live price could not be fetched — no price is shown rather than a guessed price.';
+        stripBadge.hidden = false;
+        stripBadge.textContent = 'Unavailable';
+        stripBadge.className = 'badge badge-warning';
+        return;
+      }
+      const fresh = freshness();
+      const priceText = 'Live silver price: ' + formatPKR(silverState.price, 2) + ' per tola';
+      const sourceText = priceState.sourceName ? ' · Source: ' + priceState.sourceName : '';
+      if (fresh === 'stale') {
+        strip.className = 'notice-warning';
+        stripText.textContent =
+          'Stale price — last updated ' + fmtTime(priceState.asOf) + '. ' + priceText + sourceText + '.';
+        stripBadge.hidden = false;
+        stripBadge.textContent = 'Stale';
+        stripBadge.className = 'badge badge-warning';
+      } else if (fresh === 'unavailable') {
+        strip.className = 'notice-warning';
+        stripText.textContent = 'Silver price unavailable. The live price could not be fetched.';
+        stripBadge.hidden = false;
+        stripBadge.textContent = 'Unavailable';
+        stripBadge.className = 'badge badge-warning';
+        return;
+      } else {
+        strip.className = 'notice-info';
+        stripText.textContent = priceText + sourceText + ' · as of ' + fmtTime(priceState.asOf) + '.';
+        stripBadge.hidden = false;
+        stripBadge.textContent = 'Current';
+        stripBadge.className = 'badge badge-success';
+      }
+      if (perGramLine) {
+        perGramLine.textContent =
+          'Price per gram: ' + formatPKR(silverState.price / TOLA_GRAMS, 2) + ' (1 tola = ' + TOLA_GRAMS + ' g).';
+        perGramLine.hidden = false;
+      }
+      if (creditEl) creditEl.hidden = false;
     }
 
     function checkedValue(name) {
@@ -823,10 +916,17 @@ const related = [
         if (freshness() === 'unavailable') {
           priceState.status = 'unavailable';
         }
+        const silver = typeof data.silverPerTola === 'number' ? data.silverPerTola : null;
+        silverState =
+          silver !== null && Number.isFinite(silver) && silver > 0
+            ? { status: 'ready', price: silver }
+            : { status: 'unavailable', price: null };
       } catch {
         priceState = { status: 'unavailable', price: null, sourceName: null, asOf: null, fetchedAt: null, quotationUnit: null };
+        silverState = { status: 'unavailable', price: null };
       }
       updateStrip();
+      updateSilver();
       evaluate();
     }
 
@@ -959,6 +1059,7 @@ const related = [
     }
 
     updateStrip();
+    updateSilver();
     loadPrice();
   </script>
 </Layout>

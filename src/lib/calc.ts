@@ -347,6 +347,24 @@ export function calcGold(weight: number, unit: 'tola' | 'grams', karat: number, 
   };
 }
 
+// -------------------------------------------------------- Silver ------
+// Silver uses the same tola as gold: 1 tola = TOLA_GRAMS grams. The live
+// silver rate comes from the same metals source as gold
+// (functions/api/metals.ts, goldprice.dev) — per gram in PKR, converted
+// here to per tola. No karat system applies to silver: it is quoted as
+// fine silver, so there is no purity adjustment like gold's karat ÷ 24.
+export function calcSilverPerTola(silverPerGram: number): number {
+  if (!isFiniteNumber(silverPerGram) || silverPerGram <= 0)
+    throw new Error('Silver price per gram must be a positive number.');
+  return silverPerGram * TOLA_GRAMS;
+}
+
+export function calcSilverPerGram(silverPerTola: number): number {
+  if (!isFiniteNumber(silverPerTola) || silverPerTola <= 0)
+    throw new Error('Silver price per tola must be a positive number.');
+  return silverPerTola / TOLA_GRAMS;
+}
+
 // --------------------------------------------------------- Percentage --
 export interface PercentageResult {
   result: number;
