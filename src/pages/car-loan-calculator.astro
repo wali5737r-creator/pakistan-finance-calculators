@@ -99,23 +99,23 @@ const related = [
 <Layout title={title} description={description} slug={slug} schema={schema}>
   <div class="container" style="padding-top: 32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Car Loan Calculator</p>
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="car.crumb">Car Loan Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;">Loans</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Car Loan Calculator Pakistan</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="loans.badge">Loans</p>
+    <h1 data-i18n="car.h1" style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Car Loan Calculator Pakistan</h1>
+    <p class="prose-narrow" data-i18n="car.intro" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
       Work out the monthly EMI on a car loan in Pakistan from the car price, your down
       payment, the engine size and the markup you enter — with the SBP tenure cap, the
       Rs 3,000,000 finance cap, the processing fee and insurance shown separately, so
       you see the full cost of the car, not just the EMI.
     </p>
     <p class="notice-info prose-narrow" style="margin-top: 16px;">
-      <strong>Terms checked 13 November 2026.</strong> Car-loan rates are floating
-      (KIBOR-linked) and change — the SBP policy rate was 12% and 1-year KIBOR was
-      12.94% on 6 November 2026, so the November 2026 band below is roughly 13.5–18%.
-      The rate on your bank's Key Fact Statement / offer letter governs, not this
-      estimate.
+      <strong data-i18n="car.notice-strong">Terms checked 13 November 2026.</strong><span data-i18n="car.notice-pre1"> Car-loan rates are floating
+      (KIBOR-linked) and change — the SBP policy rate was </span>12%<span data-i18n="car.notice-pre2"> and 1-year KIBOR was
+      </span>12.94%<span data-i18n="car.notice-pre3"> on 6 November 2026, so the November 2026 band below is roughly </span>13.5–18%<span data-i18n="car.notice-post">. The rate on your bank's Key Fact Statement / offer letter governs, not this
+      estimate.</span>
     </p>
+    <p id="lang-note" class="lang-note" data-i18n="tax.others-note" hidden>The other calculators on this site are still in English in this phase.</p>
   </div>
 
   <div class="container" style="margin-top: 20px;">
@@ -123,55 +123,55 @@ const related = [
       <div class="card">
         <form id="carForm" novalidate>
           <div class="field">
-            <label for="carPrice">Car price (Rs) <span aria-hidden="true">*</span></label>
+            <label for="carPrice"><span data-i18n="car.price-label">Car price (Rs)</span> <span aria-hidden="true">*</span></label>
             <input id="carPrice" type="text" inputmode="decimal" autocomplete="off" value={CAR_LOAN_DEFAULT_PRICE} />
-            <p class="hint" id="carPriceHint">The on-road price of the car you want to buy. Only locally made cars can be bank-financed — imported cars are not eligible.</p>
+            <p class="hint" id="carPriceHint" data-i18n="car.price-hint">The on-road price of the car you want to buy. Only locally made cars can be bank-financed — imported cars are not eligible.</p>
           </div>
 
           <div class="field">
-            <label for="carEngine">Engine size <span aria-hidden="true">*</span></label>
+            <label for="carEngine"><span data-i18n="car.engine-label">Engine size</span> <span aria-hidden="true">*</span></label>
             <select id="carEngine" aria-required="true">
-              <option value="upto-1000">Up to 1000cc — tenure up to 5 years</option>
-              <option value="above-1000" selected>Above 1000cc — tenure up to 3 years</option>
+              <option value="upto-1000" data-i18n="car.engine-upto">Up to 1000cc — tenure up to 5 years</option>
+              <option value="above-1000" selected data-i18n="car.engine-above">Above 1000cc — tenure up to 3 years</option>
             </select>
-            <p class="hint">SBP caps the tenure by engine size. Changing this updates the maximum tenure below.</p>
+            <p class="hint" data-i18n="car.engine-hint">SBP caps the tenure by engine size. Changing this updates the maximum tenure below.</p>
           </div>
 
           <div class="field">
-            <label for="carDown">Down payment (%) <span aria-hidden="true">*</span></label>
+            <label for="carDown"><span data-i18n="car.down-label">Down payment (%)</span> <span aria-hidden="true">*</span></label>
             <input id="carDown" type="text" inputmode="decimal" autocomplete="off" value={CAR_LOAN_DEFAULT_DOWN_PCT} />
-            <p class="hint" id="carDownHint">SBP minimum 30% of the car price. Enter 30–50%. A car above about Rs 42.9 lakh needs more than 30% down because of the Rs 3,000,000 finance cap.</p>
+            <p class="hint" id="carDownHint" data-i18n="car.down-hint">SBP minimum 30% of the car price. Enter 30–50%. A car above about Rs 42.9 lakh needs more than 30% down because of the Rs 3,000,000 finance cap.</p>
           </div>
 
           <div class="field">
-            <label for="carTenure">Tenure (years) <span aria-hidden="true">*</span></label>
+            <label for="carTenure"><span data-i18n="car.tenure-label">Tenure (years)</span> <span aria-hidden="true">*</span></label>
             <input id="carTenure" type="text" inputmode="numeric" autocomplete="off" value={CAR_LOAN_DEFAULT_TENURE_YEARS} />
             <p class="hint" id="carTenureHint">Whole years, 1–3 for cars above 1000cc.</p>
           </div>
 
           <div class="field">
-            <label for="carRate">Markup rate (% per year) <span aria-hidden="true">*</span></label>
+            <label for="carRate"><span data-i18n="car.rate-label">Markup rate (% per year)</span> <span aria-hidden="true">*</span></label>
             <input id="carRate" type="text" inputmode="decimal" autocomplete="off" value={CAR_LOAN_DEFAULT_RATE_PCT} />
-            <p class="hint">Default 16.5% — inside the November 2026 band of about 13.5–18% (KIBOR + bank spread). Enter the rate your bank quotes you; it is not a live rate from this site.</p>
+            <p class="hint" data-i18n="car.rate-hint">Default 16.5% — inside the November 2026 band of about 13.5–18% (KIBOR + bank spread). Enter the rate your bank quotes you; it is not a live rate from this site.</p>
           </div>
 
           <div class="field">
-            <label for="carFee">Processing fee (Rs, flat) <span aria-hidden="true">*</span></label>
+            <label for="carFee"><span data-i18n="car.fee-label">Processing fee (Rs, flat)</span> <span aria-hidden="true">*</span></label>
             <input id="carFee" type="text" inputmode="decimal" autocomplete="off" value={CAR_LOAN_DEFAULT_PROCESSING_FEE} />
-            <p class="hint">A flat amount, not a percentage: Meezan Rs 3,800 + FED, MCB Rs 12,000, HBL Rs 13,000 + FED, UBL Rs 14,000 + FED. FED (federal excise duty) is charged on top where shown.</p>
+            <p class="hint" data-i18n="car.fee-hint">A flat amount, not a percentage: Meezan Rs 3,800 + FED, MCB Rs 12,000, HBL Rs 13,000 + FED, UBL Rs 14,000 + FED. FED (federal excise duty) is charged on top where shown.</p>
           </div>
 
           <div class="field">
-            <label for="carInsurance">Insurance / Takaful (% of car value per year) <span aria-hidden="true">*</span></label>
+            <label for="carInsurance"><span data-i18n="car.insurance-label">Insurance / Takaful (% of car value per year)</span> <span aria-hidden="true">*</span></label>
             <input id="carInsurance" type="text" inputmode="decimal" autocomplete="off" value={CAR_LOAN_DEFAULT_INSURANCE_PCT} />
-            <p class="hint">Default 2.0% per year (range 1.4–3.0%). Charged on the original car value each year in this estimate — the real premium may fall as the car's value falls.</p>
+            <p class="hint" data-i18n="car.insurance-hint">Default 2.0% per year (range 1.4–3.0%). Charged on the original car value each year in this estimate — the real premium may fall as the car's value falls.</p>
           </div>
 
           <div id="carErrors" class="error-box" role="alert" hidden></div>
 
           <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
-            <button id="carCalculate" class="btn-primary" type="submit">Calculate</button>
-            <button id="carClear" class="btn-secondary" type="button">Clear</button>
+            <button id="carCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
+            <button id="carClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
           <p id="carFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
         </form>
@@ -179,33 +179,33 @@ const related = [
 
       <div class="result-card" id="carResultCard" tabindex="-1">
         <div id="carEmpty">
-          <p style="font-weight: 700;">Your result will appear here.</p>
-          <p>Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);">
+          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="car.empty-note">
             You will see your monthly EMI, the financed amount, total interest, and the full cost including fee and insurance.
           </p>
         </div>
 
         <div id="carResult" data-result-text hidden>
-          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Your monthly EMI</p>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" data-i18n="car.monthly-label">Your monthly EMI</p>
           <div aria-live="polite" aria-atomic="true">
             <p class="result-value" id="carHeadline"></p>
           </div>
           <div class="stat-grid">
             <div>
-              <p class="stat-label">Amount financed</p>
+              <p class="stat-label" data-i18n="car.stat1">Amount financed</p>
               <p class="stat-value" id="carStat1"></p>
             </div>
             <div>
-              <p class="stat-label">Total interest</p>
+              <p class="stat-label" data-i18n="car.stat2">Total interest</p>
               <p class="stat-value" id="carStat2"></p>
             </div>
             <div>
-              <p class="stat-label">Down payment</p>
+              <p class="stat-label" data-i18n="car.stat3">Down payment</p>
               <p class="stat-value" id="carStat3"></p>
             </div>
             <div>
-              <p class="stat-label">Total cost of the car</p>
+              <p class="stat-label" data-i18n="car.stat4">Total cost of the car</p>
               <p class="stat-value" id="carStat4"></p>
             </div>
           </div>
@@ -216,13 +216,13 @@ const related = [
           <p id="carEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p id="carFormula" style="font-size: 16px;"></p>
           <p style="font-size: 13px; color: var(--ink-muted);">
-            Estimate only — check important figures before acting. <a href="#carDisclaimer">Read the full disclaimer.</a>
+            <span data-i18n="car.estimate">Estimate only — check important figures before acting.</span> <a href="#carDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
 
         <div class="actions-row no-print">
-          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
         <p data-copy-status role="status" style="font-size: 14px;"></p>
       </div>
@@ -230,31 +230,31 @@ const related = [
   </div>
 
   <div class="container prose-narrow" style="margin-top: 40px;">
-    <h2>How it works</h2>
+    <h2 data-i18n="car.how-h">How it works</h2>
     <ol>
-      <li>Enter the car price and your down payment (at least 30%). The financed amount is the price minus the down payment.</li>
-      <li>Pick the engine size: it sets the SBP tenure cap — 5 years up to 1000cc, 3 years above 1000cc. Enter the tenure in whole years.</li>
-      <li>Enter the annual markup rate your bank quotes (the default 16.5% sits inside the November 2026 band of about 13.5–18%). The EMI is worked out on the financed amount with the reducing-balance formula.</li>
-      <li>The processing fee (flat Rs) and insurance (a % of the car value per year, for the whole tenure) are added to the total cost — they are not part of the EMI.</li>
+      <li data-i18n="car.how1">Enter the car price and your down payment (at least 30%). The financed amount is the price minus the down payment.</li>
+      <li data-i18n="car.how2">Pick the engine size: it sets the SBP tenure cap — 5 years up to 1000cc, 3 years above 1000cc. Enter the tenure in whole years.</li>
+      <li data-i18n="car.how3">Enter the annual markup rate your bank quotes (the default 16.5% sits inside the November 2026 band of about 13.5–18%). The EMI is worked out on the financed amount with the reducing-balance formula.</li>
+      <li data-i18n="car.how4">The processing fee (flat Rs) and insurance (a % of the car value per year, for the whole tenure) are added to the total cost — they are not part of the EMI.</li>
     </ol>
 
-    <h2>Formula</h2>
-    <p>Financed amount = car price − down payment</p>
-    <p>EMI = P × R × (1+R)^N / ((1+R)^N − 1), where P is the financed amount, R is the monthly rate (annual markup ÷ 100 ÷ 12), and N is the number of months. If the rate is 0, EMI = P ÷ N.</p>
-    <p>Total cost = down payment + (EMI × months) + processing fee + insurance over the tenure</p>
+    <h2 data-i18n="car.formula-h">Formula</h2>
+    <p data-i18n="car.f1">Financed amount = car price − down payment</p>
+    <p data-i18n="car.f2">EMI = P × R × (1+R)^N / ((1+R)^N − 1), where P is the financed amount, R is the monthly rate (annual markup ÷ 100 ÷ 12), and N is the number of months. If the rate is 0, EMI = P ÷ N.</p>
+    <p data-i18n="car.f3">Total cost = down payment + (EMI × months) + processing fee + insurance over the tenure</p>
 
-    <h2>Worked example</h2>
-    <p><strong>Example — Rs 3,000,000 car, above 1000cc:</strong> 30% down is Rs 900,000, so the financed amount is Rs 2,100,000. At 16.5% per year for 3 years (36 months) the EMI is Rs 74,349.20, total interest is Rs 576,571.35 and the total paid on the loan is Rs 2,676,571.35. Add the down payment (Rs 900,000), a Rs 10,000 processing fee and insurance at 2.0% per year for 3 years (Rs 180,000) and the full cost is Rs 3,766,571.35.</p>
-    <p><strong>Same car at the ends of the November 2026 band:</strong> at 13.5% the EMI is Rs 71,264.10; at 18% it is Rs 75,920.03. That is why the rate your bank actually offers matters more than any single figure on this page.</p>
-    <p><strong>The Rs 3m cap in practice:</strong> a Rs 5,000,000 car at 30% down finances Rs 3,500,000 — over the SBP cap of Rs 3,000,000 per person. At 40% down it finances exactly Rs 3,000,000, which is within the cap.</p>
-    <p style="font-size: 14px; color: var(--ink-muted);">All examples use the figures verified 13 November 2026.</p>
+    <h2 data-i18n="car.example-h">Worked example</h2>
+    <p><strong><span data-i18n="car.exa-label-pre">Example — </span>Rs 3,000,000<span data-i18n="car.exa-label-post"> car, above 1000cc:</span></strong> 30%<span data-i18n="car.exa-pre1"> down is </span>Rs 900,000<span data-i18n="car.exa-pre2">, so the financed amount is </span>Rs 2,100,000<span data-i18n="car.exa-pre3">. At </span>16.5%<span data-i18n="car.exa-pre4"> per year for 3 years (36 months) the EMI is </span>Rs 74,349.20<span data-i18n="car.exa-pre5">, total interest is </span>Rs 576,571.35<span data-i18n="car.exa-pre6"> and the total paid on the loan is </span>Rs 2,676,571.35<span data-i18n="car.exa-pre7">. Add the down payment (</span>Rs 900,000<span data-i18n="car.exa-pre8">), a </span>Rs 10,000<span data-i18n="car.exa-pre9"> processing fee and insurance at </span>2.0%<span data-i18n="car.exa-pre10"> per year for 3 years (</span>Rs 180,000<span data-i18n="car.exa-pre11">) and the full cost is </span>Rs 3,766,571.35<span data-i18n="car.exa-post">.</span></p>
+    <p><strong data-i18n="car.exb-label">Same car at the ends of the November 2026 band:</strong><span data-i18n="car.exb-pre1"> at </span>13.5%<span data-i18n="car.exb-pre2"> the EMI is </span>Rs 71,264.10<span data-i18n="car.exb-pre3">; at </span>18%<span data-i18n="car.exb-pre4"> it is </span>Rs 75,920.03<span data-i18n="car.exb-post">. That is why the rate your bank actually offers matters more than any single figure on this page.</span></p>
+    <p><strong data-i18n="car.exc-label">The Rs 3m cap in practice:</strong><span data-i18n="car.exc-pre1"> a </span>Rs 5,000,000<span data-i18n="car.exc-pre2"> car at </span>30%<span data-i18n="car.exc-pre3"> down finances </span>Rs 3,500,000<span data-i18n="car.exc-pre4"> — over the SBP cap of </span>Rs 3,000,000<span data-i18n="car.exc-pre5"> per person. At </span>40%<span data-i18n="car.exc-pre6"> down it finances exactly </span>Rs 3,000,000<span data-i18n="car.exc-post">, which is within the cap.</span></p>
+    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="car.ex-verified">All examples use the figures verified 13 November 2026.</p>
 
-    <h2>Markup rates by bank — November 2026 band</h2>
-    <p>All floating rates are 1-year KIBOR plus the bank's spread, repriced as KIBOR moves — so no single rate on this page is "the" car loan rate. The all-in band in November 2026 was about 13.5% to 18%, with a typical floating band of about 15.3–17.5%.</p>
+    <h2 data-i18n="car.rates-h">Markup rates by bank — November 2026 band</h2>
+    <p data-i18n="car.rates-intro">All floating rates are 1-year KIBOR plus the bank's spread, repriced as KIBOR moves — so no single rate on this page is "the" car loan rate. The all-in band in November 2026 was about 13.5% to 18%, with a typical floating band of about 15.3–17.5%.</p>
     <div class="table-wrap">
     <table class="breakdown-table" aria-label="Car loan markup by bank">
       <thead>
-        <tr><th scope="col">Bank</th><th scope="col">Markup / spread</th><th scope="col">Note</th></tr>
+        <tr><th scope="col" data-i18n="car.th-bank">Bank</th><th scope="col" data-i18n="car.th-spread">Markup / spread</th><th scope="col" data-i18n="car.th-note">Note</th></tr>
       </thead>
       <tbody>
         {CAR_LOAN_BANK_SPREADS.map((row) => (
@@ -268,11 +268,11 @@ const related = [
     </table>
     </div>
 
-    <h2>Processing fees — flat amounts, not percentages</h2>
+    <h2 data-i18n="car.fees-h">Processing fees — flat amounts, not percentages</h2>
     <div class="table-wrap">
     <table class="breakdown-table" aria-label="Car loan processing fees">
       <thead>
-        <tr><th scope="col">Bank</th><th scope="col">Processing fee</th></tr>
+        <tr><th scope="col" data-i18n="car.th-bank">Bank</th><th scope="col" data-i18n="car.th-fee">Processing fee</th></tr>
       </thead>
       <tbody>
         {CAR_LOAN_PROCESSING_FEES.map((row) => (
@@ -284,36 +284,36 @@ const related = [
       </tbody>
     </table>
     </div>
-    <p style="font-size: 14px; color: var(--ink-muted);">FED (federal excise duty) is charged on top of the fee where shown. Early settlement charges exist and differ by bank (for example HBL charges 5% of the outstanding amount) — no single figure is shown because there is no single figure. Minimum income: HBL/UBL Rs 35,000; Bank Alfalah Rs 30,000 salaried / Rs 50,000 self-employed; MCB Rs 40,000 net. SBP keeps all consumer instalments within 40% of net disposable income.</p>
+    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="car.fed-note">FED (federal excise duty) is charged on top of the fee where shown. Early settlement charges exist and differ by bank (for example HBL charges 5% of the outstanding amount) — no single figure is shown because there is no single figure. Minimum income: HBL/UBL Rs 35,000; Bank Alfalah Rs 30,000 salaried / Rs 50,000 self-employed; MCB Rs 40,000 net. SBP keeps all consumer instalments within 40% of net disposable income.</p>
 
-    <h2>What this page does not settle</h2>
-    <p>These points are stated plainly rather than filled in with a guess:</p>
+    <h2 data-i18n="car.unsettled-h">What this page does not settle</h2>
+    <p data-i18n="car.unsettled-intro">These points are stated plainly rather than filled in with a guess:</p>
     <ul>
-      <li>The SBP down-payment floor is quoted in some places as 15% for cars up to 1000cc and 30% above — bank tables follow the 30%-for-all reading, so this page states 30% and notes the ≤1000cc exemption exists in the SBP text.</li>
-      <li>Bank AL Habib's spread comes from a single secondary source (an archived page, 19 May 2026) — confirm it with the bank.</li>
-      <li>UBL's spread is conflicted: one reading of the UBL page gives KIBOR +3.5% (existing) / +4.0% (new); another (6 September 2026) gives +4.25%/+4.75% (1–3 years) and +4.75%/+5.25% (4–5 years). This page shows the range +3.5% to +5.25%.</li>
-      <li>HBL's 11.99% fixed campaign ran 19 August–30 September 2026 and may be withdrawn — it is not presented as current.</li>
-      <li>The UBL processing fee (Rs 14,000 + FED) is second-hand from a Key Fact Statement; Bank Alfalah's processing fee is not published on its product page.</li>
-      <li>Used-car age limits (UBL up to 9 years; Bank AL Habib up to 7 years above 1000cc / 5 years up to 1000cc) are second-hand only.</li>
-      <li>The tracker cost is not verifiable (other than HBL's free tracker with its insurance), so it is not in the calculation.</li>
+      <li data-i18n="car.un1">The SBP down-payment floor is quoted in some places as 15% for cars up to 1000cc and 30% above — bank tables follow the 30%-for-all reading, so this page states 30% and notes the ≤1000cc exemption exists in the SBP text.</li>
+      <li data-i18n="car.un2">Bank AL Habib's spread comes from a single secondary source (an archived page, 19 May 2026) — confirm it with the bank.</li>
+      <li data-i18n="car.un3">UBL's spread is conflicted: one reading of the UBL page gives KIBOR +3.5% (existing) / +4.0% (new); another (6 September 2026) gives +4.25%/+4.75% (1–3 years) and +4.75%/+5.25% (4–5 years). This page shows the range +3.5% to +5.25%.</li>
+      <li data-i18n="car.un4">HBL's 11.99% fixed campaign ran 19 August–30 September 2026 and may be withdrawn — it is not presented as current.</li>
+      <li data-i18n="car.un5">The UBL processing fee (Rs 14,000 + FED) is second-hand from a Key Fact Statement; Bank Alfalah's processing fee is not published on its product page.</li>
+      <li data-i18n="car.un6">Used-car age limits (UBL up to 9 years; Bank AL Habib up to 7 years above 1000cc / 5 years up to 1000cc) are second-hand only.</li>
+      <li data-i18n="car.un7">The tracker cost is not verifiable (other than HBL's free tracker with its insurance), so it is not in the calculation.</li>
     </ul>
 
-    <h2>Frequently asked questions</h2>
+    <h2 data-i18n="car.faq-h">Frequently asked questions</h2>
     <div class="faq">
       {
-        faqs.map((f) => (
+        faqs.map((f, i) => (
           <details>
-            <summary>{f.q}</summary>
-            <p>{f.a}</p>
+            <summary data-i18n={`car.faq${i + 1}q`}>{f.q}</summary>
+            <p data-i18n={`car.faq${i + 1}a`}>{f.a}</p>
           </details>
         ))
       }
     </div>
-    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+    <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
     <section id="carDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;">Important — please read</h2>
-      <p>
+      <h2 style="font-size: 20px;" data-i18n="car.disc-h">Important — please read</h2>
+      <p data-i18n="car.disc">
         Results are estimates for information only and are not financial advice.
         Car-loan rates are floating (KIBOR-linked) and change; the rate, fees and
         insurance on your bank's Key Fact Statement / offer letter govern, not
@@ -324,20 +324,20 @@ const related = [
       </p>
       <p>Sources: {CAR_LOAN_SOURCE_CITATION}</p>
       <p>Checked 13 November 2026; next review 13 February 2027.</p>
-      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+      <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;">Related tools</h2>
+    <h2 style="margin-top: 32px;" data-i18n="car.related-h">Related tools</h2>
     <div class="related-grid">
       {
-        related.map((tool) => (
+        related.map((tool, i) => (
           <article class="card">
             <h3 style="font-size: 18px;">
-              <a href={tool.href}>{tool.name}</a>
+              <a href={tool.href} data-i18n={`car.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p style="color: var(--ink-muted);" data-i18n={`car.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
-              <a href={tool.href}>Use the calculator →</a>
+              <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
           </article>
         ))
@@ -428,9 +428,19 @@ const related = [
         ? CAR_LOAN_MAX_TENURE_YEARS_UPTO_1000CC
         : CAR_LOAN_MAX_TENURE_YEARS_ABOVE_1000CC;
     }
+    function tenureHintText() {
+      // The tenure hint is rewritten by this script whenever the engine
+      // size changes, so it is translated here (not via data-i18n) and
+      // refreshed by the __pfcAfterLang hook when the language toggles.
+      const max = maxTenure();
+      const urdu = document.documentElement.lang === 'ur';
+      return urdu
+        ? `پورے سال، ${CAR_LOAN_MIN_TENURE_YEARS}–${max}، ${engineSelect.value === 'upto-1000' ? '1000cc تک کی گاڑیوں کے لیے' : '1000cc سے زیادہ کی گاڑیوں کے لیے'} (SBP حد)۔`
+        : `Whole years, ${CAR_LOAN_MIN_TENURE_YEARS}–${max} for ${engineSelect.value === 'upto-1000' ? 'cars up to 1000cc' : 'cars above 1000cc'} (SBP cap).`;
+    }
     function updateTenureHint() {
       const max = maxTenure();
-      tenureHint.textContent = `Whole years, ${CAR_LOAN_MIN_TENURE_YEARS}–${max} for ${engineSelect.value === 'upto-1000' ? 'cars up to 1000cc' : 'cars above 1000cc'} (SBP cap).`;
+      tenureHint.textContent = tenureHintText();
       const current = parseDecimal(tenureInput.value);
       if (current !== null && current > max) tenureInput.value = String(max);
     }
@@ -521,6 +531,10 @@ const related = [
       updateTenureHint();
       showEmpty();
     });
+    // Refresh the script-managed tenure hint when the language toggles.
+    window.__pfcAfterLang = function () {
+      tenureHint.textContent = tenureHintText();
+    };
     showEmpty();
   </script>
 </Layout>

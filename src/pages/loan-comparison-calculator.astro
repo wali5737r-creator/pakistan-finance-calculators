@@ -79,59 +79,60 @@ const related = [
 <Layout title={title} description={description} slug={slug} schema={schema}>
   <div class="container" style="padding-top: 32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Loan Comparison Calculator</p>
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="comp.crumb">Loan Comparison Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;">Loans</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Loan Comparison Calculator</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="loans.badge">Loans</p>
+    <h1 data-i18n="comp.h1" style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Loan Comparison Calculator</h1>
+    <p class="prose-narrow" data-i18n="comp.intro" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
       Two loan offers can look similar and cost very different amounts. Enter both loans — amount, rate, and tenure for each — and compare the monthly instalment, the total interest, and the total payment side by side, to see which one truly costs less.
     </p>
     <p class="notice-info prose-narrow" style="margin-top: 16px;">
-      <strong>No live data.</strong> Every rate, price, and percentage on this page is entered by
+      <strong data-i18n="comp.notice-strong">No live data.</strong><span data-i18n="comp.notice-rest"> Every rate, price, and percentage on this page is entered by
       you. Nothing is fetched from a bank, a market, or a government source, and no figure here
-      is presented as a live or official rate.
+      is presented as a live or official rate.</span>
     </p>
+    <p id="lang-note" class="lang-note" data-i18n="tax.others-note" hidden>The other calculators on this site are still in English in this phase.</p>
   </div>
 
   <div class="container" style="margin-top: 20px;">
     <div class="tool-grid">
       <div class="card">
         <form id="compForm" novalidate>
-          <p class="group-label" style="font-size: 17px; font-weight: 700; margin-bottom: 8px;">Loan A</p>
+          <p class="group-label" style="font-size: 17px; font-weight: 700; margin-bottom: 8px;" data-i18n="comp.group-a">Loan A</p>
           <div class="field">
-            <label for="compAmountA">Loan A amount (Rs) <span aria-hidden="true">*</span></label>
+            <label for="compAmountA"><span data-i18n="comp.amount-a-label">Loan A amount (Rs)</span> <span aria-hidden="true">*</span></label>
             <input id="compAmountA" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
           </div>
           <div class="field">
-            <label for="compRateA">Loan A annual rate (%) <span aria-hidden="true">*</span></label>
+            <label for="compRateA"><span data-i18n="comp.rate-a-label">Loan A annual rate (%)</span> <span aria-hidden="true">*</span></label>
             <input id="compRateA" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
           </div>
           <div class="field">
-            <label for="compMonthsA">Loan A tenure (months) <span aria-hidden="true">*</span></label>
+            <label for="compMonthsA"><span data-i18n="comp.months-a-label">Loan A tenure (months)</span> <span aria-hidden="true">*</span></label>
             <input id="compMonthsA" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">For example, 60 for 5 years.</p>
+            <p class="hint" data-i18n="comp.months-hint">For example, 60 for 5 years.</p>
           </div>
 
-          <p class="group-label" style="font-size: 17px; font-weight: 700; margin-bottom: 8px; margin-top: 20px;">Loan B</p>
+          <p class="group-label" style="font-size: 17px; font-weight: 700; margin-bottom: 8px; margin-top: 20px;" data-i18n="comp.group-b">Loan B</p>
           <div class="field">
-            <label for="compAmountB">Loan B amount (Rs) <span aria-hidden="true">*</span></label>
+            <label for="compAmountB"><span data-i18n="comp.amount-b-label">Loan B amount (Rs)</span> <span aria-hidden="true">*</span></label>
             <input id="compAmountB" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
           </div>
           <div class="field">
-            <label for="compRateB">Loan B annual rate (%) <span aria-hidden="true">*</span></label>
+            <label for="compRateB"><span data-i18n="comp.rate-b-label">Loan B annual rate (%)</span> <span aria-hidden="true">*</span></label>
             <input id="compRateB" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
           </div>
           <div class="field">
-            <label for="compMonthsB">Loan B tenure (months) <span aria-hidden="true">*</span></label>
+            <label for="compMonthsB"><span data-i18n="comp.months-b-label">Loan B tenure (months)</span> <span aria-hidden="true">*</span></label>
             <input id="compMonthsB" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">For example, 60 for 5 years.</p>
+            <p class="hint" data-i18n="comp.months-hint">For example, 60 for 5 years.</p>
           </div>
 
           <div id="compErrors" class="error-box" role="alert" hidden></div>
 
           <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
-            <button id="compCalculate" class="btn-primary" type="submit">Calculate</button>
-            <button id="compClear" class="btn-secondary" type="button">Clear</button>
+            <button id="compCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
+            <button id="compClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
           <p id="compFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
         </form>
@@ -139,54 +140,54 @@ const related = [
 
       <div class="result-card" id="compResultCard" tabindex="-1">
         <div id="compEmpty">
-          <p style="font-weight: 700;">Your result will appear here.</p>
-          <p>Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);">
+          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
 
         <div id="compResult" data-result-text hidden>
-          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Result</p>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" data-i18n="comp.result-label">Result</p>
           <div aria-live="polite" aria-atomic="true">
             <p class="result-value" id="compHeadline"></p>
           </div>
           <div class="stat-grid">
             <div>
-              <p class="stat-label">Loan A — EMI per month</p>
+              <p class="stat-label" data-i18n="comp.stat-a-emi">Loan A — EMI per month</p>
               <p class="stat-value" id="compStatAEmi"></p>
             </div>
             <div>
-              <p class="stat-label">Loan A — total payment</p>
+              <p class="stat-label" data-i18n="comp.stat-a-total">Loan A — total payment</p>
               <p class="stat-value" id="compStatATotal"></p>
             </div>
             <div>
-              <p class="stat-label">Loan A — total interest</p>
+              <p class="stat-label" data-i18n="comp.stat-a-int">Loan A — total interest</p>
               <p class="stat-value" id="compStatAInt"></p>
             </div>
             <div>
-              <p class="stat-label">Loan B — EMI per month</p>
+              <p class="stat-label" data-i18n="comp.stat-b-emi">Loan B — EMI per month</p>
               <p class="stat-value" id="compStatBEmi"></p>
             </div>
             <div>
-              <p class="stat-label">Loan B — total payment</p>
+              <p class="stat-label" data-i18n="comp.stat-b-total">Loan B — total payment</p>
               <p class="stat-value" id="compStatBTotal"></p>
             </div>
             <div>
-              <p class="stat-label">Loan B — total interest</p>
+              <p class="stat-label" data-i18n="comp.stat-b-int">Loan B — total interest</p>
               <p class="stat-value" id="compStatBInt"></p>
             </div>
           </div>
           <p id="compEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p id="compFormula" style="font-size: 16px;"></p>
           <p style="font-size: 13px; color: var(--ink-muted);">
-            Estimate only — check important figures before acting. <a href="#compDisclaimer">Read the full disclaimer.</a>
+            <span data-i18n="comp.estimate">Estimate only — check important figures before acting.</span> <a href="#compDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
 
         <div class="actions-row no-print">
-          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
         <p data-copy-status role="status" style="font-size: 14px;"></p>
       </div>
@@ -194,54 +195,54 @@ const related = [
   </div>
 
   <div class="container prose-narrow" style="margin-top: 40px;">
-    <h2>How it works</h2>
+    <h2 data-i18n="comp.how-h">How it works</h2>
     <ol>
-      <li>Enter the amount, annual rate, and tenure in months for Loan A, then the same three figures for Loan B. The two loans may be for different amounts or different tenures.</li>
-      <li>You see the EMI, total interest, and total payment for each loan, and which loan costs less in total — and by how much.</li>
-      <li>Compare more than the EMI: a lower EMI over a longer tenure can still cost more overall. The total payment is the fair comparison.</li>
+      <li data-i18n="comp.how1">Enter the amount, annual rate, and tenure in months for Loan A, then the same three figures for Loan B. The two loans may be for different amounts or different tenures.</li>
+      <li data-i18n="comp.how2">You see the EMI, total interest, and total payment for each loan, and which loan costs less in total — and by how much.</li>
+      <li data-i18n="comp.how3">Compare more than the EMI: a lower EMI over a longer tenure can still cost more overall. The total payment is the fair comparison.</li>
     </ol>
-    <p>Each loan is worked out with the same reducing-balance EMI calculation as the <a href="/emi-loan-calculator/">EMI / Loan Calculator</a>, including the final-instalment adjustment, so the figures here match that page exactly for the same inputs.</p>
+    <p><span data-i18n="comp.how-note-pre">Each loan is worked out with the same reducing-balance EMI calculation as the </span><a href="/emi-loan-calculator/" data-i18n="tool.emi">EMI / Loan Calculator</a><span data-i18n="comp.how-note-post">, including the final-instalment adjustment, so the figures here match that page exactly for the same inputs.</span></p>
 
-    <h2>Formula</h2>
+    <h2 data-i18n="comp.formula-h">Formula</h2>
     <p>EMI = [P × R × (1 + R)<sup>N</sup>] ÷ [(1 + R)<sup>N</sup> − 1]</p>
-    <p>P is the loan amount, R is the monthly rate (annual rate ÷ 12), and N is the number of monthly instalments.</p>
-    <p>Total payment = sum of all instalments. Total interest = Total payment − Loan amount. The cheaper loan is the one with the lower total payment, not necessarily the lower EMI.</p>
+    <p data-i18n="comp.f2">P is the loan amount, R is the monthly rate (annual rate ÷ 12), and N is the number of monthly instalments.</p>
+    <p data-i18n="comp.f3">Total payment = sum of all instalments. Total interest = Total payment − Loan amount. The cheaper loan is the one with the lower total payment, not necessarily the lower EMI.</p>
 
-    <h2>Worked example</h2>
-    <p><strong>Example:</strong> Two loans of Rs 1,000,000 over 60 months. Loan A at 18% has an EMI of Rs 25,393.43, total interest of Rs 523,605.61, and a total payment of Rs 1,523,605.61. Loan B at 15% has an EMI of Rs 23,789.93, total interest of Rs 427,395.77, and a total payment of Rs 1,427,395.77. Loan B is cheaper by Rs 96,209.84.</p>
+    <h2 data-i18n="comp.example-h">Worked example</h2>
+    <p><strong data-i18n="comp.ex-label">Example:</strong><span data-i18n="comp.ex-pre1"> Two loans of </span>Rs 1,000,000<span data-i18n="comp.ex-pre2"> over </span>60<span data-i18n="comp.ex-pre3"> months. Loan A at </span>18%<span data-i18n="comp.ex-pre4"> has an EMI of </span>Rs 25,393.43<span data-i18n="comp.ex-pre5">, total interest of </span>Rs 523,605.61<span data-i18n="comp.ex-pre6">, and a total payment of </span>Rs 1,523,605.61<span data-i18n="comp.ex-pre7">. Loan B at </span>15%<span data-i18n="comp.ex-pre8"> has an EMI of </span>Rs 23,789.93<span data-i18n="comp.ex-pre9">, total interest of </span>Rs 427,395.77<span data-i18n="comp.ex-pre10">, and a total payment of </span>Rs 1,427,395.77<span data-i18n="comp.ex-pre11">. Loan B is cheaper by </span>Rs 96,209.84<span data-i18n="comp.ex-post">.</span></p>
 
-    <h2>Frequently asked questions</h2>
+    <h2 data-i18n="comp.faq-h">Frequently asked questions</h2>
     <div class="faq">
       {
-        faqs.map((f) => (
+        faqs.map((f, i) => (
           <details>
-            <summary>{f.q}</summary>
-            <p>{f.a}</p>
+            <summary data-i18n={`comp.faq${i + 1}q`}>{f.q}</summary>
+            <p data-i18n={`comp.faq${i + 1}a`}>{f.a}</p>
           </details>
         ))
       }
     </div>
-    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+    <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
     <section id="compDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;">Important — please read</h2>
-      <p>
+      <h2 style="font-size: 20px;" data-i18n="comp.disc-h">Important — please read</h2>
+      <p data-i18n="comp.disc">
         Results are estimates from the figures you enter, assuming a fixed rate, fixed monthly instalments, and no fees, charges, or penalties. Real loan offers may include processing fees, insurance, and variable rates that change the total cost. Compare the full offer documents, not only the EMI.
       </p>
-      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+      <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;">Related tools</h2>
+    <h2 style="margin-top: 32px;" data-i18n="comp.related-h">Related tools</h2>
     <div class="related-grid">
       {
-        related.map((tool) => (
+        related.map((tool, i) => (
           <article class="card">
             <h3 style="font-size: 18px;">
-              <a href={tool.href}>{tool.name}</a>
+              <a href={tool.href} data-i18n={`comp.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p style="color: var(--ink-muted);" data-i18n={`comp.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
-              <a href={tool.href}>Use the calculator →</a>
+              <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
           </article>
         ))

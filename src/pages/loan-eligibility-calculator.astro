@@ -79,18 +79,19 @@ const related = [
 <Layout title={title} description={description} slug={slug} schema={schema}>
   <div class="container" style="padding-top: 32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Loan Eligibility Calculator</p>
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="elig.crumb">Loan Eligibility Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;">Loans</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Loan Eligibility Calculator</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="loans.badge">Loans</p>
+    <h1 data-i18n="elig.h1" style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Loan Eligibility Calculator</h1>
+    <p class="prose-narrow" data-i18n="elig.intro" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
       Before you apply for a loan, check what your income can comfortably support. Enter your monthly income, what you already pay each month, the share of income you will allow for EMIs, and the rate and tenure you assume — and see the largest loan that fits, as an estimate.
     </p>
     <p class="notice-info prose-narrow" style="margin-top: 16px;">
-      <strong>No live data.</strong> Every rate, price, and percentage on this page is entered by
+      <strong data-i18n="elig.notice-strong">No live data.</strong><span data-i18n="elig.notice-rest"> Every rate, price, and percentage on this page is entered by
       you. Nothing is fetched from a bank, a market, or a government source, and no figure here
-      is presented as a live or official rate.
+      is presented as a live or official rate.</span>
     </p>
+    <p id="lang-note" class="lang-note" data-i18n="tax.others-note" hidden>The other calculators on this site are still in English in this phase.</p>
   </div>
 
   <div class="container" style="margin-top: 20px;">
@@ -98,40 +99,40 @@ const related = [
       <div class="card">
         <form id="eligForm" novalidate>
           <div class="field">
-            <label for="eligIncome">Monthly income (Rs) <span aria-hidden="true">*</span></label>
+            <label for="eligIncome"><span data-i18n="elig.income-label">Monthly income (Rs)</span> <span aria-hidden="true">*</span></label>
             <input id="eligIncome" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">Your monthly take-home income, after tax and deductions.</p>
+            <p class="hint" data-i18n="elig.income-hint">Your monthly take-home income, after tax and deductions.</p>
           </div>
 
           <div class="field">
-            <label for="eligObligations">Existing monthly obligations (Rs)</label>
+            <label for="eligObligations"><span data-i18n="elig.obligations-label">Existing monthly obligations (Rs)</span></label>
             <input id="eligObligations" type="text" inputmode="decimal" autocomplete="off" />
-            <p class="hint">Other loan instalments and fixed monthly commitments. Enter 0, or leave blank, if you have none.</p>
+            <p class="hint" data-i18n="elig.obligations-hint">Other loan instalments and fixed monthly commitments. Enter 0, or leave blank, if you have none.</p>
           </div>
 
           <div class="field">
-            <label for="eligShare">Maximum share of income for EMIs (%) <span aria-hidden="true">*</span></label>
+            <label for="eligShare"><span data-i18n="elig.share-label">Maximum share of income for EMIs (%)</span> <span aria-hidden="true">*</span></label>
             <input id="eligShare" type="text" inputmode="decimal" autocomplete="off" aria-required="true" value="40" />
-            <p class="hint">The share of income that may go to all EMIs together. 40% is a common planning figure — change it if you want a stricter or looser limit.</p>
+            <p class="hint" data-i18n="elig.share-hint">The share of income that may go to all EMIs together. 40% is a common planning figure — change it if you want a stricter or looser limit.</p>
           </div>
 
           <div class="field">
-            <label for="eligRate">Annual interest rate (%) <span aria-hidden="true">*</span></label>
+            <label for="eligRate"><span data-i18n="elig.rate-label">Annual interest rate (%)</span> <span aria-hidden="true">*</span></label>
             <input id="eligRate" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">The yearly rate you assume for the loan. Enter the rate a lender quotes you — no bank rate is used.</p>
+            <p class="hint" data-i18n="elig.rate-hint">The yearly rate you assume for the loan. Enter the rate a lender quotes you — no bank rate is used.</p>
           </div>
 
           <div class="field">
-            <label for="eligMonths">Tenure (months) <span aria-hidden="true">*</span></label>
+            <label for="eligMonths"><span data-i18n="elig.months-label">Tenure (months)</span> <span aria-hidden="true">*</span></label>
             <input id="eligMonths" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">How many monthly instalments, for example 240 for 20 years, or 60 for 5 years.</p>
+            <p class="hint" data-i18n="elig.months-hint">How many monthly instalments, for example 240 for 20 years, or 60 for 5 years.</p>
           </div>
 
           <div id="eligErrors" class="error-box" role="alert" hidden></div>
 
           <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
-            <button id="eligCalculate" class="btn-primary" type="submit">Calculate</button>
-            <button id="eligClear" class="btn-secondary" type="button">Clear</button>
+            <button id="eligCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
+            <button id="eligClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
           <p id="eligFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
         </form>
@@ -139,38 +140,38 @@ const related = [
 
       <div class="result-card" id="eligResultCard" tabindex="-1">
         <div id="eligEmpty">
-          <p style="font-weight: 700;">Your result will appear here.</p>
-          <p>Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);">
+          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
 
         <div id="eligResult" data-result-text hidden>
-          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Result</p>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" data-i18n="elig.result-label">Result</p>
           <div aria-live="polite" aria-atomic="true">
             <p class="result-value" id="eligHeadline"></p>
           </div>
           <div class="stat-grid">
             <div>
-              <p class="stat-label">Affordable EMI per month</p>
+              <p class="stat-label" data-i18n="elig.stat1">Affordable EMI per month</p>
               <p class="stat-value" id="eligStat1"></p>
             </div>
             <div>
-              <p class="stat-label">EMI limit (share of income)</p>
+              <p class="stat-label" data-i18n="elig.stat2">EMI limit (share of income)</p>
               <p class="stat-value" id="eligStat2"></p>
             </div>
           </div>
           <p id="eligEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p id="eligFormula" style="font-size: 16px;"></p>
           <p style="font-size: 13px; color: var(--ink-muted);">
-            Estimate only — check important figures before acting. <a href="#eligDisclaimer">Read the full disclaimer.</a>
+            <span data-i18n="elig.estimate">Estimate only — check important figures before acting.</span> <a href="#eligDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
 
         <div class="actions-row no-print">
-          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
         <p data-copy-status role="status" style="font-size: 14px;"></p>
       </div>
@@ -178,54 +179,54 @@ const related = [
   </div>
 
   <div class="container prose-narrow" style="margin-top: 40px;">
-    <h2>How it works</h2>
+    <h2 data-i18n="elig.how-h">How it works</h2>
     <ol>
-      <li>Enter your monthly take-home income and any existing monthly obligations, such as other loan instalments.</li>
-      <li>Set the maximum share of income for all EMIs together. The default is 40%; a lower share leaves more room for living costs.</li>
-      <li>Enter the annual rate and the tenure you assume. You see the affordable EMI and the largest loan whose EMI fits inside it.</li>
+      <li data-i18n="elig.how1">Enter your monthly take-home income and any existing monthly obligations, such as other loan instalments.</li>
+      <li data-i18n="elig.how2">Set the maximum share of income for all EMIs together. The default is 40%; a lower share leaves more room for living costs.</li>
+      <li data-i18n="elig.how3">Enter the annual rate and the tenure you assume. You see the affordable EMI and the largest loan whose EMI fits inside it.</li>
     </ol>
-    <p>Banks apply their own criteria — credit history, employment type, age, property value, and documents — so a lender may offer more or less than this estimate, or decline. Treat the result as a planning figure, not an approval.</p>
+    <p data-i18n="elig.banks-note">Banks apply their own criteria — credit history, employment type, age, property value, and documents — so a lender may offer more or less than this estimate, or decline. Treat the result as a planning figure, not an approval.</p>
 
-    <h2>Formula</h2>
-    <p>EMI limit = Monthly income × Maximum EMI share %</p>
-    <p>Affordable EMI = EMI limit − Existing monthly obligations</p>
-    <p>Maximum loan = the principal whose EMI (at the entered rate and tenure) equals the affordable EMI. It is the inverse of the EMI formula shown on the <a href="/emi-loan-calculator/">EMI / Loan Calculator</a> page.</p>
+    <h2 data-i18n="elig.formula-h">Formula</h2>
+    <p data-i18n="elig.f1">EMI limit = Monthly income × Maximum EMI share %</p>
+    <p data-i18n="elig.f2">Affordable EMI = EMI limit − Existing monthly obligations</p>
+    <p><span data-i18n="elig.f3-pre">Maximum loan = the principal whose EMI (at the entered rate and tenure) equals the affordable EMI. It is the inverse of the EMI formula shown on the </span><a href="/emi-loan-calculator/" data-i18n="tool.emi">EMI / Loan Calculator</a><span data-i18n="elig.f3-post"> page.</span></p>
 
-    <h2>Worked example</h2>
-    <p><strong>Example:</strong> Monthly income Rs 200,000, existing obligations Rs 20,000, EMI share 40%, rate 18% a year, tenure 240 months. The EMI limit is 40% of Rs 200,000 = Rs 80,000, so the affordable EMI is Rs 80,000 − Rs 20,000 = Rs 60,000 a month. At 18% over 240 months, that supports a maximum loan of Rs 3,887,743.93.</p>
+    <h2 data-i18n="elig.example-h">Worked example</h2>
+    <p><strong data-i18n="elig.ex-label">Example:</strong><span data-i18n="elig.ex-pre1"> Monthly income </span>Rs 200,000<span data-i18n="elig.ex-pre2">, existing obligations </span>Rs 20,000<span data-i18n="elig.ex-pre3">, EMI share </span>40%<span data-i18n="elig.ex-pre4">, rate </span>18%<span data-i18n="elig.ex-pre5"> a year, tenure </span>240<span data-i18n="elig.ex-pre6"> months. The EMI limit is </span>Rs 200,000<span data-i18n="elig.ex-pre7"> at </span>40% = Rs 80,000<span data-i18n="elig.ex-pre8">, so the affordable EMI is </span>Rs 80,000 − Rs 20,000 = Rs 60,000<span data-i18n="elig.ex-pre9"> a month. At </span>18%<span data-i18n="elig.ex-pre10"> over </span>240<span data-i18n="elig.ex-pre11"> months, that supports a maximum loan of </span>Rs 3,887,743.93<span data-i18n="elig.ex-post">.</span></p>
 
-    <h2>Frequently asked questions</h2>
+    <h2 data-i18n="elig.faq-h">Frequently asked questions</h2>
     <div class="faq">
       {
-        faqs.map((f) => (
+        faqs.map((f, i) => (
           <details>
-            <summary>{f.q}</summary>
-            <p>{f.a}</p>
+            <summary data-i18n={`elig.faq${i + 1}q`}>{f.q}</summary>
+            <p data-i18n={`elig.faq${i + 1}a`}>{f.a}</p>
           </details>
         ))
       }
     </div>
-    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+    <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
     <section id="eligDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;">Important — please read</h2>
-      <p>
+      <h2 style="font-size: 20px;" data-i18n="elig.disc-h">Important — please read</h2>
+      <p data-i18n="elig.disc">
         This is an estimate only, for planning. Banks and lenders apply their own eligibility criteria, including credit history, employment, age, and the value of any security, and may offer a different amount or decline an application. No lender's actual criteria or rate is used here. Confirm the terms with the lender before borrowing.
       </p>
-      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+      <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;">Related tools</h2>
+    <h2 style="margin-top: 32px;" data-i18n="elig.related-h">Related tools</h2>
     <div class="related-grid">
       {
-        related.map((tool) => (
+        related.map((tool, i) => (
           <article class="card">
             <h3 style="font-size: 18px;">
-              <a href={tool.href}>{tool.name}</a>
+              <a href={tool.href} data-i18n={`elig.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p style="color: var(--ink-muted);" data-i18n={`elig.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
-              <a href={tool.href}>Use the calculator →</a>
+              <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
           </article>
         ))

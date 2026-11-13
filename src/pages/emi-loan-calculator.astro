@@ -72,16 +72,17 @@ const schema = JSON.stringify({
 <Layout title={title} description={description} slug={slug} schema={schema}>
   <div class="container" style="padding-top:32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb" style="font-size:14px; margin-bottom:12px;">
-      <a href="/">Home</a> / EMI / Loan Calculator
+      <a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="emi.crumb">EMI / Loan Calculator</span>
     </nav>
-    <p><span class="badge badge-info">Loans</span></p>
-    <h1 style="font-size:clamp(1.75rem, 4.5vw, 2.25rem); max-width:720px;">{h1}</h1>
-    <p class="prose-narrow" style="font-size:clamp(1.0625rem, 2vw, 1.1875rem); margin-top:12px;">
+    <p><span class="badge badge-info" data-i18n="loans.badge">Loans</span></p>
+    <h1 data-i18n="emi.h1" style="font-size:clamp(1.75rem, 4.5vw, 2.25rem); max-width:720px;">{h1}</h1>
+    <p class="prose-narrow" data-i18n="emi.intro" style="font-size:clamp(1.0625rem, 2vw, 1.1875rem); margin-top:12px;">
       Work out your monthly loan instalment (EMI), total interest, and total payment for a
       reducing-balance loan in Pakistan. Enter the loan amount, annual interest rate, and
       tenure to see the full amortisation schedule. Fees, insurance, and processing charges
       are not included.
     </p>
+    <p id="lang-note" class="lang-note" data-i18n="tax.others-note" hidden>The other calculators on this site are still in English in this phase.</p>
   </div>
 
   <div class="container" style="padding-top:24px;">
@@ -89,12 +90,12 @@ const schema = JSON.stringify({
       <section class="card" aria-label="Calculator">
         <form id="emi-form" novalidate>
           <div id="emi-error-box" role="alert" class="error-box" hidden></div>
-          <p class="hint" style="margin-bottom:16px;">
+          <p class="hint" style="margin-bottom:16px;" data-i18n="emi.note-reducing">
             Reducing balance only. No flat-rate mode.
           </p>
           <div class="field">
             <label for="emi-amount">
-              Loan amount (PKR) <span aria-hidden="true">*</span>
+              <span data-i18n="emi.amount-label">Loan amount (PKR)</span> <span aria-hidden="true">*</span>
             </label>
             <input
               id="emi-amount"
@@ -104,12 +105,12 @@ const schema = JSON.stringify({
               aria-required="true"
               aria-describedby="emi-amount-hint"
             />
-            <p class="hint" id="emi-amount-hint">Enter the principal amount you want to borrow.</p>
+            <p class="hint" id="emi-amount-hint" data-i18n="emi.amount-hint">Enter the principal amount you want to borrow.</p>
             <p id="emi-amount-error" style="color:var(--danger); font-size:14px; font-weight:600;" hidden></p>
           </div>
           <div class="field">
             <label for="emi-rate">
-              Annual interest rate (% per year) <span aria-hidden="true">*</span>
+              <span data-i18n="emi.rate-label">Annual interest rate (% per year)</span> <span aria-hidden="true">*</span>
             </label>
             <input
               id="emi-rate"
@@ -119,22 +120,22 @@ const schema = JSON.stringify({
               aria-required="true"
               aria-describedby="emi-rate-hint"
             />
-            <p class="hint" id="emi-rate-hint">
+            <p class="hint" id="emi-rate-hint" data-i18n="emi.rate-hint">
               Nominal annual rate. The calculator converts it to a monthly rate. Zero is
               allowed — see below.
             </p>
             <p id="emi-rate-error" style="color:var(--danger); font-size:14px; font-weight:600;" hidden></p>
-            <p id="emi-rate-warning" class="notice-warning" hidden>
+            <p id="emi-rate-warning" class="notice-warning" data-i18n="emi.high-rate-warn" hidden>
               Unusually high rate — please check it
             </p>
           </div>
           <fieldset class="field" style="border:0; padding:0; margin:0 0 16px;">
             <legend>
-              Loan tenure <span aria-hidden="true">*</span>
+              <span data-i18n="emi.tenure-legend">Loan tenure</span> <span aria-hidden="true">*</span>
             </legend>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
               <div>
-                <label for="emi-years" style="font-size:16px;">Years</label>
+                <label for="emi-years" style="font-size:16px;" data-i18n="emi.years-label">Years</label>
                 <input
                   id="emi-years"
                   type="text"
@@ -146,7 +147,7 @@ const schema = JSON.stringify({
                 <p id="emi-years-error" style="color:var(--danger); font-size:14px; font-weight:600;" hidden></p>
               </div>
               <div>
-                <label for="emi-months" style="font-size:16px;">Months (0–11)</label>
+                <label for="emi-months" style="font-size:16px;" data-i18n="emi.months-label">Months (0–11)</label>
                 <input
                   id="emi-months"
                   type="text"
@@ -158,56 +159,56 @@ const schema = JSON.stringify({
                 <p id="emi-months-error" style="color:var(--danger); font-size:14px; font-weight:600;" hidden></p>
               </div>
             </div>
-            <p class="hint" id="emi-tenure-hint">
+            <p class="hint" id="emi-tenure-hint" data-i18n="emi.tenure-hint">
               Enter whole years and months. Total months are shown below.
             </p>
             <p id="emi-total-months" aria-live="polite">Total: —</p>
           </fieldset>
           <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
-            <button type="submit" class="btn-primary">Calculate</button>
-            <button type="button" class="btn-secondary" id="emi-clear">Clear</button>
+            <button type="submit" class="btn-primary" data-i18n="ui.calculate">Calculate</button>
+            <button type="button" class="btn-secondary" id="emi-clear" data-i18n="ui.clear">Clear</button>
           </div>
           <p id="emi-status" role="status" class="hint" style="margin-top:8px;"></p>
         </form>
       </section>
 
       <section class="result-card" aria-labelledby="emi-result-heading">
-        <h2 id="emi-result-heading" tabindex="-1" style="font-size:18px;">Your result</h2>
+        <h2 id="emi-result-heading" tabindex="-1" data-i18n="emi.result-heading" style="font-size:18px;">Your result</h2>
         <div id="emi-stale" hidden>
-          <p><span class="badge badge-warning">May be out of date</span></p>
-          <p class="hint">
+          <p><span class="badge badge-warning" data-i18n="emi.stale-badge">May be out of date</span></p>
+          <p class="hint" data-i18n="emi.stale-hint">
             Previous result — based on earlier inputs. Update the highlighted field to
             recalculate.
           </p>
         </div>
         <div id="emi-empty">
-          <p>Enter your details to see your result.</p>
-          <p class="hint">You'll see your monthly EMI, total interest, and total payment.</p>
+          <p data-i18n="emi.empty1">Enter your details to see your result.</p>
+          <p class="hint" data-i18n="emi.empty2">You'll see your monthly EMI, total interest, and total payment.</p>
         </div>
         <div id="emi-result" data-result-text hidden>
-          <p style="font-size:14px; font-weight:700; color:var(--ink-muted);">Your monthly EMI</p>
+          <p data-i18n="emi.monthly-label" style="font-size:14px; font-weight:700; color:var(--ink-muted);">Your monthly EMI</p>
           <p class="result-value" id="emi-headline"></p>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;">
             <div>
-              <p class="hint">Total payment over the tenure</p>
+              <p class="hint" data-i18n="emi.lbl-total-payment">Total payment over the tenure</p>
               <p style="font-size:20px; font-weight:700;" id="emi-total-payment"></p>
             </div>
             <div>
-              <p class="hint">Total interest payable</p>
+              <p class="hint" data-i18n="emi.lbl-total-interest">Total interest payable</p>
               <p style="font-size:20px; font-weight:700;" id="emi-total-interest"></p>
             </div>
             <div>
-              <p class="hint">Principal — the amount borrowed</p>
+              <p class="hint" data-i18n="emi.lbl-principal">Principal — the amount borrowed</p>
               <p style="font-size:20px; font-weight:700;" id="emi-principal"></p>
             </div>
             <div>
-              <p class="hint">Interest share of total payment</p>
+              <p class="hint" data-i18n="emi.lbl-interest-share">Interest share of total payment</p>
               <p style="font-size:20px; font-weight:700;" id="emi-interest-share"></p>
             </div>
           </div>
           <p class="hint" id="emi-echo" style="margin-top:16px;"></p>
           <p class="hint" id="emi-formula"></p>
-          <p id="emi-result-warning" class="notice-warning" hidden>
+          <p id="emi-result-warning" class="notice-warning" data-i18n="emi.high-rate-warn" hidden>
             Unusually high rate — please check it
           </p>
           <div style="margin-top:16px;">
@@ -220,7 +221,7 @@ const schema = JSON.stringify({
               aria-describedby="emi-donut-table"
               style="display:block; margin-inline:auto;"
             >
-              <title>Principal and interest split</title>
+              <title data-i18n="emi.donut-title">Principal and interest split</title>
               <desc id="emi-donut-desc"></desc>
               <circle cx="100" cy="100" r="80" fill="none" stroke="var(--surface-tint)" stroke-width="28"></circle>
               <circle
@@ -244,23 +245,23 @@ const schema = JSON.stringify({
                 transform="rotate(-90 100 100)"
               ></circle>
               <text x="100" y="97" text-anchor="middle" fill="var(--ink)" font-size="17" font-weight="700" id="emi-donut-centre-value"></text>
-              <text x="100" y="118" text-anchor="middle" fill="var(--ink-muted)" font-size="13">Total payment</text>
+              <text x="100" y="118" text-anchor="middle" fill="var(--ink-muted)" font-size="13" data-i18n="emi.donut-total">Total payment</text>
             </svg>
             <div class="table-wrap" style="margin-top:12px;">
               <table class="data" id="emi-donut-table">
-                <caption>Principal and interest split</caption>
+                <caption data-i18n="emi.donut-caption">Principal and interest split</caption>
                 <thead>
                   <tr>
-                    <th scope="col">Part</th>
-                    <th scope="col">Amount</th>
-                    <th scope="col">Share</th>
+                    <th scope="col" data-i18n="emi.th-part">Part</th>
+                    <th scope="col" data-i18n="emi.th-amount">Amount</th>
+                    <th scope="col" data-i18n="emi.th-share">Share</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td>
                       <span aria-hidden="true" style="display:inline-block; width:12px; height:12px; border-radius:3px; background:var(--brand-600);"></span>
-                      Principal
+                      <span data-i18n="emi.legend-principal">Principal</span>
                     </td>
                     <td id="emi-legend-principal-amount"></td>
                     <td id="emi-legend-principal-share"></td>
@@ -268,7 +269,7 @@ const schema = JSON.stringify({
                   <tr>
                     <td>
                       <span aria-hidden="true" style="display:inline-block; width:12px; height:12px; border-radius:3px; background:var(--gold-500);"></span>
-                      Interest
+                      <span data-i18n="emi.legend-interest">Interest</span>
                     </td>
                     <td id="emi-legend-interest-amount"></td>
                     <td id="emi-legend-interest-share"></td>
@@ -279,22 +280,21 @@ const schema = JSON.stringify({
           </div>
         </div>
         <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;">
-          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
         <p data-copy-status role="status" class="hint"></p>
-        <p id="emi-actions-hint" class="hint">Calculate first to copy or print your result.</p>
+        <p id="emi-actions-hint" class="hint" data-i18n="emi.actions-hint">Calculate first to copy or print your result.</p>
         <p class="hint" style="margin-top:8px;">
-          Fees, insurance, and processing charges are not included. Estimates only — not
-          financial advice. <a href="#disclaimer">Read the full disclaimer.</a>
+          <span data-i18n="emi.fees-note">Fees, insurance, and processing charges are not included. Estimates only — not financial advice.</span> <a href="#disclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
         </p>
       </section>
     </div>
   </div>
 
   <section id="emi-schedule-section" class="container" style="padding-top:32px;" hidden>
-    <h2>Amortisation schedule</h2>
-    <p class="hint">
+    <h2 data-i18n="emi.schedule-h">Amortisation schedule</h2>
+    <p class="hint" data-i18n="emi.schedule-hint">
       Reducing balance. Interest each month is calculated on the opening balance.
     </p>
     <button
@@ -309,20 +309,20 @@ const schema = JSON.stringify({
     <div id="emi-schedule-region" hidden>
       <div class="table-wrap" style="max-height:480px; overflow-y:auto; margin-top:12px;">
         <table class="data">
-          <caption>Month-by-month schedule</caption>
+          <caption data-i18n="emi.schedule-caption">Month-by-month schedule</caption>
           <thead>
             <tr>
-              <th scope="col" style="position:sticky; top:0;">Month</th>
+              <th scope="col" style="position:sticky; top:0;" data-i18n="emi.th-month">Month</th>
               <th scope="col" style="position:sticky; top:0;">EMI</th>
-              <th scope="col" style="position:sticky; top:0;">Interest</th>
-              <th scope="col" style="position:sticky; top:0;">Principal</th>
-              <th scope="col" style="position:sticky; top:0;">Closing balance</th>
+              <th scope="col" style="position:sticky; top:0;" data-i18n="emi.th-interest">Interest</th>
+              <th scope="col" style="position:sticky; top:0;" data-i18n="emi.th-principal">Principal</th>
+              <th scope="col" style="position:sticky; top:0;" data-i18n="emi.th-closing">Closing balance</th>
             </tr>
           </thead>
           <tbody id="emi-schedule-body"></tbody>
           <tfoot>
             <tr>
-              <td>Total</td>
+              <td data-i18n="emi.schedule-total">Total</td>
               <td id="emi-schedule-total-emi"></td>
               <td id="emi-schedule-total-interest"></td>
               <td id="emi-schedule-total-principal"></td>
@@ -332,18 +332,16 @@ const schema = JSON.stringify({
         </table>
       </div>
       <p id="emi-schedule-footnote" class="hint" hidden>
-        † Final instalment adjusted for rounding so the schedule totals the total payment
-        and the closing balance is {formatPKR(0, 2)}.
+        <span data-i18n="emi.schedule-foot-pre">† Final instalment adjusted for rounding so the schedule totals the total payment and the closing balance is </span>{formatPKR(0, 2)}<span data-i18n="emi.schedule-foot-post">.</span>
       </p>
       <p id="emi-rounding-note" class="notice-info" hidden>
-        Totals are the sums of the rounded monthly rows. The final instalment is adjusted so
-        the schedule totals the total payment and the closing balance is {formatPKR(0, 2)}.
+        <span data-i18n="emi.rounding-pre">Totals are the sums of the rounded monthly rows. The final instalment is adjusted so the schedule totals the total payment and the closing balance is </span>{formatPKR(0, 2)}<span data-i18n="emi.rounding-post">.</span>
       </p>
       <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">
         <button type="button" class="btn-secondary" id="emi-show-all" aria-expanded="false" hidden>
           Show all months
         </button>
-        <button type="button" class="btn-secondary" id="emi-show-fewer" hidden>
+        <button type="button" class="btn-secondary" id="emi-show-fewer" data-i18n="emi.show-fewer" hidden>
           Show fewer months
         </button>
       </div>
@@ -351,51 +349,47 @@ const schema = JSON.stringify({
   </section>
 
   <div class="container prose-narrow" style="padding-top:32px;">
-    <h2>How it works</h2>
+    <h2 data-i18n="emi.how-h">How it works</h2>
     <ol>
-      <li>
+      <li data-i18n="emi.how1">
         Enter the loan amount, the nominal annual interest rate, and the tenure in whole
         years and months. Total months are shown below the tenure fields.
       </li>
-      <li>
+      <li data-i18n="emi.how2">
         The monthly rate is the annual rate divided by 100 and by 12. For example, an annual
         rate of 18% gives a monthly rate of 1.50% (0.015).
       </li>
-      <li>
+      <li data-i18n="emi.how3">
         The EMI is worked out with the reducing-balance formula, and the schedule charges
         interest each month on the opening balance. The final instalment is adjusted for
         rounding so the schedule adds up to the total payment and the closing balance is zero.
       </li>
     </ol>
-    <p>
+    <p data-i18n="emi.formula">
       Formula: EMI = P × R × (1+R)^N / ((1+R)^N − 1), where P is the loan amount, R is the
       monthly rate, and N is the number of months. If the rate is 0, EMI = P ÷ N.
     </p>
 
-    <h2>Worked example</h2>
+    <h2 data-i18n="emi.example-h">Worked example</h2>
     <p>
-      For example, a loan of {formatPKR(1000000, 2)} at 18% per year for 24 months gives a
-      monthly EMI of {formatPKR(49924.1, 2)}. This example uses fixed example inputs; enter
-      your own figures above to calculate your loan. To check affordability against
-      take-home pay, use the{' '}
-      <a href="/salary-income-tax-calculator/">Salary / Income Tax Calculator</a>.
+      <span data-i18n="emi.ex-pre1">For example, a loan of </span>{formatPKR(1000000, 2)}<span data-i18n="emi.ex-pre2"> at 18% per year for 24 months gives a monthly EMI of </span>{formatPKR(49924.1, 2)}<span data-i18n="emi.ex-post">. This example uses fixed example inputs; enter your own figures above to calculate your loan. To check affordability against take-home pay, use the </span><a href="/salary-income-tax-calculator/" data-i18n="tool.salary-tax">Salary / Income Tax Calculator</a>.
     </p>
 
     <section class="faq" aria-labelledby="emi-faq-heading">
-      <h2 id="emi-faq-heading">Frequently asked questions</h2>
+      <h2 id="emi-faq-heading" data-i18n="emi.faq-h">Frequently asked questions</h2>
       {
-        faqs.map((faq) => (
+        faqs.map((faq, i) => (
           <details>
-            <summary>{faq.question}</summary>
-            <p>{faq.answer}</p>
+            <summary data-i18n={`emi.faq${i + 1}q`}>{faq.question}</summary>
+            <p data-i18n={`emi.faq${i + 1}a`}>{faq.answer}</p>
           </details>
         ))
       }
     </section>
 
     <section id="disclaimer" class="notice-warning" style="margin-top:32px;">
-      <h2>Important — please read</h2>
-      <p>
+      <h2 data-i18n="emi.disc-h">Important — please read</h2>
+      <p data-i18n="emi.disc">
         Results are estimates for information only and are not financial advice. This
         calculator uses the reducing-balance method only, and fees, insurance, and processing
         charges are not included. The interest rate is the figure you enter — this site does
@@ -406,15 +400,15 @@ const schema = JSON.stringify({
     </section>
 
     <section style="margin-top:32px;">
-      <h2>Related tools</h2>
+      <h2 data-i18n="emi.related-h">Related tools</h2>
       <div style="display:grid; gap:16px; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));">
         <article class="card">
-          <h3 style="font-size:18px;"><a href="/salary-income-tax-calculator/">Salary / Income Tax Calculator</a></h3>
-          <p>Monthly and annual tax on your salary for 2026-27, using FBR salaried slabs, with take-home pay.</p>
+          <h3 style="font-size:18px;"><a href="/salary-income-tax-calculator/" data-i18n="tool.salary-tax">Salary / Income Tax Calculator</a></h3>
+          <p data-i18n="emi.rel-salary-desc">Monthly and annual tax on your salary for 2026-27, using FBR salaried slabs, with take-home pay.</p>
         </article>
         <article class="card">
-          <h3 style="font-size:18px;"><a href="/percentage-calculator/">Percentage Calculator</a></h3>
-          <p>What X% of a number is, percentage increase and decrease, and what percent one number is of another.</p>
+          <h3 style="font-size:18px;"><a href="/percentage-calculator/" data-i18n="tool.percentage">Percentage Calculator</a></h3>
+          <p data-i18n="emi.rel-percentage-desc">What X% of a number is, percentage increase and decrease, and what percent one number is of another.</p>
         </article>
       </div>
     </section>
@@ -541,9 +535,15 @@ const schema = JSON.stringify({
         months <= 11
       ) {
         const total = years * 12 + months;
-        totalMonthsEl.textContent = `Total: ${total} months (${decompose(total)})`;
+        // The total-months line is rewritten by this script on every input,
+        // so it is translated here (not via data-i18n) and refreshed by the
+        // __pfcAfterLang hook in i18n.js whenever the language toggles.
+        const urdu = document.documentElement.lang === 'ur';
+        totalMonthsEl.textContent = urdu
+          ? `کل: ${total} ماہ (${years} سال ${months} ماہ)`
+          : `Total: ${total} months (${decompose(total)})`;
       } else {
-        totalMonthsEl.textContent = 'Total: —';
+        totalMonthsEl.textContent = document.documentElement.lang === 'ur' ? 'کل: —' : 'Total: —';
       }
     }
 
@@ -606,14 +606,25 @@ const schema = JSON.stringify({
       scheduleFootnote.hidden = !finalDiffers;
       showAllBtn.hidden = result.schedule.length <= 12 || showAllRows;
       showFewerBtn.hidden = result.schedule.length <= 12 || !showAllRows;
-      showAllBtn.textContent = `Show all ${result.schedule.length} months`;
+      // The show-all label is rewritten by this script on every render.
+      const urduShowAll = document.documentElement.lang === 'ur';
+      showAllBtn.textContent = urduShowAll
+        ? `تمام ${result.schedule.length} ماہ دکھائیں`
+        : `Show all ${result.schedule.length} months`;
       showAllBtn.setAttribute('aria-expanded', String(showAllRows));
     }
 
     function updateScheduleToggle(months: number): void {
+      // The toggle label is rewritten by this script, so it is translated
+      // here and refreshed by the __pfcAfterLang hook (see below).
+      const urdu = document.documentElement.lang === 'ur';
       scheduleToggle.textContent = scheduleRegion.hidden
-        ? `View month-by-month schedule (${months} months)`
-        : `Hide month-by-month schedule (${months} months)`;
+        ? urdu
+          ? `ماہ بہ ماہ شیڈول دیکھیں (${months} ماہ)`
+          : `View month-by-month schedule (${months} months)`
+        : urdu
+          ? `ماہ بہ ماہ شیڈول چھپائیں (${months} ماہ)`
+          : `Hide month-by-month schedule (${months} months)`;
     }
 
     function echoText(principal: number, rate: number, months: number, stale: boolean): string {
@@ -867,6 +878,19 @@ const schema = JSON.stringify({
       showAllRows = false;
       if (lastValid) renderSchedule(lastValid.result);
     });
+
+    // Refresh script-managed labels when the language toggles (i18n.js
+    // calls this after swapping every [data-i18n] element).
+    (window as unknown as { __pfcAfterLang?: (lang: string) => void }).__pfcAfterLang = (lang) => {
+      updateTotalMonthsDisplay();
+      if (lastValid) {
+        updateScheduleToggle(lastValid.months);
+        const urdu = lang === 'ur';
+        showAllBtn.textContent = urdu
+          ? `تمام ${lastValid.result.schedule.length} ماہ دکھائیں`
+          : `Show all ${lastValid.result.schedule.length} months`;
+      }
+    };
 
     setActionsEnabled(false);
     updateTotalMonthsDisplay();
