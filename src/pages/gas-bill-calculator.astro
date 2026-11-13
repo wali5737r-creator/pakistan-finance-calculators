@@ -83,19 +83,20 @@ const related = [
 <Layout title={title} description={description} slug={slug} schema={schema}>
   <div class="container" style="padding-top: 32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Gas Bill Calculator</p>
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="gas.crumb">Gas Bill Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;">Utility Bills</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Gas Bill Calculator</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="gas.badge">Utility Bills</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;" data-i18n="gas.h1">Gas Bill Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;" data-i18n="gas.intro">
       Estimate your monthly gas bill from OGRA's 2025 domestic sale price. Enter your consumption, your consumer category, and the GCV and PCF from your bill, and you will see the gas charge by slab, the fixed charge, meter rent, GST, and the estimated total.
     </p>
+    <p id="lang-note" class="lang-note" data-i18n="tax.others-note" hidden>The other calculators on this site are still in English in this phase.</p>
     <p class="notice-info prose-narrow" style="margin-top: 16px;">
-      <strong>Estimate only.</strong> This uses the OGRA Gas Sale Price Notification
+      <strong data-i18n="gas.notice-label">Estimate only.</strong> <span data-i18n="gas.notice-text">This uses the OGRA Gas Sale Price Notification
       dated 29 June 2025 (effective 1 July 2025), checked 13 November 2026.
       GCV and PCF change from month to month, and withholding tax, TV fee,
       GIDC, and other charges are not included — so your real bill will
-      differ. Nothing here is a live or official bill amount.
+      differ. Nothing here is a live or official bill amount.</span>
     </p>
   </div>
 
@@ -104,81 +105,81 @@ const related = [
       <div class="card">
         <form id="gasForm" novalidate>
           <div class="field">
-            <label for="gasCompany">Gas company <span aria-hidden="true">*</span></label>
+            <label for="gasCompany"><span data-i18n="gas.company-label">Gas company</span> <span aria-hidden="true">*</span></label>
             <select id="gasCompany" aria-required="true">
-              <option value="SNGPL">SNGPL (Punjab, KP, Islamabad)</option>
-              <option value="SSGC">SSGC (Sindh, Balochistan)</option>
+              <option value="SNGPL" data-i18n="gas.company-sngpl">SNGPL (Punjab, KP, Islamabad)</option>
+              <option value="SSGC" data-i18n="gas.company-ssgc">SSGC (Sindh, Balochistan)</option>
             </select>
-            <p class="hint">The tariff is the same for both companies — this only labels your result.</p>
+            <p class="hint" data-i18n="gas.company-hint">The tariff is the same for both companies — this only labels your result.</p>
           </div>
 
           <div class="field">
-            <label for="gasCategory">Consumer category <span aria-hidden="true">*</span></label>
+            <label for="gasCategory"><span data-i18n="gas.cat-label">Consumer category</span> <span aria-hidden="true">*</span></label>
             <select id="gasCategory" aria-required="true">
-              <option value="non-protected">Non-protected — winter average above 0.9 hm3/month</option>
-              <option value="protected">Protected — winter average 0.9 hm3/month or less</option>
+              <option value="non-protected" data-i18n="gas.cat-nonprotected">Non-protected — winter average above 0.9 hm3/month</option>
+              <option value="protected" data-i18n="gas.cat-protected">Protected — winter average 0.9 hm3/month or less</option>
             </select>
-            <p class="hint">Protected means your average consumption over the last four winter months (November to February) was 0.9 hm3 a month or less. If you are not sure, use the helper below, or choose non-protected — it gives the higher, safer estimate.</p>
+            <p class="hint" data-i18n="gas.cat-hint">Protected means your average consumption over the last four winter months (November to February) was 0.9 hm3 a month or less. If you are not sure, use the helper below, or choose non-protected — it gives the higher, safer estimate.</p>
           </div>
 
           <div class="field">
-            <label for="gasConsumption">Monthly consumption <span aria-hidden="true">*</span></label>
+            <label for="gasConsumption"><span data-i18n="gas.cons-label">Monthly consumption</span> <span aria-hidden="true">*</span></label>
             <input id="gasConsumption" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">The gas used in the month. Your meter reads in cubic metres (m3) — 1 hm3 is 100 m3.</p>
+            <p class="hint" data-i18n="gas.cons-hint">The gas used in the month. Your meter reads in cubic metres (m3) — 1 hm3 is 100 m3.</p>
           </div>
 
           <div class="field">
-            <label for="gasUnit">Consumption unit <span aria-hidden="true">*</span></label>
+            <label for="gasUnit"><span data-i18n="gas.unit-label">Consumption unit</span> <span aria-hidden="true">*</span></label>
             <select id="gasUnit" aria-required="true">
-              <option value="hm3">hm3 (cubic hectometres — 100 m3 each)</option>
-              <option value="m3">m3 (cubic metres, as on your meter)</option>
+              <option value="hm3" data-i18n="gas.unit-hm3">hm3 (cubic hectometres — 100 m3 each)</option>
+              <option value="m3" data-i18n="gas.unit-m3">m3 (cubic metres, as on your meter)</option>
             </select>
           </div>
 
           <div class="field">
-            <label for="gasGcv">GCV (BTU/SCF) — optional</label>
+            <label for="gasGcv"><span data-i18n="gas.gcv-label">GCV (BTU/SCF) — optional</span></label>
             <input id="gasGcv" type="text" inputmode="decimal" autocomplete="off" placeholder="990" />
-            <p class="hint">Gross calorific value, printed on your bill. Leave blank for the default 990.</p>
+            <p class="hint" data-i18n="gas.gcv-hint">Gross calorific value, printed on your bill. Leave blank for the default 990.</p>
           </div>
 
           <div class="field">
-            <label for="gasPcf">PCF — optional</label>
+            <label for="gasPcf"><span data-i18n="gas.pcf-label">PCF — optional</span></label>
             <input id="gasPcf" type="text" inputmode="decimal" autocomplete="off" placeholder="1.00" />
-            <p class="hint">Pressure correction factor, printed on your bill. Leave blank for the default 1.00.</p>
+            <p class="hint" data-i18n="gas.pcf-hint">Pressure correction factor, printed on your bill. Leave blank for the default 1.00.</p>
           </div>
 
           <div id="gasErrors" class="error-box" role="alert" hidden></div>
 
           <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
-            <button id="gasCalculate" class="btn-primary" type="submit">Calculate</button>
-            <button id="gasClear" class="btn-secondary" type="button">Clear</button>
+            <button id="gasCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
+            <button id="gasClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
           <p id="gasFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
         </form>
 
         <div style="border-top: 1px solid var(--border, #e5e7eb); margin-top: 24px; padding-top: 16px;">
-          <h2 style="font-size: 18px;">Am I protected? Winter-average helper</h2>
-          <p style="font-size: 14px; color: var(--ink-muted);">Enter your usage for the last four winter months, in hm3, and the helper works out the average. 0.9 hm3 a month or less means protected.</p>
+          <h2 style="font-size: 18px;" data-i18n="gas.helper-h">Am I protected? Winter-average helper</h2>
+          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="gas.helper-intro">Enter your usage for the last four winter months, in hm3, and the helper works out the average. 0.9 hm3 a month or less means protected.</p>
           <form id="gasHelperForm" novalidate>
             <div class="field">
-              <label for="gasNov">November (hm3)</label>
+              <label for="gasNov" data-i18n="gas.helper-nov">November (hm3)</label>
               <input id="gasNov" type="text" inputmode="decimal" autocomplete="off" />
             </div>
             <div class="field">
-              <label for="gasDec">December (hm3)</label>
+              <label for="gasDec" data-i18n="gas.helper-dec">December (hm3)</label>
               <input id="gasDec" type="text" inputmode="decimal" autocomplete="off" />
             </div>
             <div class="field">
-              <label for="gasJan">January (hm3)</label>
+              <label for="gasJan" data-i18n="gas.helper-jan">January (hm3)</label>
               <input id="gasJan" type="text" inputmode="decimal" autocomplete="off" />
             </div>
             <div class="field">
-              <label for="gasFeb">February (hm3)</label>
+              <label for="gasFeb" data-i18n="gas.helper-feb">February (hm3)</label>
               <input id="gasFeb" type="text" inputmode="decimal" autocomplete="off" />
             </div>
             <div id="gasHelperErrors" class="error-box" role="alert" hidden></div>
             <p style="margin-top: 12px;">
-              <button id="gasHelperCheck" class="btn-secondary" type="submit">Check my category</button>
+              <button id="gasHelperCheck" class="btn-secondary" type="submit" data-i18n="gas.helper-btn">Check my category</button>
             </p>
             <p id="gasHelperResult" role="status" style="font-size: 15px;"></p>
           </form>
@@ -187,29 +188,29 @@ const related = [
 
       <div class="result-card" id="gasResultCard" tabindex="-1">
         <div id="gasEmpty">
-          <p style="font-weight: 700;">Your result will appear here.</p>
-          <p>Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);">
+          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
 
         <div id="gasResult" data-result-text hidden>
-          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Estimated bill</p>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" data-i18n="gas.result-label">Estimated bill</p>
           <div aria-live="polite" aria-atomic="true">
             <p class="result-value" id="gasHeadline"></p>
           </div>
           <div class="stat-grid">
             <div>
-              <p class="stat-label">Gas charge</p>
+              <p class="stat-label" data-i18n="gas.stat1">Gas charge</p>
               <p class="stat-value" id="gasStat1"></p>
             </div>
             <div>
-              <p class="stat-label">Fixed charge</p>
+              <p class="stat-label" data-i18n="gas.stat2">Fixed charge</p>
               <p class="stat-value" id="gasStat2"></p>
             </div>
             <div>
-              <p class="stat-label">GST (18%)</p>
+              <p class="stat-label" data-i18n="gas.stat3">GST (18%)</p>
               <p class="stat-value" id="gasStat3"></p>
             </div>
           </div>
@@ -219,13 +220,13 @@ const related = [
           <p id="gasEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p id="gasFormula" style="font-size: 16px;"></p>
           <p style="font-size: 13px; color: var(--ink-muted);">
-            Estimate only — check important figures before acting. <a href="#gasDisclaimer">Read the full disclaimer.</a>
+            <span data-i18n="gas.estimate">Estimate only — check important figures before acting.</span> <a href="#gasDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
 
         <div class="actions-row no-print">
-          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
         <p data-copy-status role="status" style="font-size: 14px;"></p>
       </div>
@@ -233,66 +234,66 @@ const related = [
   </div>
 
   <div class="container prose-narrow" style="margin-top: 40px;">
-    <h2>How it works</h2>
+    <h2 data-i18n="gas.how-h">How it works</h2>
     <ol>
-      <li>Enter the gas used in the month, in hm3 or in m3 as your meter reads it (1 hm3 = 100 m3), and choose your category: protected (winter average 0.9 hm3 a month or less) or non-protected.</li>
-      <li>Optionally enter the GCV and PCF printed on your bill — otherwise the defaults of 990 BTU/SCF and 1.00 are used. Your consumption is converted to MMBTU, then charged by slab.</li>
-      <li>You see the gas charge by slab, the fixed charge, meter rent of Rs 40, GST at 18%, and the estimated total.</li>
+      <li data-i18n="gas.how1">Enter the gas used in the month, in hm3 or in m3 as your meter reads it (1 hm3 = 100 m3), and choose your category: protected (winter average 0.9 hm3 a month or less) or non-protected.</li>
+      <li data-i18n="gas.how2">Optionally enter the GCV and PCF printed on your bill — otherwise the defaults of 990 BTU/SCF and 1.00 are used. Your consumption is converted to MMBTU, then charged by slab.</li>
+      <li data-i18n="gas.how3">You see the gas charge by slab, the fixed charge, meter rent of Rs 40, GST at 18%, and the estimated total.</li>
     </ol>
-    <p>Both categories get the one-previous-slab benefit: consumption up to the previous slab's boundary is billed at the previous slab's rate, and only the excess at the rate of the slab you landed in. The one exception is above 4 hm3, where the whole consumption is billed at Rs 4,200 per MMBTU with no benefit — so a bill jumps sharply when you cross 4 hm3. This slab-split method is the standard applied interpretation of OGRA's "one preceding slab" rule.</p>
+    <p data-i18n="gas.how-note">Both categories get the one-previous-slab benefit: consumption up to the previous slab's boundary is billed at the previous slab's rate, and only the excess at the rate of the slab you landed in. The one exception is above 4 hm3, where the whole consumption is billed at Rs 4,200 per MMBTU with no benefit — so a bill jumps sharply when you cross 4 hm3. This slab-split method is the standard applied interpretation of OGRA's "one preceding slab" rule.</p>
 
-    <h2>Formula</h2>
-    <p>MMBTU = hm3 × GCV ÷ 281.7385 × PCF (at GCV 990 and PCF 1.00, 1 hm3 = 3.5139 MMBTU)</p>
-    <p>Gas charge = MMBTU in each slab × slab rate (Rs per MMBTU, OGRA sale price)</p>
-    <p>GST = 18% × (Gas charge + Fixed charge + Meter rent)</p>
-    <p>Estimated total = Gas charge + Fixed charge + Meter rent + GST</p>
-    <p>Withholding tax, TV fee, and GIDC are not in this calculation. A <a href="/percentage-calculator/">Percentage Calculator</a> can help if you want to work out what share of your budget the bill takes.</p>
+    <h2 data-i18n="gas.formula-h">Formula</h2>
+    <p data-i18n="gas.f1">MMBTU = hm3 × GCV ÷ 281.7385 × PCF (at GCV 990 and PCF 1.00, 1 hm3 = 3.5139 MMBTU)</p>
+    <p data-i18n="gas.f2">Gas charge = MMBTU in each slab × slab rate (Rs per MMBTU, OGRA sale price)</p>
+    <p data-i18n="gas.f3">GST = 18% × (Gas charge + Fixed charge + Meter rent)</p>
+    <p data-i18n="gas.f4">Estimated total = Gas charge + Fixed charge + Meter rent + GST</p>
+    <p><span data-i18n="gas.formula-note-pre">Withholding tax, TV fee, and GIDC are not in this calculation. A </span><a href="/percentage-calculator/" data-i18n="card.percentage.name">Percentage Calculator</a><span data-i18n="gas.formula-note-post"> can help if you want to work out what share of your budget the bill takes.</span></p>
 
-    <h2>Worked example</h2>
-    <p><strong>Example (protected):</strong> 0.9 hm3 as a protected consumer, using the rounded 3.5 MMBTU per hm3 factor. The first 0.6 hm3 is 2.10 MMBTU at Rs 300 = Rs 630.00, and the remaining 0.3 hm3 is 1.05 MMBTU at Rs 350 = Rs 367.50, so the gas charge is Rs 997.50. The fixed charge is Rs 600 and meter rent is Rs 40, giving a subtotal of Rs 1,637.50. GST at 18% is Rs 294.75, and the estimated total is Rs 1,932.25.</p>
-    <p><strong>Example (non-protected):</strong> 2.0 hm3 as a non-protected consumer, using the same rounded factor. The first 1.5 hm3 is 5.25 MMBTU at Rs 1,450 = Rs 7,612.50, and the remaining 0.5 hm3 is 1.75 MMBTU at Rs 1,900 = Rs 3,325.00, so the gas charge is Rs 10,937.50. The fixed charge is Rs 3,000 and meter rent is Rs 40, giving a subtotal of Rs 13,977.50. GST at 18% is Rs 2,515.95, and the estimated total is Rs 16,493.45.</p>
-    <p style="font-size: 14px; color: var(--ink-muted);">The calculator above uses the exact conversion instead (3.5139 MMBTU per hm3 at GCV 990), so for the same 0.9 hm3 it gives Rs 1,936.92 and for the same 2.0 hm3 it gives Rs 16,544.70 — the small difference is the rounding in the 3.5 factor.</p>
+    <h2 data-i18n="gas.example-h">Worked example</h2>
+    <p><strong data-i18n="gas.ex1-label">Example (protected):</strong><span data-i18n="gas.ex1-rest"> 0.9 hm3 as a protected consumer, using the rounded 3.5 MMBTU per hm3 factor. The first 0.6 hm3 is 2.10 MMBTU at Rs 300 = Rs 630.00, and the remaining 0.3 hm3 is 1.05 MMBTU at Rs 350 = Rs 367.50, so the gas charge is Rs 997.50. The fixed charge is Rs 600 and meter rent is Rs 40, giving a subtotal of Rs 1,637.50. GST at 18% is Rs 294.75, and the estimated total is Rs 1,932.25.</span></p>
+    <p><strong data-i18n="gas.ex2-label">Example (non-protected):</strong><span data-i18n="gas.ex2-rest"> 2.0 hm3 as a non-protected consumer, using the same rounded factor. The first 1.5 hm3 is 5.25 MMBTU at Rs 1,450 = Rs 7,612.50, and the remaining 0.5 hm3 is 1.75 MMBTU at Rs 1,900 = Rs 3,325.00, so the gas charge is Rs 10,937.50. The fixed charge is Rs 3,000 and meter rent is Rs 40, giving a subtotal of Rs 13,977.50. GST at 18% is Rs 2,515.95, and the estimated total is Rs 16,493.45.</span></p>
+    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="gas.ex-note">The calculator above uses the exact conversion instead (3.5139 MMBTU per hm3 at GCV 990), so for the same 0.9 hm3 it gives Rs 1,936.92 and for the same 2.0 hm3 it gives Rs 16,544.70 — the small difference is the rounding in the 3.5 factor.</p>
 
-    <h2>2025 domestic gas sale price (OGRA)</h2>
+    <h2 data-i18n="gas.tariff-h">2025 domestic gas sale price (OGRA)</h2>
     <div class="table-wrap">
     <table class="breakdown-table" aria-label="OGRA domestic gas sale price 2025">
       <thead>
-        <tr><th scope="col">Consumption per month</th><th scope="col">Rate per MMBTU</th><th scope="col">Fixed charge</th></tr>
+        <tr><th scope="col" data-i18n="gas.th-consumption">Consumption per month</th><th scope="col" data-i18n="gas.th-rate">Rate per MMBTU</th><th scope="col" data-i18n="gas.th-fixed">Fixed charge</th></tr>
       </thead>
       <tbody>
-        <tr><td>Up to 0.25 hm3 (protected)</td><td>Rs 200</td><td rowspan="4">Rs 600 / month</td></tr>
-        <tr><td>Up to 0.50 hm3 (protected)</td><td>Rs 250</td></tr>
-        <tr><td>Up to 0.60 hm3 (protected)</td><td>Rs 300</td></tr>
-        <tr><td>Up to 0.90 hm3 (protected)</td><td>Rs 350</td></tr>
-        <tr><td>Up to 0.25 hm3 (non-protected)</td><td>Rs 500</td><td rowspan="3">Rs 1,500 / month</td></tr>
-        <tr><td>Up to 0.60 hm3 (non-protected)</td><td>Rs 850</td></tr>
-        <tr><td>Up to 1.00 hm3 (non-protected)</td><td>Rs 1,250</td></tr>
-        <tr><td>Up to 1.50 hm3 (non-protected)</td><td>Rs 1,450</td><td rowspan="5">Rs 3,000 / month</td></tr>
-        <tr><td>Up to 2.00 hm3 (non-protected)</td><td>Rs 1,900</td></tr>
-        <tr><td>Up to 3.00 hm3 (non-protected)</td><td>Rs 3,300</td></tr>
-        <tr><td>Up to 4.00 hm3 (non-protected)</td><td>Rs 3,800</td></tr>
-        <tr><td>Above 4.00 hm3 (non-protected)</td><td>Rs 4,200</td></tr>
+        <tr><td data-i18n="gas.row-p025">Up to 0.25 hm3 (protected)</td><td>Rs 200</td><td rowspan="4" data-i18n="gas.fixed-600">Rs 600 / month</td></tr>
+        <tr><td data-i18n="gas.row-p050">Up to 0.50 hm3 (protected)</td><td>Rs 250</td></tr>
+        <tr><td data-i18n="gas.row-p060">Up to 0.60 hm3 (protected)</td><td>Rs 300</td></tr>
+        <tr><td data-i18n="gas.row-p090">Up to 0.90 hm3 (protected)</td><td>Rs 350</td></tr>
+        <tr><td data-i18n="gas.row-np025">Up to 0.25 hm3 (non-protected)</td><td>Rs 500</td><td rowspan="3" data-i18n="gas.fixed-1500">Rs 1,500 / month</td></tr>
+        <tr><td data-i18n="gas.row-np060">Up to 0.60 hm3 (non-protected)</td><td>Rs 850</td></tr>
+        <tr><td data-i18n="gas.row-np100">Up to 1.00 hm3 (non-protected)</td><td>Rs 1,250</td></tr>
+        <tr><td data-i18n="gas.row-np150">Up to 1.50 hm3 (non-protected)</td><td>Rs 1,450</td><td rowspan="5" data-i18n="gas.fixed-3000">Rs 3,000 / month</td></tr>
+        <tr><td data-i18n="gas.row-np200">Up to 2.00 hm3 (non-protected)</td><td>Rs 1,900</td></tr>
+        <tr><td data-i18n="gas.row-np300">Up to 3.00 hm3 (non-protected)</td><td>Rs 3,300</td></tr>
+        <tr><td data-i18n="gas.row-np400">Up to 4.00 hm3 (non-protected)</td><td>Rs 3,800</td></tr>
+        <tr><td data-i18n="gas.row-np-above4">Above 4.00 hm3 (non-protected)</td><td>Rs 4,200</td></tr>
       </tbody>
     </table>
     </div>
     <p style="font-size: 14px; color: var(--ink-muted);">Meter rent is Rs 40 a month for a normal domestic meter. Source: OGRA Gas Sale Price Notification dated 29 June 2025, effective 1 July 2025. Checked 13 November 2026. Consumer tariffs are frozen for FY 2026-27. New domestic connections are RLNG-only on a monthly USD tariff and are not priced on these slabs.</p>
 
-    <h2>Frequently asked questions</h2>
+    <h2 data-i18n="gas.faq-h">Frequently asked questions</h2>
     <div class="faq">
       {
-        faqs.map((f) => (
+        faqs.map((f, i) => (
           <details>
-            <summary>{f.q}</summary>
-            <p>{f.a}</p>
+            <summary data-i18n={`gas.faq${i + 1}q`}>{f.q}</summary>
+            <p data-i18n={`gas.faq${i + 1}a`}>{f.a}</p>
           </details>
         ))
       }
     </div>
-    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+    <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
     <section id="gasDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;">Important — please read</h2>
-      <p>
+      <h2 style="font-size: 20px;" data-i18n="gas.disc-h">Important — please read</h2>
+      <p data-i18n="gas.disc">
         Results are estimates from the notified base tariff only. Your real bill
         also carries withholding tax, TV fee, GIDC, and other charges, and its
         GCV and PCF change from month to month. No rupee minimum-bill figure is
@@ -304,20 +305,20 @@ const related = [
       <p>
         Sources: <a href="https://www.ssgc.com.pk/web/?page_id=103">SSGC domestic rates</a>, <a href="https://www.ogra.org.pk/consumer-gas-prices">OGRA consumer gas prices</a>, and the <a href="https://www.sngpl.com.pk/billcalc.jsp?mdids=92">SNGPL bill estimator</a>.
       </p>
-      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+      <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;">Related tools</h2>
+    <h2 style="margin-top: 32px;" data-i18n="gas.related-h">Related tools</h2>
     <div class="related-grid">
       {
-        related.map((tool) => (
+        related.map((tool, i) => (
           <article class="card">
             <h3 style="font-size: 18px;">
-              <a href={tool.href}>{tool.name}</a>
+              <a href={tool.href} data-i18n={`gas.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p style="color: var(--ink-muted);" data-i18n={`gas.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
-              <a href={tool.href}>Use the calculator →</a>
+              <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
           </article>
         ))

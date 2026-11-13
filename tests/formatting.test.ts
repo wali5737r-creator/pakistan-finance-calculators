@@ -54,9 +54,11 @@ assert.deepEqual(violations, [], `Glued text/link lines found:\n${violations.joi
 const gasPage = readFileSync(join(SRC_DIR, 'pages', 'gas-bill-calculator.astro'), 'utf8');
 assert.match(gasPage, /\.breakdown-table td\[rowspan\]\s*\{\s*vertical-align:\s*top;/);
 assert.match(gasPage, /Sources: <a href="https:\/\/www\.ssgc\.com\.pk\/web\/\?page_id=103">SSGC domestic rates<\/a>, <a href="https:\/\/www\.ogra\.org\.pk\/consumer-gas-prices">OGRA consumer gas prices<\/a>, and the <a href="https:\/\/www\.sngpl\.com\.pk\/billcalc\.jsp\?mdids=92">SNGPL bill estimator<\/a>\./);
-assert.match(gasPage, /rowspan="4">Rs 600 \/ month/);
-assert.match(gasPage, /rowspan="3">Rs 1,500 \/ month/);
-assert.match(gasPage, /rowspan="5">Rs 3,000 \/ month/);
+// (Urdu Phase 5: the fixed-charge cells carry a data-i18n attribute,
+// so the match allows attributes between the rowspan and the text.)
+assert.match(gasPage, /rowspan="4"[^>]*>Rs 600 \/ month/);
+assert.match(gasPage, /rowspan="3"[^>]*>Rs 1,500 \/ month/);
+assert.match(gasPage, /rowspan="5"[^>]*>Rs 3,000 \/ month/);
 
 // Homepage disclaimer link must carry its space on the same line.
 // (Since Urdu Phase 1 the sentence text sits in a <span data-i18n> and

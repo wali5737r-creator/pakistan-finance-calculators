@@ -86,19 +86,20 @@ const related = [
 <Layout title={title} description={description} slug={slug} schema={schema}>
   <div class="container" style="padding-top: 32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Electricity Bill Calculator</p>
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="elec.crumb">Electricity Bill Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;">Utility Bills</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Electricity Bill Calculator</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="elec.badge">Utility Bills</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;" data-i18n="elec.h1">Electricity Bill Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;" data-i18n="elec.intro">
       Estimate your monthly electricity bill from NEPRA's 2026 domestic tariff. Enter your units, your consumer category, and your sanctioned load, and you will see the energy charge by slab, the fixed charge, GST, and the estimated total.
     </p>
+    <p id="lang-note" class="lang-note" data-i18n="tax.others-note" hidden>The other calculators on this site are still in English in this phase.</p>
     <p class="notice-info prose-narrow" style="margin-top: 16px;">
-      <strong>Estimate only.</strong> This uses the uniform domestic tariff A-1 notified by
+      <strong data-i18n="elec.notice-label">Estimate only.</strong> <span data-i18n="elec.notice-text">This uses the uniform domestic tariff A-1 notified by
       S.R.O. 279(I)/2026 (12 February 2026), checked 8 November 2026. The fuel price
       adjustment and quarterly tariff adjustment change monthly and are not in the tariff,
       and electricity duty, TV fee, and other surcharges are not included — so your real
-      bill will differ. Nothing here is a live or official bill amount.
+      bill will differ. Nothing here is a live or official bill amount.</span>
     </p>
   </div>
 
@@ -107,38 +108,38 @@ const related = [
       <div class="card">
         <form id="elecForm" novalidate>
           <div class="field">
-            <label for="elecUnits">Monthly units (kWh) <span aria-hidden="true">*</span></label>
+            <label for="elecUnits"><span data-i18n="elec.units-label">Monthly units (kWh)</span> <span aria-hidden="true">*</span></label>
             <input id="elecUnits" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">The units consumed in the month, as shown on your bill.</p>
+            <p class="hint" data-i18n="elec.units-hint">The units consumed in the month, as shown on your bill.</p>
           </div>
 
           <div class="field">
-            <label for="elecCategory">Consumer category <span aria-hidden="true">*</span></label>
+            <label for="elecCategory"><span data-i18n="elec.cat-label">Consumer category</span> <span aria-hidden="true">*</span></label>
             <select id="elecCategory" aria-required="true">
-              <option value="unprotected">Unprotected — above 200 units, or not protected</option>
-              <option value="protected">Protected — 200 units or fewer every month for 6 months</option>
-              <option value="lifeline">Lifeline — up to 100 units a month</option>
+              <option value="unprotected" data-i18n="elec.cat-unprotected">Unprotected — above 200 units, or not protected</option>
+              <option value="protected" data-i18n="elec.cat-protected">Protected — 200 units or fewer every month for 6 months</option>
+              <option value="lifeline" data-i18n="elec.cat-lifeline">Lifeline — up to 100 units a month</option>
             </select>
-            <p class="hint">Protected means 200 units or fewer in each of the last six months with a load below 5 kW. If you are not sure, choose unprotected — it gives the higher, safer estimate.</p>
+            <p class="hint" data-i18n="elec.cat-hint">Protected means 200 units or fewer in each of the last six months with a load below 5 kW. If you are not sure, choose unprotected — it gives the higher, safer estimate.</p>
           </div>
 
           <div class="field">
-            <label for="elecLoad">Sanctioned load (kW) <span aria-hidden="true">*</span></label>
+            <label for="elecLoad"><span data-i18n="elec.load-label">Sanctioned load (kW)</span> <span aria-hidden="true">*</span></label>
             <input id="elecLoad" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">The load your connection was approved for, printed on your bill in kW. Must be 5 kW or less — loads of 5 kW or more are billed on Time of Use rates, which this calculator does not cover.</p>
+            <p class="hint" data-i18n="elec.load-hint">The load your connection was approved for, printed on your bill in kW. Must be 5 kW or less — loads of 5 kW or more are billed on Time of Use rates, which this calculator does not cover.</p>
           </div>
 
           <div class="field">
-            <label for="elecFpa">Fuel price adjustment (Rs per unit) — optional</label>
+            <label for="elecFpa"><span data-i18n="elec.fpa-label">Fuel price adjustment (Rs per unit) — optional</span></label>
             <input id="elecFpa" type="text" inputmode="decimal" autocomplete="off" />
-            <p class="hint">Copy the FPA per unit from your last bill, if you want it included. Leave blank for 0. It can be negative in some months.</p>
+            <p class="hint" data-i18n="elec.fpa-hint">Copy the FPA per unit from your last bill, if you want it included. Leave blank for 0. It can be negative in some months.</p>
           </div>
 
           <div id="elecErrors" class="error-box" role="alert" hidden></div>
 
           <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
-            <button id="elecCalculate" class="btn-primary" type="submit">Calculate</button>
-            <button id="elecClear" class="btn-secondary" type="button">Clear</button>
+            <button id="elecCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
+            <button id="elecClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
           <p id="elecFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
         </form>
@@ -146,29 +147,29 @@ const related = [
 
       <div class="result-card" id="elecResultCard" tabindex="-1">
         <div id="elecEmpty">
-          <p style="font-weight: 700;">Your result will appear here.</p>
-          <p>Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);">
+          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
 
         <div id="elecResult" data-result-text hidden>
-          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Estimated bill</p>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" data-i18n="elec.result-label">Estimated bill</p>
           <div aria-live="polite" aria-atomic="true">
             <p class="result-value" id="elecHeadline"></p>
           </div>
           <div class="stat-grid">
             <div>
-              <p class="stat-label">Energy charge</p>
+              <p class="stat-label" data-i18n="elec.stat1">Energy charge</p>
               <p class="stat-value" id="elecStat1"></p>
             </div>
             <div>
-              <p class="stat-label">Fixed charge</p>
+              <p class="stat-label" data-i18n="elec.stat2">Fixed charge</p>
               <p class="stat-value" id="elecStat2"></p>
             </div>
             <div>
-              <p class="stat-label">GST (18%)</p>
+              <p class="stat-label" data-i18n="elec.stat3">GST (18%)</p>
               <p class="stat-value" id="elecStat3"></p>
             </div>
           </div>
@@ -179,13 +180,13 @@ const related = [
           <p id="elecEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p id="elecFormula" style="font-size: 16px;"></p>
           <p style="font-size: 13px; color: var(--ink-muted);">
-            Estimate only — check important figures before acting. <a href="#elecDisclaimer">Read the full disclaimer.</a>
+            <span data-i18n="elec.estimate">Estimate only — check important figures before acting.</span> <a href="#elecDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
 
         <div class="actions-row no-print">
-          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
         <p data-copy-status role="status" style="font-size: 14px;"></p>
       </div>
@@ -193,30 +194,30 @@ const related = [
   </div>
 
   <div class="container prose-narrow" style="margin-top: 40px;">
-    <h2>How it works</h2>
+    <h2 data-i18n="elec.how-h">How it works</h2>
     <ol>
-      <li>Enter the units consumed in the month and choose your category: lifeline (up to 100 units), protected (up to 200 units every month for six months), or unprotected.</li>
-      <li>Enter your sanctioned load in kW from your bill — the fixed charge is a rate per kW that depends on the slab you reach.</li>
-      <li>Optionally add the fuel price adjustment per unit from your last bill. You see the energy charge by slab, the fixed charge, GST at 18%, and the estimated total.</li>
+      <li data-i18n="elec.how1">Enter the units consumed in the month and choose your category: lifeline (up to 100 units), protected (up to 200 units every month for six months), or unprotected.</li>
+      <li data-i18n="elec.how2">Enter your sanctioned load in kW from your bill — the fixed charge is a rate per kW that depends on the slab you reach.</li>
+      <li data-i18n="elec.how3">Optionally add the fuel price adjustment per unit from your last bill. You see the energy charge by slab, the fixed charge, GST at 18%, and the estimated total.</li>
     </ol>
-    <p>Only protected consumers get the one-previous-slab benefit: their first 100 units are charged at Rs 10.54 and only the excess at Rs 13.01. Lifeline and unprotected consumers pay the rate of the slab reached on every unit. That is why a bill jumps sharply when you cross 200 units — at 201 units the whole bill is charged at Rs 33.10 per unit.</p>
+    <p data-i18n="elec.how-note">Only protected consumers get the one-previous-slab benefit: their first 100 units are charged at Rs 10.54 and only the excess at Rs 13.01. Lifeline and unprotected consumers pay the rate of the slab reached on every unit. That is why a bill jumps sharply when you cross 200 units — at 201 units the whole bill is charged at Rs 33.10 per unit.</p>
 
-    <h2>Formula</h2>
-    <p>Energy charge = Units × slab rate (Rs per unit, NEPRA tariff A-1)</p>
-    <p>Fixed charge = Fixed rate per kW × sanctioned load (kW)</p>
-    <p>GST = 18% × (Energy charge + Fixed charge + Fuel price adjustment)</p>
-    <p>Estimated total = Energy charge + Fixed charge + Fuel price adjustment + GST</p>
-    <p>Quarterly tariff adjustment, electricity duty, TV fee, and other surcharges are not in this calculation. A <a href="/percentage-calculator/">Percentage Calculator</a> can help if you want to work out what share of your budget the bill takes.</p>
+    <h2 data-i18n="elec.formula-h">Formula</h2>
+    <p data-i18n="elec.f1">Energy charge = Units × slab rate (Rs per unit, NEPRA tariff A-1)</p>
+    <p data-i18n="elec.f2">Fixed charge = Fixed rate per kW × sanctioned load (kW)</p>
+    <p data-i18n="elec.f3">GST = 18% × (Energy charge + Fixed charge + Fuel price adjustment)</p>
+    <p data-i18n="elec.f4">Estimated total = Energy charge + Fixed charge + Fuel price adjustment + GST</p>
+    <p><span data-i18n="elec.formula-note-pre">Quarterly tariff adjustment, electricity duty, TV fee, and other surcharges are not in this calculation. A </span><a href="/percentage-calculator/" data-i18n="card.percentage.name">Percentage Calculator</a><span data-i18n="elec.formula-note-post"> can help if you want to work out what share of your budget the bill takes.</span></p>
 
-    <h2>Worked example</h2>
-    <p><strong>Example:</strong> 250 units as an unprotected consumer with a 3 kW sanctioned load and no FPA. The 201–300 slab rate is Rs 33.10, so the energy charge is 250 × Rs 33.10 = Rs 8,275. The fixed rate for that slab is Rs 350 per kW, so the fixed charge is Rs 350 × 3 = Rs 1,050. The subtotal is Rs 9,325, GST at 18% is Rs 1,678.50, and the estimated total is Rs 11,003.50.</p>
-    <p><strong>Protected example:</strong> 150 units as a protected consumer with a 2 kW load. The first 100 units cost 100 × Rs 10.54 = Rs 1,054 and the next 50 cost 50 × Rs 13.01 = Rs 650.50, so the energy charge is Rs 1,704.50. The fixed charge is Rs 300 × 2 = Rs 600, the subtotal is Rs 2,304.50, GST is Rs 414.81, and the estimated total is Rs 2,719.31.</p>
+    <h2 data-i18n="elec.example-h">Worked example</h2>
+    <p><strong data-i18n="elec.ex1-label">Example:</strong><span data-i18n="elec.ex1-rest"> 250 units as an unprotected consumer with a 3 kW sanctioned load and no FPA. The 201–300 slab rate is Rs 33.10, so the energy charge is 250 × Rs 33.10 = Rs 8,275. The fixed rate for that slab is Rs 350 per kW, so the fixed charge is Rs 350 × 3 = Rs 1,050. The subtotal is Rs 9,325, GST at 18% is Rs 1,678.50, and the estimated total is Rs 11,003.50.</span></p>
+    <p><strong data-i18n="elec.ex2-label">Protected example:</strong><span data-i18n="elec.ex2-rest"> 150 units as a protected consumer with a 2 kW load. The first 100 units cost 100 × Rs 10.54 = Rs 1,054 and the next 50 cost 50 × Rs 13.01 = Rs 650.50, so the energy charge is Rs 1,704.50. The fixed charge is Rs 300 × 2 = Rs 600, the subtotal is Rs 2,304.50, GST is Rs 414.81, and the estimated total is Rs 2,719.31.</span></p>
 
-    <h2>2026 domestic tariff (NEPRA A-1)</h2>
+    <h2 data-i18n="elec.tariff-h">2026 domestic tariff (NEPRA A-1)</h2>
     <div class="table-wrap">
       <table class="breakdown-table" aria-label="NEPRA domestic tariff 2026">
         <thead>
-          <tr><th scope="col">Units per month</th><th scope="col">Rate per unit</th><th scope="col">Fixed charge</th></tr>
+          <tr><th scope="col" data-i18n="elec.th-units">Units per month</th><th scope="col" data-i18n="elec.th-rate">Rate per unit</th><th scope="col" data-i18n="elec.th-fixed">Fixed charge</th></tr>
         </thead>
         <tbody>
           {
@@ -233,22 +234,22 @@ const related = [
     </div>
     <p style="font-size: 14px; color: var(--ink-muted);">Uniform tariff for all DISCOs and K-Electric. Source: NEPRA Decision No. NEPRA/R/DG(Trf)/TRF-100/2935-57 dated 11 February 2026, notified vide S.R.O. 279(I)/2026 dated 12 February 2026. Checked 8 November 2026.</p>
 
-    <h2>Frequently asked questions</h2>
+    <h2 data-i18n="elec.faq-h">Frequently asked questions</h2>
     <div class="faq">
       {
-        faqs.map((f) => (
+        faqs.map((f, i) => (
           <details>
-            <summary>{f.q}</summary>
-            <p>{f.a}</p>
+            <summary data-i18n={`elec.faq${i + 1}q`}>{f.q}</summary>
+            <p data-i18n={`elec.faq${i + 1}a`}>{f.a}</p>
           </details>
         ))
       }
     </div>
-    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+    <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
     <section id="elecDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;">Important — please read</h2>
-      <p>
+      <h2 style="font-size: 20px;" data-i18n="elec.disc-h">Important — please read</h2>
+      <p data-i18n="elec.disc">
         Results are estimates from the notified base tariff only. Your real bill also carries
         the monthly fuel price adjustment, the quarterly tariff adjustment, electricity duty,
         TV fee, and other surcharges, which vary by month and by province. Connections with
@@ -259,20 +260,20 @@ const related = [
       <p>
         Sources: <a href="https://www.nepra.org.pk/tariff/Tariff/Ex-WAPDA%20DISCOS/2026/TRF-100%20XWDISCOS%20AND%20KE%20RATIONALIZATION%20OF%20TARIFF%2011-02-2026%202935-57.pdf">NEPRA decision of 11 February 2026 (PDF)</a> and the <a href="https://iesco.com.pk/tariff-guide">IESCO tariff guide</a>.
       </p>
-      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+      <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;">Related tools</h2>
+    <h2 style="margin-top: 32px;" data-i18n="elec.related-h">Related tools</h2>
     <div class="related-grid">
       {
-        related.map((tool) => (
+        related.map((tool, i) => (
           <article class="card">
             <h3 style="font-size: 18px;">
-              <a href={tool.href}>{tool.name}</a>
+              <a href={tool.href} data-i18n={`elec.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p style="color: var(--ink-muted);" data-i18n={`elec.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
-              <a href={tool.href}>Use the calculator →</a>
+              <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
           </article>
         ))
