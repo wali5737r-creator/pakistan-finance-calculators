@@ -120,4 +120,23 @@ for (const { file, src } of stickyPages) {
   assert.ok(!src.includes("paddingBottom = '76px'"), `${file}: fixed 76px body padding must not come back`);
 }
 
+// Electricity Bill page: the tariff table must be rendered FROM the
+// config (P1 fix), never from hard-coded rows — and both tables on the
+// page must sit inside a .table-wrap so they scroll horizontally at
+// 360px instead of overflowing the viewport.
+const elecPage = readFileSync(join(SRC_DIR, 'pages', 'electricity-bill-calculator.astro'), 'utf8');
+assert.ok(elecPage.includes("import { electricityTariffTableRows } from '../lib/calc'"), 'electricity page must import the config-driven table rows');
+assert.ok(elecPage.includes('tariffRows.map((row)'), 'electricity tariff table must render from tariffRows');
+assert.ok(!elecPage.includes('<tr><td>Up to 50 (lifeline)</td>'), 'electricity tariff table must not hard-code rows');
+assert.ok(!elecPage.includes('<tr><td>Above 700</td>'), 'electricity tariff table must not hard-code rows');
+assert.equal((elecPage.match(/<div class="table-wrap">/g) || []).length, 2, 'electricity page must wrap both tables in .table-wrap');
+
+// 404 page: must link all 24 tools (it listed only 11 before the P1 fix).
+const notFoundPage = readFileSync(join(SRC_DIR, 'pages', '404.astro'), 'utf8');
+const notFoundHrefs = [...notFoundPage.matchAll(/href="(\/[^"]+\/)"/g)].map((m) => m[1]);
+const toolHrefs = new Set(navHrefs);
+for (const href of toolHrefs) {
+  assert.ok(notFoundHrefs.includes(href), `404 page is missing ${href}`);
+}
+
 console.log(`formatting: ${checked} .astro files scanned, no glued text/link lines; gas table + nav guards present.`);

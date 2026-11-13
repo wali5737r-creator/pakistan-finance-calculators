@@ -33,7 +33,6 @@ const exampleSqFt = formatNumber(convertArea(10, 'marla', 'sqft'), 2);
 const exampleSqYd = formatNumber(convertArea(10, 'marla', 'sqyd'), 2);
 const exampleKanal = formatNumber(convertArea(10, 'marla', 'kanal'), 2);
 
-const provisionalLabel = `${UNIT_REGION} definition — source to be confirmed`;
 const sourceNote = UNIT_SOURCE_CITATION
   ? `Source: ${UNIT_SOURCE_CITATION}.`
   : 'No source has been cited yet.';
@@ -203,15 +202,7 @@ const schema = JSON.stringify({
               </div>
             </div>
             <p id="echo" style="margin-top: 20px; font-size: 14px; color: var(--ink-muted);"></p>
-            {UNIT_SOURCE_CITATION === '' && (
-              <p style="margin-top: 12px;">
-                <span class="badge badge-warning">{UNIT_SOURCE_STATUS}</span>
-              </p>
-              <p class="notice-warning" style="margin-top: 8px;">{provisionalLabel}.</p>
-            )}
-            {UNIT_SOURCE_CITATION !== '' && (
-              <p style="margin-top: 12px; font-size: 14px;">Source: {UNIT_SOURCE_CITATION}</p>
-            )}
+            <p id="result-source" style="margin-top: 12px; font-size: 14px;">Source: {UNIT_SOURCE_CITATION}</p>
             <p class="notice-warning" style="margin-top: 12px;">
               Uses the marla standard you chose above (Punjab revenue by default).
               Marla sizes can differ by region and housing society; for important
@@ -231,12 +222,7 @@ const schema = JSON.stringify({
     <section id="table-section" hidden style="margin-top: 32px;">
       <h2>The same area in every unit</h2>
       <p>{canonicalLine}</p>
-      {UNIT_SOURCE_CITATION === '' && (
-        <p><span class="badge badge-warning">{UNIT_SOURCE_STATUS}</span></p>
-      )}
-      {UNIT_SOURCE_CITATION !== '' && (
-        <p style="font-size: 14px;">Source: {UNIT_SOURCE_CITATION}</p>
-      )}
+      <p id="table-source" style="font-size: 14px;">Source: {UNIT_SOURCE_CITATION}</p>
       <div class="table-wrap">
         <table class="data">
           <caption id="table-caption"></caption>
@@ -265,14 +251,11 @@ const schema = JSON.stringify({
       <h2>Worked example</h2>
       <p>
         <strong>Example — 10 marla</strong>
-        {UNIT_SOURCE_CITATION === '' && (
-          <span class="badge badge-warning" style="margin-left: 8px;">{UNIT_SOURCE_STATUS}</span>
-        )}
       </p>
       <p>
         10 {marlaUnit.label} = {exampleSqFt} {sqftUnit.label}; {exampleSqYd} {sqydUnit.label};
-        {exampleKanal} {kanalUnit.label}. Provisional factors, labelled as such
-        on this page: {provisionalLabel}.
+        {exampleKanal} {kanalUnit.label}. Both standards are defined in the
+        official sources cited on this page.
       </p>
     </section>
 
@@ -308,8 +291,6 @@ const schema = JSON.stringify({
   <script>
     import {
       DEFAULT_MARLA_STANDARD_ID,
-      UNIT_SOURCE_CITATION,
-      UNIT_SOURCE_STATUS,
       areaUnitsForStandard,
       marlaStandardById,
     } from '../config/units.ts';
@@ -340,6 +321,8 @@ const schema = JSON.stringify({
     const factorStat = document.getElementById('factor-stat') as HTMLParagraphElement;
     const factorInverse = document.getElementById('factor-inverse') as HTMLParagraphElement;
     const echoEl = document.getElementById('echo') as HTMLParagraphElement;
+    const resultSource = document.getElementById('result-source') as HTMLParagraphElement;
+    const tableSource = document.getElementById('table-source') as HTMLParagraphElement;
     const tableSection = document.getElementById('table-section') as HTMLElement;
     const tableCaption = document.getElementById('table-caption') as HTMLTableCaptionElement;
     const tableBody = document.getElementById('all-units-body') as HTMLTableSectionElement;
@@ -447,7 +430,9 @@ const schema = JSON.stringify({
       factorInverse.textContent = `1 ${toUnit.label} = ${formatArea(inverse)} ${fromUnit.label}`;
       echoEl.textContent =
         `Based on: ${echoValue(raw)} ${fromUnit.label} → ${toUnit.label} (${currentStandard.shortLabel})` +
-        (UNIT_SOURCE_CITATION === '' ? ` — ${UNIT_SOURCE_STATUS}` : ` — Source: ${UNIT_SOURCE_CITATION}`);
+        ` — Source: ${currentStandard.citation}`;
+      resultSource.textContent = `Source: ${currentStandard.citation}`;
+      tableSource.textContent = `Source: ${currentStandard.citation}`;
       tableCaption.textContent =
         `Conversion of ${echoValue(raw)} ${fromUnit.label} into all listed units (${currentStandard.shortLabel})`;
       tableBody.innerHTML = '';

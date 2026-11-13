@@ -1,5 +1,8 @@
 ---
 import Layout from '../components/Layout.astro';
+import { electricityTariffTableRows } from '../lib/calc';
+
+const tariffRows = electricityTariffTableRows();
 
 const title = "Electricity Bill Calculator Pakistan | NEPRA Slabs 2026 | Pakistan Finance Calculators";
 const description = "Estimate your monthly electricity bill in Pakistan from NEPRA's 2026 tariff: lifeline, protected and unprotected slabs, fixed charge and 18% GST.";
@@ -169,7 +172,9 @@ const related = [
               <p class="stat-value" id="elecStat3"></p>
             </div>
           </div>
-          <table class="breakdown-table" id="elecBreakdown" aria-label="Bill breakdown"></table>
+          <div class="table-wrap">
+            <table class="breakdown-table" id="elecBreakdown" aria-label="Bill breakdown"></table>
+          </div>
           <p id="elecMinimumNote" style="font-size: 14px; color: var(--ink-muted);" hidden></p>
           <p id="elecEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p id="elecFormula" style="font-size: 16px;"></p>
@@ -208,25 +213,24 @@ const related = [
     <p><strong>Protected example:</strong> 150 units as a protected consumer with a 2 kW load. The first 100 units cost 100 × Rs 10.54 = Rs 1,054 and the next 50 cost 50 × Rs 13.01 = Rs 650.50, so the energy charge is Rs 1,704.50. The fixed charge is Rs 300 × 2 = Rs 600, the subtotal is Rs 2,304.50, GST is Rs 414.81, and the estimated total is Rs 2,719.31.</p>
 
     <h2>2026 domestic tariff (NEPRA A-1)</h2>
-    <table class="breakdown-table" aria-label="NEPRA domestic tariff 2026">
-      <thead>
-        <tr><th scope="col">Units per month</th><th scope="col">Rate per unit</th><th scope="col">Fixed charge</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Up to 50 (lifeline)</td><td>Rs 3.95</td><td>None</td></tr>
-        <tr><td>51–100 (lifeline)</td><td>Rs 7.74</td><td>None</td></tr>
-        <tr><td>1–100 (protected)</td><td>Rs 10.54</td><td>Rs 200 / kW</td></tr>
-        <tr><td>101–200 (protected)</td><td>Rs 13.01</td><td>Rs 300 / kW</td></tr>
-        <tr><td>1–100 (unprotected)</td><td>Rs 22.44</td><td>Rs 275 / kW</td></tr>
-        <tr><td>101–200 (unprotected)</td><td>Rs 28.91</td><td>Rs 300 / kW</td></tr>
-        <tr><td>201–300</td><td>Rs 33.10</td><td>Rs 350 / kW</td></tr>
-        <tr><td>301–400</td><td>Rs 36.46</td><td>Rs 400 / kW</td></tr>
-        <tr><td>401–500</td><td>Rs 38.95</td><td>Rs 500 / kW</td></tr>
-        <tr><td>501–600</td><td>Rs 40.22</td><td>Rs 675 / kW</td></tr>
-        <tr><td>601–700</td><td>Rs 41.85</td><td>Rs 675 / kW</td></tr>
-        <tr><td>Above 700</td><td>Rs 47.20</td><td>Rs 675 / kW</td></tr>
-      </tbody>
-    </table>
+    <div class="table-wrap">
+      <table class="breakdown-table" aria-label="NEPRA domestic tariff 2026">
+        <thead>
+          <tr><th scope="col">Units per month</th><th scope="col">Rate per unit</th><th scope="col">Fixed charge</th></tr>
+        </thead>
+        <tbody>
+          {
+            tariffRows.map((row) => (
+              <tr>
+                <td>{row.label}</td>
+                <td>Rs {row.ratePerUnit.toFixed(2)}</td>
+                <td>{row.fixedPerKw === 0 ? 'None' : `Rs ${row.fixedPerKw} / kW`}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
     <p style="font-size: 14px; color: var(--ink-muted);">Uniform tariff for all DISCOs and K-Electric. Source: NEPRA Decision No. NEPRA/R/DG(Trf)/TRF-100/2935-57 dated 11 February 2026, notified vide S.R.O. 279(I)/2026 dated 12 February 2026. Checked 8 November 2026.</p>
 
     <h2>Frequently asked questions</h2>

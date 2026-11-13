@@ -130,20 +130,23 @@ re-run, never a code rewrite:
 
 ## Remaining launch blockers (do not close by faking evidence)
 
-1. **FBR citation (OQ-01).** Re-verify slabs against the Finance Act
-   2026 gazette / FBR notification; fill `SOURCE_CITATION` in
-   `src/config/tax.ts` (title, date, link/document ref). The Salary Tax
-   page currently shows "to be verified … before launch" — correct
-   until this closes.
+1. **FBR citation (OQ-01) — CLOSED 2026-10-29.** Slabs re-verified
+   against the Finance Act 2026 gazette; `SOURCE_CITATION` in
+   `src/config/tax.ts` (Finance Act, 2026, Act No. XLIII of 2026,
+   Gazette 26 June 2026, No. F.22(46)/2026-Legis.).
 2. **Rate test calls + quota re-verification (OQ-09).** See above.
    Source names appear on live pages only after confirmation.
-3. **Marla source (OQ-13).** Both marla standards are now offered
-   (revenue 272.25 + society 225 sq ft, see `src/config/units.ts`),
-   with the figures cross-checked against published conversion tables
-   on 2026-10-28; the Provisional badge stays until a named official
-   source (e.g. PLRA / revenue record or a society's approved layout
-   plan) is cited. A 250 sq ft municipal variant reported in some
-   CDA/Islamabad areas is deliberately not offered.
+3. **Marla source (OQ-13) — CLOSED 2026-11-13.** Both standards now
+   have citable official sources (see `src/config/units.ts`): the
+   272.25 sq ft revenue figure from the CDA 2023 Regulation (S.R.O.
+   886(I)/2023, Gazette of Pakistan, 7 July 2023) and the 225 sq ft
+   society figure from DHA Lahore's Construction & Development
+   Regulations 2014. No PLRA / Board of Revenue Punjab document
+   stating 272.25 sq ft was found published online; the CDA Gazette
+   defines the identical traditional revenue figures. The Provisional
+   badge is removed. A 250 sq ft municipal variant reported in some
+   CDA/Islamabad areas is deliberately not offered — no official
+   source for it was found (CDA's 2023 Regulation defines 272.25).
 4. **Working contact route (OQ-14).** The Contact page deliberately
    has no invented email address and no dead form. Confirm the contact
    address/form handling, then link it there.
@@ -159,17 +162,20 @@ re-run, never a code rewrite:
 
 ## What was verified in this build
 
-- `npm test`: 27 checks pass — every SRS worked example and boundary
+- `npm test`: 204 checks pass (13 November 2026) — every SRS worked example and boundary
   case (tax E1–E6 + boundary sweep, EMI E1–E4 + stall guard +
   240-month schedule, Zakat, currency cross-rates with test-injected
   tables only, gold E1–E4 with an illustrative test price, percentage
-  E1–E7, age E1–E3 + month-end borrowing + 29 Feb rule, area E1–E4).
-- `npm run build`: passes; 14 pages (13 routes + 404); largest
-  calculator JS bundle 17.9 kB (Zakat), total `dist/` 348 kB.
-- Route smoke check (local server): all 13 routes return 200 with
+  E1–E7, age E1–E3 + month-end borrowing + 29 Feb rule, area E1–E4),
+  plus the review-date tripwires, API/freshness behaviour, formatting
+  guards, the config-driven electricity tariff table, and the
+  SRS-consistency checks (SRS §1 salaried slabs, §5 Zakat constants,
+  and the Addendum headline figures for all 16 post-v1.0 tools).
+- `npm run build`: passes; 30 pages (29 routes + 404) for 24 tools.
+- Route smoke check (local server): all 29 routes return 200 with
   the correct H1; every tool page carries one JSON-LD block and a
   self-canonical link; visible FAQ count equals schema question count
-  on all 8 tool pages.
+  on all 24 tool pages.
 - Grep: no hard-coded currency rate or gold price in `src/` or
   `functions/` outside config/test fixtures; no API key or secret
   anywhere in the repo; Functions files bundle cleanly with esbuild.

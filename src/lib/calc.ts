@@ -1,4 +1,4 @@
-// Pure calculation functions for all 8 tools. No DOM, no network, no
+// Pure calculation functions for all 24 tools. No DOM, no network, no
 // storage, no randomness. Every value that can change year to year is
 // read from src/config/* — never hard-coded here (SRS G17-G19).
 // Rounding is display-only, except where a function documents that a
@@ -953,6 +953,57 @@ export interface ElectricityBillResult {
 export const ELECTRICITY_MAX_UNITS = 100000;
 export const ELECTRICITY_MAX_LOAD_KW = 5;
 export const ELECTRICITY_MAX_FPA = 10;
+
+export interface ElectricityTariffTableRow {
+  /** Row label as shown on the page, e.g. "1–100 (protected)". */
+  label: string;
+  /** Variable (energy) charge, Rs per unit, from the config slab. */
+  ratePerUnit: number;
+  /** Fixed charge, Rs per kW of sanctioned load per month (0 = none). */
+  fixedPerKw: number;
+}
+
+/**
+ * The NEPRA domestic tariff table exactly as it appears on the
+ * Electricity Bill page — built from LIFELINE_SLABS, PROTECTED_SLABS
+ * and UNPROTECTED_SLABS in src/config/electricity.ts, never from
+ * hard-coded page markup. Labels follow the page's long-standing
+ * wording: the first lifeline band is "Up to 50 (lifeline)", bands up
+ * to 200 units carry their category in brackets, higher unprotected
+ * bands are bare ranges ("201–300"), and the open-ended band is
+ * "Above 700". Changing a tariff = editing the config only; the page
+ * table and this helper follow automatically (SRS G17-G19).
+ */
+export function electricityTariffTableRows(): ElectricityTariffTableRow[] {
+  const rows: ElectricityTariffTableRow[] = [];
+  const addGroup = (
+    slabs: { upTo: number | null; ratePerUnit: number; fixedPerKw: number }[],
+    category: 'lifeline' | 'protected' | 'unprotected',
+  ): void => {
+    let prevUpTo = 0;
+    slabs.forEach((slab, index) => {
+      let label: string;
+      if (slab.upTo === null) {
+        label = `Above ${prevUpTo}`;
+      } else if (category === 'lifeline' && index === 0) {
+        label = `Up to ${slab.upTo} (lifeline)`;
+      } else {
+        const start = prevUpTo === 0 ? 1 : prevUpTo + 1;
+        const suffix =
+          category === 'lifeline' || category === 'protected' || slab.upTo <= 200
+            ? ` (${category})`
+            : '';
+        label = `${start}–${slab.upTo}${suffix}`;
+      }
+      rows.push({ label, ratePerUnit: slab.ratePerUnit, fixedPerKw: slab.fixedPerKw });
+      if (slab.upTo !== null) prevUpTo = slab.upTo;
+    });
+  };
+  addGroup(LIFELINE_SLABS, 'lifeline');
+  addGroup(PROTECTED_SLABS, 'protected');
+  addGroup(UNPROTECTED_SLABS, 'unprotected');
+  return rows;
+}
 
 /**
  * Monthly domestic electricity bill estimate on NEPRA's uniform tariff
