@@ -83,17 +83,16 @@ const related = [
 <Layout title={title} description={description} slug={slug} schema={schema}>
   <div class="container" style="padding-top: 32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Fixed Deposit Calculator</p>
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="fd.crumb">Fixed Deposit Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;">Savings & Growth</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Fixed Deposit Calculator</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="fd.badge">Savings & Growth</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;" data-i18n="fd.h1">Fixed Deposit Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;" data-i18n="fd.intro">
       Work out what a fixed deposit will be worth at maturity. Enter the deposit amount, the profit rate a bank quotes you, how long it runs, and how the profit is worked out — and see the maturity amount and the profit before and after the tax rate you enter.
     </p>
+    <p id="lang-note" class="lang-note" data-i18n="tax.others-note" hidden>The other calculators on this site are still in English in this phase.</p>
     <p class="notice-info prose-narrow" style="margin-top: 16px;">
-      <strong>No live data.</strong> Every rate, price, and percentage on this page is entered by
-      you. Nothing is fetched from a bank, a market, or a government source, and no figure here
-      is presented as a live or official rate.
+      <strong data-i18n="fd.notice-label">No live data.</strong> <span data-i18n="fd.notice-text">Every rate, price, and percentage on this page is entered by you. Nothing is fetched from a bank, a market, or a government source, and no figure here is presented as a live or official rate.</span>
     </p>
   </div>
 
@@ -102,45 +101,45 @@ const related = [
       <div class="card">
         <form id="fdForm" novalidate>
           <div class="field">
-            <label for="fdPrincipal">Deposit amount (Rs) <span aria-hidden="true">*</span></label>
+            <label for="fdPrincipal"><span data-i18n="fd.principal-label">Deposit amount (Rs)</span> <span aria-hidden="true">*</span></label>
             <input id="fdPrincipal" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">The amount you place on fixed deposit.</p>
+            <p class="hint" data-i18n="fd.principal-hint">The amount you place on fixed deposit.</p>
           </div>
 
           <div class="field">
-            <label for="fdRate">Annual profit rate (%) <span aria-hidden="true">*</span></label>
+            <label for="fdRate"><span data-i18n="fd.rate-label">Annual profit rate (%)</span> <span aria-hidden="true">*</span></label>
             <input id="fdRate" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">The yearly profit rate you assume. Enter the rate a bank quotes you — no bank's actual rate is used.</p>
+            <p class="hint" data-i18n="fd.rate-hint">The yearly profit rate you assume. Enter the rate a bank quotes you — no bank's actual rate is used.</p>
           </div>
 
           <div class="field">
-            <label for="fdYears">Tenure (years) <span aria-hidden="true">*</span></label>
+            <label for="fdYears"><span data-i18n="fd.years-label">Tenure (years)</span> <span aria-hidden="true">*</span></label>
             <input id="fdYears" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">How long the deposit runs, from just above 0 to 30 years. Part years are allowed.</p>
+            <p class="hint" data-i18n="fd.years-hint">How long the deposit runs, from just above 0 to 30 years. Part years are allowed.</p>
           </div>
 
           <div class="field">
-            <label for="fdCompounding">Profit payment / compounding</label>
+            <label for="fdCompounding" data-i18n="fd.comp-label">Profit payment / compounding</label>
             <select id="fdCompounding">
-              <option value="monthly">Monthly compounding</option>
-              <option value="quarterly" selected>Quarterly compounding</option>
-              <option value="annual">Annual compounding</option>
-              <option value="maturity">Simple profit, paid at maturity</option>
+              <option value="monthly" data-i18n="fd.comp-monthly">Monthly compounding</option>
+              <option value="quarterly" selected data-i18n="fd.comp-quarterly">Quarterly compounding</option>
+              <option value="annual" data-i18n="fd.comp-annual">Annual compounding</option>
+              <option value="maturity" data-i18n="fd.comp-maturity">Simple profit, paid at maturity</option>
             </select>
-            <p class="hint">How the profit is worked out. Compounding adds profit to the balance so later profit is worked out on more; simple profit is worked out on the original deposit only.</p>
+            <p class="hint" data-i18n="fd.comp-hint">How the profit is worked out. Compounding adds profit to the balance so later profit is worked out on more; simple profit is worked out on the original deposit only.</p>
           </div>
 
           <div class="field">
-            <label for="fdTax">Withholding tax on profit (%)</label>
+            <label for="fdTax" data-i18n="fd.tax-label">Withholding tax on profit (%)</label>
             <input id="fdTax" type="text" inputmode="decimal" autocomplete="off" value="0" />
-            <p class="hint">The tax rate you enter yourself, applied to the profit only. Enter 0 if you do not want tax shown. This is your input, not a tax rule.</p>
+            <p class="hint" data-i18n="fd.tax-hint">The tax rate you enter yourself, applied to the profit only. Enter 0 if you do not want tax shown. This is your input, not a tax rule.</p>
           </div>
 
           <div id="fdErrors" class="error-box" role="alert" hidden></div>
 
           <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
-            <button id="fdCalculate" class="btn-primary" type="submit">Calculate</button>
-            <button id="fdClear" class="btn-secondary" type="button">Clear</button>
+            <button id="fdCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
+            <button id="fdClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
           <p id="fdFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
         </form>
@@ -148,9 +147,9 @@ const related = [
 
       <div class="result-card" id="fdResultCard" tabindex="-1">
         <div id="fdEmpty">
-          <p style="font-weight: 700;">Your result will appear here.</p>
-          <p>Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);">
+          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
@@ -177,13 +176,13 @@ const related = [
           <p id="fdEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p id="fdFormula" style="font-size: 16px;"></p>
           <p style="font-size: 13px; color: var(--ink-muted);">
-            Estimate only — check important figures before acting. <a href="#fdDisclaimer">Read the full disclaimer.</a>
+            <span data-i18n="fd.estimate">Estimate only — check important figures before acting.</span> <a href="#fdDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
 
         <div class="actions-row no-print">
-          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
         <p data-copy-status role="status" style="font-size: 14px;"></p>
       </div>
@@ -191,54 +190,54 @@ const related = [
   </div>
 
   <div class="container prose-narrow" style="margin-top: 40px;">
-    <h2>How it works</h2>
+    <h2 data-i18n="fd.how-h">How it works</h2>
     <ol>
-      <li>Enter the deposit amount, the annual profit rate, and the tenure in years.</li>
-      <li>Choose how profit is worked out: monthly, quarterly, or annual compounding, or simple profit paid at maturity.</li>
-      <li>Enter the withholding-tax rate you want applied to the profit, or leave it at 0. You see the maturity amount, the profit before tax, the tax, and the profit after tax.</li>
+      <li data-i18n="fd.how1">Enter the deposit amount, the annual profit rate, and the tenure in years.</li>
+      <li data-i18n="fd.how2">Choose how profit is worked out: monthly, quarterly, or annual compounding, or simple profit paid at maturity.</li>
+      <li data-i18n="fd.how3">Enter the withholding-tax rate you want applied to the profit, or leave it at 0. You see the maturity amount, the profit before tax, the tax, and the profit after tax.</li>
     </ol>
-    <p>No bank's actual rate is used anywhere on this page. Banks quote different rates for different tenures and amounts, and rates change — always enter the rate from the bank's current offer, and read its terms.</p>
+    <p data-i18n="fd.how-note">No bank's actual rate is used anywhere on this page. Banks quote different rates for different tenures and amounts, and rates change — always enter the rate from the bank's current offer, and read its terms.</p>
 
-    <h2>Formula</h2>
-    <p>Compounded: Maturity amount = Deposit × (1 + annual rate ÷ periods per year)<sup>periods per year × years</sup></p>
-    <p>Simple (at maturity): Maturity amount = Deposit × (1 + annual rate × years)</p>
-    <p>Profit = Maturity amount − Deposit. Tax = Profit × withholding-tax %. Profit after tax = Profit − Tax.</p>
+    <h2 data-i18n="fd.formula-h">Formula</h2>
+    <p><span data-i18n="fd.f1-pre">Compounded: Maturity amount = Deposit × (1 + annual rate ÷ periods per year)</span><sup>periods per year × years</sup></p>
+    <p data-i18n="fd.f2">Simple (at maturity): Maturity amount = Deposit × (1 + annual rate × years)</p>
+    <p data-i18n="fd.f3">Profit = Maturity amount − Deposit. Tax = Profit × withholding-tax %. Profit after tax = Profit − Tax.</p>
 
-    <h2>Worked example</h2>
-    <p><strong>Example:</strong> Rs 500,000 at 12% a year for 3 years, compounded quarterly, grows to Rs 712,880.44. The profit is Rs 212,880.44. At a 15% withholding-tax rate entered by the user, the tax is Rs 31,932.07 and the profit after tax is Rs 180,948.37. The same deposit with simple profit paid at maturity would reach Rs 680,000, a profit of Rs 180,000 before tax.</p>
+    <h2 data-i18n="fd.example-h">Worked example</h2>
+    <p><strong data-i18n="fd.ex-label">Example:</strong> Rs 500,000<span data-i18n="fd.ex-pre1"> at 12% a year for </span>3<span data-i18n="fd.ex-pre2"> years, compounded quarterly, grows to </span>Rs 712,880.44<span data-i18n="fd.ex-pre3">. The profit is </span>Rs 212,880.44<span data-i18n="fd.ex-pre4">. At a </span>15%<span data-i18n="fd.ex-pre5"> withholding-tax rate entered by the user, the tax is </span>Rs 31,932.07<span data-i18n="fd.ex-pre6"> and the profit after tax is </span>Rs 180,948.37<span data-i18n="fd.ex-pre7">. The same deposit with simple profit paid at maturity would reach </span>Rs 680,000<span data-i18n="fd.ex-pre8">, a profit of </span>Rs 180,000<span data-i18n="fd.ex-post"> before tax.</span></p>
 
-    <h2>Frequently asked questions</h2>
+    <h2 data-i18n="fd.faq-h">Frequently asked questions</h2>
     <div class="faq">
       {
-        faqs.map((f) => (
+        faqs.map((f, i) => (
           <details>
-            <summary>{f.q}</summary>
-            <p>{f.a}</p>
+            <summary data-i18n={`fd.faq${i + 1}q`}>{f.q}</summary>
+            <p data-i18n={`fd.faq${i + 1}a`}>{f.a}</p>
           </details>
         ))
       }
     </div>
-    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+    <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
     <section id="fdDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;">Important — please read</h2>
-      <p>
+      <h2 style="font-size: 20px;" data-i18n="fd.disc-h">Important — please read</h2>
+      <p data-i18n="fd.disc">
         Results are estimates from the rate, tenure, and tax rate you enter. No bank's actual rate is stated or implied, and the tax rate is your input, not a statement of current tax law. Real deposits may have minimum amounts, early-withdrawal penalties, and different profit-payment terms. Confirm the offer and the tax treatment with the bank.
       </p>
-      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+      <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;">Related tools</h2>
+    <h2 style="margin-top: 32px;" data-i18n="fd.related-h">Related tools</h2>
     <div class="related-grid">
       {
-        related.map((tool) => (
+        related.map((tool, i) => (
           <article class="card">
             <h3 style="font-size: 18px;">
-              <a href={tool.href}>{tool.name}</a>
+              <a href={tool.href} data-i18n={`fd.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p style="color: var(--ink-muted);" data-i18n={`fd.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
-              <a href={tool.href}>Use the calculator →</a>
+              <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
           </article>
         ))

@@ -1,14 +1,17 @@
-// Urdu Phase 1 + 2 + 3 regression tests — homepage + navigation toggle,
-// plus the Phase 2 tax cluster (Salary, Freelancer, GST) and the Phase 3
-// loans cluster (EMI, Eligibility, Comparison, Car, Home).
+// Urdu Phase 1 + 2 + 3 + 4 regression tests — homepage + navigation toggle,
+// plus the Phase 2 tax cluster (Salary, Freelancer, GST), the Phase 3
+// loans cluster (EMI, Eligibility, Comparison, Car, Home) and the Phase 4
+// Zakat/savings cluster (Zakat, National Savings, Fixed Deposit).
 // Run: npx tsx tests/i18n.test.ts
 //
 // Guards:
 //   - every data-i18n key used in Layout.astro / index.astro / the three
-//     tax pages / the five loans pages has a non-empty Urdu entry in
-//     public/js/i18n.js (26/26 tool labels, 26/26 card names +
-//     descriptions included, plus 58 salary + 73 freelancer + 99 GST +
-//     71 EMI + 61 eligibility + 63 comparison + 108 car + 113 home keys);
+//     tax pages / the five loans pages / the three Zakat/savings pages
+//     has a non-empty Urdu entry in public/js/i18n.js (26/26 tool labels,
+//     26/26 card names + descriptions included, plus 58 salary + 73
+//     freelancer + 99 GST + 71 EMI + 61 eligibility + 63 comparison +
+//     108 car + 113 home + 96 zakat + 141 national-savings + 61
+//     fixed-deposit keys);
 //   - the toggle exists, is a plain <button> (no inline handler — the
 //     CSP has no 'unsafe-inline' in script-src), and Layout loads the
 //     external /js/i18n.js with defer;
@@ -41,7 +44,7 @@ const dictBlock = i18nJs.match(/var UR = \{([\s\S]*?)\n  \};/);
 assert.ok(dictBlock, 'i18n.js must define a var UR = { ... } dictionary');
 const entries = [...dictBlock[1].matchAll(/'([^']+)':\s*'([^']*)'/g)];
 const UR = new Map(entries.map((m) => [m[1], m[2]]));
-check(UR.size >= 760, `dictionary must hold 760+ keys, found ${UR.size}`);
+check(UR.size >= 1060, `dictionary must hold 1060+ keys, found ${UR.size}`);
 for (const [key, value] of UR) {
   check(value.trim().length > 0, `dictionary entry ${key} must be non-empty`);
   // GST is a Latin acronym kept as-is in the short nav label (the card
@@ -75,6 +78,10 @@ const compPage = readFileSync(join(SRC, 'pages', 'loan-comparison-calculator.ast
 const carPage = readFileSync(join(SRC, 'pages', 'car-loan-calculator.astro'), 'utf8');
 const homePage = readFileSync(join(SRC, 'pages', 'home-loan-calculator.astro'), 'utf8');
 const loansPages = [emiPage, eligPage, compPage, carPage, homePage];
+const zakatPage = readFileSync(join(SRC, 'pages', 'zakat-calculator.astro'), 'utf8');
+const nssPage = readFileSync(join(SRC, 'pages', 'national-savings-calculator.astro'), 'utf8');
+const fdPage = readFileSync(join(SRC, 'pages', 'fixed-deposit-calculator.astro'), 'utf8');
+const savingsPages = [zakatPage, nssPage, fdPage];
 
 function staticKeys(src: string): string[] {
   return [...src.matchAll(/data-i18n="([^"]+)"/g)].map((m) => m[1]);
@@ -95,6 +102,7 @@ check(
 const used = new Set<string>([...staticKeys(layout), ...staticKeys(indexPage)]);
 for (const page of taxPages) for (const k of staticKeys(page)) used.add(k);
 for (const page of loansPages) for (const k of staticKeys(page)) used.add(k);
+for (const page of savingsPages) for (const k of staticKeys(page)) used.add(k);
 // Dynamic keys: the FAQ maps use indexed sal/fr/gst.faq${i}q/a keys, the
 // GST preset options use gst.preset.${id} from src/config/gst.ts, and the
 // related-tool cards use fr/gst.rel${i}(-desc).
@@ -142,6 +150,26 @@ for (let i = 1; i <= 6; i++) {
   used.add(`home.faq${i}q`);
   used.add(`home.faq${i}a`);
 }
+// Dynamic keys: the FAQ maps use indexed zak/nss/fd.faq${i}q/a keys, and
+// the related-tool cards use zak/nss/fd.rel${i}(-desc).
+for (let i = 1; i <= 5; i++) {
+  used.add(`zak.faq${i}q`);
+  used.add(`zak.faq${i}a`);
+}
+for (let i = 1; i <= 6; i++) {
+  used.add(`nss.faq${i}q`);
+  used.add(`nss.faq${i}a`);
+  used.add(`fd.faq${i}q`);
+  used.add(`fd.faq${i}a`);
+}
+for (let i = 1; i <= 2; i++) {
+  used.add(`zak.rel${i}`);
+  used.add(`zak.rel${i}-desc`);
+  used.add(`nss.rel${i}`);
+  used.add(`nss.rel${i}-desc`);
+  used.add(`fd.rel${i}`);
+  used.add(`fd.rel${i}-desc`);
+}
 check(salaryPage.includes('sal.faq${i + 1}q'), 'salary FAQ summaries must use indexed sal.faq keys');
 check(freelancerPage.includes('fr.faq${i + 1}q'), 'freelancer FAQ summaries must use indexed fr.faq keys');
 check(gstPage.includes('gst.faq${i + 1}q'), 'GST FAQ summaries must use indexed gst.faq keys');
@@ -157,6 +185,11 @@ check(eligPage.includes('elig.rel${i + 1}'), 'eligibility related cards must use
 check(compPage.includes('comp.rel${i + 1}'), 'comparison related cards must use indexed comp.rel keys');
 check(carPage.includes('car.rel${i + 1}'), 'car related cards must use indexed car.rel keys');
 check(homePage.includes('home.rel${i + 1}'), 'home related cards must use indexed home.rel keys');
+check(zakatPage.includes('zak.faq${i + 1}q'), 'zakat FAQ summaries must use indexed zak.faq keys');
+check(nssPage.includes('nss.faq${i + 1}q'), 'national savings FAQ summaries must use indexed nss.faq keys');
+check(fdPage.includes('fd.faq${i + 1}q'), 'fixed deposit FAQ summaries must use indexed fd.faq keys');
+check(nssPage.includes('nss.rel${i + 1}'), 'national savings related cards must use indexed nss.rel keys');
+check(fdPage.includes('fd.rel${i + 1}'), 'fixed deposit related cards must use indexed fd.rel keys');
 // The comparison formula is pure symbols with <sup> (EMI = [P x R x ...]),
 // the same in both languages, so it stays English and has no comp.f1 key.
 check(compPage.includes('EMI = [P × R × (1 + R)<sup>N</sup>]'), 'comparison formula must keep its superscript form');
@@ -172,6 +205,30 @@ check(homeLoanConfig.includes('14.9–17.2%'), 'home-loan config must still quot
 // sal.how3, fr.slabs-h): a year change must update them too.
 const taxConfig = readFileSync(join(ROOT, 'src', 'config', 'tax.ts'), 'utf8');
 check(taxConfig.includes("TAX_YEAR = '2026-27'"), "TAX_YEAR must still be 2026-27 — the Urdu strings hard-code that year");
+// The Urdu strings hard-code the Zakat constants (2.5% rate, 87.48 g gold
+// / 612.36 g silver nisab, 11.664 g per tola): a config change must update
+// them too.
+const zakatConfig = readFileSync(join(ROOT, 'src', 'config', 'zakat.ts'), 'utf8');
+check(zakatConfig.includes('ZAKAT_RATE = 0.025'), 'zakat config must still set ZAKAT_RATE 0.025 — the Urdu strings hard-code 2.5%');
+check(zakatConfig.includes('NISAB_GOLD_GRAMS = 87.48'), 'zakat config must still set gold nisab 87.48 g — the Urdu strings hard-code it');
+check(zakatConfig.includes('NISAB_SILVER_GRAMS = 612.36'), 'zakat config must still set silver nisab 612.36 g — the Urdu strings hard-code it');
+check(zakatConfig.includes('TOLA_GRAMS = 11.664'), 'zakat config must still set 11.664 g per tola — the Urdu strings hard-code it');
+// The Urdu strings hard-code the CDNS rates w.e.f. 21 October 2026
+// (DSC 11.94%, RIC 12.12%, BSC/PBA/SFWA 12.96%, SSC 12.00%/12.80%,
+// SA 10.00%, WHT 15%/30%, Zakat nisab Rs 503,529): a CDNS revision
+// must update them too. The NSS intro and formula f4 embed figures in
+// the Urdu string itself, so those are pinned directly.
+const nssConfig = readFileSync(join(ROOT, 'src', 'config', 'national-savings.ts'), 'utf8');
+check(nssConfig.includes('ratePct: 11.94'), 'national-savings config must still quote DSC 11.94% — the Urdu strings hard-code it');
+check(nssConfig.includes('ratePct: 12.12'), 'national-savings config must still quote RIC 12.12% — the Urdu strings hard-code it');
+check(nssConfig.includes('ratePct: 12.96'), 'national-savings config must still quote BSC/PBA/SFWA 12.96% — the Urdu strings hard-code it');
+check(nssConfig.includes('ratePct: 12.0'), 'national-savings config must still quote SSC 12.0% — the Urdu strings hard-code 12.00%/12.80%');
+check(nssConfig.includes('ratePct: 10.0'), 'national-savings config must still quote Savings Account 10.0% — the Urdu strings hard-code 10.00%');
+check(nssConfig.includes('503,529'), 'national-savings config must still quote Zakat nisab Rs 503,529 — the Urdu strings hard-code it');
+check(nssConfig.includes("NATIONAL_SAVINGS_RATES_EFFECTIVE = '21 October 2026'"), "CDNS rates must still be w.e.f. 21 October 2026 — the Urdu strings hard-code that date");
+check((UR.get('nss.intro-pre1') ?? '').includes('Rs 100,000'), 'nss.intro-pre1 must keep the Rs 100,000 figure — it is embedded in the Urdu string, not a separate literal');
+check((UR.get('nss.f4') ?? '').includes('10.00%'), 'nss.f4 must keep the 10.00% figure — it is embedded in the Urdu string, not a separate literal');
+check((UR.get('fd.ex-pre1') ?? '').includes('12%'), 'fd.ex-pre1 must keep the 12% figure — it is embedded in the Urdu string, not a separate literal');
 // Labels the calculator scripts rewrite (Salary amount / take-home,
 // GST headline) are translated in the page scripts and refreshed via
 // the __pfcAfterLang hook i18n.js calls after every language apply.
@@ -184,6 +241,15 @@ check(gstPage.includes('__pfcAfterLang'), 'GST page must define the __pfcAfterLa
 check(emiPage.includes('__pfcAfterLang'), 'EMI page must define the __pfcAfterLang hook for its script-managed labels');
 check(carPage.includes('__pfcAfterLang'), 'car page must define the __pfcAfterLang hook for its tenure hint');
 check(homePage.includes('__pfcAfterLang'), 'home page must define the __pfcAfterLang hook for its mode hints and headline label');
+// Labels the Zakat/savings scripts rewrite (Zakat empty-result state and
+// static formula line, National Savings filer hint) are translated in the
+// page scripts and refreshed via the hook. Fixed Deposit has no
+// script-rewritten static labels, so it needs no hook.
+check(zakatPage.includes('__pfcAfterLang'), 'zakat page must define the __pfcAfterLang hook for its empty state and formula line');
+check(nssPage.includes('__pfcAfterLang'), 'national savings page must define the __pfcAfterLang hook for its filer hint');
+check(zakatPage.includes('زکوٰۃ واجب'), 'zakat page script must carry the Urdu empty-result heading');
+check(zakatPage.includes('خالص دولت ×'), 'zakat page script must carry the Urdu static formula line');
+check(nssPage.includes('ودہولڈنگ ٹیکس کٹتا ہے'), 'national savings page script must carry the Urdu filer hint');
 // Each tax page carries the Urdu-only note that the other tools are
 // still English in this phase (same hidden-until-Urdu pattern as home).
 for (const [name, page] of [['salary', salaryPage], ['freelancer', freelancerPage], ['gst', gstPage]] as const) {
@@ -192,6 +258,11 @@ for (const [name, page] of [['salary', salaryPage], ['freelancer', freelancerPag
 }
 // Each loans page carries the same Urdu-only note (same key, same pattern).
 for (const [name, page] of [['emi', emiPage], ['eligibility', eligPage], ['comparison', compPage], ['car', carPage], ['home', homePage]] as const) {
+  check(page.includes('id="lang-note"'), `${name} page must contain the #lang-note element`);
+  check(page.includes('data-i18n="tax.others-note"'), `${name} page note must use the tax.others-note key`);
+}
+// Each Zakat/savings page carries the same Urdu-only note.
+for (const [name, page] of [['zakat', zakatPage], ['national-savings', nssPage], ['fixed-deposit', fdPage]] as const) {
   check(page.includes('id="lang-note"'), `${name} page must contain the #lang-note element`);
   check(page.includes('data-i18n="tax.others-note"'), `${name} page note must use the tax.others-note key`);
 }
@@ -218,7 +289,7 @@ check(layout.includes('aria-pressed="false"'), 'the toggle must expose aria-pres
 check(layout.includes('<script src="/js/i18n.js" defer>'), 'Layout must load /js/i18n.js with defer');
 check(layout.includes('id="lang-note"') === false, 'the Urdu-only tools note lives on the homepage, not in Layout');
 check(indexPage.includes('id="lang-note"'), 'homepage must contain the #lang-note element');
-check(indexPage.includes('hidden>Tax and loans calculators are now available in Urdu'), 'the tools note must say plainly (in English) that the tax and loans calculators are now in Urdu and the rest follow');
+check(indexPage.includes('hidden>Tax, loans and Zakat/savings calculators are now available in Urdu'), 'the tools note must say plainly (in English) that the tax, loans and Zakat/savings calculators are now in Urdu and the rest follow');
 check(indexPage.includes('data-i18n="home.tools-note"'), 'the tools note must have a data-i18n key');
 
 // --- 4. English default unchanged ----------------------------------------
@@ -263,6 +334,9 @@ if (existsSync(distIndex)) {
     statSync(join(SRC, 'pages', 'loan-comparison-calculator.astro')).mtimeMs,
     statSync(join(SRC, 'pages', 'car-loan-calculator.astro')).mtimeMs,
     statSync(join(SRC, 'pages', 'home-loan-calculator.astro')).mtimeMs,
+    statSync(join(SRC, 'pages', 'zakat-calculator.astro')).mtimeMs,
+    statSync(join(SRC, 'pages', 'national-savings-calculator.astro')).mtimeMs,
+    statSync(join(SRC, 'pages', 'fixed-deposit-calculator.astro')).mtimeMs,
     statSync(join(ROOT, 'public', 'js', 'i18n.js')).mtimeMs,
   );
   if (distTime >= srcTime) {
@@ -275,7 +349,7 @@ if (existsSync(distIndex)) {
     check(built.includes('id="lang-toggle"'), 'built homepage must contain the toggle button');
     check(built.includes('/js/i18n.js'), 'built homepage must load /js/i18n.js');
     check(built.includes('lang="en"'), 'built homepage must default to lang="en"');
-    check(built.includes('Tax and loans calculators are now available in Urdu'), 'built homepage note must say the tax and loans calculators are in Urdu');
+    check(built.includes('Tax, loans and Zakat/savings calculators are now available in Urdu'), 'built homepage note must say the tax, loans and Zakat/savings calculators are in Urdu');
     // Built tax pages: English default intact, Urdu keys wired.
     const builtTax: Array<[string, string, string]> = [
       ['salary-income-tax-calculator', 'Salary / Income Tax Calculator Pakistan 2026-27', 'sal.h1'],
@@ -308,7 +382,22 @@ if (existsSync(distIndex)) {
       check(pageBuilt.includes('id="lang-toggle"'), `built ${slug} page must contain the toggle button`);
       check(pageBuilt.includes('id="lang-note"'), `built ${slug} page must contain the other-tools note`);
     }
+    // Built Zakat/savings pages: English default intact, Urdu keys wired.
+    const builtSavings: Array<[string, string, string]> = [
+      ['zakat-calculator', 'Zakat Calculator', 'zak.h1'],
+      ['national-savings-calculator', 'National Savings Calculator', 'nss.h1'],
+      ['fixed-deposit-calculator', 'Fixed Deposit Calculator', 'fd.h1'],
+    ];
+    for (const [slug, h1, key] of builtSavings) {
+      const pagePath = join(ROOT, 'dist', slug, 'index.html');
+      check(existsSync(pagePath), `built ${slug} page must exist`);
+      const pageBuilt = readFileSync(pagePath, 'utf8');
+      check(pageBuilt.includes(h1), `built ${slug} page must keep the English H1`);
+      check(pageBuilt.includes(`data-i18n="${key}"`), `built ${slug} page must carry data-i18n="${key}"`);
+      check(pageBuilt.includes('id="lang-toggle"'), `built ${slug} page must contain the toggle button`);
+      check(pageBuilt.includes('id="lang-note"'), `built ${slug} page must contain the other-tools note`);
+    }
   }
 }
 
-console.log(`i18n: ${checks} checks — ${used.size} data-i18n keys covered, 26/26 tool labels + card names + descriptions translated, tax cluster (Salary 58 + Freelancer 73 + GST 99 keys) + loans cluster (EMI 71 + Eligibility 61 + Comparison 63 + Car 108 + Home 113 keys) translated, font ${fontBytes} bytes.`);
+console.log(`i18n: ${checks} checks — ${used.size} data-i18n keys covered, 26/26 tool labels + card names + descriptions translated, tax cluster (Salary 58 + Freelancer 73 + GST 99 keys) + loans cluster (EMI 71 + Eligibility 61 + Comparison 63 + Car 108 + Home 113 keys) + Zakat/savings cluster (Zakat 96 + National Savings 141 + Fixed Deposit 61 keys) translated, font ${fontBytes} bytes.`);

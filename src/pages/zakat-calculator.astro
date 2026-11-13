@@ -96,15 +96,14 @@ const schema = JSON.stringify({
 
   <div class="container" style="padding-top:32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb" style="font-size:14px; margin-bottom:12px;">
-      <a href="/">Home</a> / Zakat Calculator
+      <a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="zak.crumb">Zakat Calculator</span>
     </nav>
-    <p class="badge badge-info" style="margin-bottom:12px;">Islamic Finance</p>
-    <h1 style="font-size:clamp(1.75rem,4.5vw,2.25rem);">Zakat Calculator</h1>
+    <p class="badge badge-info" style="margin-bottom:12px;" data-i18n="zak.badge">Islamic Finance</p>
+    <h1 data-i18n="zak.h1" style="font-size:clamp(1.75rem,4.5vw,2.25rem);">Zakat Calculator</h1>
     <p class="prose-narrow" style="font-size:clamp(1.0625rem,2vw,1.1875rem); margin-top:12px;">
-      Add up zakatable wealth, deduct debts due, and work out {ZAKAT_RATE * 100}% Zakat
-      on the stated nisab basis. This is an arithmetic estimate only, not a ruling —
-      how long wealth has been owned (hawl) is not computed here.
+      <span data-i18n="zak.intro-pre">Add up zakatable wealth, deduct debts due, and work out </span>{ZAKAT_RATE * 100}%<span data-i18n="zak.intro-post"> Zakat on the stated nisab basis. This is an arithmetic estimate only, not a ruling — how long wealth has been owned (hawl) is not computed here.</span>
     </p>
+    <p id="lang-note" class="lang-note" data-i18n="tax.others-note" hidden>The other calculators on this site are still in English in this phase.</p>
   </div>
 
   <div class="container" style="margin-top:20px;">
@@ -122,103 +121,103 @@ const schema = JSON.stringify({
         <form id="zakat-form" novalidate>
           <div id="error-summary" class="error-box" role="alert" hidden></div>
 
-          <p class="group-label">Cash and other assets</p>
+          <p class="group-label" data-i18n="zak.group-cash">Cash and other assets</p>
           <hr class="group-divider" />
-          <p class="hint" style="font-size:14px; color:var(--ink-muted); margin-bottom:12px;">
+          <p class="hint" style="font-size:14px; color:var(--ink-muted); margin-bottom:12px;" data-i18n="zak.cash-note">
             All fields are optional. Leave a field blank if it does not apply — blank means zero.
           </p>
 
           <div class="field">
-            <label for="cash">Cash in hand and bank balance (PKR) (optional)</label>
+            <label for="cash" data-i18n="zak.cash-label">Cash in hand and bank balance (PKR) (optional)</label>
             <input type="text" inputmode="decimal" autocomplete="off" id="cash" />
-            <p class="hint" id="hint-cash">Money in hand and in bank accounts. Leave blank if none.</p>
+            <p class="hint" id="hint-cash" data-i18n="zak.cash-hint">Money in hand and in bank accounts. Leave blank if none.</p>
             <p class="field-error" id="err-cash" hidden></p>
           </div>
 
-          <p class="group-label">Gold owned</p>
+          <p class="group-label" data-i18n="zak.group-gold">Gold owned</p>
           <hr class="group-divider" />
           <fieldset class="field" style="border:0; padding:0; margin-bottom:12px;">
-            <legend>Gold — how do you want to enter it?</legend>
+            <legend data-i18n="zak.gold-legend">Gold — how do you want to enter it?</legend>
             <div class="segmented" role="radiogroup" aria-label="Gold entry mode">
-              <label><input type="radio" name="gold-mode" value="value" checked /> Value</label>
-              <label><input type="radio" name="gold-mode" value="weight" /> Weight</label>
+              <label><input type="radio" name="gold-mode" value="value" checked /> <span data-i18n="zak.mode-value">Value</span></label>
+              <label><input type="radio" name="gold-mode" value="weight" /> <span data-i18n="zak.mode-weight">Weight</span></label>
             </div>
-            <p class="hint">Choose one way to enter gold. Do not enter both a value and a weight.</p>
+            <p class="hint" data-i18n="zak.gold-mode-hint">Choose one way to enter gold. Do not enter both a value and a weight.</p>
             <p class="field-error" id="err-gold-mode" hidden></p>
           </fieldset>
           <div id="gold-value-wrap">
             <div class="field">
-              <label for="gold-value">Value of gold owned (PKR) (optional)</label>
+              <label for="gold-value" data-i18n="zak.gold-value-label">Value of gold owned (PKR) (optional)</label>
               <input type="text" inputmode="decimal" autocomplete="off" id="gold-value" />
-              <p class="hint">The PKR value of gold you own. Enter only zakatable gold — see the note below.</p>
+              <p class="hint" data-i18n="zak.gold-value-hint">The PKR value of gold you own. Enter only zakatable gold — see the note below.</p>
               <p class="field-error" id="err-gold-value" hidden></p>
             </div>
           </div>
           <div id="gold-weight-wrap" hidden>
             <div class="field">
-              <label for="gold-weight">Weight of gold owned (optional)</label>
+              <label for="gold-weight" data-i18n="zak.gold-weight-label">Weight of gold owned (optional)</label>
               <input type="text" inputmode="decimal" autocomplete="off" id="gold-weight" />
-              <p class="hint">Weight of gold you own.</p>
+              <p class="hint" data-i18n="zak.gold-weight-hint">Weight of gold you own.</p>
               <p class="field-error" id="err-gold-weight" hidden></p>
             </div>
             <div class="field">
-              <label for="gold-weight-unit">Weight unit</label>
+              <label for="gold-weight-unit" data-i18n="zak.gold-unit-label">Weight unit</label>
               <select id="gold-weight-unit">
-                <option value="tola" selected>tola</option>
-                <option value="grams">grams</option>
+                <option value="tola" selected data-i18n="zak.gold-unit-tola">tola</option>
+                <option value="grams" data-i18n="zak.gold-unit-grams">grams</option>
               </select>
-              <p class="hint">1 tola = {TOLA_GRAMS} g.</p>
+              <p class="hint"><span data-i18n="zak.gold-unit-hint-pre">1 tola = </span>{TOLA_GRAMS}<span data-i18n="zak.gold-unit-hint-post"> g.</span></p>
             </div>
           </div>
           <p class="hint" id="gold-retained" style="font-size:14px; color:var(--ink-muted);"></p>
           <div class="field">
-            <label for="gold-price">Gold price (PKR per tola) (optional)</label>
+            <label for="gold-price" data-i18n="zak.gold-price-label">Gold price (PKR per tola) (optional)</label>
             <input type="text" inputmode="decimal" autocomplete="off" id="gold-price" />
-            <p class="hint">Used to value gold by weight and to work out the gold nisab. A live price shows its source and date; a price you type is labelled as yours.</p>
+            <p class="hint" data-i18n="zak.gold-price-hint">Used to value gold by weight and to work out the gold nisab. A live price shows its source and date; a price you type is labelled as yours.</p>
             <p class="hint" id="gold-price-meta"></p>
             <p class="field-error" id="err-gold-price" hidden></p>
           </div>
 
-          <p class="group-label">Silver owned</p>
+          <p class="group-label" data-i18n="zak.group-silver">Silver owned</p>
           <hr class="group-divider" />
           <fieldset class="field" style="border:0; padding:0; margin-bottom:12px;">
-            <legend>Silver — how do you want to enter it?</legend>
+            <legend data-i18n="zak.silver-legend">Silver — how do you want to enter it?</legend>
             <div class="segmented" role="radiogroup" aria-label="Silver entry mode">
-              <label><input type="radio" name="silver-mode" value="value" checked /> Value</label>
-              <label><input type="radio" name="silver-mode" value="weight" /> Weight</label>
+              <label><input type="radio" name="silver-mode" value="value" checked /> <span data-i18n="zak.mode-value">Value</span></label>
+              <label><input type="radio" name="silver-mode" value="weight" /> <span data-i18n="zak.mode-weight">Weight</span></label>
             </div>
-            <p class="hint">Choose one way to enter silver. Do not enter both a value and a weight.</p>
+            <p class="hint" data-i18n="zak.silver-mode-hint">Choose one way to enter silver. Do not enter both a value and a weight.</p>
             <p class="field-error" id="err-silver-mode" hidden></p>
           </fieldset>
           <div id="silver-value-wrap">
             <div class="field">
-              <label for="silver-value">Value of silver owned (PKR) (optional)</label>
+              <label for="silver-value" data-i18n="zak.silver-value-label">Value of silver owned (PKR) (optional)</label>
               <input type="text" inputmode="decimal" autocomplete="off" id="silver-value" />
-              <p class="hint">The PKR value of silver you own.</p>
+              <p class="hint" data-i18n="zak.silver-value-hint">The PKR value of silver you own.</p>
               <p class="field-error" id="err-silver-value" hidden></p>
             </div>
           </div>
           <div id="silver-weight-wrap" hidden>
             <div class="field">
-              <label for="silver-weight">Weight of silver owned (optional)</label>
+              <label for="silver-weight" data-i18n="zak.silver-weight-label">Weight of silver owned (optional)</label>
               <input type="text" inputmode="decimal" autocomplete="off" id="silver-weight" />
-              <p class="hint">Weight of silver you own.</p>
+              <p class="hint" data-i18n="zak.silver-weight-hint">Weight of silver you own.</p>
               <p class="field-error" id="err-silver-weight" hidden></p>
             </div>
             <div class="field">
-              <label for="silver-weight-unit">Weight unit</label>
+              <label for="silver-weight-unit" data-i18n="zak.silver-unit-label">Weight unit</label>
               <select id="silver-weight-unit">
-                <option value="tola" selected>tola</option>
-                <option value="grams">grams</option>
+                <option value="tola" selected data-i18n="zak.silver-unit-tola">tola</option>
+                <option value="grams" data-i18n="zak.silver-unit-grams">grams</option>
               </select>
-              <p class="hint">1 tola = {TOLA_GRAMS} g.</p>
+              <p class="hint"><span data-i18n="zak.silver-unit-hint-pre">1 tola = </span>{TOLA_GRAMS}<span data-i18n="zak.silver-unit-hint-post"> g.</span></p>
             </div>
           </div>
           <p class="hint" id="silver-retained" style="font-size:14px; color:var(--ink-muted);"></p>
           <div class="field">
-            <label for="silver-price">Silver price (PKR per tola) (optional)</label>
+            <label for="silver-price" data-i18n="zak.silver-price-label">Silver price (PKR per tola) (optional)</label>
             <input type="text" inputmode="decimal" autocomplete="off" id="silver-price" />
-            <p class="hint">Used to value silver by weight and to work out the silver nisab. A live price shows its source and date; a price you type is labelled as yours.</p>
+            <p class="hint" data-i18n="zak.silver-price-hint">Used to value silver by weight and to work out the silver nisab. A live price shows its source and date; a price you type is labelled as yours.</p>
             <p class="hint" id="silver-price-meta"></p>
             <p class="hint" id="zakat-credit" hidden>
               Live gold and silver prices by <a href="https://goldprice.dev" rel="noopener nofollow" target="_blank">goldprice.dev</a>.
@@ -227,47 +226,47 @@ const schema = JSON.stringify({
           </div>
 
           <div style="margin-top:8px;">
-            <button type="button" class="btn-secondary" id="use-prices">Use latest prices</button>
-            <p class="hint" style="font-size:14px; color:var(--ink-muted); margin-top:8px;">
+            <button type="button" class="btn-secondary" id="use-prices" data-i18n="zak.use-prices">Use latest prices</button>
+            <p class="hint" style="font-size:14px; color:var(--ink-muted); margin-top:8px;" data-i18n="zak.use-prices-hint">
               Fetches the latest gold and silver prices. If the prices cannot be loaded, type them yourself.
             </p>
           </div>
 
-          <p class="group-label">Trade goods, other assets and debts</p>
+          <p class="group-label" data-i18n="zak.group-trade">Trade goods, other assets and debts</p>
           <hr class="group-divider" />
           <div class="field">
-            <label for="trade-goods">Trade goods / stock for sale (PKR) (optional)</label>
+            <label for="trade-goods" data-i18n="zak.trade-label">Trade goods / stock for sale (PKR) (optional)</label>
             <input type="text" inputmode="decimal" autocomplete="off" id="trade-goods" />
-            <p class="hint">Goods held for trade or resale only. Personal-use items are excluded — do not include them here.</p>
+            <p class="hint" data-i18n="zak.trade-hint">Goods held for trade or resale only. Personal-use items are excluded — do not include them here.</p>
             <p class="field-error" id="err-trade-goods" hidden></p>
           </div>
           <div class="field">
-            <label for="other-assets">Other zakatable assets / money owed to you (PKR) (optional)</label>
+            <label for="other-assets" data-i18n="zak.other-label">Other zakatable assets / money owed to you (PKR) (optional)</label>
             <input type="text" inputmode="decimal" autocomplete="off" id="other-assets" />
-            <p class="hint">Other zakatable wealth and money owed to you. Include only amounts you count as zakatable.</p>
+            <p class="hint" data-i18n="zak.other-hint">Other zakatable wealth and money owed to you. Include only amounts you count as zakatable.</p>
             <p class="field-error" id="err-other-assets" hidden></p>
           </div>
           <div class="field">
-            <label for="debts">Debts you owe that are due (PKR) (optional)</label>
+            <label for="debts" data-i18n="zak.debts-label">Debts you owe that are due (PKR) (optional)</label>
             <input type="text" inputmode="decimal" autocomplete="off" id="debts" />
-            <p class="hint">Debts due now. Deducted from your total below. If you are unsure whether a debt should be deducted, confirm with a qualified scholar.</p>
+            <p class="hint" data-i18n="zak.debts-hint">Debts due now. Deducted from your total below. If you are unsure whether a debt should be deducted, confirm with a qualified scholar.</p>
             <p class="field-error" id="err-debts" hidden></p>
           </div>
 
-          <p style="font-size:14px; color:var(--ink-muted);">
+          <p style="font-size:14px; color:var(--ink-muted);" data-i18n="zak.personal-note">
             Personal-use items (for example, items you use yourself and do not hold for trade) are excluded.
             This tool cannot decide whether an item is zakatable — if you are unsure, confirm with a
             qualified scholar before paying.
           </p>
 
           <fieldset class="field" style="border:0; padding:0; margin-top:16px;">
-            <legend>Nisab basis</legend>
+            <legend data-i18n="zak.nisab-legend">Nisab basis</legend>
             <div class="segmented" role="radiogroup" aria-label="Nisab basis">
-              <label><input type="radio" name="nisab-basis" value="gold" /> Gold</label>
-              <label><input type="radio" name="nisab-basis" value="silver" /> Silver</label>
-              <label><input type="radio" name="nisab-basis" value="both" checked /> Both</label>
+              <label><input type="radio" name="nisab-basis" value="gold" /> <span data-i18n="zak.nisab-gold">Gold</span></label>
+              <label><input type="radio" name="nisab-basis" value="silver" /> <span data-i18n="zak.nisab-silver">Silver</span></label>
+              <label><input type="radio" name="nisab-basis" value="both" checked /> <span data-i18n="zak.nisab-both">Both</span></label>
             </div>
-            <p class="hint">
+            <p class="hint" data-i18n="zak.nisab-hint">
               Which nisab threshold the result is compared with. Both shows both thresholds;
               the basis actually used is labelled on the result. Gold only if you own only gold,
               otherwise silver for mixed assets and cash.
@@ -275,8 +274,8 @@ const schema = JSON.stringify({
           </fieldset>
 
           <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
-            <button type="submit" class="btn-primary" style="flex:1;">Calculate</button>
-            <button type="button" class="btn-secondary" id="clear-btn">Clear</button>
+            <button type="submit" class="btn-primary" style="flex:1;" data-i18n="ui.calculate">Calculate</button>
+            <button type="button" class="btn-secondary" id="clear-btn" data-i18n="ui.clear">Clear</button>
           </div>
           <p class="hint" style="font-size:14px; color:var(--ink-muted); margin-top:8px;" role="status" id="form-status"></p>
         </form>
@@ -290,9 +289,9 @@ const schema = JSON.stringify({
           <p style="font-size:13px; color:var(--ink-muted);">Estimates only — not a religious ruling. Confirm with a qualified scholar. Read the full disclaimer below.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;" class="no-print">
-          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-          <button type="button" class="btn-secondary" data-share-result disabled>Share</button>
-          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-share-result data-i18n="zak.share" disabled>Share</button>
+          <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
         <p data-copy-status role="status" style="font-size:14px; margin-top:8px;"></p>
       </section>
@@ -300,60 +299,57 @@ const schema = JSON.stringify({
   </div>
 
   <div id="sticky-bar" class="no-print" hidden>
-    <p style="margin:0;"><strong>Zakat due</strong><br /><span id="sticky-text"></span></p>
+    <p style="margin:0;"><strong data-i18n="zak.sticky-due">Zakat due</strong><br /><span id="sticky-text"></span></p>
     <div style="display:flex; gap:8px; align-items:center;">
-      <button type="button" class="btn-secondary" id="sticky-details">Details</button>
+      <button type="button" class="btn-secondary" id="sticky-details" data-i18n="zak.sticky-details">Details</button>
       <button type="button" class="btn-secondary" id="sticky-dismiss" aria-label="Dismiss summary">×</button>
     </div>
   </div>
 
   <div class="container prose-narrow" style="margin-top:48px;">
-    <h2>How it works</h2>
+    <h2 data-i18n="zak.how-h">How it works</h2>
     <ol>
-      <li>Add up cash, gold, silver, trade goods, and other zakatable assets to get gross wealth.</li>
-      <li>Deduct debts that are due. Net wealth is gross wealth minus debts, and never goes below zero.</li>
-      <li>Compare net wealth with the nisab: {NISAB_GOLD_GRAMS} g of gold or {NISAB_SILVER_GRAMS} g of silver (1 tola = {TOLA_GRAMS} g). If net wealth is at or above the nisab on the basis stated, Zakat due is {ZAKAT_RATE * 100}% of net wealth. The{' '}
-        <a href="/gold-price-calculator/">Gold Price Calculator</a> shows how the price per tola and per gram is worked out.</li>
-      <li>Hawl (how long wealth has been owned) is not computed. Include only wealth meeting the conditions you follow, and confirm with a qualified scholar.</li>
+      <li data-i18n="zak.how1">Add up cash, gold, silver, trade goods, and other zakatable assets to get gross wealth.</li>
+      <li data-i18n="zak.how2">Deduct debts that are due. Net wealth is gross wealth minus debts, and never goes below zero.</li>
+      <li><span data-i18n="zak.how3-pre">Compare net wealth with the nisab: </span>{NISAB_GOLD_GRAMS}<span data-i18n="zak.how3-mid1"> g of gold or </span>{NISAB_SILVER_GRAMS}<span data-i18n="zak.how3-mid2"> g of silver (1 tola = </span>{TOLA_GRAMS}<span data-i18n="zak.how3-mid3"> g). If net wealth is at or above the nisab on the basis stated, Zakat due is </span>{ZAKAT_RATE * 100}%<span data-i18n="zak.how3-mid4"> of net wealth. The </span><a href="/gold-price-calculator/" data-i18n="card.gold.name">Gold Price Calculator</a><span data-i18n="zak.how3-post"> shows how the price per tola and per gram is worked out.</span></li>
+      <li data-i18n="zak.how4">Hawl (how long wealth has been owned) is not computed. Include only wealth meeting the conditions you follow, and confirm with a qualified scholar.</li>
     </ol>
     <p id="how-numbers">Net wealth × {ZAKAT_RATE * 100}% = Zakat due, when nisab is met.</p>
 
-    <h2>Worked example</h2>
+    <h2 data-i18n="zak.example-h">Worked example</h2>
     <p>
-      Example only — not your result. Cash Rs 2,000,000, no debts, and nisab met
-      (assumed for this example): net wealth is Rs 2,000,000, and {ZAKAT_RATE * 100}% of
-      Rs 2,000,000 is Rs 50,000 Zakat due.
+      <span data-i18n="zak.ex-pre1">Example only — not your result. Cash </span>Rs 2,000,000<span data-i18n="zak.ex-pre2">, no debts, and nisab met (assumed for this example): net wealth is </span>Rs 2,000,000<span data-i18n="zak.ex-pre3">, and </span>Rs 2,000,000<span data-i18n="zak.ex-pre4"> of </span>{ZAKAT_RATE * 100}%<span data-i18n="zak.ex-pre5"> is </span>Rs 50,000<span data-i18n="zak.ex-post"> Zakat due.</span>
     </p>
 
-    <h2>Frequently asked questions</h2>
+    <h2 data-i18n="zak.faq-h">Frequently asked questions</h2>
     <div class="faq">
-      {faqs.map((f) => (
+      {faqs.map((f, i) => (
         <details>
-          <summary><h3 style="display:inline; font-size:18px;">{f.q}</h3></summary>
-          <p>{f.a}</p>
+          <summary><h3 style="display:inline; font-size:18px;" data-i18n={`zak.faq${i + 1}q`}>{f.q}</h3></summary>
+          <p data-i18n={`zak.faq${i + 1}a`}>{f.a}</p>
         </details>
       ))}
     </div>
 
-    <h2>Important — please read</h2>
+    <h2 data-i18n="zak.disc-h">Important — please read</h2>
     <div class="notice-warning">
-      <p>
+      <p data-i18n="zak.disc">
         This is an arithmetic estimate only, not a fatwa. Zakat method, nisab and asset
         eligibility can differ by school of thought. Please confirm with a qualified scholar
         before paying, especially for edge cases.
       </p>
       <ul>
-        <li>Results are estimates for information only.</li>
-        <li>This tool does not compute hawl or decide eligibility — include only wealth meeting the conditions you follow.</li>
-        <li>Personal-use items are excluded.</li>
-        <li>Prices shown are as sourced and dated on the page, or entered by you, and nisab in rupees depends on those prices. Confirm nisab and method questions with a scholar before acting.</li>
+        <li data-i18n="zak.disc1">Results are estimates for information only.</li>
+        <li data-i18n="zak.disc2">This tool does not compute hawl or decide eligibility — include only wealth meeting the conditions you follow.</li>
+        <li data-i18n="zak.disc3">Personal-use items are excluded.</li>
+        <li data-i18n="zak.disc4">Prices shown are as sourced and dated on the page, or entered by you, and nisab in rupees depends on those prices. Confirm nisab and method questions with a scholar before acting.</li>
       </ul>
     </div>
 
-    <h2>Related tools</h2>
+    <h2 data-i18n="zak.related-h">Related tools</h2>
     <div style="display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
-      <article class="card"><h3 style="font-size:18px;"><a href="/gold-price-calculator/">Gold Price Calculator</a></h3><p style="color:var(--ink-muted);">Value of gold per tola and per gram, with a live or your own price.</p></article>
-      <article class="card"><h3 style="font-size:18px;"><a href="/currency-converter/">Currency Converter</a></h3><p style="color:var(--ink-muted);">Convert between PKR and major currencies at the latest rate.</p></article>
+      <article class="card"><h3 style="font-size:18px;"><a href="/gold-price-calculator/" data-i18n="zak.rel1">Gold Price Calculator</a></h3><p style="color:var(--ink-muted);" data-i18n="zak.rel1-desc">Value of gold per tola and per gram, with a live or your own price.</p></article>
+      <article class="card"><h3 style="font-size:18px;"><a href="/currency-converter/" data-i18n="zak.rel2">Currency Converter</a></h3><p style="color:var(--ink-muted);" data-i18n="zak.rel2-desc">Convert between PKR and major currencies at the latest rate.</p></article>
     </div>
   </div>
 
@@ -784,14 +780,32 @@ const schema = JSON.stringify({
       }
     }
 
+    // The empty result state is rewritten by this script on load and on
+    // Clear, so it is translated here (not via data-i18n) and refreshed
+    // by the __pfcAfterLang hook when the language toggles.
     function renderEmpty() {
-      resultContent.innerHTML = `
+      const urdu = document.documentElement.lang === 'ur';
+      resultContent.innerHTML = urdu ? `
+        <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:0;">زکوٰۃ واجب</p>
+        <p>اپنی تفصیل درج کریں تاکہ آپ کو نتیجہ نظر آئے۔</p>
+        <p>کم از کم ایک اثاثہ درج کریں تاکہ آپ کو نتیجہ نظر آئے۔ آپ کو اپنی واجب زکوٰۃ، خالص دولت، اور یہ نظر آئے گا کہ بیان کردہ بنیاد پر نصاب پورا ہوا یا نہیں۔</p>
+        <p style="font-size:13px; color:var(--ink-muted);">صرف اندازے ہیں — کوئی مذہبی فتویٰ نہیں۔ کسی مستند عالم سے تصدیق کریں۔ نیچے مکمل ڈسکلیمر پڑھیں۔</p>` : `
         <p style="font-size:14px; font-weight:700; color:var(--ink-muted); margin:0;">Zakat due</p>
         <p>Enter your details to see your result.</p>
         <p>Enter at least one asset to see your result. You will see your Zakat due, net wealth, and whether nisab is met on the basis stated.</p>
         <p style="font-size:13px; color:var(--ink-muted);">Estimates only — not a religious ruling. Confirm with a qualified scholar. Read the full disclaimer below.</p>`;
       setActionsEnabled(false);
       hideSticky();
+    }
+
+    // The static formula line under "How it works" is rewritten by the
+    // script whenever the result is cleared, so it is translated here
+    // (not via data-i18n) and refreshed by the __pfcAfterLang hook.
+    function setHowNumbersStatic() {
+      const urdu = document.documentElement.lang === 'ur';
+      $('how-numbers').textContent = urdu
+        ? `خالص دولت × ${ZAKAT_RATE * 100}% = زکوٰۃ واجب، جب نصاب پورا ہو۔`
+        : `Net wealth × ${ZAKAT_RATE * 100}% = Zakat due, when nisab is met.`;
     }
 
     function recalculate(fromCalculate) {
@@ -827,7 +841,7 @@ const schema = JSON.stringify({
       updatePriceMetas();
       if (!anyAssetEntered(parsed)) {
         renderEmpty();
-        $('how-numbers').textContent = `Net wealth × ${ZAKAT_RATE * 100}% = Zakat due, when nisab is met.`;
+        setHowNumbersStatic();
         return;
       }
       const values = collectValues(parsed);
@@ -924,8 +938,8 @@ const schema = JSON.stringify({
       syncModeVisibility();
       updateStrip();
       updatePriceMetas();
+      setHowNumbersStatic();
       renderEmpty();
-      $('how-numbers').textContent = `Net wealth × ${ZAKAT_RATE * 100}% = Zakat due, when nisab is met.`;
     });
 
     $('sticky-details').addEventListener('click', () => {
@@ -959,6 +973,18 @@ const schema = JSON.stringify({
         if (status) status.textContent = 'Sharing did not work in this browser. Select the result text and copy it manually.';
       }
     });
+
+    // Refresh script-managed labels when the language toggles (i18n.js
+    // calls this after swapping every [data-i18n] element). With a result
+    // shown the dynamic result text stays in the language it was
+    // calculated in; only the empty state and the static formula line
+    // are re-rendered here.
+    window.__pfcAfterLang = function (lang) {
+      if (!lastValidHTML) {
+        renderEmpty();
+        setHowNumbersStatic();
+      }
+    };
 
     syncModeVisibility();
     updateStrip();
