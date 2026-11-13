@@ -3,5 +3,19 @@
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://s3.tradingview.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://s3.tradingview.com https://*.tradingview.com; connect-src 'self' https://*.tradingview.com; frame-src https://www.tradingview.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://s3.tradingview.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://s3.tradingview.com https://*.tradingview.com; connect-src 'self' https://*.tradingview.com; frame-src https://www.tradingview.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'
+  # NOTE (2026-11-13): 'unsafe-inline' was removed from script-src. Every
+  # executable script is now an external file: tool calculators are bundled
+  # by Astro into /_astro/*.js, the shared copy/print handler lives in
+  # /js/shared.js, and the GST / National Savings pages pass their data via
+  # <script type="application/json"> data blocks (data blocks are not
+  # executed, so CSP script-src does not apply to them — same as the
+  # application/ld+json schema blocks). The TradingView widget on the Gold
+  # page is still allowed: it is loaded by creating a <script> element with
+  # src https://s3.tradingview.com/..., which the host source permits.
+  # style-src KEEPS 'unsafe-inline' deliberately: 727 inline style="..."
+  # attributes exist across src/ (plus style attributes built by JS at
+  # runtime, e.g. the currency converter). Removing it would need every
+  # one moved to CSS classes — a full visual refactor, not a safe header
+  # change. That is a separate follow-up, not forced here.
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload

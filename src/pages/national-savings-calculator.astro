@@ -97,7 +97,7 @@ const maxDisplay: Record<string, string> = {
   sa: 'No maximum',
   sfwa: 'See note below — official page conflicts',
 };
-const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES);
+const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES).replace(/</g, '\\u003c');
 ---
 <Layout title={title} description={description} slug={slug} schema={schema}>
   <div class="container" style="padding-top: 32px;">
@@ -439,10 +439,14 @@ const schemeJson = JSON.stringify(NATIONAL_SAVINGS_SCHEMES);
     }
   </style>
 
-  <script define:vars={{ schemeJson }}>
+  <!-- Scheme data as a JSON data block (CSP data block, not executed), so the
+       calculator script below can be bundled externally and script-src needs no 'unsafe-inline'. -->
+  <script type="application/json" id="nssSchemes" set:html={schemeJson}></script>
+
+  <script>
     import { calcNationalSavings, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';
 
-    const schemes = JSON.parse(schemeJson);
+    const schemes = JSON.parse(document.getElementById('nssSchemes').textContent);
     const form = document.getElementById('nssForm');
     const errorsBox = document.getElementById('nssErrors');
     const emptyBox = document.getElementById('nssEmpty');

@@ -126,29 +126,7 @@ const tools = [
         <span>Free · No sign-up · Private</span>
       </div>
     </footer>
-    <script>
-      // Shared copy/print behaviour for every tool page. No user input is
-      // ever placed in a URL, analytics event, or storage (SRS G3).
-      document.addEventListener('click', async (event) => {
-        const target = event.target as HTMLElement;
-        const copyBtn = target.closest('[data-copy-result]') as HTMLButtonElement | null;
-        if (copyBtn) {
-          const source = document.querySelector('[data-result-text]');
-          const text = source?.textContent?.trim() ?? '';
-          const status = document.querySelector('[data-copy-status]');
-          try {
-            await navigator.clipboard.writeText(text);
-            if (status) status.textContent = 'Result copied.';
-            copyBtn.textContent = 'Copied ✓';
-            setTimeout(() => { copyBtn.textContent = 'Copy result'; }, 2000);
-          } catch {
-            if (status) status.textContent = 'Copy did not work in this browser. Select the result text and copy it manually.';
-          }
-          return;
-        }
-        const printBtn = target.closest('[data-print-result]') as HTMLButtonElement | null;
-        if (printBtn) window.print();
-      });
-    </script>
+    <!-- External script (public/js/shared.js) so CSP script-src needs no 'unsafe-inline'. -->
+    <script src="/js/shared.js" defer></script>
   </body>
 </html>

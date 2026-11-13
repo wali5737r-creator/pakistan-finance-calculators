@@ -90,7 +90,7 @@ const related = [
   },
 ];
 
-const presetsJson = JSON.stringify(GST_PRESETS);
+const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
 ---
 <Layout title={title} description={description} slug={slug} schema={schema}>
   <div class="container" style="padding-top: 32px;">
@@ -402,10 +402,14 @@ const presetsJson = JSON.stringify(GST_PRESETS);
     }
   </style>
 
-  <script define:vars={{ presetsJson }}>
+  <!-- GST preset data as a JSON data block (CSP data block, not executed), so the
+       calculator script below can be bundled externally and script-src needs no 'unsafe-inline'. -->
+  <script type="application/json" id="gstPresets" set:html={presetsJson}></script>
+
+  <script>
     import { calcGst, parseDecimal, formatPKR, formatNumber } from '../lib/calc.ts';
 
-    const presets = JSON.parse(presetsJson);
+    const presets = JSON.parse(document.getElementById('gstPresets').textContent);
     const form = document.getElementById('gstForm');
     const errorsBox = document.getElementById('gstErrors');
     const emptyBox = document.getElementById('gstEmpty');
