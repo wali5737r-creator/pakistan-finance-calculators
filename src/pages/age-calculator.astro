@@ -73,51 +73,52 @@ const schema = JSON.stringify({
 <Layout title={title} description={description} slug="/age-calculator/" schema={schema}>
   <div class="container" style="padding-top: 32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb" style="font-size: 14px; margin-bottom: 12px;">
-      <a href="/">Home</a> / Age Calculator
+      <a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="age.crumb">Age Calculator</span>
     </nav>
-    <h1>Age Calculator</h1>
-    <p class="prose-narrow" style="font-size: 1.0625rem; margin-top: 12px;">
+    <h1 data-i18n="age.h1">Age Calculator</h1>
+    <p class="prose-narrow" style="font-size: 1.0625rem; margin-top: 12px;" data-i18n="age.intro">
       Work out your exact age in years, months and days from your date of birth,
       on today’s date or on any date you choose — plus your total days, total
       weeks, and days until your next birthday. Your dates stay in your browser:
       your date of birth is not stored.
     </p>
+    <p id="lang-note" class="lang-note" data-i18n="tax.others-note" hidden>The other calculators on this site are still in English in this phase.</p>
 
     <div class="tool-grid" style="margin-top: 24px;">
       <section class="card" aria-label="Age calculator form">
         <div class="field">
-          <label for="dob">Date of birth *</label>
+          <label for="dob"><span data-i18n="age.dob-label">Date of birth</span> <span aria-hidden="true">*</span></label>
           <input type="date" id="dob" name="dob" required aria-required="true" aria-describedby="dob-error dob-help" autocomplete="off" />
-          <p class="hint" id="dob-help">
+          <p class="hint" id="dob-help" data-i18n="age.dob-help">
             Enter as day / month / year, for example 15/03/1995, using the date
             picker. 03/04/2000 means 3 April 2000.
           </p>
-          <p class="notice-info">
+          <p class="notice-info" data-i18n="age.leap-note">
             Born on 29 February? In years without a 29 February, your completed
             years count from 1 March, and your next birthday is shown as
             1 March.
           </p>
         </div>
         <div class="field">
-          <label for="asof">Age at (optional)</label>
+          <label for="asof" data-i18n="age.asof-label">Age at (optional)</label>
           <input type="date" id="asof" name="asof" aria-describedby="dob-error asof-help" autocomplete="off" />
           <p class="hint" id="asof-help">
             Defaults to today (Asia/Karachi). You can pick a past or future date
             to see your age on that date.
           </p>
-          <p><button type="button" class="btn-secondary" id="reset-today">Reset to today</button></p>
+          <p><button type="button" class="btn-secondary" id="reset-today" data-i18n="age.reset-today">Reset to today</button></p>
         </div>
         <div id="dob-error" role="alert" class="error-box" hidden></div>
         <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px;">
-          <button type="button" class="btn-primary" id="calculate">Calculate</button>
-          <button type="button" class="btn-secondary" id="clear">Clear</button>
+          <button type="button" class="btn-primary" id="calculate" data-i18n="ui.calculate">Calculate</button>
+          <button type="button" class="btn-secondary" id="clear" data-i18n="ui.clear">Clear</button>
         </div>
       </section>
 
       <section class="result-card" aria-label="Age result">
         <div id="empty-state">
-          <p><strong>Enter your date of birth to see your age.</strong></p>
-          <p>
+          <p><strong data-i18n="age.empty1">Enter your date of birth to see your age.</strong></p>
+          <p data-i18n="age.empty2">
             You’ll see your age in years, months and days, your total days, and
             your next birthday.
           </p>
@@ -128,43 +129,43 @@ const schema = JSON.stringify({
               <p id="result-eyebrow" style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Your age</p>
               <p class="result-value" id="headline"></p>
             </div>
-            <p id="age-warning" class="notice-warning" role="note" hidden>
+            <p id="age-warning" class="notice-warning" role="note" hidden data-i18n="age.warning">
               This age is over 150 years. Please check the date of birth — the result is shown, but it may be a typing mistake.
             </p>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px;">
               <div>
-                <p style="font-size: 14px; color: var(--ink-muted);">Total days lived</p>
+                <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="age.lbl-days">Total days lived</p>
                 <p id="total-days" style="font-weight: 700; font-size: 20px;"></p>
               </div>
               <div>
-                <p style="font-size: 14px; color: var(--ink-muted);">Total weeks</p>
+                <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="age.lbl-weeks">Total weeks</p>
                 <p id="total-weeks" style="font-weight: 700; font-size: 20px;"></p>
               </div>
               <div>
-                <p style="font-size: 14px; color: var(--ink-muted);">Total complete months</p>
+                <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="age.lbl-months">Total complete months</p>
                 <p id="total-months" style="font-weight: 700; font-size: 20px;"></p>
               </div>
               <div>
-                <p style="font-size: 14px; color: var(--ink-muted);">Next birthday</p>
+                <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="age.lbl-next">Next birthday</p>
                 <p id="next-birthday" style="font-weight: 700; font-size: 20px;"></p>
               </div>
               <div>
-                <p style="font-size: 14px; color: var(--ink-muted);">Born</p>
+                <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="age.lbl-born">Born</p>
                 <p id="born" style="font-weight: 700; font-size: 20px;"></p>
               </div>
             </div>
             <p id="echo" style="margin-top: 20px; font-size: 14px; color: var(--ink-muted);"></p>
-            <p class="notice-info" style="margin-top: 12px;">
+            <p class="notice-info" style="margin-top: 12px;" data-i18n="age.cal-note">
               Gregorian calendar. “Today” is the date in Asia/Karachi. 29 February
               birthdays count from 1 March in non-leap years.
             </p>
-            <p style="margin-top: 12px; font-size: 14px;">
+            <p style="margin-top: 12px; font-size: 14px;" data-i18n="age.not-stored">
               Your date of birth is not stored.
             </p>
           </div>
           <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px;">
-            <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-            <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+            <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+            <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
           </div>
           <p data-copy-status role="status" style="font-size: 14px; margin-top: 8px;"></p>
         </div>
@@ -172,52 +173,50 @@ const schema = JSON.stringify({
     </div>
 
     <section class="prose-narrow" style="margin-top: 48px;">
-      <h2>How it works</h2>
+      <h2 data-i18n="age.how-h">How it works</h2>
       <ol>
-        <li>Enter your date of birth as day / month / year — 03/04/2000 always means 3 April 2000.</li>
-        <li>Leave “Age at” blank for today (the date in Asia/Karachi), or pick any past or future date.</li>
-        <li>Read your age in completed years, months and days, plus your total days, weeks, and next birthday.</li>
+        <li data-i18n="age.how1">Enter your date of birth as day / month / year — 03/04/2000 always means 3 April 2000.</li>
+        <li data-i18n="age.how2">Leave “Age at” blank for today (the date in Asia/Karachi), or pick any past or future date.</li>
+        <li data-i18n="age.how3">Read your age in completed years, months and days, plus your total days, weeks, and next birthday.</li>
       </ol>
-      <p>
+      <p data-i18n="age.how-note1">
         The years, months and days are counted by calendar borrowing: first the
         completed years, then the completed months, then the remaining days —
         not by dividing total days by 365. Total days are counted by subtracting
         the two calendar dates, so leap days are included exactly.
       </p>
-      <p>
+      <p data-i18n="age.how-note2">
         Born on 29 February? In a year without 29 February, your completed
         years count from 1 March, and your next birthday is shown as 1 March.
         In a leap year, your birthday is 29 February itself.
       </p>
-      <p>
+      <p data-i18n="age.how-note3">
         “Today” means the calendar date in Pakistan (Asia/Karachi) when you
         calculate. The time of day does not change the result.
       </p>
     </section>
 
     <section class="prose-narrow" style="margin-top: 40px;">
-      <h2>Worked example</h2>
+      <h2 data-i18n="age.example-h">Worked example</h2>
       <p>
-        Born <strong>15 March 1995</strong>, age at <strong>28 October 2026</strong>:
-        <strong>31 years, 7 months, 13 days</strong>; 11,550 days; 1,650 weeks,
-        0 days; 379 complete months; born on a Wednesday; next birthday
-        15 March 2027 (Monday), 138 days away.
+        <span data-i18n="age.ex-pre">Born</span> <strong>15 March 1995</strong><span data-i18n="age.ex-mid1">, age at</span> <strong>28 October 2026</strong><span data-i18n="age.ex-mid2">:</span>
+        <strong data-i18n="age.ex-age">31 years, 7 months, 13 days</strong><span data-i18n="age.ex-rest">; 11,550 days; 1,650 weeks, 0 days; 379 complete months; born on a Wednesday; next birthday 15 March 2027 (Monday), 138 days away.</span>
       </p>
     </section>
 
     <section class="prose-narrow faq" style="margin-top: 40px;">
-      <h2>Frequently asked questions</h2>
-      {faqs.map((faq) => (
+      <h2 data-i18n="age.faq-h">Frequently asked questions</h2>
+      {faqs.map((faq, i) => (
         <details>
-          <summary>{faq.question}</summary>
-          <p>{faq.answer}</p>
+          <summary data-i18n={`age.faq${i + 1}q`}>{faq.question}</summary>
+          <p data-i18n={`age.faq${i + 1}a`}>{faq.answer}</p>
         </details>
       ))}
-      <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+      <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
     </section>
 
     <section style="margin-top: 40px;">
-      <p><a href="/">See all calculators →</a></p>
+      <p><a href="/" data-i18n="age.see-all">See all calculators →</a></p>
     </section>
   </div>
 
@@ -314,8 +313,17 @@ const schema = JSON.stringify({
         return false;
       }
       clearError();
+      // The eyebrow is rewritten by this script, so it is translated here
+      // (not via data-i18n) and refreshed by the __pfcAfterLang hook below
+      // when the language toggles. The date itself stays in English,
+      // matching the result display.
+      const urdu = document.documentElement.lang === 'ur';
       eyebrow.textContent =
-        asOfISO === todayISO ? 'Your age' : `Your age on ${formatLong(asOfISO)}`;
+        asOfISO === todayISO
+          ? (urdu ? 'آپ کی عمر' : 'Your age')
+          : urdu
+            ? `${formatLong(asOfISO)} کو آپ کی عمر`
+            : `Your age on ${formatLong(asOfISO)}`;
       headline.textContent =
         `${result.years} ${plural(result.years, 'year', 'years')}, ` +
         `${result.months} ${plural(result.months, 'month', 'months')}, ` +
@@ -376,6 +384,17 @@ const schema = JSON.stringify({
       refreshAsOfHelp();
       dobInput.focus();
     });
+
+    // The "age at" help line is rebuilt from the live date on every
+    // calculation, so it stays English (dynamic result text) and carries
+    // no data-i18n; only the eyebrow above is a script-managed label.
+
+    // Refresh the script-managed eyebrow when the language toggles (i18n.js
+    // calls this after swapping every [data-i18n] element). Re-running the
+    // calculation restores the eyebrow; computed results stay English.
+    (window as unknown as { __pfcAfterLang?: (lang: string) => void }).__pfcAfterLang = () => {
+      if (!resultContent.hidden) calculate(false);
+    };
 
     // Default the "age at" date to today in Asia/Karachi, evaluated in the
     // browser at load time — never baked into the static HTML.

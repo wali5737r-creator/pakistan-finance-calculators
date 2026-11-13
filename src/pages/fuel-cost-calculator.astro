@@ -83,17 +83,18 @@ const related = [
 <Layout title={title} description={description} slug={slug} schema={schema}>
   <div class="container" style="padding-top: 32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Fuel Cost Calculator</p>
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="fuel.crumb">Fuel Cost Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;">Travel Costs</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Fuel Cost Calculator</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="fuel.badge">Travel Costs</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;" data-i18n="fuel.h1">Fuel Cost Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;" data-i18n="fuel.intro">
       Work out what a journey will cost in fuel before you set off. Enter the distance, your vehicle's mileage, and the fuel price you pay, and you will see the litres used, the total cost, and the cost per kilometre — for a one-way trip or a return trip.
     </p>
+    <p id="lang-note" class="lang-note" data-i18n="tax.others-note" hidden>The other calculators on this site are still in English in this phase.</p>
     <p class="notice-info prose-narrow" style="margin-top: 16px;">
-      <strong>No live data.</strong> Every rate, price, and percentage on this page is entered by
+      <strong data-i18n="fuel.notice-label">No live data.</strong> <span data-i18n="fuel.notice-text">Every rate, price, and percentage on this page is entered by
       you. Nothing is fetched from a bank, a market, or a government source, and no figure here
-      is presented as a live or official rate.
+      is presented as a live or official rate.</span>
     </p>
   </div>
 
@@ -102,35 +103,35 @@ const related = [
       <div class="card">
         <form id="fuelForm" novalidate>
           <div class="field">
-            <label for="fuelDistance">One-way distance (km) <span aria-hidden="true">*</span></label>
+            <label for="fuelDistance"><span data-i18n="fuel.dist-label">One-way distance (km)</span> <span aria-hidden="true">*</span></label>
             <input id="fuelDistance" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">The distance for one leg of the journey, in kilometres.</p>
+            <p class="hint" data-i18n="fuel.dist-hint">The distance for one leg of the journey, in kilometres.</p>
           </div>
 
           <div class="field">
-            <label for="fuelMileage">Mileage (km per litre) <span aria-hidden="true">*</span></label>
+            <label for="fuelMileage"><span data-i18n="fuel.mileage-label">Mileage (km per litre)</span> <span aria-hidden="true">*</span></label>
             <input id="fuelMileage" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">How many kilometres your vehicle travels on one litre of fuel.</p>
+            <p class="hint" data-i18n="fuel.mileage-hint">How many kilometres your vehicle travels on one litre of fuel.</p>
           </div>
 
           <div class="field">
-            <label for="fuelPrice">Fuel price per litre (Rs) <span aria-hidden="true">*</span></label>
+            <label for="fuelPrice"><span data-i18n="fuel.price-label">Fuel price per litre (Rs)</span> <span aria-hidden="true">*</span></label>
             <input id="fuelPrice" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">Enter the price you pay at the pump. No live petrol or diesel price is used.</p>
+            <p class="hint" data-i18n="fuel.price-hint">Enter the price you pay at the pump. No live petrol or diesel price is used.</p>
           </div>
 
           <div class="field">
             <label style="display: flex; align-items: center; gap: 8px; font-weight: 600;">
-              <input id="fuelReturn" type="checkbox" /> Return trip (double the distance)
+              <input id="fuelReturn" type="checkbox" /> <span data-i18n="fuel.return-label">Return trip (double the distance)</span>
             </label>
-            <p class="hint">Tick this if you are travelling there and back on the same route.</p>
+            <p class="hint" data-i18n="fuel.return-hint">Tick this if you are travelling there and back on the same route.</p>
           </div>
 
           <div id="fuelErrors" class="error-box" role="alert" hidden></div>
 
           <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
-            <button id="fuelCalculate" class="btn-primary" type="submit">Calculate</button>
-            <button id="fuelClear" class="btn-secondary" type="button">Clear</button>
+            <button id="fuelCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
+            <button id="fuelClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
           <p id="fuelFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
         </form>
@@ -138,42 +139,42 @@ const related = [
 
       <div class="result-card" id="fuelResultCard" tabindex="-1">
         <div id="fuelEmpty">
-          <p style="font-weight: 700;">Your result will appear here.</p>
-          <p>Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);">
+          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
 
         <div id="fuelResult" data-result-text hidden>
-          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Result</p>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" data-i18n="fuel.result-label">Result</p>
           <div aria-live="polite" aria-atomic="true">
             <p class="result-value" id="fuelHeadline"></p>
           </div>
           <div class="stat-grid">
             <div>
-              <p class="stat-label">Fuel used</p>
+              <p class="stat-label" data-i18n="fuel.stat1">Fuel used</p>
               <p class="stat-value" id="fuelStat1"></p>
             </div>
             <div>
-              <p class="stat-label">Total distance</p>
+              <p class="stat-label" data-i18n="fuel.stat2">Total distance</p>
               <p class="stat-value" id="fuelStat2"></p>
             </div>
             <div>
-              <p class="stat-label">Cost per km</p>
+              <p class="stat-label" data-i18n="fuel.stat3">Cost per km</p>
               <p class="stat-value" id="fuelStat3"></p>
             </div>
           </div>
           <p id="fuelEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p id="fuelFormula" style="font-size: 16px;"></p>
           <p style="font-size: 13px; color: var(--ink-muted);">
-            Estimate only — check important figures before acting. <a href="#fuelDisclaimer">Read the full disclaimer.</a>
+            <span data-i18n="fuel.estimate">Estimate only — check important figures before acting.</span> <a href="#fuelDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
 
         <div class="actions-row no-print">
-          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
         <p data-copy-status role="status" style="font-size: 14px;"></p>
       </div>
@@ -181,55 +182,55 @@ const related = [
   </div>
 
   <div class="container prose-narrow" style="margin-top: 40px;">
-    <h2>How it works</h2>
+    <h2 data-i18n="fuel.how-h">How it works</h2>
     <ol>
-      <li>Enter the one-way distance in kilometres, your vehicle's mileage in kilometres per litre, and the fuel price per litre you pay.</li>
-      <li>Tick "Return trip" if you are travelling there and back — the distance is doubled, and the cost per kilometre stays the same.</li>
-      <li>You see the litres used, the total cost, and the cost per kilometre, with the working shown so you can check it.</li>
+      <li data-i18n="fuel.how1">Enter the one-way distance in kilometres, your vehicle's mileage in kilometres per litre, and the fuel price per litre you pay.</li>
+      <li data-i18n="fuel.how2">Tick "Return trip" if you are travelling there and back — the distance is doubled, and the cost per kilometre stays the same.</li>
+      <li data-i18n="fuel.how3">You see the litres used, the total cost, and the cost per kilometre, with the working shown so you can check it.</li>
     </ol>
-    <p>Fuel prices change often, so always enter the price at the pump on the day you travel. The calculator never uses a stored or live petrol price.</p>
+    <p data-i18n="fuel.how-note">Fuel prices change often, so always enter the price at the pump on the day you travel. The calculator never uses a stored or live petrol price.</p>
 
-    <h2>Formula</h2>
-    <p>Litres used = Total distance (km) ÷ Mileage (km per litre)</p>
-    <p>Total cost = Litres used × Fuel price per litre (Rs)</p>
-    <p>Cost per km = Total cost ÷ Total distance (km)</p>
-    <p>For a return trip, total distance is twice the one-way distance. A <a href="/percentage-calculator/">Percentage Calculator</a> can help if you want to work out how much of a budget the trip uses.</p>
+    <h2 data-i18n="fuel.formula-h">Formula</h2>
+    <p data-i18n="fuel.f1">Litres used = Total distance (km) ÷ Mileage (km per litre)</p>
+    <p data-i18n="fuel.f2">Total cost = Litres used × Fuel price per litre (Rs)</p>
+    <p data-i18n="fuel.f3">Cost per km = Total cost ÷ Total distance (km)</p>
+    <p><span data-i18n="fuel.formula-note-pre">For a return trip, total distance is twice the one-way distance. A </span><a href="/percentage-calculator/" data-i18n="card.percentage.name">Percentage Calculator</a><span data-i18n="fuel.formula-note-post"> can help if you want to work out how much of a budget the trip uses.</span></p>
 
-    <h2>Worked example</h2>
-    <p><strong>Example:</strong> A 300 km journey at 12 km per litre uses 300 ÷ 12 = 25 litres. At Rs 270 per litre, the trip costs 25 × Rs 270 = Rs 6,750, which is Rs 22.50 per kilometre. The same journey as a return trip covers 600 km, uses 50 litres, and costs Rs 13,500.</p>
+    <h2 data-i18n="fuel.example-h">Worked example</h2>
+    <p><strong data-i18n="fuel.ex-label">Example:</strong><span data-i18n="fuel.ex-rest"> A 300 km journey at 12 km per litre uses 300 ÷ 12 = 25 litres. At Rs 270 per litre, the trip costs 25 × Rs 270 = Rs 6,750, which is Rs 22.50 per kilometre. The same journey as a return trip covers 600 km, uses 50 litres, and costs Rs 13,500.</span></p>
 
-    <h2>Frequently asked questions</h2>
+    <h2 data-i18n="fuel.faq-h">Frequently asked questions</h2>
     <div class="faq">
       {
-        faqs.map((f) => (
+        faqs.map((f, i) => (
           <details>
-            <summary>{f.q}</summary>
-            <p>{f.a}</p>
+            <summary data-i18n={`fuel.faq${i + 1}q`}>{f.q}</summary>
+            <p data-i18n={`fuel.faq${i + 1}a`}>{f.a}</p>
           </details>
         ))
       }
     </div>
-    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+    <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
     <section id="fuelDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;">Important — please read</h2>
-      <p>
+      <h2 style="font-size: 20px;" data-i18n="fuel.disc-h">Important — please read</h2>
+      <p data-i18n="fuel.disc">
         Results are estimates based on the distance, mileage, and fuel price you enter. Real fuel use varies with traffic, load, air conditioning, and driving style. This tool is for planning only and is not a quote for fuel. Check the pump price on the day you travel.
       </p>
-      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+      <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;">Related tools</h2>
+    <h2 style="margin-top: 32px;" data-i18n="fuel.related-h">Related tools</h2>
     <div class="related-grid">
       {
-        related.map((tool) => (
+        related.map((tool, i) => (
           <article class="card">
             <h3 style="font-size: 18px;">
-              <a href={tool.href}>{tool.name}</a>
+              <a href={tool.href} data-i18n={`fuel.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p style="color: var(--ink-muted);" data-i18n={`fuel.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
-              <a href={tool.href}>Use the calculator →</a>
+              <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
           </article>
         ))
@@ -343,9 +344,15 @@ const related = [
       form.reset();
       errorsBox.textContent = '';
       errorsBox.hidden = true;
-      formStatus.textContent = 'Form cleared.';
+      formStatus.textContent = document.documentElement.lang === 'ur' ? 'فارم صاف کر دیا گیا۔' : 'Form cleared.';
       showEmpty();
     });
+    // Refresh the script-managed "Form cleared." status when the language toggles.
+    window.__pfcAfterLang = function (lang) {
+      if (formStatus.textContent === 'Form cleared.' || formStatus.textContent === 'فارم صاف کر دیا گیا۔') {
+        formStatus.textContent = lang === 'ur' ? 'فارم صاف کر دیا گیا۔' : 'Form cleared.';
+      }
+    };
     showEmpty();
 
   </script>

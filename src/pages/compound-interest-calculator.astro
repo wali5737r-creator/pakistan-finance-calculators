@@ -83,17 +83,18 @@ const related = [
 <Layout title={title} description={description} slug={slug} schema={schema}>
   <div class="container" style="padding-top: 32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Compound Interest Calculator</p>
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="cint.crumb">Compound Interest Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;">Savings & Growth</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Compound Interest Calculator</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="cint.badge">Savings & Growth</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;" data-i18n="cint.h1">Compound Interest Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;" data-i18n="cint.intro">
       See how money grows when the return itself earns a return. Enter a starting amount, what you add each month, and the annual return you assume, and this calculator shows the final amount, how much you put in, how much is growth, and the balance at the end of every year.
     </p>
+    <p id="lang-note" class="lang-note" data-i18n="tax.others-note" hidden>The other calculators on this site are still in English in this phase.</p>
     <p class="notice-info prose-narrow" style="margin-top: 16px;">
-      <strong>No live data.</strong> Every rate, price, and percentage on this page is entered by
+      <strong data-i18n="cint.notice-label">No live data.</strong> <span data-i18n="cint.notice-text">Every rate, price, and percentage on this page is entered by
       you. Nothing is fetched from a bank, a market, or a government source, and no figure here
-      is presented as a live or official rate.
+      is presented as a live or official rate.</span>
     </p>
   </div>
 
@@ -102,45 +103,45 @@ const related = [
       <div class="card">
         <form id="compoundForm" novalidate>
           <div class="field">
-            <label for="compoundPrincipal">Starting amount (Rs) <span aria-hidden="true">*</span></label>
+            <label for="compoundPrincipal"><span data-i18n="cint.principal-label">Starting amount (Rs)</span> <span aria-hidden="true">*</span></label>
             <input id="compoundPrincipal" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">The lump sum you start with. Enter 0 if you are starting from nothing.</p>
+            <p class="hint" data-i18n="cint.principal-hint">The lump sum you start with. Enter 0 if you are starting from nothing.</p>
           </div>
 
           <div class="field">
-            <label for="compoundMonthly">Monthly contribution (Rs)</label>
+            <label for="compoundMonthly" data-i18n="cint.monthly-label">Monthly contribution (Rs)</label>
             <input id="compoundMonthly" type="text" inputmode="decimal" autocomplete="off" />
-            <p class="hint">What you add every month. Enter 0 if you add nothing. It can be left blank for 0.</p>
+            <p class="hint" data-i18n="cint.monthly-hint">What you add every month. Enter 0 if you add nothing. It can be left blank for 0.</p>
           </div>
 
           <div class="field">
-            <label for="compoundRate">Annual return (%) <span aria-hidden="true">*</span></label>
+            <label for="compoundRate"><span data-i18n="cint.rate-label">Annual return (%)</span> <span aria-hidden="true">*</span></label>
             <input id="compoundRate" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">The yearly return you assume, as a percentage. This is your assumption, not a promised return.</p>
+            <p class="hint" data-i18n="cint.rate-hint">The yearly return you assume, as a percentage. This is your assumption, not a promised return.</p>
           </div>
 
           <div class="field">
-            <label for="compoundYears">Years <span aria-hidden="true">*</span></label>
+            <label for="compoundYears"><span data-i18n="cint.years-label">Years</span> <span aria-hidden="true">*</span></label>
             <input id="compoundYears" type="text" inputmode="decimal" autocomplete="off" aria-required="true" />
-            <p class="hint">A whole number of years, from 1 to 50.</p>
+            <p class="hint" data-i18n="cint.years-hint">A whole number of years, from 1 to 50.</p>
           </div>
 
           <div class="field">
-            <label for="compoundFrequency">Compounding frequency</label>
+            <label for="compoundFrequency" data-i18n="cint.freq-label">Compounding frequency</label>
             <select id="compoundFrequency">
-              <option value="12" selected>Monthly</option>
-              <option value="4">Quarterly (every 3 months)</option>
-              <option value="2">Half-yearly (every 6 months)</option>
-              <option value="1">Annually</option>
+              <option value="12" selected data-i18n="cint.freq-monthly">Monthly</option>
+              <option value="4" data-i18n="cint.freq-quarterly">Quarterly (every 3 months)</option>
+              <option value="2" data-i18n="cint.freq-halfyearly">Half-yearly (every 6 months)</option>
+              <option value="1" data-i18n="cint.freq-annually">Annually</option>
             </select>
-            <p class="hint">How often the return is added to the balance. More frequent compounding grows the balance slightly faster.</p>
+            <p class="hint" data-i18n="cint.freq-hint">How often the return is added to the balance. More frequent compounding grows the balance slightly faster.</p>
           </div>
 
           <div id="compoundErrors" class="error-box" role="alert" hidden></div>
 
           <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
-            <button id="compoundCalculate" class="btn-primary" type="submit">Calculate</button>
-            <button id="compoundClear" class="btn-secondary" type="button">Clear</button>
+            <button id="compoundCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
+            <button id="compoundClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
           <p id="compoundFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
         </form>
@@ -148,45 +149,45 @@ const related = [
 
       <div class="result-card" id="compoundResultCard" tabindex="-1">
         <div id="compoundEmpty">
-          <p style="font-weight: 700;">Your result will appear here.</p>
-          <p>Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);">
+          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
 
         <div id="compoundResult" data-result-text hidden>
-          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Result</p>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" data-i18n="cint.result-label">Result</p>
           <div aria-live="polite" aria-atomic="true">
             <p class="result-value" id="compoundHeadline"></p>
           </div>
           <div class="stat-grid">
             <div>
-              <p class="stat-label">Total you put in</p>
+              <p class="stat-label" data-i18n="cint.stat1">Total you put in</p>
               <p class="stat-value" id="compoundStat1"></p>
             </div>
             <div>
-              <p class="stat-label">Interest earned</p>
+              <p class="stat-label" data-i18n="cint.stat2">Interest earned</p>
               <p class="stat-value" id="compoundStat2"></p>
             </div>
           </div>
           <div class="table-wrap" id="compoundTableWrap" hidden style="margin-top: 12px; max-height: 360px; overflow-y: auto;">
             <table class="data">
-              <caption>Year-by-year balance</caption>
-              <thead><tr><th scope="col">Year</th><th scope="col">Balance</th><th scope="col">Total put in</th><th scope="col">Interest earned</th></tr></thead>
+              <caption data-i18n="cint.table-caption">Year-by-year balance</caption>
+              <thead><tr><th scope="col" data-i18n="cint.th-year">Year</th><th scope="col" data-i18n="cint.th-balance">Balance</th><th scope="col" data-i18n="cint.th-putin">Total put in</th><th scope="col" data-i18n="cint.th-interest">Interest earned</th></tr></thead>
               <tbody id="compoundTableBody"></tbody>
             </table>
           </div>
           <p id="compoundEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p id="compoundFormula" style="font-size: 16px;"></p>
           <p style="font-size: 13px; color: var(--ink-muted);">
-            Estimate only — check important figures before acting. <a href="#compoundDisclaimer">Read the full disclaimer.</a>
+            <span data-i18n="cint.estimate">Estimate only — check important figures before acting.</span> <a href="#compoundDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
 
         <div class="actions-row no-print">
-          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
         <p data-copy-status role="status" style="font-size: 14px;"></p>
       </div>
@@ -194,54 +195,54 @@ const related = [
   </div>
 
   <div class="container prose-narrow" style="margin-top: 40px;">
-    <h2>How it works</h2>
+    <h2 data-i18n="cint.how-h">How it works</h2>
     <ol>
-      <li>Enter the amount you start with (0 is fine), the amount you add each month, and the annual return you assume.</li>
-      <li>Choose how often the return is compounded. Monthly compounding is the default; quarterly, half-yearly, and annual are also available.</li>
-      <li>You see the final amount, the total you put in, and the interest earned, plus a table showing the balance at the end of each year.</li>
+      <li data-i18n="cint.how1">Enter the amount you start with (0 is fine), the amount you add each month, and the annual return you assume.</li>
+      <li data-i18n="cint.how2">Choose how often the return is compounded. Monthly compounding is the default; quarterly, half-yearly, and annual are also available.</li>
+      <li data-i18n="cint.how3">You see the final amount, the total you put in, and the interest earned, plus a table showing the balance at the end of each year.</li>
     </ol>
-    <p>Contributions are treated as added at the end of each compounding period, so they start earning a return from the next period. The return you enter is an assumption — real returns vary and are never guaranteed.</p>
+    <p data-i18n="cint.how-note">Contributions are treated as added at the end of each compounding period, so they start earning a return from the next period. The return you enter is an assumption — real returns vary and are never guaranteed.</p>
 
-    <h2>Formula</h2>
-    <p>Balance after each period = Previous balance × (1 + annual rate ÷ periods per year) + contribution for the period</p>
-    <p>With no contributions, this is the familiar form: Final amount = Principal × (1 + r ÷ n)<sup>n × t</sup>, where r is the annual rate, n is the number of compounding periods per year, and t is the number of years.</p>
-    <p>Interest earned = Final amount − Total put in (starting amount + all monthly contributions).</p>
+    <h2 data-i18n="cint.formula-h">Formula</h2>
+    <p data-i18n="cint.f1">Balance after each period = Previous balance × (1 + annual rate ÷ periods per year) + contribution for the period</p>
+    <p><span data-i18n="cint.f2-pre">With no contributions, this is the familiar form: Final amount = Principal × (1 + r ÷ n)</span><sup>n × t</sup><span data-i18n="cint.f2-post">, where r is the annual rate, n is the number of compounding periods per year, and t is the number of years.</span></p>
+    <p data-i18n="cint.f3">Interest earned = Final amount − Total put in (starting amount + all monthly contributions).</p>
 
-    <h2>Worked example</h2>
-    <p><strong>Example:</strong> Rs 100,000 to start, Rs 5,000 a month, at 10% a year compounded monthly for 10 years, grows to Rs 1,294,929.07. You put in Rs 700,000 in total (Rs 100,000 + Rs 5,000 × 120 months), so Rs 594,929.07 is interest. After year 1 the balance is Rs 173,299.13, and after year 5 it is Rs 551,716.24.</p>
+    <h2 data-i18n="cint.example-h">Worked example</h2>
+    <p><strong data-i18n="cint.ex-label">Example:</strong><span data-i18n="cint.ex-rest"> Rs 100,000 to start, Rs 5,000 a month, at 10% a year compounded monthly for 10 years, grows to Rs 1,294,929.07. You put in Rs 700,000 in total (Rs 100,000 + Rs 5,000 × 120 months), so Rs 594,929.07 is interest. After year 1 the balance is Rs 173,299.13, and after year 5 it is Rs 551,716.24.</span></p>
 
-    <h2>Frequently asked questions</h2>
+    <h2 data-i18n="cint.faq-h">Frequently asked questions</h2>
     <div class="faq">
       {
-        faqs.map((f) => (
+        faqs.map((f, i) => (
           <details>
-            <summary>{f.q}</summary>
-            <p>{f.a}</p>
+            <summary data-i18n={`cint.faq${i + 1}q`}>{f.q}</summary>
+            <p data-i18n={`cint.faq${i + 1}a`}>{f.a}</p>
           </details>
         ))
       }
     </div>
-    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+    <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
     <section id="compoundDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;">Important — please read</h2>
-      <p>
+      <h2 style="font-size: 20px;" data-i18n="cint.disc-h">Important — please read</h2>
+      <p data-i18n="cint.disc">
         Results are illustrations based on the return and contributions you enter. The return is your assumption, not a forecast and not a promise from any bank or fund. Real returns vary, charges and tax are not included, and past growth does not guarantee future growth. This is not investment advice.
       </p>
-      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+      <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;">Related tools</h2>
+    <h2 style="margin-top: 32px;" data-i18n="cint.related-h">Related tools</h2>
     <div class="related-grid">
       {
-        related.map((tool) => (
+        related.map((tool, i) => (
           <article class="card">
             <h3 style="font-size: 18px;">
-              <a href={tool.href}>{tool.name}</a>
+              <a href={tool.href} data-i18n={`cint.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p style="color: var(--ink-muted);" data-i18n={`cint.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
-              <a href={tool.href}>Use the calculator →</a>
+              <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
           </article>
         ))
@@ -375,9 +376,15 @@ const related = [
       form.reset();
       errorsBox.textContent = '';
       errorsBox.hidden = true;
-      formStatus.textContent = 'Form cleared.';
+      formStatus.textContent = document.documentElement.lang === 'ur' ? 'فارم صاف کر دیا گیا۔' : 'Form cleared.';
       showEmpty();
     });
+    // Refresh the script-managed "Form cleared." status when the language toggles.
+    window.__pfcAfterLang = function (lang) {
+      if (formStatus.textContent === 'Form cleared.' || formStatus.textContent === 'فارم صاف کر دیا گیا۔') {
+        formStatus.textContent = lang === 'ur' ? 'فارم صاف کر دیا گیا۔' : 'Form cleared.';
+      }
+    };
     showEmpty();
 
   </script>

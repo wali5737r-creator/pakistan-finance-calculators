@@ -111,31 +111,32 @@ const schema = JSON.stringify({
 <Layout title={title} description={description} slug="/unit-marla-converter/" schema={schema}>
   <div class="container" style="padding-top: 32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb" style="font-size: 14px; margin-bottom: 12px;">
-      <a href="/">Home</a> / Unit / Marla Converter
+      <a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="marla.crumb">Unit / Marla Converter</span>
     </nav>
-    <h1>Unit / Marla Converter</h1>
-    <p class="prose-narrow" style="font-size: 1.0625rem; margin-top: 12px;">
+    <h1 data-i18n="marla.h1">Unit / Marla Converter</h1>
+    <p class="prose-narrow" style="font-size: 1.0625rem; margin-top: 12px;" data-i18n="marla.intro">
       Convert land area between marla, kanal, acre, square feet, square yards,
       square metres and hectares. Choose the marla standard that matches your
       land — Punjab revenue (272.25 sq ft per marla, default) or housing-society
       (225 sq ft per marla, DHA / Bahria / LDA). Free, instant and private — nothing you enter is stored.
     </p>
+    <p id="lang-note" class="lang-note" data-i18n="tax.others-note" hidden>The other calculators on this site are still in English in this phase.</p>
 
     <div class="tool-grid" style="margin-top: 24px;">
       <section class="card" aria-label="Unit converter form">
         <div class="field">
-          <label for="marla-standard">Marla standard *</label>
+          <label for="marla-standard"><span data-i18n="marla.std-label">Marla standard</span> <span aria-hidden="true">*</span></label>
           <select id="marla-standard" name="marla-standard" required aria-required="true" aria-describedby="standard-help">
             {MARLA_STANDARDS.map((standard) => (
               <option value={standard.id} selected={standard.id === DEFAULT_MARLA_STANDARD_ID}>{standard.label}</option>
             ))}
           </select>
-          <p class="hint" id="standard-help">
+          <p class="hint" id="standard-help" data-i18n="marla.std-help">
             Revenue land records use 272.25 sq ft per marla; DHA, Bahria Town and LDA schemes use 225 sq ft. Pick the one your plot follows — marla and kanal change together (20 marla = 1 kanal under both).
           </p>
         </div>
         <div class="field">
-          <label for="area-value">Area *</label>
+          <label for="area-value"><span data-i18n="marla.area-label">Area</span> <span aria-hidden="true">*</span></label>
           <input
             type="text"
             inputmode="decimal"
@@ -146,12 +147,12 @@ const schema = JSON.stringify({
             aria-describedby="area-error area-help"
             autocomplete="off"
           />
-          <p class="hint" id="area-help">
+          <p class="hint" id="area-help" data-i18n="marla.area-help">
             Enter 0 or more. Fractions are allowed — for example, 0.5 marla.
           </p>
         </div>
         <div class="field">
-          <label for="from-unit">From *</label>
+          <label for="from-unit"><span data-i18n="marla.from-label">From</span> <span aria-hidden="true">*</span></label>
           <select id="from-unit" name="from-unit" required aria-required="true" aria-describedby="area-error">
             {AREA_UNITS.map((unit) => (
               <option value={unit.id} selected={unit.id === 'marla'}>{unit.label}</option>
@@ -159,10 +160,10 @@ const schema = JSON.stringify({
           </select>
         </div>
         <div style="text-align: center; margin: 4px 0 16px;">
-          <button type="button" class="btn-secondary" id="swap" aria-label="Swap units" style="min-height: 48px;">⇅ Swap units</button>
+          <button type="button" class="btn-secondary" id="swap" aria-label="Swap units" style="min-height: 48px;" data-i18n="marla.swap">⇅ Swap units</button>
         </div>
         <div class="field">
-          <label for="to-unit">To *</label>
+          <label for="to-unit"><span data-i18n="marla.to-label">To</span> <span aria-hidden="true">*</span></label>
           <select id="to-unit" name="to-unit" required aria-required="true" aria-describedby="area-error">
             {AREA_UNITS.map((unit) => (
               <option value={unit.id} selected={unit.id === 'sqft'}>{unit.label}</option>
@@ -172,38 +173,38 @@ const schema = JSON.stringify({
         <p id="swap-status" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
         <div id="area-error" role="alert" class="error-box" hidden></div>
         <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px;">
-          <button type="button" class="btn-primary" id="calculate">Calculate</button>
-          <button type="button" class="btn-secondary" id="clear">Clear</button>
+          <button type="button" class="btn-primary" id="calculate" data-i18n="ui.calculate">Calculate</button>
+          <button type="button" class="btn-secondary" id="clear" data-i18n="ui.clear">Clear</button>
         </div>
       </section>
 
       <section class="result-card" aria-label="Conversion result">
         <div id="empty-state">
-          <p><strong>Enter an area to see your conversion.</strong></p>
-          <p>
+          <p><strong data-i18n="marla.empty1">Enter an area to see your conversion.</strong></p>
+          <p data-i18n="marla.empty2">
             You’ll see the converted value and the same area in every listed unit.
           </p>
         </div>
         <div id="result-content" hidden>
           <div data-result-text>
             <div id="result-heading" tabindex="-1" aria-live="polite" aria-atomic="true">
-              <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Converted area</p>
+              <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" data-i18n="marla.result-label">Converted area</p>
               <p class="result-value" id="headline"></p>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px;">
               <div>
-                <p style="font-size: 14px; color: var(--ink-muted);">In square feet</p>
+                <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="marla.lbl-sqft">In square feet</p>
                 <p id="sqft-stat" style="font-weight: 700; font-size: 20px;"></p>
               </div>
               <div>
-                <p style="font-size: 14px; color: var(--ink-muted);">Conversion factor</p>
+                <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="marla.lbl-factor">Conversion factor</p>
                 <p id="factor-stat" style="font-weight: 700; font-size: 16px;"></p>
                 <p id="factor-inverse" style="font-size: 14px; color: var(--ink-muted);"></p>
               </div>
             </div>
             <p id="echo" style="margin-top: 20px; font-size: 14px; color: var(--ink-muted);"></p>
             <p id="result-source" style="margin-top: 12px; font-size: 14px;">Source: {UNIT_SOURCE_CITATION}</p>
-            <p class="notice-warning" style="margin-top: 12px;">
+            <p class="notice-warning" style="margin-top: 12px;" data-i18n="marla.warn">
               Uses the marla standard you chose above (Punjab revenue by default).
               Marla sizes can differ by region and housing society; for important
               measurements, check the dimensions on your registry or the
@@ -211,8 +212,8 @@ const schema = JSON.stringify({
             </p>
           </div>
           <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px;">
-            <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-            <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+            <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+            <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
           </div>
           <p data-copy-status role="status" style="font-size: 14px; margin-top: 8px;"></p>
         </div>
@@ -220,14 +221,14 @@ const schema = JSON.stringify({
     </div>
 
     <section id="table-section" hidden style="margin-top: 32px;">
-      <h2>The same area in every unit</h2>
+      <h2 data-i18n="marla.table-h">The same area in every unit</h2>
       <p>{canonicalLine}</p>
       <p id="table-source" style="font-size: 14px;">Source: {UNIT_SOURCE_CITATION}</p>
       <div class="table-wrap">
         <table class="data">
           <caption id="table-caption"></caption>
           <thead>
-            <tr><th scope="col">Unit</th><th scope="col">Value</th></tr>
+            <tr><th scope="col" data-i18n="marla.th-unit">Unit</th><th scope="col" data-i18n="marla.th-value">Value</th></tr>
           </thead>
           <tbody id="all-units-body"></tbody>
         </table>
@@ -235,56 +236,58 @@ const schema = JSON.stringify({
     </section>
 
     <section class="prose-narrow" style="margin-top: 48px;">
-      <h2>How it works</h2>
+      <h2 data-i18n="marla.how-h">How it works</h2>
       <ol>
-        <li>Enter the area and choose the unit it is measured in.</li>
-        <li>The area is converted to square feet — the common unit all conversions go through.</li>
-        <li>Square feet are divided by the size of the unit you want, giving your converted area — shown in every listed unit below.</li>
+        <li data-i18n="marla.how1">Enter the area and choose the unit it is measured in.</li>
+        <li data-i18n="marla.how2">The area is converted to square feet — the common unit all conversions go through.</li>
+        <li data-i18n="marla.how3">Square feet are divided by the size of the unit you want, giving your converted area — shown in every listed unit below.</li>
       </ol>
       <p>
-        The conversion goes through square feet: value × square feet per From
-        unit ÷ square feet per To unit. {canonicalLine}.
+        <span data-i18n="marla.how-formula">The conversion goes through square feet: value × square feet per From
+        unit ÷ square feet per To unit.</span> {canonicalLine}.
       </p>
     </section>
 
     <section class="prose-narrow" style="margin-top: 40px;">
-      <h2>Worked example</h2>
+      <h2 data-i18n="marla.example-h">Worked example</h2>
       <p>
-        <strong>Example — 10 marla</strong>
+        <strong data-i18n="marla.ex-label">Example — 10 marla</strong>
       </p>
       <p>
-        10 {marlaUnit.label} = {exampleSqFt} {sqftUnit.label}; {exampleSqYd} {sqydUnit.label};
-        {exampleKanal} {kanalUnit.label}. Both standards are defined in the
-        official sources cited on this page.
+        <span data-i18n="marla.ex-pre">10 Marla =</span> {exampleSqFt} <span data-i18n="marla.ex-mid1">Square feet;</span> {exampleSqYd} <span data-i18n="marla.ex-mid2">Square yards;</span> {exampleKanal} <span data-i18n="marla.ex-rest">Kanal. Both standards are defined in the official sources cited on this page.</span>
       </p>
     </section>
 
     <section class="prose-narrow faq" style="margin-top: 40px;">
-      <h2>Frequently asked questions</h2>
-      {faqs.map((faq) => (
+      <h2 data-i18n="marla.faq-h">Frequently asked questions</h2>
+      {faqs.map((faq, i) => (
         <details>
-          <summary>{faq.question}</summary>
-          <p>{faq.answer}</p>
+          <summary data-i18n={`marla.faq${i + 1}q`}>{faq.question}</summary>
+          {/* FAQ 4's answer ends with the full source citation, so it stays
+              English and carries no data-i18n; every other answer is
+              translated. */}
+          <p {...(i === 3 ? {} : { 'data-i18n': `marla.faq${i + 1}a` })}>{faq.answer}</p>
         </details>
       ))}
-      <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+      <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
     </section>
 
     <section class="prose-narrow" style="margin-top: 40px;">
       <div class="notice-info">
-        <h2>Important — please read</h2>
+        <h2 data-i18n="marla.disc-h">Important — please read</h2>
         <p>
-          Results are estimates for information only. This converter uses the
-          marla standard you chose above ({UNIT_REGION} revenue by default),
+          <span data-i18n="marla.disc">Results are estimates for information only. This converter uses the
+          marla standard you chose above (Punjab revenue by default),
           and other regional and housing-society definitions differ. This is not legal, surveying, or financial
           advice. Confirm important land measurements against official land
-          records and, where needed, a qualified professional before acting. <a href="/terms/">Read the full disclaimer</a>.
+          records and, where needed, a qualified professional before acting.</span>{' '}
+          <a href="/terms/" data-i18n="ui.disclaimer-link">Read the full disclaimer</a>.
         </p>
       </div>
     </section>
 
     <section style="margin-top: 40px;">
-      <p><a href="/">See all calculators →</a></p>
+      <p><a href="/" data-i18n="marla.see-all">See all calculators →</a></p>
     </section>
   </div>
 
@@ -445,7 +448,9 @@ const schema = JSON.stringify({
           const pill = document.createElement('span');
           pill.className = 'badge badge-info';
           pill.style.marginLeft = '8px';
-          pill.textContent = 'Selected';
+          // The only static label this script writes: translated here and
+          // refreshed by the __pfcAfterLang hook when the language toggles.
+          pill.textContent = document.documentElement.lang === 'ur' ? 'منتخب شدہ' : 'Selected';
           unitCell.appendChild(pill);
         }
         const valueCell = document.createElement('td');
@@ -514,5 +519,13 @@ const schema = JSON.stringify({
       printBtn.disabled = true;
       valueInput.focus();
     });
+
+    // Refresh the script-managed 'Selected' pill when the language toggles
+    // (i18n.js calls this after swapping every [data-i18n] element).
+    // Re-running the calculation rebuilds the units table; computed
+    // results, status lines and source citations stay English.
+    (window as unknown as { __pfcAfterLang?: (lang: string) => void }).__pfcAfterLang = () => {
+      if (!resultContent.hidden) calculate(false);
+    };
   </script>
 </Layout>

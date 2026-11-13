@@ -77,15 +77,16 @@ const related = [
 <Layout title={title} description={description} slug={slug} schema={schema}>
   <div class="container" style="padding-top: 32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Percentage Calculator</p>
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="pct.crumb">Percentage Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;">Everyday Math</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Percentage Calculator</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info" style="margin-top: 8px;" data-i18n="pct.badge">Everyday Math</p>
+    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;" data-i18n="pct.h1">Percentage Calculator</h1>
+    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;" data-i18n="pct.intro">
       Work out what X% of a number is, what percent one number is of another, or a percentage
       increase or decrease — with the formula shown using your numbers, so you can check every
       answer. Results are plain arithmetic: plain numbers or percentages, with no currency assumed.
     </p>
+    <p id="lang-note" class="lang-note" data-i18n="tax.others-note" hidden>The other calculators on this site are still in English in this phase.</p>
   </div>
 
   <div class="container" style="margin-top: 20px;">
@@ -93,7 +94,7 @@ const related = [
       <div class="card">
         <form id="pctForm" novalidate>
           <fieldset class="radiogroup">
-            <legend>Choose what to calculate</legend>
+            <legend data-i18n="pct.mode-legend">Choose what to calculate</legend>
             <div class="seg">
               <label>
                 <input
@@ -103,7 +104,7 @@ const related = [
                   checked
                   aria-label="What is X percent of Y?"
                 />
-                <span>X% of Y</span>
+                <span data-i18n="pct.mode-6a">X% of Y</span>
               </label>
               <label>
                 <input
@@ -112,7 +113,7 @@ const related = [
                   value="6b"
                   aria-label="X is what percent of Y?"
                 />
-                <span>X as % of Y</span>
+                <span data-i18n="pct.mode-6b">X as % of Y</span>
               </label>
               <label>
                 <input
@@ -121,7 +122,7 @@ const related = [
                   value="6c"
                   aria-label="Percentage increase or decrease"
                 />
-                <span>% change</span>
+                <span data-i18n="pct.mode-6c">% change</span>
               </label>
             </div>
           </fieldset>
@@ -140,7 +141,7 @@ const related = [
               <span id="pctSuffix1" class="suffix" aria-hidden="true">%</span>
             </div>
             <p class="hint" id="pctHint1">Enter a percentage. It can be more than 100.</p>
-            <p class="hint">Negative numbers are allowed. Results keep their sign.</p>
+            <p class="hint" data-i18n="pct.hint-neg">Negative numbers are allowed. Results keep their sign.</p>
             <p class="field-error" id="pctError1" hidden></p>
           </div>
 
@@ -159,14 +160,14 @@ const related = [
           </div>
 
           <p style="font-size: 14px; color: var(--ink-muted);">
-            Formula: <span id="pctPreviewText">X% of Y = ?</span>
+            <span data-i18n="pct.formula-label">Formula:</span> <span id="pctPreviewText">X% of Y = ?</span>
           </p>
 
           <div id="pctErrors" class="error-box" role="alert" hidden></div>
 
           <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
-            <button id="pctCalculate" class="btn-primary" type="submit">Calculate</button>
-            <button id="pctClear" class="btn-secondary" type="button">Clear</button>
+            <button id="pctCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
+            <button id="pctClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
           <p id="pctFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
         </form>
@@ -174,14 +175,14 @@ const related = [
 
       <div class="result-card" id="pctResultCard" tabindex="-1">
         <div id="pctEmpty">
-          <p style="font-weight: 700;">Your result will appear here.</p>
-          <p>Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);">
+          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="pct.empty-note">
             You’ll see your answer with the formula shown, so you can check it.
           </p>
         </div>
 
-        <div id="pctTooLarge" class="error-box" role="alert" hidden>
+        <div id="pctTooLarge" class="error-box" role="alert" hidden data-i18n="pct.too-large">
           Result is too large to display. Enter smaller numbers.
         </div>
 
@@ -203,20 +204,20 @@ const related = [
               <p class="stat-value" id="pctStatValue2"></p>
             </div>
             <div id="pctStat3" hidden>
-              <p class="stat-label">Difference (To − From)</p>
+              <p class="stat-label" data-i18n="pct.stat3">Difference (To − From)</p>
               <p class="stat-value" id="pctStatValue3"></p>
             </div>
           </div>
           <p id="pctEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p id="pctFormula" style="font-size: 16px;"></p>
           <p style="font-size: 13px; color: var(--ink-muted);">
-            Arithmetic only — check important figures before acting. <a href="#pctDisclaimer">Read the full disclaimer.</a>
+            <span data-i18n="pct.estimate">Arithmetic only — check important figures before acting.</span> <a href="#pctDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
 
         <div class="actions-row no-print">
-          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
         <p data-copy-status role="status" style="font-size: 14px;"></p>
       </div>
@@ -224,75 +225,74 @@ const related = [
   </div>
 
   <div class="container prose-narrow" style="margin-top: 40px;">
-    <h2>How it works</h2>
+    <h2 data-i18n="pct.how-h">How it works</h2>
     <ol>
-      <li>
+      <li data-i18n="pct.how1">
         Choose what you want to work out: a percentage of a number, what percentage one number is
         of another, or a percentage increase or decrease.
       </li>
-      <li>
+      <li data-i18n="pct.how2">
         Enter the two numbers. Negative numbers are allowed, and a percentage can be more than 100.
         The formula preview updates as you switch modes, and your numbers stay in place when you
         switch.
       </li>
-      <li>
+      <li data-i18n="pct.how3">
         You see the answer with the formula and your numbers filled in, so you can check it. In
         percentage-change mode you also see the difference and whether it is an increase, a
         decrease, or no change.
       </li>
     </ol>
-    <p>Result = (X ÷ 100) × Y</p>
-    <p>Result % = (X ÷ Y) × 100</p>
+    <p data-i18n="pct.f1">Result = (X ÷ 100) × Y</p>
+    <p data-i18n="pct.f2">Result % = (X ÷ Y) × 100</p>
     <p>
-      Change % = ((To − From) ÷ From) × 100. Percentage change from zero is undefined, so the
+      <span data-i18n="pct.f3-pre">Change % = ((To − From) ÷ From) × 100. Percentage change from zero is undefined, so the
       starting number cannot be 0. In the second mode, the second number cannot be 0, because you
-      cannot divide by zero. Interest on a loan is a percentage of the amount borrowed — the{' '}
-      <a href="/emi-loan-calculator/">EMI / Loan Calculator</a> shows the full repayment schedule.
+      cannot divide by zero. Interest on a loan is a percentage of the amount borrowed — the</span>{' '}
+      <a href="/emi-loan-calculator/" data-i18n="tool.emi">EMI / Loan Calculator</a><span data-i18n="pct.f3-post"> shows the full repayment schedule.</span>
     </p>
 
-    <h2>Worked examples</h2>
-    <p><strong>Example 1:</strong> What is 15% of 2,000? (15 ÷ 100) × 2,000 = 300. The answer is 300.</p>
+    <h2 data-i18n="pct.example-h">Worked examples</h2>
+    <p><strong data-i18n="pct.ex1-label">Example 1:</strong> <span data-i18n="pct.ex1-rest">What is 15% of 2,000? (15 ÷ 100) × 2,000 = 300. The answer is 300.</span></p>
     <p>
-      <strong>Example 2:</strong> From 800 to 1,000: ((1,000 − 800) ÷ 800) × 100 = +25.00%, an
-      increase, with a difference of +200.
+      <strong data-i18n="pct.ex2-label">Example 2:</strong> <span data-i18n="pct.ex2-rest">From 800 to 1,000: ((1,000 − 800) ÷ 800) × 100 = +25.00%, an increase, with a difference of +200.</span>
     </p>
 
-    <h2>Frequently asked questions</h2>
+    <h2 data-i18n="pct.faq-h">Frequently asked questions</h2>
     <div class="faq">
       {
-        faqs.map((f) => (
+        faqs.map((f, i) => (
           <details>
-            <summary>{f.q}</summary>
-            <p>{f.a}</p>
+            <summary data-i18n={`pct.faq${i + 1}q`}>{f.q}</summary>
+            <p data-i18n={`pct.faq${i + 1}a`}>{f.a}</p>
           </details>
         ))
       }
     </div>
-    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+    <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
     <section id="pctDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;">Important — please read</h2>
+      <h2 style="font-size: 20px;" data-i18n="pct.disc-h">Important — please read</h2>
       <p>
-        Results are plain arithmetic only, for information. They are not financial, tax, or other
+        <span data-i18n="pct.disc">Results are plain arithmetic only, for information. They are not financial, tax, or other
         professional advice. Check important figures before acting on them, especially for money
         decisions. This tool stores nothing, files nothing, and takes no payment. If a result looks
-        wrong, please report it via <a href="/contact/">Contact</a>, with the inputs and the result
-        shown.
+        wrong, please report it via</span>{' '}
+        <a href="/contact/" data-i18n="nav.contact">Contact</a><span data-i18n="pct.disc-post">, with the inputs and the result shown.</span>
       </p>
-      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+      <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;">Related tools</h2>
+    <h2 style="margin-top: 32px;" data-i18n="pct.related-h">Related tools</h2>
     <div class="related-grid">
       {
-        related.map((tool) => (
+        related.map((tool, i) => (
           <article class="card">
             <h3 style="font-size: 18px;">
-              <a href={tool.href}>{tool.name}</a>
+              <a href={tool.href} data-i18n={`pct.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p style="color: var(--ink-muted);" data-i18n={`pct.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
-              <a href={tool.href}>Use the calculator →</a>
+              <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
           </article>
         ))
@@ -430,6 +430,41 @@ const related = [
         eyebrow: 'Percentage change',
       },
     };
+
+    // Static mode labels rewritten by this script (field labels, hints,
+    // preview template, eyebrow, direction badge) are translated here and
+    // refreshed by the __pfcAfterLang hook when the language toggles.
+    // Validation messages, computed formulas and results stay English.
+    const MODES_UR = {
+      '6a': {
+        label1: 'فیصد (X)',
+        label2: 'عدد (Y)',
+        hint1: 'فیصد درج کریں۔ یہ 100 سے زیادہ بھی ہو سکتا ہے۔',
+        hint2: 'وہ عدد درج کریں جس کا فیصد نکالنا ہے۔',
+        template: 'Y کا X% = ؟',
+        eyebrow: 'نتیجہ',
+      },
+      '6b': {
+        label1: 'حصہ (X)',
+        label2: 'کل (Y)',
+        hint1: 'پہلا عدد درج کریں۔',
+        hint2: 'دوسرا عدد درج کریں۔ یہ 0 نہیں ہو سکتا۔',
+        template: 'X ÷ Y × 100 = ؟%',
+        eyebrow: 'نتیجہ',
+      },
+      '6c': {
+        label1: 'ابتدائی قیمت',
+        label2: 'نئی قیمت',
+        hint1: 'ابتدائی عدد درج کریں۔ یہ 0 نہیں ہو سکتا۔',
+        hint2: 'نیا عدد درج کریں۔',
+        template: '(To − From) ÷ From × 100 = ؟%',
+        eyebrow: 'فیصد تبدیلی',
+      },
+    };
+
+    function isUrdu() {
+      return document.documentElement.lang === 'ur';
+    }
 
     const form = document.getElementById('pctForm');
     const field1 = document.getElementById('pctField1');
@@ -576,14 +611,15 @@ const related = [
     function updateModeUI() {
       const mode = currentMode();
       const cfg = MODES[mode];
-      label1.textContent = cfg.label1;
-      label2.textContent = cfg.label2;
-      hint1.textContent = cfg.hint1;
-      hint2.textContent = cfg.hint2;
-      statLabel1.textContent = cfg.label1;
-      statLabel2.textContent = cfg.label2;
+      const ur = isUrdu() ? MODES_UR[mode] : null;
+      label1.textContent = ur ? ur.label1 : cfg.label1;
+      label2.textContent = ur ? ur.label2 : cfg.label2;
+      hint1.textContent = ur ? ur.hint1 : cfg.hint1;
+      hint2.textContent = ur ? ur.hint2 : cfg.hint2;
+      statLabel1.textContent = ur ? ur.label1 : cfg.label1;
+      statLabel2.textContent = ur ? ur.label2 : cfg.label2;
       suffix1.hidden = mode !== '6a';
-      previewText.textContent = cfg.template;
+      previewText.textContent = ur ? ur.template : cfg.template;
     }
 
     function evaluate(final) {
@@ -668,7 +704,7 @@ const related = [
 
       const formula = formatFormula(mode, parsed1.value, parsed2.value, headlineValue);
       previewText.textContent = formula;
-      eyebrow.textContent = cfg.eyebrow;
+      eyebrow.textContent = isUrdu() ? MODES_UR[mode].eyebrow : cfg.eyebrow;
 
       if (mode === '6a') {
         headline.textContent = formatPlain(headlineValue);
@@ -694,13 +730,13 @@ const related = [
         directionRow.hidden = false;
         const direction = calc.direction;
         if (direction === 'increase') {
-          directionBadge.textContent = '↑ Increase';
+          directionBadge.textContent = isUrdu() ? '↑ اضافہ' : '↑ Increase';
           directionBadge.className = 'badge badge-success';
         } else if (direction === 'decrease') {
-          directionBadge.textContent = '↓ Decrease';
+          directionBadge.textContent = isUrdu() ? '↓ کمی' : '↓ Decrease';
           directionBadge.className = 'badge badge-warning';
         } else {
-          directionBadge.textContent = '— No change';
+          directionBadge.textContent = isUrdu() ? '— کوئی تبدیلی نہیں' : '— No change';
           directionBadge.className = 'badge badge-info';
         }
         stat3.hidden = false;
@@ -782,6 +818,14 @@ const related = [
       updateModeUI();
       showEmpty();
     });
+
+    // Refresh script-managed labels when the language toggles (i18n.js
+    // calls this after swapping every [data-i18n] element). Re-running
+    // evaluate restores the mode labels and hints, and either the preview
+    // template or, when a result is showing, the computed formula.
+    window.__pfcAfterLang = function () {
+      evaluate(false);
+    };
 
     updateModeUI();
   </script>

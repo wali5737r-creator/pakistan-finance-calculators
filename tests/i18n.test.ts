@@ -1,19 +1,23 @@
-// Urdu Phase 1 + 2 + 3 + 4 + 5 regression tests — homepage + navigation toggle,
+// Urdu Phase 1 + 2 + 3 + 4 + 5 + 6 regression tests — homepage + navigation toggle,
 // plus the Phase 2 tax cluster (Salary, Freelancer, GST), the Phase 3
 // loans cluster (EMI, Eligibility, Comparison, Car, Home), the Phase 4
-// Zakat/savings cluster (Zakat, National Savings, Fixed Deposit) and the
-// Phase 5 bills cluster (Electricity, Gas).
+// Zakat/savings cluster (Zakat, National Savings, Fixed Deposit), the
+// Phase 5 bills cluster (Electricity, Gas) and the Phase 6 converters
+// cluster (Percentage, Age, Unit/Marla, Fuel, Compound Interest,
+// Inflation, Budget, Debt, Goal).
 // Run: npx tsx tests/i18n.test.ts
 //
 // Guards:
 //   - every data-i18n key used in Layout.astro / index.astro / the three
 //     tax pages / the five loans pages / the three Zakat/savings pages
-//     / the two bills pages
+//     / the two bills pages / the nine converters pages
 //     has a non-empty Urdu entry in public/js/i18n.js (26/26 tool labels,
 //     26/26 card names + descriptions included, plus 58 salary + 73
 //     freelancer + 99 GST + 71 EMI + 61 eligibility + 63 comparison +
 //     108 car + 113 home + 96 zakat + 141 national-savings + 61
-//     fixed-deposit + 63 electricity + 92 gas keys);
+//     fixed-deposit + 63 electricity + 92 gas + 44 percentage + 43 age
+//     + 43 unit/marla + 53 fuel + 62 compound interest + 47 inflation
+//     + 52 budget + 51 debt + 53 goal keys);
 //   - the toggle exists, is a plain <button> (no inline handler — the
 //     CSP has no 'unsafe-inline' in script-src), and Layout loads the
 //     external /js/i18n.js with defer;
@@ -46,7 +50,7 @@ const dictBlock = i18nJs.match(/var UR = \{([\s\S]*?)\n  \};/);
 assert.ok(dictBlock, 'i18n.js must define a var UR = { ... } dictionary');
 const entries = [...dictBlock[1].matchAll(/'([^']+)':\s*'([^']*)'/g)];
 const UR = new Map(entries.map((m) => [m[1], m[2]]));
-check(UR.size >= 1219, `dictionary must hold 1219+ keys, found ${UR.size}`);
+check(UR.size >= 1667, `dictionary must hold 1667+ keys, found ${UR.size}`);
 for (const [key, value] of UR) {
   check(value.trim().length > 0, `dictionary entry ${key} must be non-empty`);
   // GST is a Latin acronym kept as-is in the short nav label (the card
@@ -87,6 +91,16 @@ const savingsPages = [zakatPage, nssPage, fdPage];
 const elecPage = readFileSync(join(SRC, 'pages', 'electricity-bill-calculator.astro'), 'utf8');
 const gasPage = readFileSync(join(SRC, 'pages', 'gas-bill-calculator.astro'), 'utf8');
 const billsPages = [elecPage, gasPage];
+const pctPage = readFileSync(join(SRC, 'pages', 'percentage-calculator.astro'), 'utf8');
+const agePage = readFileSync(join(SRC, 'pages', 'age-calculator.astro'), 'utf8');
+const marlaPage = readFileSync(join(SRC, 'pages', 'unit-marla-converter.astro'), 'utf8');
+const fuelPage = readFileSync(join(SRC, 'pages', 'fuel-cost-calculator.astro'), 'utf8');
+const cintPage = readFileSync(join(SRC, 'pages', 'compound-interest-calculator.astro'), 'utf8');
+const inflPage = readFileSync(join(SRC, 'pages', 'inflation-calculator.astro'), 'utf8');
+const budPage = readFileSync(join(SRC, 'pages', 'budget-planner-calculator.astro'), 'utf8');
+const debtPage = readFileSync(join(SRC, 'pages', 'debt-payoff-calculator.astro'), 'utf8');
+const goalPage = readFileSync(join(SRC, 'pages', 'goal-savings-calculator.astro'), 'utf8');
+const convertersPages = [pctPage, agePage, marlaPage, fuelPage, cintPage, inflPage, budPage, debtPage, goalPage];
 
 function staticKeys(src: string): string[] {
   return [...src.matchAll(/data-i18n="([^"]+)"/g)].map((m) => m[1]);
@@ -109,6 +123,7 @@ for (const page of taxPages) for (const k of staticKeys(page)) used.add(k);
 for (const page of loansPages) for (const k of staticKeys(page)) used.add(k);
 for (const page of savingsPages) for (const k of staticKeys(page)) used.add(k);
 for (const page of billsPages) for (const k of staticKeys(page)) used.add(k);
+for (const page of convertersPages) for (const k of staticKeys(page)) used.add(k);
 // Dynamic keys: the FAQ maps use indexed sal/fr/gst.faq${i}q/a keys, the
 // GST preset options use gst.preset.${id} from src/config/gst.ts, and the
 // related-tool cards use fr/gst.rel${i}(-desc).
@@ -190,6 +205,52 @@ for (let i = 1; i <= 2; i++) {
   used.add(`gas.rel${i}`);
   used.add(`gas.rel${i}-desc`);
 }
+// Dynamic keys: the FAQ maps use indexed pct/age/marla/fuel/cint/infl/
+// bud/debt/goal.faq${i}q/a keys, and the related-tool cards use
+// pct/fuel/cint/infl/bud/debt/goal.rel${i}(-desc). Age and Unit/Marla
+// have no related-tool cards. Unit/Marla FAQ 4's answer ends with the
+// full CDA source citation, so it stays English and has no marla.faq4a
+// key — only marla.faq1a/2a/3a/5a exist.
+for (let i = 1; i <= 4; i++) {
+  used.add(`pct.faq${i}q`);
+  used.add(`pct.faq${i}a`);
+}
+for (let i = 1; i <= 5; i++) {
+  used.add(`age.faq${i}q`);
+  used.add(`age.faq${i}a`);
+  used.add(`marla.faq${i}q`);
+  used.add(`bud.faq${i}q`);
+  used.add(`bud.faq${i}a`);
+  used.add(`debt.faq${i}q`);
+  used.add(`debt.faq${i}a`);
+  used.add(`goal.faq${i}q`);
+  used.add(`goal.faq${i}a`);
+  used.add(`infl.faq${i}q`);
+  used.add(`infl.faq${i}a`);
+}
+for (const i of [1, 2, 3, 5]) used.add(`marla.faq${i}a`);
+for (let i = 1; i <= 6; i++) {
+  used.add(`fuel.faq${i}q`);
+  used.add(`fuel.faq${i}a`);
+  used.add(`cint.faq${i}q`);
+  used.add(`cint.faq${i}a`);
+}
+for (let i = 1; i <= 2; i++) {
+  used.add(`pct.rel${i}`);
+  used.add(`pct.rel${i}-desc`);
+  used.add(`fuel.rel${i}`);
+  used.add(`fuel.rel${i}-desc`);
+  used.add(`cint.rel${i}`);
+  used.add(`cint.rel${i}-desc`);
+  used.add(`infl.rel${i}`);
+  used.add(`infl.rel${i}-desc`);
+  used.add(`bud.rel${i}`);
+  used.add(`bud.rel${i}-desc`);
+  used.add(`debt.rel${i}`);
+  used.add(`debt.rel${i}-desc`);
+  used.add(`goal.rel${i}`);
+  used.add(`goal.rel${i}-desc`);
+}
 check(salaryPage.includes('sal.faq${i + 1}q'), 'salary FAQ summaries must use indexed sal.faq keys');
 check(freelancerPage.includes('fr.faq${i + 1}q'), 'freelancer FAQ summaries must use indexed fr.faq keys');
 check(gstPage.includes('gst.faq${i + 1}q'), 'GST FAQ summaries must use indexed gst.faq keys');
@@ -214,6 +275,32 @@ check(elecPage.includes('elec.faq${i + 1}q'), 'electricity FAQ summaries must us
 check(gasPage.includes('gas.faq${i + 1}q'), 'gas FAQ summaries must use indexed gas.faq keys');
 check(elecPage.includes('elec.rel${i + 1}'), 'electricity related cards must use indexed elec.rel keys');
 check(gasPage.includes('gas.rel${i + 1}'), 'gas related cards must use indexed gas.rel keys');
+check(pctPage.includes('pct.faq${i + 1}q'), 'percentage FAQ summaries must use indexed pct.faq keys');
+check(agePage.includes('age.faq${i + 1}q'), 'age FAQ summaries must use indexed age.faq keys');
+check(marlaPage.includes('marla.faq${i + 1}q'), 'unit/marla FAQ summaries must use indexed marla.faq keys');
+check(fuelPage.includes('fuel.faq${i + 1}q'), 'fuel FAQ summaries must use indexed fuel.faq keys');
+check(cintPage.includes('cint.faq${i + 1}q'), 'compound FAQ summaries must use indexed cint.faq keys');
+check(inflPage.includes('infl.faq${i + 1}q'), 'inflation FAQ summaries must use indexed infl.faq keys');
+check(budPage.includes('bud.faq${i + 1}q'), 'budget FAQ summaries must use indexed bud.faq keys');
+check(debtPage.includes('debt.faq${i + 1}q'), 'debt FAQ summaries must use indexed debt.faq keys');
+check(goalPage.includes('goal.faq${i + 1}q'), 'goal FAQ summaries must use indexed goal.faq keys');
+check(pctPage.includes('pct.rel${i + 1}'), 'percentage related cards must use indexed pct.rel keys');
+check(fuelPage.includes('fuel.rel${i + 1}'), 'fuel related cards must use indexed fuel.rel keys');
+check(cintPage.includes('cint.rel${i + 1}'), 'compound related cards must use indexed cint.rel keys');
+check(inflPage.includes('infl.rel${i + 1}'), 'inflation related cards must use indexed infl.rel keys');
+check(budPage.includes('bud.rel${i + 1}'), 'budget related cards must use indexed bud.rel keys');
+check(debtPage.includes('debt.rel${i + 1}'), 'debt related cards must use indexed debt.rel keys');
+check(goalPage.includes('goal.rel${i + 1}'), 'goal related cards must use indexed goal.rel keys');
+// Unit/Marla FAQ 4's answer ends with the full CDA source citation, so
+// it stays English and has no marla.faq4a key.
+check(!marlaPage.includes('marla.faq4a'), 'unit/marla FAQ 4 answer must stay English (CDA citation) — no marla.faq4a key');
+// The Unit/Marla Urdu strings never call the 272.25 sq ft standard a
+// Punjab standard: the citable official source is the CDA Regulation
+// 2023 (S.R.O. 886(I)/2023, ICT), and no PLRA/Board of Revenue Punjab
+// document stating 272.25 was found. The English source text is
+// untouched; only the new Urdu wording avoids the Punjab attribution.
+check(!(UR.get('marla.intro') ?? '').includes('پنجاب'), 'marla.intro must not call the 272.25 standard a Punjab standard in Urdu');
+check(!(UR.get('marla.faq1a') ?? '').includes('پنجاب'), 'marla.faq1a must not call the 272.25 standard a Punjab standard in Urdu');
 // The comparison formula is pure symbols with <sup> (EMI = [P x R x ...]),
 // the same in both languages, so it stays English and has no comp.f1 key.
 check(compPage.includes('EMI = [P × R × (1 + R)<sup>N</sup>]'), 'comparison formula must keep its superscript form');
@@ -321,6 +408,20 @@ check(nssPage.includes('__pfcAfterLang'), 'national savings page must define the
 check(zakatPage.includes('زکوٰۃ واجب'), 'zakat page script must carry the Urdu empty-result heading');
 check(zakatPage.includes('خالص دولت ×'), 'zakat page script must carry the Urdu static formula line');
 check(nssPage.includes('ودہولڈنگ ٹیکس کٹتا ہے'), 'national savings page script must carry the Urdu filer hint');
+// Labels the converters scripts rewrite (Percentage mode labels, Age
+// result eyebrow, Unit/Marla Selected pill, Fuel/Compound/Inflation
+// "Form cleared." status, Goal mode labels) are translated in the page
+// scripts and refreshed via the hook. Budget and Debt have no
+// script-rewritten static labels, so they define no hook.
+check(pctPage.includes('__pfcAfterLang'), 'percentage page must define the __pfcAfterLang hook for its mode labels');
+check(agePage.includes('__pfcAfterLang'), 'age page must define the __pfcAfterLang hook for its result eyebrow');
+check(marlaPage.includes('__pfcAfterLang'), 'unit/marla page must define the __pfcAfterLang hook for its Selected pill');
+check(fuelPage.includes('__pfcAfterLang'), 'fuel page must define the __pfcAfterLang hook for its Form cleared status');
+check(cintPage.includes('__pfcAfterLang'), 'compound page must define the __pfcAfterLang hook for its Form cleared status');
+check(inflPage.includes('__pfcAfterLang'), 'inflation page must define the __pfcAfterLang hook for its Form cleared status');
+check(goalPage.includes('__pfcAfterLang'), 'goal page must define the __pfcAfterLang hook for its mode labels');
+check(!budPage.includes('__pfcAfterLang'), 'budget page must not define a __pfcAfterLang hook — it has no script-rewritten static labels');
+check(!debtPage.includes('__pfcAfterLang'), 'debt page must not define a __pfcAfterLang hook — it has no script-rewritten static labels');
 // Each tax page carries the Urdu-only note that the other tools are
 // still English in this phase (same hidden-until-Urdu pattern as home).
 for (const [name, page] of [['salary', salaryPage], ['freelancer', freelancerPage], ['gst', gstPage]] as const) {
@@ -339,6 +440,11 @@ for (const [name, page] of [['zakat', zakatPage], ['national-savings', nssPage],
 }
 // Each bills page carries the same Urdu-only note.
 for (const [name, page] of [['electricity', elecPage], ['gas', gasPage]] as const) {
+  check(page.includes('id="lang-note"'), `${name} page must contain the #lang-note element`);
+  check(page.includes('data-i18n="tax.others-note"'), `${name} page note must use the tax.others-note key`);
+}
+// Each converters page carries the same Urdu-only note.
+for (const [name, page] of [['percentage', pctPage], ['age', agePage], ['unit/marla', marlaPage], ['fuel', fuelPage], ['compound', cintPage], ['inflation', inflPage], ['budget', budPage], ['debt', debtPage], ['goal', goalPage]] as const) {
   check(page.includes('id="lang-note"'), `${name} page must contain the #lang-note element`);
   check(page.includes('data-i18n="tax.others-note"'), `${name} page note must use the tax.others-note key`);
 }
@@ -365,7 +471,7 @@ check(layout.includes('aria-pressed="false"'), 'the toggle must expose aria-pres
 check(layout.includes('<script src="/js/i18n.js" defer>'), 'Layout must load /js/i18n.js with defer');
 check(layout.includes('id="lang-note"') === false, 'the Urdu-only tools note lives on the homepage, not in Layout');
 check(indexPage.includes('id="lang-note"'), 'homepage must contain the #lang-note element');
-check(indexPage.includes('hidden>Tax, loans, Zakat/savings and bills calculators are now available in Urdu'), 'the tools note must say plainly (in English) that the tax, loans, Zakat/savings and bills calculators are now in Urdu and the rest follow');
+check(indexPage.includes('hidden>Tax, loans, Zakat/savings, bills and converters calculators are now available in Urdu'), 'the tools note must say plainly (in English) that the tax, loans, Zakat/savings, bills and converters calculators are now in Urdu and the rest follow');
 check(indexPage.includes('data-i18n="home.tools-note"'), 'the tools note must have a data-i18n key');
 
 // --- 4. English default unchanged ----------------------------------------
@@ -415,6 +521,15 @@ if (existsSync(distIndex)) {
     statSync(join(SRC, 'pages', 'fixed-deposit-calculator.astro')).mtimeMs,
     statSync(join(SRC, 'pages', 'electricity-bill-calculator.astro')).mtimeMs,
     statSync(join(SRC, 'pages', 'gas-bill-calculator.astro')).mtimeMs,
+    statSync(join(SRC, 'pages', 'percentage-calculator.astro')).mtimeMs,
+    statSync(join(SRC, 'pages', 'age-calculator.astro')).mtimeMs,
+    statSync(join(SRC, 'pages', 'unit-marla-converter.astro')).mtimeMs,
+    statSync(join(SRC, 'pages', 'fuel-cost-calculator.astro')).mtimeMs,
+    statSync(join(SRC, 'pages', 'compound-interest-calculator.astro')).mtimeMs,
+    statSync(join(SRC, 'pages', 'inflation-calculator.astro')).mtimeMs,
+    statSync(join(SRC, 'pages', 'budget-planner-calculator.astro')).mtimeMs,
+    statSync(join(SRC, 'pages', 'debt-payoff-calculator.astro')).mtimeMs,
+    statSync(join(SRC, 'pages', 'goal-savings-calculator.astro')).mtimeMs,
     statSync(join(ROOT, 'public', 'js', 'i18n.js')).mtimeMs,
   );
   if (distTime >= srcTime) {
@@ -427,7 +542,7 @@ if (existsSync(distIndex)) {
     check(built.includes('id="lang-toggle"'), 'built homepage must contain the toggle button');
     check(built.includes('/js/i18n.js'), 'built homepage must load /js/i18n.js');
     check(built.includes('lang="en"'), 'built homepage must default to lang="en"');
-    check(built.includes('Tax, loans, Zakat/savings and bills calculators are now available in Urdu'), 'built homepage note must say the tax, loans, Zakat/savings and bills calculators are in Urdu');
+    check(built.includes('Tax, loans, Zakat/savings, bills and converters calculators are now available in Urdu'), 'built homepage note must say the tax, loans, Zakat/savings, bills and converters calculators are in Urdu');
     // Built tax pages: English default intact, Urdu keys wired.
     const builtTax: Array<[string, string, string]> = [
       ['salary-income-tax-calculator', 'Salary / Income Tax Calculator Pakistan 2026-27', 'sal.h1'],
@@ -489,7 +604,28 @@ if (existsSync(distIndex)) {
       check(pageBuilt.includes('id="lang-toggle"'), `built ${slug} page must contain the toggle button`);
       check(pageBuilt.includes('id="lang-note"'), `built ${slug} page must contain the other-tools note`);
     }
+    // Built converters pages: English default intact, Urdu keys wired.
+    const builtConverters: Array<[string, string, string]> = [
+      ['percentage-calculator', 'Percentage Calculator', 'pct.h1'],
+      ['age-calculator', 'Age Calculator', 'age.h1'],
+      ['unit-marla-converter', 'Unit / Marla Converter', 'marla.h1'],
+      ['fuel-cost-calculator', 'Fuel Cost Calculator', 'fuel.h1'],
+      ['compound-interest-calculator', 'Compound Interest Calculator', 'cint.h1'],
+      ['inflation-calculator', 'Inflation Calculator', 'infl.h1'],
+      ['budget-planner-calculator', 'Budget Planner Calculator', 'bud.h1'],
+      ['debt-payoff-calculator', 'Debt Payoff Calculator', 'debt.h1'],
+      ['goal-savings-calculator', 'Goal Savings Calculator', 'goal.h1'],
+    ];
+    for (const [slug, h1, key] of builtConverters) {
+      const pagePath = join(ROOT, 'dist', slug, 'index.html');
+      check(existsSync(pagePath), `built ${slug} page must exist`);
+      const pageBuilt = readFileSync(pagePath, 'utf8');
+      check(pageBuilt.includes(h1), `built ${slug} page must keep the English H1`);
+      check(pageBuilt.includes(`data-i18n="${key}"`), `built ${slug} page must carry data-i18n="${key}"`);
+      check(pageBuilt.includes('id="lang-toggle"'), `built ${slug} page must contain the toggle button`);
+      check(pageBuilt.includes('id="lang-note"'), `built ${slug} page must contain the other-tools note`);
+    }
   }
 }
 
-console.log(`i18n: ${checks} checks — ${used.size} data-i18n keys covered, 26/26 tool labels + card names + descriptions translated, tax cluster (Salary 58 + Freelancer 73 + GST 99 keys) + loans cluster (EMI 71 + Eligibility 61 + Comparison 63 + Car 108 + Home 113 keys) + Zakat/savings cluster (Zakat 96 + National Savings 141 + Fixed Deposit 61 keys) + bills cluster (Electricity 63 + Gas 92 keys) translated, font ${fontBytes} bytes.`);
+console.log(`i18n: ${checks} checks — ${used.size} data-i18n keys covered, 26/26 tool labels + card names + descriptions translated, tax cluster (Salary 58 + Freelancer 73 + GST 99 keys) + loans cluster (EMI 71 + Eligibility 61 + Comparison 63 + Car 108 + Home 113 keys) + Zakat/savings cluster (Zakat 96 + National Savings 141 + Fixed Deposit 61 keys) + bills cluster (Electricity 63 + Gas 92 keys) + converters cluster (Percentage 44 + Age 43 + Unit/Marla 43 + Fuel 53 + Compound Interest 62 + Inflation 47 + Budget 52 + Debt 51 + Goal 53 keys) translated, font ${fontBytes} bytes.`);
