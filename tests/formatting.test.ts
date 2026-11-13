@@ -90,4 +90,18 @@ const cardHrefs = [...indexPage.matchAll(/href:\s*'(\/[^']+\/)'/g)].map((m) => m
 assert.equal(new Set(cardHrefs).size, 23, `homepage must list 23 unique tool cards, found ${new Set(cardHrefs).size}`);
 assert.ok(cardHrefs.includes('/solar-size-payback-calculator/'), 'homepage is missing the Solar card');
 
+// Currency converter: each rate keeps its number and currency code together
+// in one nowrap span, so a wrap can only happen at the "=" — never a lone
+// "PKR"/"USD" on its own line. The sticky bar must actually hide (its
+// display:flex used to override the hidden attribute, so it was rendered
+// permanently and covered the footer) and must stay out of the footer's way.
+const currencyPage = readFileSync(join(SRC_DIR, 'pages', 'currency-converter.astro'), 'utf8');
+assert.ok(currencyPage.includes('.nowrap { white-space: nowrap; }'), 'currency page needs a .nowrap rule');
+assert.ok(currencyPage.includes('<span class="nowrap">${escapeHtml(formatRate(d.rate))} ${escapeHtml(d.to)}</span>'), 'rate value and code must be in one nowrap span');
+assert.ok(currencyPage.includes('<span class="nowrap">${escapeHtml(formatRate(d.inverseRate))} ${escapeHtml(d.from)}</span>'), 'inverse rate value and code must be in one nowrap span');
+assert.ok(currencyPage.includes('#sticky-bar[hidden] { display: none; }'), 'sticky bar hidden attribute must actually hide it');
+assert.ok(currencyPage.includes('IntersectionObserver'), 'sticky bar must hide when the footer is in view');
+assert.ok(currencyPage.includes('syncStickyPadding'), 'body padding must match the measured bar height');
+assert.ok(!currencyPage.includes('overflow-wrap: anywhere'), 'stat values must not break anywhere');
+
 console.log(`formatting: ${checked} .astro files scanned, no glued text/link lines; gas table + nav guards present.`);
