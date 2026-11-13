@@ -110,15 +110,16 @@ const related = [
 <Layout title={title} description={description} slug={slug} schema={schema}>
   <div class="container" style="padding-top: 32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / Freelancer Tax Calculator</p>
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="fr.crumb">Freelancer Tax Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;">Tax</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Freelancer Tax Calculator</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info" data-i18n="tax.badge" style="margin-top: 8px;">Tax</p>
+    <h1 data-i18n="fr.h1" style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">Freelancer Tax Calculator</h1>
+    <p class="prose-narrow" data-i18n="fr.intro" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
       Work out the tax on your freelance income in Pakistan. Export income from IT and ITeS services is taxed at 0.25% if you are PSEB-registered, or 1% if you are not — a final tax on the gross amount. Your local income is taxed separately under the non-salaried slabs. Enter both below and you will see each part, the surcharge if it applies, and the total.
     </p>
+    <p id="lang-note" class="lang-note" data-i18n="tax.others-note" hidden>The other calculators on this site are still in English in this phase.</p>
     <p class="notice-info prose-narrow" style="margin-top: 16px;">
-      <strong>For individual freelancers and sole proprietors only.</strong> This
+      <strong data-i18n="fr.notice-strong">For individual freelancers and sole proprietors only.</strong> This
       uses the non-salaried slabs in clause (1), Division I, Part I, First
       Schedule to the Income Tax Ordinance, 2001 (Finance Act 2024 table,
       unchanged by the Finance Act 2026), and section 154A export tax as
@@ -134,40 +135,40 @@ const related = [
       <div class="card">
         <form id="freelancerForm" novalidate>
           <div class="field">
-            <label for="freelancerExport">Annual export income — IT / ITeS (gross, Rs) <span aria-hidden="true">*</span></label>
+            <label for="freelancerExport"><span data-i18n="fr.export-label">Annual export income — IT / ITeS (gross, Rs)</span> <span aria-hidden="true">*</span></label>
             <input id="freelancerExport" type="text" inputmode="decimal" autocomplete="off" aria-required="true" placeholder="e.g. 2000000" />
-            <p class="hint">The gross amount your foreign clients paid you, before any expenses. Leave blank or enter 0 if you had no export income.</p>
+            <p class="hint" data-i18n="fr.export-hint">The gross amount your foreign clients paid you, before any expenses. Leave blank or enter 0 if you had no export income.</p>
           </div>
 
           <div class="field">
-            <label for="freelancerPseb">PSEB registered? <span aria-hidden="true">*</span></label>
+            <label for="freelancerPseb"><span data-i18n="fr.pseb-label">PSEB registered?</span> <span aria-hidden="true">*</span></label>
             <select id="freelancerPseb" aria-required="true">
-              <option value="yes">Yes — PSEB-registered (0.25% export tax)</option>
-              <option value="no">No — not PSEB-registered (1% export tax)</option>
+              <option value="yes" data-i18n="fr.pseb-yes">Yes — PSEB-registered (0.25% export tax)</option>
+              <option value="no" data-i18n="fr.pseb-no">No — not PSEB-registered (1% export tax)</option>
             </select>
-            <p class="hint">Registration is through portal.techdestination.com — Rs {PSEB_NEW_REGISTRATION_FEE.toLocaleString('en-PK')} for a new freelancer, Rs {PSEB_RENEWAL_FEE.toLocaleString('en-PK')} a year to renew. It is the gateway to the 0.25% rate, not legally mandatory just to export.</p>
+            <p class="hint"><span data-i18n="fr.pseb-hint1">Registration is through portal.techdestination.com — Rs </span>{PSEB_NEW_REGISTRATION_FEE.toLocaleString('en-PK')}<span data-i18n="fr.pseb-hint2"> for a new freelancer, Rs </span>{PSEB_RENEWAL_FEE.toLocaleString('en-PK')}<span data-i18n="fr.pseb-hint3"> a year to renew. It is the gateway to the 0.25% rate, not legally mandatory just to export.</span></p>
           </div>
 
           <div class="field">
-            <label for="freelancerLocal">Annual local taxable income / profit (Rs) <span aria-hidden="true">*</span></label>
+            <label for="freelancerLocal"><span data-i18n="fr.local-label">Annual local taxable income / profit (Rs)</span> <span aria-hidden="true">*</span></label>
             <input id="freelancerLocal" type="text" inputmode="decimal" autocomplete="off" aria-required="true" placeholder="e.g. 1000000" />
-            <p class="hint">Your taxable profit from local clients — income after business expenses, not your gross local receipts. Leave blank or enter 0 if you had no local income.</p>
+            <p class="hint" data-i18n="fr.local-hint">Your taxable profit from local clients — income after business expenses, not your gross local receipts. Leave blank or enter 0 if you had no local income.</p>
           </div>
 
           <div class="field">
-            <label for="freelancerReturn">Will you file your income tax return? <span aria-hidden="true">*</span></label>
+            <label for="freelancerReturn"><span data-i18n="fr.return-label">Will you file your income tax return?</span> <span aria-hidden="true">*</span></label>
             <select id="freelancerReturn" aria-required="true">
-              <option value="yes">Yes — return filed (export tax stays final)</option>
-              <option value="no">No — return not filed (finality is lost)</option>
+              <option value="yes" data-i18n="fr.return-yes">Yes — return filed (export tax stays final)</option>
+              <option value="no" data-i18n="fr.return-no">No — return not filed (finality is lost)</option>
             </select>
-            <p class="hint">Filing the return is what keeps the 0.25% or 1% export rate final. If the return is not filed, your export income is taxed under the normal slabs instead, with the bank deduction credited against it — see worked example E below.</p>
+            <p class="hint" data-i18n="fr.return-hint">Filing the return is what keeps the 0.25% or 1% export rate final. If the return is not filed, your export income is taxed under the normal slabs instead, with the bank deduction credited against it — see worked example E below.</p>
           </div>
 
           <div id="freelancerErrors" class="error-box" role="alert" hidden></div>
 
           <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
-            <button id="freelancerCalculate" class="btn-primary" type="submit">Calculate</button>
-            <button id="freelancerClear" class="btn-secondary" type="button">Clear</button>
+            <button id="freelancerCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
+            <button id="freelancerClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
           <p id="freelancerFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
         </form>
@@ -175,29 +176,29 @@ const related = [
 
       <div class="result-card" id="freelancerResultCard" tabindex="-1">
         <div id="freelancerEmpty">
-          <p style="font-weight: 700;">Your result will appear here.</p>
-          <p>Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);">
+          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
 
         <div id="freelancerResult" data-result-text hidden>
-          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);">Total tax payable</p>
+          <p style="font-size: 14px; font-weight: 700; color: var(--ink-muted);" data-i18n="fr.total-label">Total tax payable</p>
           <div aria-live="polite" aria-atomic="true">
             <p class="result-value" id="freelancerHeadline"></p>
           </div>
           <div class="stat-grid">
             <div>
-              <p class="stat-label">Export tax (s.154A)</p>
+              <p class="stat-label" data-i18n="fr.stat-export">Export tax (s.154A)</p>
               <p class="stat-value" id="freelancerStat1"></p>
             </div>
             <div>
-              <p class="stat-label">Local slab tax</p>
+              <p class="stat-label" data-i18n="fr.stat-local">Local slab tax</p>
               <p class="stat-value" id="freelancerStat2"></p>
             </div>
             <div>
-              <p class="stat-label">Surcharge (s.4AB)</p>
+              <p class="stat-label" data-i18n="fr.stat-surcharge">Surcharge (s.4AB)</p>
               <p class="stat-value" id="freelancerStat3"></p>
             </div>
           </div>
@@ -208,13 +209,13 @@ const related = [
           <p id="freelancerEcho" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p id="freelancerFormula" style="font-size: 16px;"></p>
           <p style="font-size: 13px; color: var(--ink-muted);">
-            Estimate only — check important figures before acting. <a href="#freelancerDisclaimer">Read the full disclaimer.</a>
+            <span data-i18n="fr.estimate">Estimate only — check important figures before acting.</span> <a href="#freelancerDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
 
         <div class="actions-row no-print">
-          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
         <p data-copy-status role="status" style="font-size: 14px;"></p>
       </div>
@@ -222,34 +223,34 @@ const related = [
   </div>
 
   <div class="container prose-narrow" style="margin-top: 40px;">
-    <h2>How it works</h2>
+    <h2 data-i18n="fr.how-h">How it works</h2>
     <ol>
-      <li>Enter your gross annual export income from IT / ITeS services and whether you are PSEB-registered. The export tax is 0.25% of the gross amount if you are registered, 1% if you are not — your bank deducts it when the payment arrives.</li>
-      <li>Enter your annual local taxable profit — local income after business expenses, not gross receipts. It is taxed under the non-salaried slabs below.</li>
-      <li>Say whether you will file your return. If yes, the export tax is final and the export income never enters the slabs. If no, finality is lost: the slabs apply to your export and local income combined, and the bank deduction is credited against that tax.</li>
+      <li data-i18n="fr.how1">Enter your gross annual export income from IT / ITeS services and whether you are PSEB-registered. The export tax is 0.25% of the gross amount if you are registered, 1% if you are not — your bank deducts it when the payment arrives.</li>
+      <li data-i18n="fr.how2">Enter your annual local taxable profit — local income after business expenses, not gross receipts. It is taxed under the non-salaried slabs below.</li>
+      <li data-i18n="fr.how3">Say whether you will file your return. If yes, the export tax is final and the export income never enters the slabs. If no, finality is lost: the slabs apply to your export and local income combined, and the bank deduction is credited against that tax.</li>
     </ol>
-    <p>The most common mistake is adding export income to local income and slabbing the total. That is wrong when the return is filed — the export income is excluded from the slabs entirely (section 169), and no expenses are deductible against it. Worked example C below shows the difference: Rs 65,000 the right way, Rs 590,000 the wrong way.</p>
+    <p data-i18n="fr.mistake">The most common mistake is adding export income to local income and slabbing the total. That is wrong when the return is filed — the export income is excluded from the slabs entirely (section 169), and no expenses are deductible against it. Worked example C below shows the difference: Rs 65,000 the right way, Rs 590,000 the wrong way.</p>
 
-    <h2>Formula</h2>
-    <p>Export tax (s.154A) = Gross export proceeds × 0.25% (PSEB-registered) or × 1% (not registered)</p>
-    <p>Local tax = Slab tax on local taxable profit (non-salaried slabs, clause (1))</p>
-    <p>Surcharge (s.4AB) = 10% × slab tax, only where taxable income exceeds Rs 10,000,000</p>
-    <p>Total payable (return filed) = Export tax + Local tax + Surcharge</p>
-    <p>Total payable (return not filed) = Slab tax on (export + local income) + Surcharge − Bank deduction already taken</p>
+    <h2 data-i18n="fr.formula-h">Formula</h2>
+    <p data-i18n="fr.f1">Export tax (s.154A) = Gross export proceeds × 0.25% (PSEB-registered) or × 1% (not registered)</p>
+    <p data-i18n="fr.f2">Local tax = Slab tax on local taxable profit (non-salaried slabs, clause (1))</p>
+    <p data-i18n="fr.f3">Surcharge (s.4AB) = 10% × slab tax, only where taxable income exceeds Rs 10,000,000</p>
+    <p data-i18n="fr.f4">Total payable (return filed) = Export tax + Local tax + Surcharge</p>
+    <p data-i18n="fr.f5">Total payable (return not filed) = Slab tax on (export + local income) + Surcharge − Bank deduction already taken</p>
 
-    <h2>Worked examples</h2>
-    <p><strong>A. Export only, PSEB-registered:</strong> Rs 2,000,000 export income × 0.25% = Rs 5,000 final tax.</p>
-    <p><strong>B. Export only, not PSEB-registered:</strong> Rs 2,000,000 export income × 1% = Rs 20,000 final tax.</p>
-    <p><strong>C. Mixed — Rs 2,000,000 export + Rs 1,000,000 local taxable profit:</strong> local tax alone is 15% × Rs 400,000 (the amount above Rs 600,000) = Rs 60,000. Total: Rs 5,000 + Rs 60,000 = Rs 65,000 if PSEB-registered, or Rs 20,000 + Rs 60,000 = Rs 80,000 if not. Adding the export to the local income and slabbing Rs 3,000,000 would give Rs 590,000 — that is wrong.</p>
-    <p><strong>D. Local only, Rs 3,000,000:</strong> Rs 170,000 + 30% × Rs 1,400,000 (the amount above Rs 1,600,000) = Rs 170,000 + Rs 420,000 = Rs 590,000.</p>
-    <p><strong>E. Non-filer warning — Rs 2,000,000 export, return not filed:</strong> slabs on Rs 2,000,000 = Rs 90,000 + Rs 80,000 + Rs 120,000 = Rs 290,000, less the Rs 20,000 already deducted at 1% = Rs 270,000 still payable. This is a warning, not the headline rate — filing the return keeps the tax at Rs 20,000.</p>
-    <p><strong>F. Surcharge — Rs 11,000,000 local:</strong> Rs 1,610,000 + 45% × Rs 5,400,000 (the amount above Rs 5,600,000) = Rs 1,610,000 + Rs 2,430,000 = Rs 4,040,000, plus 10% surcharge of Rs 404,000 = Rs 4,444,000. At exactly Rs 10,000,000 the tax is Rs 3,590,000 with no surcharge.</p>
+    <h2 data-i18n="fr.examples-h">Worked examples</h2>
+    <p><strong data-i18n="fr.exa-label">A. Export only, PSEB-registered:</strong><span data-i18n="fr.exa-rest"> Rs 2,000,000 export income × 0.25% = Rs 5,000 final tax.</span></p>
+    <p><strong data-i18n="fr.exb-label">B. Export only, not PSEB-registered:</strong><span data-i18n="fr.exb-rest"> Rs 2,000,000 export income × 1% = Rs 20,000 final tax.</span></p>
+    <p><strong data-i18n="fr.exc-label">C. Mixed — Rs 2,000,000 export + Rs 1,000,000 local taxable profit:</strong><span data-i18n="fr.exc-rest"> local tax alone is 15% × Rs 400,000 (the amount above Rs 600,000) = Rs 60,000. Total: Rs 5,000 + Rs 60,000 = Rs 65,000 if PSEB-registered, or Rs 20,000 + Rs 60,000 = Rs 80,000 if not. Adding the export to the local income and slabbing Rs 3,000,000 would give Rs 590,000 — that is wrong.</span></p>
+    <p><strong data-i18n="fr.exd-label">D. Local only, Rs 3,000,000:</strong><span data-i18n="fr.exd-rest"> Rs 170,000 + 30% × Rs 1,400,000 (the amount above Rs 1,600,000) = Rs 170,000 + Rs 420,000 = Rs 590,000.</span></p>
+    <p><strong data-i18n="fr.exe-label">E. Non-filer warning — Rs 2,000,000 export, return not filed:</strong><span data-i18n="fr.exe-rest"> slabs on Rs 2,000,000 = Rs 90,000 + Rs 80,000 + Rs 120,000 = Rs 290,000, less the Rs 20,000 already deducted at 1% = Rs 270,000 still payable. This is a warning, not the headline rate — filing the return keeps the tax at Rs 20,000.</span></p>
+    <p><strong data-i18n="fr.exf-label">F. Surcharge — Rs 11,000,000 local:</strong><span data-i18n="fr.exf-rest"> Rs 1,610,000 + 45% × Rs 5,400,000 (the amount above Rs 5,600,000) = Rs 1,610,000 + Rs 2,430,000 = Rs 4,040,000, plus 10% surcharge of Rs 404,000 = Rs 4,444,000. At exactly Rs 10,000,000 the tax is Rs 3,590,000 with no surcharge.</span></p>
 
-    <h2>Non-salaried tax slabs 2026-27 (clause (1))</h2>
+    <h2 data-i18n="fr.slabs-h">Non-salaried tax slabs 2026-27 (clause (1))</h2>
     <div class="table-wrap">
     <table class="breakdown-table" aria-label="Non-salaried tax slabs 2026-27">
       <thead>
-        <tr><th scope="col">Annual taxable income</th><th scope="col">Tax</th><th scope="col">Tax at the top of the band</th></tr>
+        <tr><th scope="col" data-i18n="fr.th-income">Annual taxable income</th><th scope="col" data-i18n="fr.th-tax">Tax</th><th scope="col" data-i18n="fr.th-top">Tax at the top of the band</th></tr>
       </thead>
       <tbody>
         {
@@ -264,24 +265,24 @@ const related = [
       </tbody>
     </table>
     </div>
-    <p style="font-size: 14px; color: var(--ink-muted);">Source: clause (1), Division I, Part I, First Schedule to the Income Tax Ordinance, 2001, as substituted by the Finance Act 2024 — unchanged by the Finance Act 2026, which substituted only the salaried clause (2) table. Surcharge under section 4AB: 10% of the tax where taxable income exceeds Rs 10,000,000; no surcharge at exactly Rs 10,000,000. Checked 13 November 2026. Re-verify by 1 May 2027, before Tax Year 2026-27 ends on 30 June 2027.</p>
+    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="fr.slabs-source">Source: clause (1), Division I, Part I, First Schedule to the Income Tax Ordinance, 2001, as substituted by the Finance Act 2024 — unchanged by the Finance Act 2026, which substituted only the salaried clause (2) table. Surcharge under section 4AB: 10% of the tax where taxable income exceeds Rs 10,000,000; no surcharge at exactly Rs 10,000,000. Checked 13 November 2026. Re-verify by 1 May 2027, before Tax Year 2026-27 ends on 30 June 2027.</p>
 
-    <h2>Frequently asked questions</h2>
+    <h2 data-i18n="fr.faq-h">Frequently asked questions</h2>
     <div class="faq">
       {
-        faqs.map((f) => (
+        faqs.map((f, i) => (
           <details>
-            <summary>{f.q}</summary>
-            <p>{f.a}</p>
+            <summary data-i18n={`fr.faq${i + 1}q`}>{f.q}</summary>
+            <p data-i18n={`fr.faq${i + 1}a`}>{f.a}</p>
           </details>
         ))
       }
     </div>
-    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+    <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
     <section id="freelancerDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;">Important — please read</h2>
-      <p>
+      <h2 style="font-size: 20px;" data-i18n="fr.disc-h">Important — please read</h2>
+      <p data-i18n="fr.disc1">
         Results are estimates, not tax advice. This calculator covers
         individual freelancers and sole proprietors only. Associations of
         persons (AOPs) and companies are out of scope, and the AOP
@@ -295,20 +296,20 @@ const related = [
       <p>
         Sources: <a href="http://na.gov.pk/uploads/documents/6a422720f05a0_626.pdf">Finance Act, 2026 Gazette (PDF)</a>, <a href="https://www.fbr.gov.pk/Downloads/?id=90590&Type=Docs">FBR Circular No. 02 of 2026-27</a>, <a href="https://download1.fbr.gov.pk/Docs/202681113864992WithholdingTaxRatesCard2027.pdf">FBR withholding-tax rate card 2027 (PDF)</a>, and <a href="https://portal.techdestination.com">PSEB registration portal</a>.
       </p>
-      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+      <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;">Related tools</h2>
+    <h2 style="margin-top: 32px;" data-i18n="fr.related-h">Related tools</h2>
     <div class="related-grid">
       {
-        related.map((tool) => (
+        related.map((tool, i) => (
           <article class="card">
             <h3 style="font-size: 18px;">
-              <a href={tool.href}>{tool.name}</a>
+              <a href={tool.href} data-i18n={`fr.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p style="color: var(--ink-muted);" data-i18n={`fr.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
-              <a href={tool.href}>Use the calculator →</a>
+              <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
           </article>
         ))

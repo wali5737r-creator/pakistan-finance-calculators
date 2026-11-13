@@ -95,22 +95,23 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
 <Layout title={title} description={description} slug={slug} schema={schema}>
   <div class="container" style="padding-top: 32px;">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/">Home</a> / GST Calculator</p>
+      <p style="font-size: 14px; color: var(--ink-muted);"><a href="/" data-i18n="nav.home">Home</a> / <span data-i18n="gst.crumb">GST Calculator</span></p>
     </nav>
-    <p class="badge badge-info" style="margin-top: 8px;">Tax</p>
-    <h1 style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">GST Calculator Pakistan</h1>
-    <p class="prose-narrow" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
+    <p class="badge badge-info" data-i18n="tax.badge" style="margin-top: 8px;">Tax</p>
+    <h1 data-i18n="gst.h1" style="font-size: clamp(1.75rem, 4.5vw, 2.25rem); max-width: 720px;">GST Calculator Pakistan</h1>
+    <p class="prose-narrow" data-i18n="gst.intro" style="font-size: clamp(1.0625rem, 2vw, 1.1875rem); margin-top: 12px;">
       The standard GST rate in Pakistan is 18% under section 3(1) of the
       Sales Tax Act 1990 — unchanged by the Finance Act 2026. Add GST to a
       price before tax, or remove it from a price that already includes it,
       at 18% or at a verified reduced rate, and see the further tax for
       unregistered buyers.
     </p>
+    <p id="lang-note" class="lang-note" data-i18n="tax.others-note" hidden>The other calculators on this site are still in English in this phase.</p>
     <p class="notice-info prose-narrow" style="margin-top: 16px;">
-      <strong>Rates checked 13 November 2026.</strong> Not every item is
+      <strong data-i18n="gst.notice-strong">Rates checked 13 November 2026.</strong><span data-i18n="gst.notice-rest"> Not every item is
       charged 18% — some are zero-rated, some are exempt, and some carry a
       reduced rate. Pick the rate that applies to your item, and confirm it
-      with the seller or FBR: the result is an estimate, not tax advice.
+      with the seller or FBR: the result is an estimate, not tax advice.</span>
     </p>
   </div>
 
@@ -119,49 +120,49 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
       <div class="card">
         <form id="gstForm" novalidate>
           <div class="field">
-            <label for="gstAmount">Amount (Rs) <span aria-hidden="true">*</span></label>
+            <label for="gstAmount"><span data-i18n="gst.amount-label">Amount (Rs)</span> <span aria-hidden="true">*</span></label>
             <input id="gstAmount" type="text" inputmode="decimal" autocomplete="off" placeholder="100000" />
-            <p class="hint" id="gstAmountHint">In "Add GST" mode this is the price before tax. In "Remove GST" mode this is the price that already includes GST.</p>
+            <p class="hint" id="gstAmountHint" data-i18n="gst.amount-hint">In "Add GST" mode this is the price before tax. In "Remove GST" mode this is the price that already includes GST.</p>
           </div>
 
           <div class="field">
-            <label for="gstMode">Add or remove GST? <span aria-hidden="true">*</span></label>
+            <label for="gstMode"><span data-i18n="gst.mode-label">Add or remove GST?</span> <span aria-hidden="true">*</span></label>
             <select id="gstMode" aria-required="true">
-              <option value="add">Add GST — amount is before tax</option>
-              <option value="remove">Remove GST — amount already includes GST</option>
+              <option value="add" data-i18n="gst.mode-add">Add GST — amount is before tax</option>
+              <option value="remove" data-i18n="gst.mode-remove">Remove GST — amount already includes GST</option>
             </select>
           </div>
 
           <div class="field">
-            <label for="gstPreset">Which GST rate applies? <span aria-hidden="true">*</span></label>
+            <label for="gstPreset"><span data-i18n="gst.preset-label">Which GST rate applies?</span> <span aria-hidden="true">*</span></label>
             <select id="gstPreset" aria-required="true">
               {GST_PRESETS.map((p) => (
-                <option value={p.id}>{p.label}</option>
+                <option value={p.id} data-i18n={`gst.preset.${p.id}`}>{p.label}</option>
               ))}
-              <option value="custom">Custom rate — enter your own %</option>
+              <option value="custom" data-i18n="gst.preset-custom">Custom rate — enter your own %</option>
             </select>
             <p class="hint" id="gstPresetHint"></p>
           </div>
 
           <div class="field" id="gstCustomField" hidden>
-            <label for="gstCustomRate">Custom GST rate (%) <span aria-hidden="true">*</span></label>
+            <label for="gstCustomRate"><span data-i18n="gst.custom-label">Custom GST rate (%)</span> <span aria-hidden="true">*</span></label>
             <input id="gstCustomRate" type="text" inputmode="decimal" autocomplete="off" placeholder="18" />
-            <p class="hint">Between 0% and 100%. Use this only when you know the rate that applies to your item — for example a rate agreed with the seller.</p>
+            <p class="hint" data-i18n="gst.custom-hint">Between 0% and 100%. Use this only when you know the rate that applies to your item — for example a rate agreed with the seller.</p>
           </div>
 
           <div class="field">
             <label style="display: flex; gap: 8px; align-items: flex-start; font-weight: 600;">
               <input id="gstFurtherTax" type="checkbox" style="margin-top: 4px;" />
-              <span>Buyer is unregistered / not an active taxpayer — add 4% further tax (s.3(1A))</span>
+              <span data-i18n="gst.further-label">Buyer is unregistered / not an active taxpayer — add 4% further tax (s.3(1A))</span>
             </label>
-            <p class="hint">Further tax is charged on top of the GST rate, on the value excluding tax. On a standard-rate supply it makes the effective rate 22%.</p>
+            <p class="hint" data-i18n="gst.further-hint">Further tax is charged on top of the GST rate, on the value excluding tax. On a standard-rate supply it makes the effective rate 22%.</p>
           </div>
 
           <div id="gstErrors" class="error-box" role="alert" hidden></div>
 
           <p style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
-            <button id="gstCalculate" class="btn-primary" type="submit">Calculate</button>
-            <button id="gstClear" class="btn-secondary" type="button">Clear</button>
+            <button id="gstCalculate" class="btn-primary" type="submit" data-i18n="ui.calculate">Calculate</button>
+            <button id="gstClear" class="btn-secondary" type="button" data-i18n="ui.clear">Clear</button>
           </p>
           <p id="gstFormStatus" role="status" style="font-size: 14px; color: var(--ink-muted);"></p>
         </form>
@@ -169,9 +170,9 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
 
       <div class="result-card" id="gstResultCard" tabindex="-1">
         <div id="gstEmpty">
-          <p style="font-weight: 700;">Your result will appear here.</p>
-          <p>Enter your details to see your result.</p>
-          <p style="font-size: 14px; color: var(--ink-muted);">
+          <p style="font-weight: 700;" data-i18n="ui.empty-title">Your result will appear here.</p>
+          <p data-i18n="ui.empty-sub">Enter your details to see your result.</p>
+          <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="ui.empty-note">
             You will see your answer with the figures shown, so you can check it.
           </p>
         </div>
@@ -183,19 +184,19 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
           </div>
           <div class="stat-grid">
             <div>
-              <p class="stat-label" id="gstStatLabel1">Price before GST</p>
+              <p class="stat-label" id="gstStatLabel1" data-i18n="gst.stat1">Price before GST</p>
               <p class="stat-value" id="gstStat1"></p>
             </div>
             <div>
-              <p class="stat-label" id="gstStatLabel2">GST amount</p>
+              <p class="stat-label" id="gstStatLabel2" data-i18n="gst.stat2">GST amount</p>
               <p class="stat-value" id="gstStat2"></p>
             </div>
             <div>
-              <p class="stat-label" id="gstStatLabel3">Further tax (4%)</p>
+              <p class="stat-label" id="gstStatLabel3" data-i18n="gst.stat3">Further tax (4%)</p>
               <p class="stat-value" id="gstStat3"></p>
             </div>
             <div>
-              <p class="stat-label" id="gstStatLabel4">Total payable</p>
+              <p class="stat-label" id="gstStatLabel4" data-i18n="gst.stat4">Total payable</p>
               <p class="stat-value" id="gstStat4"></p>
             </div>
           </div>
@@ -206,13 +207,13 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
           <p id="gstFormula" style="font-size: 16px;"></p>
           <p id="gstNote" style="font-size: 14px; color: var(--ink-muted);"></p>
           <p style="font-size: 13px; color: var(--ink-muted);">
-            Estimate only — check important figures before acting. <a href="#gstDisclaimer">Read the full disclaimer.</a>
+            <span data-i18n="gst.estimate">Estimate only — check important figures before acting.</span> <a href="#gstDisclaimer" data-i18n="ui.disclaimer-link">Read the full disclaimer.</a>
           </p>
         </div>
 
         <div class="actions-row no-print">
-          <button type="button" class="btn-secondary" data-copy-result disabled>Copy result</button>
-          <button type="button" class="btn-secondary" data-print-result disabled>Print</button>
+          <button type="button" class="btn-secondary" data-copy-result data-i18n="ui.copy" disabled>Copy result</button>
+          <button type="button" class="btn-secondary" data-print-result data-i18n="ui.print" disabled>Print</button>
         </div>
         <p data-copy-status role="status" style="font-size: 14px;"></p>
       </div>
@@ -220,34 +221,34 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
   </div>
 
   <div class="container prose-narrow" style="margin-top: 40px;">
-    <h2>How it works</h2>
+    <h2 data-i18n="gst.how-h">How it works</h2>
     <ol>
-      <li>Enter the amount. In "Add GST" mode this is the price before tax; in "Remove GST" mode it is the price that already includes GST.</li>
-      <li>Pick the rate that applies to your item. The standard rate is 18%; the list also has the verified reduced rates, zero-rated (0%) and exempt (no tax). If you know a different rate applies, choose "Custom rate" and enter it.</li>
-      <li>Tick the further-tax box only when the buyer is unregistered or not an active taxpayer — that adds 4% on the value excluding tax (section 3(1A)).</li>
-      <li>The calculator shows the price before GST, the GST amount, any further tax, and the total — with the formula using your own numbers.</li>
+      <li data-i18n="gst.how1">Enter the amount. In "Add GST" mode this is the price before tax; in "Remove GST" mode it is the price that already includes GST.</li>
+      <li data-i18n="gst.how2">Pick the rate that applies to your item. The standard rate is 18%; the list also has the verified reduced rates, zero-rated (0%) and exempt (no tax). If you know a different rate applies, choose "Custom rate" and enter it.</li>
+      <li data-i18n="gst.how3">Tick the further-tax box only when the buyer is unregistered or not an active taxpayer — that adds 4% on the value excluding tax (section 3(1A)).</li>
+      <li data-i18n="gst.how4">The calculator shows the price before GST, the GST amount, any further tax, and the total — with the formula using your own numbers.</li>
     </ol>
 
-    <h2>Formula</h2>
-    <p>Add GST: total = price x (1 + rate) — GST = price x rate</p>
-    <p>Remove GST: price before tax = inclusive price / (1 + rate) — GST = inclusive price − price before tax</p>
-    <p>Further tax (unregistered buyer): further tax = price before tax x 4% — effective standard rate 18% + 4% = 22%</p>
-    <p><strong>Do not take the rate % of the inclusive price.</strong> On Rs 118,000 inclusive, 18% of Rs 118,000 is Rs 21,240 — that is wrong. The correct GST is Rs 18,000, because Rs 118,000 divided by 1.18 is Rs 100,000 before tax.</p>
+    <h2 data-i18n="gst.formula-h">Formula</h2>
+    <p data-i18n="gst.f1">Add GST: total = price x (1 + rate) — GST = price x rate</p>
+    <p data-i18n="gst.f2">Remove GST: price before tax = inclusive price / (1 + rate) — GST = inclusive price − price before tax</p>
+    <p data-i18n="gst.f3">Further tax (unregistered buyer): further tax = price before tax x 4% — effective standard rate 18% + 4% = 22%</p>
+    <p><strong data-i18n="gst.f4-strong">Do not take the rate % of the inclusive price.</strong><span data-i18n="gst.f4-rest"> On Rs 118,000 inclusive, 18% of Rs 118,000 is Rs 21,240 — that is wrong. The correct GST is Rs 18,000, because Rs 118,000 divided by 1.18 is Rs 100,000 before tax.</span></p>
 
-    <h2>Worked examples</h2>
-    <p><strong>Example A — Add 18%:</strong> Rs 100,000 x 18% = Rs 18,000 GST, total Rs 118,000.</p>
-    <p><strong>Example B — Remove 18%:</strong> Rs 118,000 / 1.18 = Rs 100,000 before tax, GST Rs 18,000. Taking 18% of Rs 118,000 gives Rs 21,240 — that is the common mistake, and it is wrong.</p>
-    <p><strong>Example C — 1% registered drugs:</strong> Rs 10,000 x 1% = Rs 100 GST, total Rs 10,100.</p>
-    <p><strong>Example D — 10% imported laptop:</strong> Rs 100,000 x 10% = Rs 10,000 GST, total Rs 110,000.</p>
-    <p><strong>Example E — Further tax:</strong> Rs 100,000 sold to an unregistered buyer: 18% GST (Rs 18,000) + 4% further tax (Rs 4,000) = Rs 22,000 tax, total Rs 122,000.</p>
-    <p><strong>Example F — Zero-rated export / exempt:</strong> Rs 100,000 x 0% = Rs 0 GST, total Rs 100,000. For a zero-rated export the seller can still claim back input tax (section 10); for an exempt supply the seller cannot (section 8).</p>
-    <p style="font-size: 14px; color: var(--ink-muted);">All examples use the rates verified 13 November 2026 (Sales Tax Act 1990 as amended by the Finance Act 2026).</p>
+    <h2 data-i18n="gst.examples-h">Worked examples</h2>
+    <p><strong data-i18n="gst.exa-label">Example A — Add 18%:</strong><span data-i18n="gst.exa-rest"> Rs 100,000 x 18% = Rs 18,000 GST, total Rs 118,000.</span></p>
+    <p><strong data-i18n="gst.exb-label">Example B — Remove 18%:</strong><span data-i18n="gst.exb-rest"> Rs 118,000 / 1.18 = Rs 100,000 before tax, GST Rs 18,000. Taking 18% of Rs 118,000 gives Rs 21,240 — that is the common mistake, and it is wrong.</span></p>
+    <p><strong data-i18n="gst.exc-label">Example C — 1% registered drugs:</strong><span data-i18n="gst.exc-rest"> Rs 10,000 x 1% = Rs 100 GST, total Rs 10,100.</span></p>
+    <p><strong data-i18n="gst.exd-label">Example D — 10% imported laptop:</strong><span data-i18n="gst.exd-rest"> Rs 100,000 x 10% = Rs 10,000 GST, total Rs 110,000.</span></p>
+    <p><strong data-i18n="gst.exe-label">Example E — Further tax:</strong><span data-i18n="gst.exe-rest"> Rs 100,000 sold to an unregistered buyer: 18% GST (Rs 18,000) + 4% further tax (Rs 4,000) = Rs 22,000 tax, total Rs 122,000.</span></p>
+    <p><strong data-i18n="gst.exf-label">Example F — Zero-rated export / exempt:</strong><span data-i18n="gst.exf-rest"> Rs 100,000 x 0% = Rs 0 GST, total Rs 100,000. For a zero-rated export the seller can still claim back input tax (section 10); for an exempt supply the seller cannot (section 8).</span></p>
+    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="gst.ex-note">All examples use the rates verified 13 November 2026 (Sales Tax Act 1990 as amended by the Finance Act 2026).</p>
 
-    <h2>GST rates — standard, reduced, zero-rated and exempt</h2>
+    <h2 data-i18n="gst.rates-h">GST rates — standard, reduced, zero-rated and exempt</h2>
     <div class="table-wrap">
     <table class="breakdown-table" aria-label="GST rates">
       <thead>
-        <tr><th scope="col">Item</th><th scope="col">Rate</th><th scope="col">Basis</th></tr>
+        <tr><th scope="col" data-i18n="gst.th-item">Item</th><th scope="col" data-i18n="gst.th-rate">Rate</th><th scope="col" data-i18n="gst.th-basis">Basis</th></tr>
       </thead>
       <tbody>
         {GST_PRESETS.map((p) => (
@@ -260,55 +261,55 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
       </tbody>
     </table>
     </div>
-    <p style="font-size: 14px; color: var(--ink-muted);">Rates: Sales Tax Act 1990 — standard rate s.3(1); reduced rates s.3(2)(aa) + Eighth Schedule; zero-rated s.4 + Fifth Schedule; exempt s.13(1) + Sixth Schedule; mobile phones Ninth Schedule; commercial imports Twelfth Schedule. Finance Act 2026 (in force 1 July 2026) did not change the 18% standard rate. For Third Schedule goods the 18% is charged on the printed retail price, not the transaction value (s.3(2)(a)); Finance Act 2026 expanded the Third Schedule by about 20 new groups (serials 56–75). Commercial imports carry a separate 3% value-addition tax (Twelfth Schedule) — an effective 21% at import; manufacturers importing for their own use are excluded. A 2% withholding applies to digitally ordered goods (s.3(3)(c) + Eleventh Schedule serial 8; adjustable for sellers with turnover above Rs 200m since Finance Act 2026) — it is not built into this calculator.</p>
+    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="gst.rates-source">Rates: Sales Tax Act 1990 — standard rate s.3(1); reduced rates s.3(2)(aa) + Eighth Schedule; zero-rated s.4 + Fifth Schedule; exempt s.13(1) + Sixth Schedule; mobile phones Ninth Schedule; commercial imports Twelfth Schedule. Finance Act 2026 (in force 1 July 2026) did not change the 18% standard rate. For Third Schedule goods the 18% is charged on the printed retail price, not the transaction value (s.3(2)(a)); Finance Act 2026 expanded the Third Schedule by about 20 new groups (serials 56–75). Commercial imports carry a separate 3% value-addition tax (Twelfth Schedule) — an effective 21% at import; manufacturers importing for their own use are excluded. A 2% withholding applies to digitally ordered goods (s.3(3)(c) + Eleventh Schedule serial 8; adjustable for sellers with turnover above Rs 200m since Finance Act 2026) — it is not built into this calculator.</p>
     <p style="font-size: 14px; color: var(--ink-muted);">{GST_SERVICES_NOTE}</p>
 
-    <h2>Zero-rated (0%) — s.4 + Fifth Schedule</h2>
-    <p>Zero-rated means taxable at 0%, and the seller can claim back input tax (s.10). The main categories are:</p>
+    <h2 data-i18n="gst.zero-h">Zero-rated (0%) — s.4 + Fifth Schedule</h2>
+    <p data-i18n="gst.zero-intro">Zero-rated means taxable at 0%, and the seller can claim back input tax (s.10). The main categories are:</p>
     <ul>
       {GST_ZERO_RATED_ITEMS.map((item) => (
         <li>{item}</li>
       ))}
     </ul>
-    <p style="font-size: 14px; color: var(--ink-muted);">Warning: several older Fifth Schedule entries were omitted by the Finance Acts of 2021 and 2022, so older zero-rated lists found online are unreliable — use the current schedule.</p>
+    <p style="font-size: 14px; color: var(--ink-muted);" data-i18n="gst.zero-warn">Warning: several older Fifth Schedule entries were omitted by the Finance Acts of 2021 and 2022, so older zero-rated lists found online are unreliable — use the current schedule.</p>
 
-    <h2>Exempt (no tax) — s.13(1) + Sixth Schedule</h2>
-    <p>Exempt means no tax is charged — and the seller cannot claim back input tax (s.8). The main categories are:</p>
+    <h2 data-i18n="gst.exempt-h">Exempt (no tax) — s.13(1) + Sixth Schedule</h2>
+    <p data-i18n="gst.exempt-intro">Exempt means no tax is charged — and the seller cannot claim back input tax (s.8). The main categories are:</p>
     <ul>
       {GST_EXEMPT_ITEMS.map((item) => (
         <li>{item}</li>
       ))}
     </ul>
-    <p><strong>Food is not automatically exempt.</strong> Many foods lose the exemption once sold under a brand name or in retail packing — check the exact item and how it is sold before treating it as exempt. Medicines are not exempt: drugs registered under the Drugs Act 1976 are charged at 1% (see the rates table above).</p>
+    <p><strong data-i18n="gst.food-strong">Food is not automatically exempt.</strong><span data-i18n="gst.food-rest"> Many foods lose the exemption once sold under a brand name or in retail packing — check the exact item and how it is sold before treating it as exempt. Medicines are not exempt: drugs registered under the Drugs Act 1976 are charged at 1% (see the rates table above).</span></p>
 
-    <h2>What this page does not settle</h2>
-    <p>These points are stated plainly rather than filled in with a guess:</p>
+    <h2 data-i18n="gst.unsettled-h">What this page does not settle</h2>
+    <p data-i18n="gst.unsettled-intro">These points are stated plainly rather than filled in with a guess:</p>
     <ul>
-      <li>No consolidated FBR Act text after 30 June 2026 was retrievable — the FBR Act PDF is "as amended up to 23 February 2023". The rates here rest on FBR Circular No. 01 of 2026 and secondary compilations as amended to 30 June 2026, and will be re-checked against FBR's updated Act PDF once it is posted.</li>
-      <li>Stationery at 10% rising to 18% was a June 2026 proposal only. Post-enactment listings (12 November 2026) still show 10%, so this page keeps 10% and does not present the rise as fact.</li>
-      <li>Sanitary pads vs tampons: the Circular grants exemption to "tampon" (serial 183) and says pads are taxable at the standard rate before that sentence — whether pads are also exempt is unconfirmed. The exempt list above says "tampons (pads — wording unclear)".</li>
-      <li>Plug-in hybrid vehicles at 18% vs 25% is unresolved — this page does not present either figure as settled.</li>
-      <li>Individual Eighth Schedule serial numbers for tractors, laptops and solar panels were not individually confirmed (solar is entry 90 per LookupTax).</li>
-      <li>There is no generic "5% on certain items" preset: only DAP fertiliser, second-hand clothing and footwear, and the small-retailer levy are verified at 5%.</li>
-      <li>The 3% gold jewellery rate is shown "as listed": an FBR POS page gives a different formula (1.5% of gold value + 0.5% diamond + 3% making charges).</li>
+      <li data-i18n="gst.un1">No consolidated FBR Act text after 30 June 2026 was retrievable — the FBR Act PDF is "as amended up to 23 February 2023". The rates here rest on FBR Circular No. 01 of 2026 and secondary compilations as amended to 30 June 2026, and will be re-checked against FBR's updated Act PDF once it is posted.</li>
+      <li data-i18n="gst.un2">Stationery at 10% rising to 18% was a June 2026 proposal only. Post-enactment listings (12 November 2026) still show 10%, so this page keeps 10% and does not present the rise as fact.</li>
+      <li data-i18n="gst.un3">Sanitary pads vs tampons: the Circular grants exemption to "tampon" (serial 183) and says pads are taxable at the standard rate before that sentence — whether pads are also exempt is unconfirmed. The exempt list above says "tampons (pads — wording unclear)".</li>
+      <li data-i18n="gst.un4">Plug-in hybrid vehicles at 18% vs 25% is unresolved — this page does not present either figure as settled.</li>
+      <li data-i18n="gst.un5">Individual Eighth Schedule serial numbers for tractors, laptops and solar panels were not individually confirmed (solar is entry 90 per LookupTax).</li>
+      <li data-i18n="gst.un6">There is no generic "5% on certain items" preset: only DAP fertiliser, second-hand clothing and footwear, and the small-retailer levy are verified at 5%.</li>
+      <li data-i18n="gst.un7">The 3% gold jewellery rate is shown "as listed": an FBR POS page gives a different formula (1.5% of gold value + 0.5% diamond + 3% making charges).</li>
     </ul>
 
-    <h2>Frequently asked questions</h2>
+    <h2 data-i18n="gst.faq-h">Frequently asked questions</h2>
     <div class="faq">
       {
-        faqs.map((f) => (
+        faqs.map((f, i) => (
           <details>
-            <summary>{f.q}</summary>
-            <p>{f.a}</p>
+            <summary data-i18n={`gst.faq${i + 1}q`}>{f.q}</summary>
+            <p data-i18n={`gst.faq${i + 1}a`}>{f.a}</p>
           </details>
         ))
       }
     </div>
-    <p>Still have a question? <a href="/contact/">Contact us</a>.</p>
+    <p><span data-i18n="fr.contact-text">Still have a question?</span> <a href="/contact/" data-i18n="nav.contact">Contact us</a>.</p>
 
     <section id="gstDisclaimer" class="notice-info" style="margin-top: 32px;">
-      <h2 style="font-size: 20px;">Important — please read</h2>
-      <p>
+      <h2 style="font-size: 20px;" data-i18n="gst.disc-h">Important — please read</h2>
+      <p data-i18n="gst.disc1">
         Results are estimates from the Sales Tax Act 1990 rates as
         amended by the Finance Act 2026, checked 13 November 2026 —
         they are not tax advice and not a promise of what a seller or
@@ -323,20 +324,20 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
         by the presets on this page.
       </p>
       <p>Sources: <a href={GST_SOURCE_URL}>Sales Tax Act 1990 (FBR PDF, as amended up to 23 February 2023)</a>; FBR Sales Tax General Order No. 8 of 2026 (2 July 2026); FBR Circular No. 01 of 2026 (11 September 2026). Checked 13 November 2026; next review 1 May 2027.</p>
-      <p><a href="/terms/">Read the full Terms &amp; Disclaimer</a>.</p>
+      <p><a href="/terms/" data-i18n="ui.terms-link">Read the full Terms &amp; Disclaimer</a>.</p>
     </section>
 
-    <h2 style="margin-top: 32px;">Related tools</h2>
+    <h2 style="margin-top: 32px;" data-i18n="gst.related-h">Related tools</h2>
     <div class="related-grid">
       {
-        related.map((tool) => (
+        related.map((tool, i) => (
           <article class="card">
             <h3 style="font-size: 18px;">
-              <a href={tool.href}>{tool.name}</a>
+              <a href={tool.href} data-i18n={`gst.rel${i + 1}`}>{tool.name}</a>
             </h3>
-            <p style="color: var(--ink-muted);">{tool.desc}</p>
+            <p style="color: var(--ink-muted);" data-i18n={`gst.rel${i + 1}-desc`}>{tool.desc}</p>
             <p>
-              <a href={tool.href}>Use the calculator →</a>
+              <a href={tool.href} data-i18n="home.use-calculator">Use the calculator →</a>
             </p>
           </article>
         ))
@@ -484,7 +485,12 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
 
         errorsBox.textContent = '';
         errorsBox.hidden = true;
-        headlineLabel.textContent = mode === 'add' ? 'Total including GST' : 'Price before GST';
+        // The headline label is rewritten on every calculation, so it
+        // is translated here (not via data-i18n) and refreshed by the
+        // __pfcAfterLang hook in i18n.js when the language toggles.
+        headlineLabel.textContent = document.documentElement.lang === 'ur'
+          ? (mode === 'add' ? 'GST سمیت کل رقم' : 'GST سے پہلے قیمت')
+          : (mode === 'add' ? 'Total including GST' : 'Price before GST');
         headline.textContent = formatPKR(mode === 'add' ? r.total : r.baseAmount, 0);
         stat1.textContent = formatPKR(r.baseAmount, 0);
         stat2.textContent = r.exempt ? 'Exempt — no tax' : formatPKR(r.gstAmount, 0);
@@ -526,6 +532,15 @@ const presetsJson = JSON.stringify(GST_PRESETS).replace(/</g, '\\u003c');
       updatePresetHint();
       showEmpty();
     });
+    // Refresh the script-managed headline label when the language toggles.
+    window.__pfcAfterLang = function (lang) {
+      if (!resultBox.hidden) {
+        var mode = document.getElementById('gstMode').value;
+        headlineLabel.textContent = lang === 'ur'
+          ? (mode === 'add' ? 'GST سمیت کل رقم' : 'GST سے پہلے قیمت')
+          : (mode === 'add' ? 'Total including GST' : 'Price before GST');
+      }
+    };
     showEmpty();
   </script>
 </Layout>
