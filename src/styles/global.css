@@ -182,6 +182,59 @@ input[type="radio"], input[type="checkbox"] { accent-color: var(--brand-700); }
 }
 .tool-nav-scroll a:hover { background: rgba(255, 255, 255, 0.12); color: #fff; text-decoration: none; }
 
+/* ---------- Language toggle (Urdu Phase 1) ---------- */
+/* Self-hosted Noto Nastaliq Urdu, Arabic subset only (239 KB woff2,
+   OFL, from Google Fonts). It loads only when Urdu is active: the
+   font-family is referenced solely under html[lang="ur"] below, and
+   font-display: swap keeps English text visible while it loads. */
+@font-face {
+  font-family: 'Noto Nastaliq Urdu';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/noto-nastaliq-urdu-arabic.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+}
+.lang-toggle {
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+.lang-toggle:hover { background: rgba(255, 255, 255, 0.22); }
+.lang-toggle:focus-visible { outline: 2px solid var(--gold-400); outline-offset: 2px; }
+/* Urdu-only note on the homepage: the tools themselves are still English. */
+.lang-note {
+  display: inline-block;
+  margin: 18px 0 0;
+  padding: 8px 14px;
+  border: 1px solid var(--gold-500);
+  border-radius: 10px;
+  background: rgba(212, 175, 55, 0.12);
+  font-size: 15px;
+}
+/* dir stays "ltr" in Urdu mode (layout stability); Urdu text renders
+   correctly via bidi. Nastaliq needs a taller line, so translated
+   blocks get room to breathe without changing the layout. */
+html[lang="ur"] [data-i18n] {
+  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif;
+}
+html[lang="ur"] .hero-lede,
+html[lang="ur"] .tool-card p,
+html[lang="ur"] .info-card p,
+html[lang="ur"] .section-sub,
+html[lang="ur"] .lang-note { line-height: 2.1; }
+html[lang="ur"] .hero h1,
+html[lang="ur"] .section-title,
+html[lang="ur"] .tool-card h2,
+html[lang="ur"] .info-card h2 { line-height: 1.9; }
+
 /* ---------- Footer ---------- */
 .site-footer {
   background: var(--brand-950);

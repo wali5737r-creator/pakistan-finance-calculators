@@ -14,32 +14,32 @@ const { title, description, slug, schema, noindex = false } = Astro.props;
 // Canonical URL for this page, using the live domain.
 const canonical = `https://pakistan-finance-calculators.pages.dev${slug}`;
 const tools = [
-  { href: '/salary-income-tax-calculator/', label: 'Salary Tax' },
-  { href: '/emi-loan-calculator/', label: 'EMI Calculator' },
-  { href: '/zakat-calculator/', label: 'Zakat Calculator' },
-  { href: '/currency-converter/', label: 'Currency Converter' },
-  { href: '/gold-price-calculator/', label: 'Gold Price' },
-  { href: '/percentage-calculator/', label: 'Percentage' },
-  { href: '/age-calculator/', label: 'Age Calculator' },
-  { href: '/unit-marla-converter/', label: 'Marla Converter' },
-  { href: '/fuel-cost-calculator/', label: 'Fuel Cost' },
-  { href: '/compound-interest-calculator/', label: 'Compound Interest' },
-  { href: '/loan-eligibility-calculator/', label: 'Loan Eligibility' },
-  { href: '/inflation-calculator/', label: 'Inflation' },
-  { href: '/budget-planner-calculator/', label: 'Budget Planner' },
-  { href: '/debt-payoff-calculator/', label: 'Debt Payoff' },
-  { href: '/fixed-deposit-calculator/', label: 'Fixed Deposit' },
-  { href: '/loan-comparison-calculator/', label: 'Loan Comparison' },
-  { href: '/goal-savings-calculator/', label: 'Goal Savings' },
-  { href: '/electricity-bill-calculator/', label: 'Electricity Bill' },
-  { href: '/gas-bill-calculator/', label: 'Gas Bill' },
-  { href: '/freelancer-tax-calculator/', label: 'Freelancer Tax' },
-  { href: '/solar-size-payback-calculator/', label: 'Solar Payback' },
-  { href: '/pension-eobi-calculator/', label: 'Pension / EOBI' },
-  { href: '/national-savings-calculator/', label: 'National Savings' },
-  { href: '/gst-calculator/', label: 'GST Calculator' },
-  { href: '/car-loan-calculator/', label: 'Car Loan' },
-  { href: '/home-loan-calculator/', label: 'Home Loan' },
+  { href: '/salary-income-tax-calculator/', label: 'Salary Tax', key: 'salary-tax' },
+  { href: '/emi-loan-calculator/', label: 'EMI Calculator', key: 'emi' },
+  { href: '/zakat-calculator/', label: 'Zakat Calculator', key: 'zakat' },
+  { href: '/currency-converter/', label: 'Currency Converter', key: 'currency' },
+  { href: '/gold-price-calculator/', label: 'Gold Price', key: 'gold' },
+  { href: '/percentage-calculator/', label: 'Percentage', key: 'percentage' },
+  { href: '/age-calculator/', label: 'Age Calculator', key: 'age' },
+  { href: '/unit-marla-converter/', label: 'Marla Converter', key: 'marla' },
+  { href: '/fuel-cost-calculator/', label: 'Fuel Cost', key: 'fuel' },
+  { href: '/compound-interest-calculator/', label: 'Compound Interest', key: 'compound' },
+  { href: '/loan-eligibility-calculator/', label: 'Loan Eligibility', key: 'loan-eligibility' },
+  { href: '/inflation-calculator/', label: 'Inflation', key: 'inflation' },
+  { href: '/budget-planner-calculator/', label: 'Budget Planner', key: 'budget' },
+  { href: '/debt-payoff-calculator/', label: 'Debt Payoff', key: 'debt' },
+  { href: '/fixed-deposit-calculator/', label: 'Fixed Deposit', key: 'fixed-deposit' },
+  { href: '/loan-comparison-calculator/', label: 'Loan Comparison', key: 'loan-comparison' },
+  { href: '/goal-savings-calculator/', label: 'Goal Savings', key: 'goal' },
+  { href: '/electricity-bill-calculator/', label: 'Electricity Bill', key: 'electricity' },
+  { href: '/gas-bill-calculator/', label: 'Gas Bill', key: 'gas' },
+  { href: '/freelancer-tax-calculator/', label: 'Freelancer Tax', key: 'freelancer' },
+  { href: '/solar-size-payback-calculator/', label: 'Solar Payback', key: 'solar' },
+  { href: '/pension-eobi-calculator/', label: 'Pension / EOBI', key: 'pension' },
+  { href: '/national-savings-calculator/', label: 'National Savings', key: 'national-savings' },
+  { href: '/gst-calculator/', label: 'GST Calculator', key: 'gst' },
+  { href: '/car-loan-calculator/', label: 'Car Loan', key: 'car-loan' },
+  { href: '/home-loan-calculator/', label: 'Home Loan', key: 'home-loan' },
 ];
 ---
 
@@ -77,15 +77,17 @@ const tools = [
           <span>Pakistan Finance Calculators</span>
         </a>
         <nav class="main-nav" aria-label="Main">
-          <a href="/">Home</a>
-          <a href="/about/">About</a>
-          <a href="/contact/">Contact</a>
+          <a href="/" data-i18n="nav.home">Home</a>
+          <a href="/about/" data-i18n="nav.about">About</a>
+          <a href="/contact/" data-i18n="nav.contact">Contact</a>
         </nav>
+        <!-- Language toggle (Urdu Phase 1): wired by /js/i18n.js, no inline handler. -->
+        <button id="lang-toggle" class="lang-toggle" type="button" aria-pressed="false" aria-label="اردو میں دیکھیں">اردو</button>
       </div>
       <nav class="tool-nav" aria-label="Calculators">
         <div class="container tool-nav-scroll">
           {tools.map((t) => (
-            <a href={t.href}>{t.label}</a>
+            <a href={t.href} data-i18n={`tool.${t.key}`}>{t.label}</a>
           ))}
         </div>
       </nav>
@@ -97,36 +99,38 @@ const tools = [
       <div class="container footer-grid">
         <div>
           <p class="footer-brand">Pakistan Finance Calculators</p>
-          <p style="font-size:14px; max-width:480px; margin:0;">
+          <p style="font-size:14px; max-width:480px; margin:0;" data-i18n="footer.brand-text">
             Free calculators for Pakistan. Results are estimates for information
             only — not tax, financial, or religious advice. Calculations run in
             your browser; nothing you enter is stored or sent to a server.
           </p>
         </div>
         <nav aria-label="Calculators">
-          <p class="footer-heading">Calculators</p>
+          <p class="footer-heading" data-i18n="footer.heading-calculators">Calculators</p>
           <ul class="footer-links">
             {tools.map((t) => (
-              <li><a href={t.href}>{t.label}</a></li>
+              <li><a href={t.href} data-i18n={`tool.${t.key}`}>{t.label}</a></li>
             ))}
           </ul>
         </nav>
         <nav aria-label="Footer">
-          <p class="footer-heading">Site</p>
+          <p class="footer-heading" data-i18n="footer.heading-site">Site</p>
           <ul class="footer-links">
-            <li><a href="/about/">About</a></li>
-            <li><a href="/contact/">Contact</a></li>
-            <li><a href="/privacy/">Privacy Policy</a></li>
-            <li><a href="/terms/">Terms &amp; Disclaimer</a></li>
+            <li><a href="/about/" data-i18n="footer.about">About</a></li>
+            <li><a href="/contact/" data-i18n="footer.contact">Contact</a></li>
+            <li><a href="/privacy/" data-i18n="footer.privacy">Privacy Policy</a></li>
+            <li><a href="/terms/" data-i18n="footer.terms">Terms &amp; Disclaimer</a></li>
           </ul>
         </nav>
       </div>
       <div class="container footer-bottom">
         <span>© 2026 Pakistan Finance Calculators</span>
-        <span>Free · No sign-up · Private</span>
+        <span data-i18n="footer.bottom-right">Free · No sign-up · Private</span>
       </div>
     </footer>
     <!-- External script (public/js/shared.js) so CSP script-src needs no 'unsafe-inline'. -->
     <script src="/js/shared.js" defer></script>
+    <!-- Urdu toggle (public/js/i18n.js): homepage + nav/footer dictionary, localStorage persistence. -->
+    <script src="/js/i18n.js" defer></script>
   </body>
 </html>

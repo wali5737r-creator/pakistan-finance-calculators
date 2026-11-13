@@ -59,8 +59,10 @@ assert.match(gasPage, /rowspan="3">Rs 1,500 \/ month/);
 assert.match(gasPage, /rowspan="5">Rs 3,000 \/ month/);
 
 // Homepage disclaimer link must carry its space on the same line.
+// (Since Urdu Phase 1 the sentence text sits in a <span data-i18n> and
+// the link carries data-i18n="home.estimates-link".)
 const indexPage = readFileSync(join(SRC_DIR, 'pages', 'index.astro'), 'utf8');
-assert.match(indexPage, /jeweller rates\. <a href="\/terms\/">Read the full disclaimer<\/a>\./);
+assert.match(indexPage, /jeweller rates\.<\/span> <a href="\/terms\/" data-i18n="home\.estimates-link">Read the full disclaimer<\/a>\./);
 
 // Top tool nav: the last label must be scrollable fully into view and the
 // strip must signal that it scrolls instead of cutting a label mid-word.

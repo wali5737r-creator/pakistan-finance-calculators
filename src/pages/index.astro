@@ -13,72 +13,74 @@ const schema = JSON.stringify({
 });
 const iconAttrs = 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"';
 const tools = [
-  { href: '/salary-income-tax-calculator/', name: 'Salary / Income Tax Calculator', desc: 'Monthly and annual tax on your salary for 2026-27, using FBR salaried slabs, with take-home pay.', icon: `<svg ${iconAttrs}><path d="M6 3h9l3 3v15H6z"/><path d="M9 12h6M9 16h6M14 3v4h4"/></svg>` },
-  { href: '/emi-loan-calculator/', name: 'EMI / Loan Calculator', desc: 'Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan.', icon: `<svg ${iconAttrs}><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/></svg>` },
-  { href: '/zakat-calculator/', name: 'Zakat Calculator', desc: 'Zakat at 2.5% on cash, gold, silver, and trade goods, with gold and silver nisab shown.', icon: `<svg ${iconAttrs}><path d="M20 13A8 8 0 1 1 11 4a6.5 6.5 0 0 0 9 9z"/><path d="M17 3l.6 1.6L19 5l-1.4.5L17 7l-.6-1.5L15 5l1.4-.4z"/></svg>` },
-  { href: '/currency-converter/', name: 'Currency Converter PKR', desc: 'Convert PKR to USD, GBP, EUR, SAR, AED, AUD, and CAD with the rate source and last-updated time shown.', icon: `<svg ${iconAttrs}><path d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5"/></svg>` },
-  { href: '/gold-price-calculator/', name: 'Gold Price Calculator', desc: 'Value of gold per tola and per gram for 24K, 22K, 21K, and 18K, with a live or your own price.', icon: `<svg ${iconAttrs}><path d="M4 18h16M6.5 18l1.5-6.5h8L17.5 18M9.5 11.5V7.5h5v4"/></svg>` },
-  { href: '/percentage-calculator/', name: 'Percentage Calculator', desc: 'What X% of a number is, percentage increase and decrease, and what percent one number is of another.', icon: `<svg ${iconAttrs}><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/><path d="M18 5L6 19"/></svg>` },
-  { href: '/age-calculator/', name: 'Age Calculator', desc: 'Your exact age in years, months, and days, plus total days lived and days until your next birthday.', icon: `<svg ${iconAttrs}><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4M8.5 15h3"/></svg>` },
-  { href: '/unit-marla-converter/', name: 'Unit / Marla Converter', desc: 'Convert marla, kanal, acre, square feet, square yards, square metres, and hectares.', icon: `<svg ${iconAttrs}><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M12 4v16M4 12h16" stroke-dasharray="3 2"/></svg>` },
-  { href: '/fuel-cost-calculator/', name: 'Fuel Cost Calculator', desc: 'Litres used, total cost, and cost per kilometre for any trip, from the distance, mileage, and fuel price you enter.', icon: `<svg ${iconAttrs}><path d="M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h14"/><path d="M15 9h2.5A1.5 1.5 0 0 1 19 10.5V16a2 2 0 0 0 4 0V8l-3-3"/><path d="M8 7h4v3H8z"/></svg>` },
-  { href: '/compound-interest-calculator/', name: 'Compound Interest Calculator', desc: 'How savings grow with compound interest: final amount, interest earned, and a year-by-year table.', icon: `<svg ${iconAttrs}><path d="M4 20V10M10 20V4M16 20v-8M21 20H3"/></svg>` },
-  { href: '/loan-eligibility-calculator/', name: 'Loan Eligibility Calculator', desc: 'The largest loan your income can support, from the affordable EMI after your existing obligations.', icon: `<svg ${iconAttrs}><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>` },
-  { href: '/inflation-calculator/', name: 'Inflation Calculator', desc: 'The future cost of an amount and its purchasing power, at the inflation rate and years you assume.', icon: `<svg ${iconAttrs}><path d="M4 19l6-6 4 4 6-8"/><path d="M20 9h-4V5"/></svg>` },
-  { href: '/budget-planner-calculator/', name: 'Budget Planner Calculator', desc: 'Split monthly take-home pay into needs, wants, and savings with the 50/30/20 rule and your own percentages.', icon: `<svg ${iconAttrs}><path d="M4 19h16M6 19V9M11 19V5M16 19v-7M21 19H3"/></svg>` },
-  { href: '/debt-payoff-calculator/', name: 'Debt Payoff Calculator', desc: 'How fast a balance clears with and without an extra monthly payment, and the interest the extra payment saves.', icon: `<svg ${iconAttrs}><path d="M5 21V4M5 4h11l-2.5 4L16 12H5"/><path d="M15 17h5M17.5 15v4"/></svg>` },
-  { href: '/fixed-deposit-calculator/', name: 'Fixed Deposit Calculator', desc: 'Maturity amount and profit on a fixed deposit, with the profit rate and tax you enter.', icon: `<svg ${iconAttrs}><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12h8M8 8h8M8 16h5"/></svg>` },
-  { href: '/loan-comparison-calculator/', name: 'Loan Comparison Calculator', desc: 'Compare two loans side by side: EMI, total interest, and total payment for each, and which costs less.', icon: `<svg ${iconAttrs}><path d="M12 4v16M6 20h12M6 7l6-3 6 3M6 7h12"/></svg>` },
-  { href: '/goal-savings-calculator/', name: 'Goal Savings Calculator', desc: 'How much to save each month for a target, or how long a monthly saving will take to reach it.', icon: `<svg ${iconAttrs}><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3"/></svg>` },
-  { href: '/electricity-bill-calculator/', name: 'Electricity Bill Calculator', desc: 'Estimate your monthly electricity bill from NEPRA’s 2026 domestic tariff: slabs, fixed charge, FPA and 18% GST.', icon: `<svg ${iconAttrs}><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>` },
-  { href: '/gas-bill-calculator/', name: 'Gas Bill Calculator', desc: 'Estimate your monthly gas bill from OGRA’s 2025 domestic sale price: protected and non-protected slabs, fixed charge, meter rent and 18% GST.', icon: `<svg ${iconAttrs}><path d="M12 3c1.5 3.5-4 5.5-4 10a4 4 0 0 0 8 0c0-1.5-.5-2.5-1-3.5.8.5 2 1.5 2 3.5a6 6 0 0 1-12 0C5 8.5 10.5 6 12 3z"/></svg>` },
-  { href: '/freelancer-tax-calculator/', name: 'Freelancer Tax Calculator', desc: 'Tax on freelance income: PSEB 0.25% export tax or 1% without it, plus non-salaried slabs on local profit, with the 10% surcharge above Rs 10m.', icon: `<svg ${iconAttrs}><path d="M4 20h16M6 20V9a6 6 0 0 1 12 0v11"/><path d="M9 20v-6h6v6M12 3v3"/></svg>` },
-  { href: '/solar-size-payback-calculator/', name: 'Solar Size & Payback Calculator', desc: 'The right solar size for your home and how fast it pays back under NEPRA net billing 2026 — system cost, monthly saving and payback.', icon: `<svg ${iconAttrs}><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>` },
-  { href: '/pension-eobi-calculator/', name: 'Pension / EOBI Calculator', desc: 'Your EOBI old-age pension from your contribution wage and years of service: monthly pension, contributions, reduced and survivor pension, and the old-age grant.', icon: `<svg ${iconAttrs}><path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.5"/></svg>` },
-  { href: '/national-savings-calculator/', name: 'National Savings Calculator', desc: 'Monthly profit on RIC, Behbood, Pensioners\' and Shuhada accounts, DSC maturity from the CDNS table and SSC half-yearly profit, at CDNS rates from 21 Oct 2026.', icon: `<svg ${iconAttrs}><path d="M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6M9 10h.01M15 10h.01"/></svg>` },
-  { href: '/gst-calculator/', name: 'GST Calculator', desc: 'Add or remove 18% GST from any price in Pakistan, with verified reduced rates, zero-rated and exempt items, and the 4% further tax for unregistered buyers.', icon: `<svg ${iconAttrs}><path d="M6 3h9l3 3v15H6z"/><path d="M9 12h6M9 16h6M14 3v4h4"/></svg>` },
-  { href: '/car-loan-calculator/', name: 'Car Loan Calculator', desc: 'Monthly EMI on a car loan in Pakistan: down payment, SBP tenure caps and the Rs 3m finance cap, at the KIBOR-linked markup you enter.', icon: `<svg ${iconAttrs}><path d="M5 17h14M6.5 17l1.5-5h8l1.5 5M7.5 12l1.5-4.5h6L16.5 12"/><circle cx="7.5" cy="17.5" r="1.8"/><circle cx="16.5" cy="17.5" r="1.8"/></svg>` },
-  { href: '/home-loan-calculator/', name: 'Home Loan Calculator', desc: 'Monthly EMI on a home loan in Pakistan: commercial KIBOR-linked rates, or the Apna Ghar 5% subsidy for 10 years with both phases shown.', icon: `<svg ${iconAttrs}><path d="M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6M9 10h.01M15 10h.01"/></svg>` },
+  { href: '/salary-income-tax-calculator/', key: 'salary-tax', name: 'Salary / Income Tax Calculator', desc: 'Monthly and annual tax on your salary for 2026-27, using FBR salaried slabs, with take-home pay.', icon: `<svg ${iconAttrs}><path d="M6 3h9l3 3v15H6z"/><path d="M9 12h6M9 16h6M14 3v4h4"/></svg>` },
+  { href: '/emi-loan-calculator/', key: 'emi', name: 'EMI / Loan Calculator', desc: 'Monthly instalment, total interest, and the full amortisation schedule for a reducing-balance loan.', icon: `<svg ${iconAttrs}><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/></svg>` },
+  { href: '/zakat-calculator/', key: 'zakat', name: 'Zakat Calculator', desc: 'Zakat at 2.5% on cash, gold, silver, and trade goods, with gold and silver nisab shown.', icon: `<svg ${iconAttrs}><path d="M20 13A8 8 0 1 1 11 4a6.5 6.5 0 0 0 9 9z"/><path d="M17 3l.6 1.6L19 5l-1.4.5L17 7l-.6-1.5L15 5l1.4-.4z"/></svg>` },
+  { href: '/currency-converter/', key: 'currency', name: 'Currency Converter PKR', desc: 'Convert PKR to USD, GBP, EUR, SAR, AED, AUD, and CAD with the rate source and last-updated time shown.', icon: `<svg ${iconAttrs}><path d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5"/></svg>` },
+  { href: '/gold-price-calculator/', key: 'gold', name: 'Gold Price Calculator', desc: 'Value of gold per tola and per gram for 24K, 22K, 21K, and 18K, with a live or your own price.', icon: `<svg ${iconAttrs}><path d="M4 18h16M6.5 18l1.5-6.5h8L17.5 18M9.5 11.5V7.5h5v4"/></svg>` },
+  { href: '/percentage-calculator/', key: 'percentage', name: 'Percentage Calculator', desc: 'What X% of a number is, percentage increase and decrease, and what percent one number is of another.', icon: `<svg ${iconAttrs}><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/><path d="M18 5L6 19"/></svg>` },
+  { href: '/age-calculator/', key: 'age', name: 'Age Calculator', desc: 'Your exact age in years, months, and days, plus total days lived and days until your next birthday.', icon: `<svg ${iconAttrs}><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4M8.5 15h3"/></svg>` },
+  { href: '/unit-marla-converter/', key: 'marla', name: 'Unit / Marla Converter', desc: 'Convert marla, kanal, acre, square feet, square yards, square metres, and hectares.', icon: `<svg ${iconAttrs}><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M12 4v16M4 12h16" stroke-dasharray="3 2"/></svg>` },
+  { href: '/fuel-cost-calculator/', key: 'fuel', name: 'Fuel Cost Calculator', desc: 'Litres used, total cost, and cost per kilometre for any trip, from the distance, mileage, and fuel price you enter.', icon: `<svg ${iconAttrs}><path d="M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h14"/><path d="M15 9h2.5A1.5 1.5 0 0 1 19 10.5V16a2 2 0 0 0 4 0V8l-3-3"/><path d="M8 7h4v3H8z"/></svg>` },
+  { href: '/compound-interest-calculator/', key: 'compound', name: 'Compound Interest Calculator', desc: 'How savings grow with compound interest: final amount, interest earned, and a year-by-year table.', icon: `<svg ${iconAttrs}><path d="M4 20V10M10 20V4M16 20v-8M21 20H3"/></svg>` },
+  { href: '/loan-eligibility-calculator/', key: 'loan-eligibility', name: 'Loan Eligibility Calculator', desc: 'The largest loan your income can support, from the affordable EMI after your existing obligations.', icon: `<svg ${iconAttrs}><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>` },
+  { href: '/inflation-calculator/', key: 'inflation', name: 'Inflation Calculator', desc: 'The future cost of an amount and its purchasing power, at the inflation rate and years you assume.', icon: `<svg ${iconAttrs}><path d="M4 19l6-6 4 4 6-8"/><path d="M20 9h-4V5"/></svg>` },
+  { href: '/budget-planner-calculator/', key: 'budget', name: 'Budget Planner Calculator', desc: 'Split monthly take-home pay into needs, wants, and savings with the 50/30/20 rule and your own percentages.', icon: `<svg ${iconAttrs}><path d="M4 19h16M6 19V9M11 19V5M16 19v-7M21 19H3"/></svg>` },
+  { href: '/debt-payoff-calculator/', key: 'debt', name: 'Debt Payoff Calculator', desc: 'How fast a balance clears with and without an extra monthly payment, and the interest the extra payment saves.', icon: `<svg ${iconAttrs}><path d="M5 21V4M5 4h11l-2.5 4L16 12H5"/><path d="M15 17h5M17.5 15v4"/></svg>` },
+  { href: '/fixed-deposit-calculator/', key: 'fixed-deposit', name: 'Fixed Deposit Calculator', desc: 'Maturity amount and profit on a fixed deposit, with the profit rate and tax you enter.', icon: `<svg ${iconAttrs}><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12h8M8 8h8M8 16h5"/></svg>` },
+  { href: '/loan-comparison-calculator/', key: 'loan-comparison', name: 'Loan Comparison Calculator', desc: 'Compare two loans side by side: EMI, total interest, and total payment for each, and which costs less.', icon: `<svg ${iconAttrs}><path d="M12 4v16M6 20h12M6 7l6-3 6 3M6 7h12"/></svg>` },
+  { href: '/goal-savings-calculator/', key: 'goal', name: 'Goal Savings Calculator', desc: 'How much to save each month for a target, or how long a monthly saving will take to reach it.', icon: `<svg ${iconAttrs}><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3"/></svg>` },
+  { href: '/electricity-bill-calculator/', key: 'electricity', name: 'Electricity Bill Calculator', desc: 'Estimate your monthly electricity bill from NEPRA’s 2026 domestic tariff: slabs, fixed charge, FPA and 18% GST.', icon: `<svg ${iconAttrs}><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>` },
+  { href: '/gas-bill-calculator/', key: 'gas', name: 'Gas Bill Calculator', desc: 'Estimate your monthly gas bill from OGRA’s 2025 domestic sale price: protected and non-protected slabs, fixed charge, meter rent and 18% GST.', icon: `<svg ${iconAttrs}><path d="M12 3c1.5 3.5-4 5.5-4 10a4 4 0 0 0 8 0c0-1.5-.5-2.5-1-3.5.8.5 2 1.5 2 3.5a6 6 0 0 1-12 0C5 8.5 10.5 6 12 3z"/></svg>` },
+  { href: '/freelancer-tax-calculator/', key: 'freelancer', name: 'Freelancer Tax Calculator', desc: 'Tax on freelance income: PSEB 0.25% export tax or 1% without it, plus non-salaried slabs on local profit, with the 10% surcharge above Rs 10m.', icon: `<svg ${iconAttrs}><path d="M4 20h16M6 20V9a6 6 0 0 1 12 0v11"/><path d="M9 20v-6h6v6M12 3v3"/></svg>` },
+  { href: '/solar-size-payback-calculator/', key: 'solar', name: 'Solar Size & Payback Calculator', desc: 'The right solar size for your home and how fast it pays back under NEPRA net billing 2026 — system cost, monthly saving and payback.', icon: `<svg ${iconAttrs}><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>` },
+  { href: '/pension-eobi-calculator/', key: 'pension', name: 'Pension / EOBI Calculator', desc: 'Your EOBI old-age pension from your contribution wage and years of service: monthly pension, contributions, reduced and survivor pension, and the old-age grant.', icon: `<svg ${iconAttrs}><path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.5"/></svg>` },
+  { href: '/national-savings-calculator/', key: 'national-savings', name: 'National Savings Calculator', desc: 'Monthly profit on RIC, Behbood, Pensioners\' and Shuhada accounts, DSC maturity from the CDNS table and SSC half-yearly profit, at CDNS rates from 21 Oct 2026.', icon: `<svg ${iconAttrs}><path d="M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6M9 10h.01M15 10h.01"/></svg>` },
+  { href: '/gst-calculator/', key: 'gst', name: 'GST Calculator', desc: 'Add or remove 18% GST from any price in Pakistan, with verified reduced rates, zero-rated and exempt items, and the 4% further tax for unregistered buyers.', icon: `<svg ${iconAttrs}><path d="M6 3h9l3 3v15H6z"/><path d="M9 12h6M9 16h6M14 3v4h4"/></svg>` },
+  { href: '/car-loan-calculator/', key: 'car-loan', name: 'Car Loan Calculator', desc: 'Monthly EMI on a car loan in Pakistan: down payment, SBP tenure caps and the Rs 3m finance cap, at the KIBOR-linked markup you enter.', icon: `<svg ${iconAttrs}><path d="M5 17h14M6.5 17l1.5-5h8l1.5 5M7.5 12l1.5-4.5h6L16.5 12"/><circle cx="7.5" cy="17.5" r="1.8"/><circle cx="16.5" cy="17.5" r="1.8"/></svg>` },
+  { href: '/home-loan-calculator/', key: 'home-loan', name: 'Home Loan Calculator', desc: 'Monthly EMI on a home loan in Pakistan: commercial KIBOR-linked rates, or the Apna Ghar 5% subsidy for 10 years with both phases shown.', icon: `<svg ${iconAttrs}><path d="M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6M9 10h.01M15 10h.01"/></svg>` },
 ];
 ---
 
 <Layout title={title} description={description} slug="/" schema={schema}>
   <section class="hero">
     <div class="container hero-inner">
-      <p><span class="badge badge-dark">Free · No sign-up · Private</span></p>
-      <h1>Pakistan Finance Calculators — <span class="hero-accent">every rupee, worked out.</span></h1>
-      <p class="hero-lede">
+      <p><span class="badge badge-dark" data-i18n="home.badge">Free · No sign-up · Private</span></p>
+      <h1><span>Pakistan Finance Calculators —</span> <span class="hero-accent" data-i18n="home.hero-accent">every rupee, worked out.</span></h1>
+      <p class="hero-lede" data-i18n="home.lede">
         Twenty-six calculators built for Pakistan — salary tax, EMI, Zakat, currency,
         gold, percentages, age, and land area, plus fuel costs, savings growth, loans,
         inflation, budgets, debt payoff, fixed deposits, goal saving, electricity bills, gas bills, freelancer tax, solar payback, EOBI pension, National Savings, GST, car loans, and home loans. Every calculation runs in your
         browser, every result shows its basis, and nothing you enter is stored.
       </p>
       <p class="hero-cta">
-        <a class="btn-hero-primary" href="/salary-income-tax-calculator/">Calculate salary tax →</a>
-        <a class="btn-hero-secondary" href="#tools">Browse all 26 tools</a>
+        <a class="btn-hero-primary" href="/salary-income-tax-calculator/" data-i18n="home.cta-tax">Calculate salary tax →</a>
+        <a class="btn-hero-secondary" href="#tools" data-i18n="home.cta-browse">Browse all 26 tools</a>
       </p>
+      <!-- Shown only in Urdu (JS toggles hidden): the tools themselves are still English in Phase 1. -->
+      <p id="lang-note" class="lang-note" data-i18n="home.tools-note" hidden>Calculators are currently in English — Urdu translation is coming step by step.</p>
       <ul class="trust-strip">
-        <li><span class="trust-tick" aria-hidden="true">✓</span> Free forever — no fees, no sign-up</li>
-        <li><span class="trust-tick" aria-hidden="true">✓</span> Private — calculations never leave your browser</li>
-        <li><span class="trust-tick" aria-hidden="true">✓</span> Sources shown — slabs, rates, and dates on every result</li>
-        <li><span class="trust-tick" aria-hidden="true">✓</span> Built for Pakistan — FBR slabs, tola, marla, and PKR</li>
+        <li><span class="trust-tick" aria-hidden="true">✓</span> <span data-i18n="home.trust-1">Free forever — no fees, no sign-up</span></li>
+        <li><span class="trust-tick" aria-hidden="true">✓</span> <span data-i18n="home.trust-2">Private — calculations never leave your browser</span></li>
+        <li><span class="trust-tick" aria-hidden="true">✓</span> <span data-i18n="home.trust-3">Sources shown — slabs, rates, and dates on every result</span></li>
+        <li><span class="trust-tick" aria-hidden="true">✓</span> <span data-i18n="home.trust-4">Built for Pakistan — FBR slabs, tola, marla, and PKR</span></li>
       </ul>
     </div>
   </section>
 
   <div class="container section-head" id="tools">
-    <p class="section-eyebrow">All calculators</p>
-    <h2 class="section-title">Twenty-six tools, one for every money question</h2>
-    <p class="section-sub">Pick a tool and get your answer in seconds — with the formula, a worked example, and the source behind every figure.</p>
+    <p class="section-eyebrow" data-i18n="home.eyebrow">All calculators</p>
+    <h2 class="section-title" data-i18n="home.section-title">Twenty-six tools, one for every money question</h2>
+    <p class="section-sub" data-i18n="home.section-sub">Pick a tool and get your answer in seconds — with the formula, a worked example, and the source behind every figure.</p>
   </div>
   <div class="container">
     <div class="tool-card-grid">
       {tools.map((tool) => (
         <article class="tool-card">
           <span class="tool-icon" set:html={tool.icon} />
-          <h2><a href={tool.href}>{tool.name}</a></h2>
-          <p>{tool.desc}</p>
-          <p><a class="tool-link" href={tool.href}>Use the calculator <span class="arrow" aria-hidden="true">→</span></a></p>
+          <h2><a href={tool.href} data-i18n={`card.${tool.key}.name`}>{tool.name}</a></h2>
+          <p data-i18n={`card.${tool.key}.desc`}>{tool.desc}</p>
+          <p><a class="tool-link" href={tool.href}><span data-i18n="home.use-calculator">Use the calculator</span> <span class="arrow" aria-hidden="true">→</span></a></p>
         </article>
       ))}
     </div>
@@ -86,8 +88,8 @@ const tools = [
 
   <div class="container info-grid" style="padding-bottom:48px;">
     <section class="card info-card">
-      <h2>How this site works</h2>
-      <p>
+      <h2 data-i18n="home.how-title">How this site works</h2>
+      <p data-i18n="home.how-text">
         Each tool is a separate page with its own worked example, formula,
         source, and disclaimer. Tax slabs, nisab weights, and conversion
         factors live in one config file each, so next year's update is a
@@ -97,13 +99,9 @@ const tools = [
       </p>
     </section>
     <section class="card info-card">
-      <h2>Results are estimates</h2>
+      <h2 data-i18n="home.estimates-title">Results are estimates</h2>
       <p>
-        Tax results use salaried slabs only, before any surcharge, rebate, or
-        withholding adjustment. The Freelancer Tax Calculator uses the
-        non-salaried slabs and section 154A export tax instead. Zakat results are arithmetic estimates only,
-        not a fatwa — please confirm with a qualified scholar. Currency and
-        gold figures are indicative, not bank or jeweller rates. <a href="/terms/">Read the full disclaimer</a>.
+        <span data-i18n="home.estimates-text">Tax results use salaried slabs only, before any surcharge, rebate, or withholding adjustment. The Freelancer Tax Calculator uses the non-salaried slabs and section 154A export tax instead. Zakat results are arithmetic estimates only, not a fatwa — please confirm with a qualified scholar. Currency and gold figures are indicative, not bank or jeweller rates.</span> <a href="/terms/" data-i18n="home.estimates-link">Read the full disclaimer</a>.
       </p>
     </section>
   </div>
