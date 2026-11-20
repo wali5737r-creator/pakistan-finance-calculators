@@ -676,3 +676,13 @@ nav.breadcrumb a { font-weight: 600; }
 /* Currency converter only: add/remove this class on the <p class="result-value"> */
 /* when headline.length > 16 (longHeadline). Do NOT put it on statically. */
 .u-headline-long { font-size: clamp(1.5rem, 5vw, 1.875rem); }
+
+/* ---------- Adsterra ad slots (2026-11-20) ---------- */
+/* Layout wrappers only — no theme/colour change. Both slots collapse to
+   zero height when unfilled or blocked (e.g. by an ad blocker), so the
+   page never shows an empty band. The banner wrapper clips overflow so
+   the fixed 728px-wide iframe can never break the mobile layout; the
+   iframe is centred and capped at the container width. */
+.ad-slot-banner { display: flex; justify-content: center; overflow: hidden; margin-top: 16px; }
+.ad-slot-banner iframe { display: block; max-width: 100%; border: 0; }
+.ad-slot-native { overflow: hidden; margin-top: 24px; }

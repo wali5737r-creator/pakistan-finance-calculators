@@ -92,9 +92,24 @@ const tools = [
         </div>
       </nav>
     </header>
+    <!-- Adsterra Banner 728x90 — this site's unit only. The unit options
+         live in /js/ad-banner.js (loaded first, synchronously) so CSP
+         script-src needs no 'unsafe-inline'; the invoke script inserts
+         its iframe at this position. Wrapper CSS: .ad-slot-banner. -->
+    <div class="container ad-slot ad-slot-banner">
+      <script is:inline src="/js/ad-banner.js"></script>
+      <script is:inline src="https://bauval.org/22/3e76464b4ebe0e045c83a7f62e1f7724"></script>
+    </div>
     <main id="main">
       <slot />
     </main>
+    <!-- Adsterra Native Banner — this site's unit only, snippet exactly as
+         issued (async invoke script + its container div), placed after the
+         page content and before the footer. -->
+    <div class="container ad-slot ad-slot-native">
+      <script is:inline async="async" data-cfasync="false" src="https://bauval.org/21/78fd3b53101cdffee4b63b07d7c2ef1d"></script>
+      <div id="container-78fd3b53101cdffee4b63b07d7c2ef1d"></div>
+    </div>
     <footer class="site-footer">
       <div class="container footer-grid">
         <div>
