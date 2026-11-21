@@ -33,7 +33,7 @@
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://s3.tradingview.com https://bauval.org; style-src 'self'; img-src 'self' data: https://s3.tradingview.com https://*.tradingview.com https://bauval.org https://cdn.cloudvideosa.com; connect-src 'self' https://*.tradingview.com https://bauval.org https://cdn.cloudvideosa.com; frame-src https://www.tradingview.com https://www.tradingview-widget.com https://bauval.org; media-src 'self' https://bauval.org https://cdn.cloudvideosa.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://s3.tradingview.com https://bauval.org https://*.bauval.org https://cdn.cloudvideosa.com; style-src 'self' 'unsafe-inline' https://bauval.org https://*.bauval.org https://cdn.cloudvideosa.com; img-src 'self' data: https:; connect-src 'self' https://*.tradingview.com https://bauval.org https://*.bauval.org https://cdn.cloudvideosa.com; frame-src https://www.tradingview.com https://www.tradingview-widget.com https://bauval.org https://*.bauval.org https://cdn.cloudvideosa.com; media-src 'self' https://bauval.org https://*.bauval.org https://cdn.cloudvideosa.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'
   # Adsterra allowances (2026-11-20): Layout.astro carries this site's two
   # Adsterra units (Native Banner + Banner 728x90, both scripts served from
   # https://bauval.org — the /21/ native and /22/ banner invoke scripts).
